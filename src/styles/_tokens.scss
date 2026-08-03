@@ -24,8 +24,8 @@
   );
 
   --mcm-font-sans:
-    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
-    'Noto Sans KR', 'Malgun Gothic', 'Segoe UI', sans-serif;
+    Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR',
+    'Malgun Gothic', 'Segoe UI', sans-serif;
   --mcm-font-brand: 'neurimbo_Gothic', var(--mcm-font-sans);
 
   --mcm-safe-top: env(safe-area-inset-top, 0px);
