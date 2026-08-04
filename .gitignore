@@ -27,3 +27,6 @@ Thumbs.db
 
 # Vercel
 .vercel/
+
+# Local source font packages (selected web assets live in src/assets/fonts)
+/font/
