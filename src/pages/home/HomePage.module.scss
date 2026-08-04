@@ -1,0 +1,379 @@
+.introPage,
+.landingPage {
+  min-height: var(--mcm-viewport-stable);
+  background: var(--mcm-color-canvas);
+}
+
+.introHero {
+  position: relative;
+  min-height: calc(var(--mcm-viewport-stable) - 97px - var(--mcm-safe-top));
+  overflow: hidden;
+  color: #fafafa;
+  background: var(--mcm-gradient-hero);
+  isolation: isolate;
+}
+
+.introHero::after {
+  position: absolute;
+  z-index: -1;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 182px;
+  background: linear-gradient(to bottom, transparent, rgb(25 25 25 / 60%));
+  content: '';
+}
+
+.glow {
+  position: absolute;
+  z-index: -1;
+  top: -220px;
+  left: 48%;
+  width: 48px;
+  height: 1100px;
+  transform: rotate(24deg);
+  background: linear-gradient(rgb(255 219 160 / 20%), rgb(211 134 53 / 20%));
+  filter: blur(40px);
+}
+
+.introSuitcase,
+.introPlane,
+.introWatch,
+.cardPlane {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.introSuitcase {
+  top: -34px;
+  left: 36%;
+  width: 132px;
+  height: 229px;
+  transform: rotate(-28deg);
+  opacity: 0.9;
+  object-fit: fill;
+}
+
+.introPlane {
+  z-index: 2;
+  top: 162px;
+  left: 20%;
+  width: min(91.5%, 357px);
+  height: min(72vw, 280px);
+  transform: rotate(-8deg);
+  filter: blur(2px);
+  object-fit: fill;
+}
+
+.introWatch {
+  top: 70%;
+  left: 22px;
+  width: 142px;
+  height: 116px;
+  transform: rotate(34deg);
+  opacity: 0.7;
+  filter: blur(2px);
+  object-fit: fill;
+}
+
+.introCopy {
+  position: absolute;
+  z-index: 4;
+  top: 250px;
+  left: 30px;
+}
+
+.planeIconLarge {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 18px;
+}
+
+.introCopy h1,
+.cardTitle {
+  margin: 0;
+  font-family: var(--mcm-font-brand);
+  font-weight: 400;
+}
+
+.introCopy h1 {
+  display: grid;
+  gap: 10px;
+  font-size: clamp(42px, 12.82vw, 50px);
+  line-height: 0.8;
+}
+
+.introFlightPath {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 32px;
+  width: calc(100% - 32px);
+  height: min(66%, 462px);
+  border-bottom: 1px solid #fff7d5;
+  border-left: 1px solid #fff7d5;
+}
+
+.introFlightPath::before,
+.cardFlightPath::before {
+  position: absolute;
+  top: min(49%, 228px);
+  left: -4px;
+  width: 7px;
+  height: 9px;
+  background: #fff7d5;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  content: '';
+}
+
+.boardingButton {
+  position: absolute;
+  z-index: 6;
+  top: min(68%, 477px);
+  right: 30px;
+  display: inline-flex;
+  width: 150px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid rgb(255 247 213 / 45%);
+  border-radius: 100px;
+  color: #fafafa;
+  background: rgb(255 247 213 / 20%);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.boardingButton img {
+  width: 12px;
+  height: 14px;
+  transform: rotate(90deg);
+}
+
+.boardingButton:hover {
+  background: rgb(255 247 213 / 30%);
+}
+
+.boardingButton:active {
+  transform: scale(0.98);
+}
+
+.boardingButton:focus-visible {
+  outline: 2px solid #fafafa;
+  outline-offset: 3px;
+}
+
+.landingContent {
+  display: grid;
+  gap: 20px;
+  width: calc(100% - 40px);
+  max-width: 390px;
+  margin-inline: auto;
+  padding-bottom: calc(24px + var(--mcm-safe-bottom));
+}
+
+.contentGroup {
+  display: grid;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.boardingCard,
+.collectionCard {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0 8px 8px;
+  box-shadow: 2px 2px 14px rgb(0 0 0 / 20%);
+}
+
+.boardingCard {
+  aspect-ratio: 350 / 272;
+  color: #fafafa;
+  background: linear-gradient(211deg, #c07346 6.67%, #5a3621 93.33%);
+}
+
+.boardingCard::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 42%, rgb(255 219 160 / 11%) 55%, transparent 68%);
+  content: '';
+  pointer-events: none;
+}
+
+.cardPlane {
+  top: 5%;
+  right: -7%;
+  width: 70%;
+  height: 70%;
+  transform: rotate(-8deg);
+  filter: blur(1.5px);
+  object-fit: fill;
+}
+
+.cardPlaneIcon {
+  position: absolute;
+  top: 12%;
+  left: 9.4%;
+  width: 20px;
+  height: 20px;
+}
+
+.cardTitle {
+  position: absolute;
+  z-index: 3;
+  top: 25.5%;
+  left: 8.6%;
+  display: grid;
+  gap: 9px;
+  font-size: clamp(30px, 10.25vw, 40px);
+  line-height: 0.75;
+}
+
+.cardFlightPath {
+  position: absolute;
+  z-index: 3;
+  right: 0;
+  bottom: 15.8%;
+  left: 9.4%;
+  height: 15%;
+  border-bottom: 1px solid #fff7d5;
+  border-left: 1px solid #fff7d5;
+}
+
+.boardingButtonCompact {
+  top: auto;
+  right: 8.6%;
+  bottom: 11.8%;
+  width: 108px;
+  height: 26px;
+  gap: 7px;
+  font-size: 12px;
+}
+
+.boardingButtonCompact img {
+  width: 8px;
+  height: 10px;
+}
+
+.contentLink {
+  display: flex;
+  min-height: 18px;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.contentLink img {
+  width: 12px;
+  height: 12px;
+}
+
+.collectionCard {
+  aspect-ratio: 350 / 207;
+}
+
+.collectionCard::after {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 40%);
+  content: '';
+}
+
+.collectionCard > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.collectionCard > span {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  color: #fafafa;
+  font-size: 12px;
+  font-weight: 600;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+
+.loginButton {
+  display: flex;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #fafafa;
+  background: #191919;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.loginButton:hover {
+  background: #343434;
+}
+
+.loginButton:active {
+  transform: scale(0.99);
+}
+
+.contentGroup:focus-visible,
+.loginButton:focus-visible {
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: 3px;
+}
+
+@media (max-width: 349px) {
+  .introSuitcase {
+    left: 38%;
+    width: 112px;
+    height: 195px;
+  }
+
+  .introPlane {
+    top: 152px;
+    left: 48px;
+  }
+
+  .introCopy {
+    left: 24px;
+  }
+
+  .introFlightPath {
+    left: 25px;
+    width: calc(100% - 25px);
+  }
+
+  .boardingButton {
+    right: 20px;
+    width: 136px;
+  }
+
+  .landingContent {
+    width: calc(100% - 32px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boardingButton,
+  .loginButton {
+    transition: none;
+  }
+}
