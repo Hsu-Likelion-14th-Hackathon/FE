@@ -82,6 +82,11 @@
 
 의존성은 초기 설정 시점의 안정 버전으로 설치하고 lockfile에 고정한다.
 
+React Router는 현재 프로젝트의 Node 22.12 환경과 호환되는 `7.18.2`를 고정해 사용한다.
+`GHSA-qwww-vcr4-c8h2`는 불안정 RSC API를 사용할 때만 영향을 주며, 현재 Vite SPA의
+Data Router 구성에는 RSC 및 서버 Action이 없다. Node 최소 버전을 22.22 이상으로 올릴 수
+있게 되면 해당 예외를 제거하고 React Router 8.3 이상으로 갱신한다.
+
 ## 6. 스타일링 전략
 
 Tailwind CSS와 SCSS를 같은 파일의 전처리 과정에 섞지 않고 역할을 분리한다.
