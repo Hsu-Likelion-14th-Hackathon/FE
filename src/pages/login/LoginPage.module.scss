@@ -1,0 +1,109 @@
+.page {
+  min-height: var(--mcm-viewport-stable);
+  color: var(--mcm-color-ink);
+  background: var(--mcm-color-canvas);
+}
+
+.main {
+  position: relative;
+  min-height: calc(var(--mcm-viewport-stable) - 97px - var(--mcm-safe-top));
+  padding: 39px 20px max(32px, var(--mcm-safe-bottom));
+}
+
+.backLink {
+  position: absolute;
+  top: 0;
+  left: 8px;
+  display: flex;
+  width: 44px;
+  height: 39px;
+  align-items: flex-start;
+  padding-left: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.backIcon {
+  width: 9.52913px;
+  max-width: none;
+  height: 17.0709px;
+  flex: none;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.title,
+.description {
+  margin: 0;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.descriptionRow {
+  display: grid;
+  align-items: start;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.description,
+.textLink {
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.description {
+  font-weight: 400;
+}
+
+.textLink {
+  color: var(--mcm-color-muted);
+  font-weight: 600;
+  text-underline-offset: 1px;
+}
+
+.kakaoButton {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 50px;
+  margin-top: 30px;
+  place-items: center;
+  padding: 0 52px;
+  border: 0;
+  border-radius: 8px;
+  appearance: none;
+  color: var(--mcm-color-ink);
+  background: var(--mcm-color-kakao);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.kakaoIcon {
+  position: absolute;
+  top: 13px;
+  left: 20px;
+  width: 24px;
+  max-width: none;
+  height: 24px;
+}
+
+.backLink:focus-visible,
+.textLink:focus-visible,
+.kakaoButton:focus-visible {
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: 2px;
+}
+
+.kakaoButton:active {
+  transform: translateY(1px);
+}
