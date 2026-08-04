@@ -8,11 +8,11 @@
 }
 
 .brandStrip {
+  position: relative;
   display: flex;
   height: 43px;
   align-items: center;
   justify-content: center;
-  gap: 17px;
   overflow: hidden;
   color: rgb(226 197 176 / 40%);
   background: var(--mcm-gradient-header);
@@ -20,14 +20,56 @@
 }
 
 .brandName {
+  position: absolute;
+  left: 50%;
   font-family: var(--mcm-font-brand);
   font-size: 22px;
   line-height: 40px;
+  transform: translateX(-50%);
+  white-space: nowrap;
 }
 
 .ornament {
-  font-size: 8px;
-  letter-spacing: 5px;
+  position: absolute;
+  top: 14px;
+  display: flex;
+  height: 16px;
+  align-items: center;
+  gap: 10px;
+}
+
+.ornamentLeft {
+  left: 16px;
+}
+
+.ornamentRight {
+  right: 17px;
+}
+
+.ornamentDot {
+  width: 4px;
+  height: 4px;
+  flex: none;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+.ornamentDiamond {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.ornamentDiamond::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 11.3px;
+  height: 11.3px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: currentcolor;
+  content: '';
 }
 
 .navigation {
@@ -39,10 +81,12 @@
   position: relative;
   display: flex;
   width: calc(100% - 40px);
-  height: 100%;
+  height: 24px;
   margin-inline: auto;
+  padding-top: 12px;
   align-items: center;
   justify-content: space-between;
+  box-sizing: content-box;
 }
 
 .sideGroup {
@@ -61,6 +105,10 @@
 .icon {
   width: 22px;
   height: 24px;
+}
+
+.heartIcon {
+  width: 24px;
 }
 
 .logo {
@@ -88,6 +136,13 @@
   margin: -11px;
 }
 
+.iconButton {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+}
+
 .logoLink:focus-visible,
 .iconLink:focus-visible {
   outline: 2px solid var(--mcm-color-brand-brown);
@@ -95,16 +150,20 @@
 }
 
 @media (max-width: 349px) {
-  .brandStrip {
-    gap: 10px;
-  }
-
   .brandName {
     font-size: 19px;
   }
 
+  .ornamentLeft {
+    left: 12px;
+  }
+
+  .ornamentRight {
+    right: 12px;
+  }
+
   .ornament {
-    letter-spacing: 3px;
+    gap: 7px;
   }
 
   .navigationInner {

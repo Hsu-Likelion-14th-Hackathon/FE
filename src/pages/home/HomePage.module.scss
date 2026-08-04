@@ -1,5 +1,4 @@
-.introPage,
-.landingPage {
+.introPage {
   min-height: var(--mcm-viewport-stable);
   background: var(--mcm-color-canvas);
 }
@@ -15,117 +14,178 @@
 
 .introHero::after {
   position: absolute;
-  z-index: -1;
+  z-index: 5;
   right: 0;
   bottom: 0;
   left: 0;
   height: 182px;
   background: linear-gradient(to bottom, transparent, rgb(25 25 25 / 60%));
   content: '';
+  pointer-events: none;
 }
 
-.glow {
-  position: absolute;
-  z-index: -1;
-  top: -220px;
-  left: 48%;
-  width: 48px;
-  height: 1100px;
-  transform: rotate(24deg);
-  background: linear-gradient(rgb(255 219 160 / 20%), rgb(211 134 53 / 20%));
-  filter: blur(40px);
-}
-
+.heroGlowTop,
+.heroGlowLeft,
+.glowFrame,
 .introSuitcase,
 .introPlane,
-.introWatch,
-.cardPlane {
+.introWatch {
   position: absolute;
-  display: block;
   pointer-events: none;
   user-select: none;
 }
 
-.introSuitcase {
-  top: -34px;
-  left: 36%;
-  width: 132px;
-  height: 229px;
-  transform: rotate(-28deg);
-  opacity: 0.9;
+.heroGlowTop {
+  z-index: 0;
+  top: -219px;
+  left: 41.54%;
+  width: min(91.29vw, 356px);
+  height: min(81.37vw, 317.34px);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgb(255 219 160 / 25%) 0%, transparent 70%);
+  filter: blur(28px);
+}
+
+.heroGlowLeft {
+  z-index: 0;
+  top: 148px;
+  left: -140px;
+  width: min(67.4vw, 262.85px);
+  height: min(58.51vw, 228.17px);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgb(255 247 213 / 18%) 0%, transparent 72%);
+  filter: blur(24px);
+}
+
+.glowFrame {
+  z-index: 0;
+  top: -272px;
+  left: -93px;
+  width: min(147.6vw, 575.65px);
+  height: min(312.25vw, 1217.78px);
+}
+
+.glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(12.12vw, 47.26px);
+  height: min(336.29vw, 1311.55px);
+  transform: translate(-50%, -50%) rotate(23.95deg);
+  background: linear-gradient(rgb(255 219 160 / 20%), rgb(211 134 53 / 20%));
+  filter: blur(40px);
+}
+
+.introSuitcase img,
+.introPlane img,
+.introWatch img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  max-width: none;
   object-fit: fill;
+}
+
+.introSuitcase {
+  z-index: 1;
+  top: -34.53px;
+  left: 36.26%;
+  width: min(57.57vw, 224.51px);
+  height: min(67.76vw, 264.25px);
+}
+
+.introSuitcase img {
+  width: min(33.87vw, 132.11px);
+  height: min(58.72vw, 229.01px);
+  transform: translate(-50%, -50%) rotate(-28.14deg);
+  opacity: 0.9;
 }
 
 .introPlane {
   z-index: 2;
-  top: 162px;
-  left: 20%;
-  width: min(91.5%, 357px);
-  height: min(72vw, 280px);
-  transform: rotate(-8deg);
-  filter: blur(2px);
-  object-fit: fill;
+  top: 161.56px;
+  left: 19.94%;
+  width: min(100.42vw, 391.66px);
+  height: min(83.54vw, 325.81px);
+}
+
+.introPlane img {
+  width: min(91.54vw, 357px);
+  height: min(71.79vw, 280px);
+  transform: translate(-50%, -50%) rotate(-7.79deg);
+  filter: blur(5px);
 }
 
 .introWatch {
-  top: 70%;
-  left: 22px;
-  width: 142px;
-  height: 116px;
-  transform: rotate(34deg);
+  z-index: 1;
+  top: 492px;
+  left: 5.38%;
+  width: min(46.79vw, 182.47px);
+  height: min(45.07vw, 175.79px);
+}
+
+.introWatch img {
+  width: min(36.31vw, 141.6px);
+  height: min(29.8vw, 116.23px);
+  transform: translate(-50%, -50%) rotate(34.27deg);
   opacity: 0.7;
-  filter: blur(2px);
-  object-fit: fill;
+  filter: blur(5px);
 }
 
 .introCopy {
   position: absolute;
   z-index: 4;
-  top: 250px;
+  top: 257px;
   left: 30px;
 }
 
 .planeIconLarge {
   width: 30px;
   height: 30px;
-  margin-bottom: 18px;
-}
-
-.introCopy h1,
-.cardTitle {
-  margin: 0;
-  font-family: var(--mcm-font-brand);
-  font-weight: 400;
+  margin-bottom: 10px;
+  margin-left: 3px;
 }
 
 .introCopy h1 {
   display: grid;
   gap: 10px;
+  margin: 0;
+  font-family: var(--mcm-font-brand);
   font-size: clamp(42px, 12.82vw, 50px);
+  font-weight: 400;
   line-height: 0.8;
 }
 
-.introFlightPath {
+.introFlightPathTop,
+.introFlightPathBottom {
   position: absolute;
   z-index: 3;
-  top: 0;
   left: 32px;
-  width: calc(100% - 32px);
-  height: min(66%, 462px);
-  border-bottom: 1px solid #fff7d5;
   border-left: 1px solid #fff7d5;
 }
 
-.introFlightPath::before,
-.cardFlightPath::before {
+.introFlightPathTop {
+  top: 0;
+  height: 240px;
+}
+
+.introFlightPathTop::after {
   position: absolute;
-  top: min(49%, 228px);
+  bottom: -1px;
   left: -4px;
   width: 7px;
   height: 9px;
   background: #fff7d5;
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
   content: '';
+}
+
+.introFlightPathBottom {
+  top: 462px;
+  width: calc(100% - 32px);
+  height: 33px;
+  border-bottom: 1px solid #fff7d5;
 }
 
 .boardingButton {
@@ -139,13 +199,14 @@
   align-items: center;
   justify-content: center;
   gap: 9px;
-  border: 1px solid rgb(255 247 213 / 45%);
+  border: 0;
   border-radius: 100px;
   color: #fafafa;
   background: rgb(255 247 213 / 20%);
   font-size: 20px;
   font-weight: 600;
   line-height: 1;
+  text-decoration: none;
   transition:
     background-color 160ms ease,
     transform 160ms ease;
@@ -170,194 +231,17 @@
   outline-offset: 3px;
 }
 
-.landingContent {
-  display: grid;
-  gap: 20px;
-  width: calc(100% - 40px);
-  max-width: 390px;
-  margin-inline: auto;
-  padding-bottom: calc(24px + var(--mcm-safe-bottom));
-}
-
-.contentGroup {
-  display: grid;
-  gap: 10px;
-  color: inherit;
-  text-decoration: none;
-}
-
-.boardingCard,
-.collectionCard {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border-radius: 0 8px 8px;
-  box-shadow: 2px 2px 14px rgb(0 0 0 / 20%);
-}
-
-.boardingCard {
-  aspect-ratio: 350 / 272;
-  color: #fafafa;
-  background: linear-gradient(211deg, #c07346 6.67%, #5a3621 93.33%);
-}
-
-.boardingCard::after {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(115deg, transparent 42%, rgb(255 219 160 / 11%) 55%, transparent 68%);
-  content: '';
-  pointer-events: none;
-}
-
-.cardPlane {
-  top: 5%;
-  right: -7%;
-  width: 70%;
-  height: 70%;
-  transform: rotate(-8deg);
-  filter: blur(1.5px);
-  object-fit: fill;
-}
-
-.cardPlaneIcon {
-  position: absolute;
-  top: 12%;
-  left: 9.4%;
-  width: 20px;
-  height: 20px;
-}
-
-.cardTitle {
-  position: absolute;
-  z-index: 3;
-  top: 25.5%;
-  left: 8.6%;
-  display: grid;
-  gap: 9px;
-  font-size: clamp(30px, 10.25vw, 40px);
-  line-height: 0.75;
-}
-
-.cardFlightPath {
-  position: absolute;
-  z-index: 3;
-  right: 0;
-  bottom: 15.8%;
-  left: 9.4%;
-  height: 15%;
-  border-bottom: 1px solid #fff7d5;
-  border-left: 1px solid #fff7d5;
-}
-
-.boardingButtonCompact {
-  top: auto;
-  right: 8.6%;
-  bottom: 11.8%;
-  width: 108px;
-  height: 26px;
-  gap: 7px;
-  font-size: 12px;
-}
-
-.boardingButtonCompact img {
-  width: 8px;
-  height: 10px;
-}
-
-.contentLink {
-  display: flex;
-  min-height: 18px;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 18px;
-}
-
-.contentLink img {
-  width: 12px;
-  height: 12px;
-}
-
-.collectionCard {
-  aspect-ratio: 350 / 207;
-}
-
-.collectionCard::after {
-  position: absolute;
-  inset: 0;
-  background: rgb(0 0 0 / 40%);
-  content: '';
-}
-
-.collectionCard > img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
-.collectionCard > span {
-  position: absolute;
-  z-index: 1;
-  top: 50%;
-  left: 50%;
-  color: #fafafa;
-  font-size: 12px;
-  font-weight: 600;
-  transform: translate(-50%, -50%);
-  white-space: nowrap;
-}
-
-.loginButton {
-  display: flex;
-  height: 50px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  color: #fafafa;
-  background: #191919;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 18px;
-  text-decoration: none;
-  transition:
-    background-color 160ms ease,
-    transform 160ms ease;
-}
-
-.loginButton:hover {
-  background: #343434;
-}
-
-.loginButton:active {
-  transform: scale(0.99);
-}
-
-.contentGroup:focus-visible,
-.loginButton:focus-visible {
-  outline: 2px solid var(--mcm-color-brand-brown);
-  outline-offset: 3px;
-}
-
 @media (max-width: 349px) {
-  .introSuitcase {
-    left: 38%;
-    width: 112px;
-    height: 195px;
-  }
-
-  .introPlane {
-    top: 152px;
-    left: 48px;
-  }
-
   .introCopy {
     left: 24px;
   }
 
-  .introFlightPath {
+  .introFlightPathTop,
+  .introFlightPathBottom {
     left: 25px;
+  }
+
+  .introFlightPathBottom {
     width: calc(100% - 25px);
   }
 
@@ -365,15 +249,10 @@
     right: 20px;
     width: 136px;
   }
-
-  .landingContent {
-    width: calc(100% - 32px);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .boardingButton,
-  .loginButton {
+  .boardingButton {
     transition: none;
   }
 }

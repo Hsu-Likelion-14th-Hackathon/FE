@@ -1,11 +1,14 @@
 import { Outlet } from 'react-router'
 
 import MobileShell from '@/shared/layout/mobile-shell/MobileShell.jsx'
+import StoreMenuProvider from '@/shared/layout/store-menu/StoreMenuProvider.jsx'
 
 function App() {
   return (
     <MobileShell>
-      <Outlet />
+      <StoreMenuProvider>
+        <Outlet />
+      </StoreMenuProvider>
     </MobileShell>
   )
 }

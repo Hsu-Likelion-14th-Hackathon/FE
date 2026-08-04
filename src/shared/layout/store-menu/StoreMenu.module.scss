@@ -1,0 +1,243 @@
+.menuPanel {
+  position: fixed;
+  z-index: 19;
+  top: calc(97px + var(--mcm-safe-top));
+  left: 50%;
+  width: min(100%, 430px);
+  height: calc(var(--mcm-viewport-dynamic) - 97px - var(--mcm-safe-top));
+  overflow-x: hidden;
+  overflow-y: auto;
+  transform: translateX(-50%);
+  outline: none;
+  background: var(--mcm-color-canvas);
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.menuPanel::-webkit-scrollbar {
+  display: none;
+}
+
+.menuContent {
+  display: grid;
+  gap: 20px;
+  width: calc(100% - 40px);
+  max-width: 390px;
+  margin-inline: auto;
+  padding-bottom: calc(24px + var(--mcm-safe-bottom));
+}
+
+.contentGroup {
+  display: grid;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.boardingCard,
+.collectionCard {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0 8px 8px;
+  box-shadow: 2px 2px 14px rgb(0 0 0 / 20%);
+}
+
+.boardingCard {
+  aspect-ratio: 350 / 272;
+  color: #fafafa;
+  background: linear-gradient(211deg, #c07346 6.67%, #5a3621 93.33%);
+}
+
+.boardingCard::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 42%, rgb(255 219 160 / 11%) 55%, transparent 68%);
+  content: '';
+  pointer-events: none;
+}
+
+.cardPlaneFrame {
+  position: absolute;
+  top: 6.4%;
+  left: 29.86%;
+  display: block;
+  width: 76.19%;
+  height: 81.53%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.cardPlaneFrame img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 91.15%;
+  max-width: none;
+  height: 85.94%;
+  transform: translate(-50%, -50%) rotate(-7.79deg);
+  filter: blur(5px);
+  object-fit: fill;
+}
+
+.cardPlaneIcon {
+  position: absolute;
+  top: 11.76%;
+  left: 9.43%;
+  width: 20px;
+  height: 20px;
+}
+
+.cardTitle {
+  position: absolute;
+  z-index: 3;
+  top: 22.79%;
+  left: 8.57%;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--mcm-font-brand);
+  font-size: clamp(32px, 10.26vw, 40px);
+  font-weight: 400;
+  line-height: 0.75;
+}
+
+.cardFlightPath {
+  position: absolute;
+  z-index: 3;
+  right: 0;
+  bottom: 15.8%;
+  left: 9.43%;
+  height: 15%;
+  border-left: 1px solid #fff7d5;
+  background:
+    linear-gradient(#fff7d5, #fff7d5) left bottom / 56.94% 1px no-repeat,
+    linear-gradient(#fff7d5, #fff7d5) right bottom / 9.62% 1px no-repeat;
+}
+
+.cardFlightPath::before {
+  position: absolute;
+  top: 0;
+  left: -4px;
+  width: 7px;
+  height: 9px;
+  background: #fff7d5;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  content: '';
+}
+
+.boardingButton {
+  position: absolute;
+  z-index: 4;
+  right: 8.57%;
+  bottom: 11.76%;
+  display: inline-flex;
+  width: 108px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 100px;
+  background: rgb(255 247 213 / 20%);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.boardingButton img {
+  width: 8px;
+  height: 10px;
+  transform: rotate(90deg);
+}
+
+.contentLink {
+  display: flex;
+  min-height: 18px;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.contentLink img {
+  width: 12px;
+  height: 12px;
+}
+
+.collectionCard {
+  aspect-ratio: 350 / 207;
+}
+
+.collectionCard::after {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 40%);
+  content: '';
+}
+
+.collectionCard > img {
+  position: absolute;
+  top: 0;
+  left: -67.93%;
+  width: 236.57%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+}
+
+.collectionCard > span {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  color: #fafafa;
+  font-size: 12px;
+  font-weight: 600;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+
+.loginButton {
+  display: flex;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #fafafa;
+  background: #191919;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.contentGroup:hover .boardingCard,
+.contentGroup:hover .collectionCard {
+  box-shadow: 2px 4px 16px rgb(0 0 0 / 24%);
+}
+
+.loginButton:hover {
+  background: #343434;
+}
+
+.contentGroup:active,
+.loginButton:active {
+  transform: scale(0.99);
+}
+
+.contentGroup:focus-visible,
+.loginButton:focus-visible {
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loginButton {
+    transition: none;
+  }
+}
