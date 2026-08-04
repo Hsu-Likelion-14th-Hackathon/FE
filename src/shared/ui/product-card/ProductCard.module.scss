@@ -1,0 +1,212 @@
+.card {
+  position: relative;
+  min-width: 0;
+  background: var(--mcm-color-canvas);
+}
+
+.cardLink {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardLink:focus-visible {
+  position: relative;
+  z-index: 2;
+  border-radius: 4px;
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: -2px;
+}
+
+.media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 193 / 190;
+  background: var(--mcm-color-product-surface);
+}
+
+.collectionLabel {
+  position: absolute;
+  z-index: 2;
+  top: 4px;
+  left: 10px;
+  color: var(--mcm-color-muted);
+  font-size: 8px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.artwork {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.artworkFrame {
+  position: absolute;
+  bottom: var(--product-frame-bottom);
+  left: var(--product-frame-left);
+  display: block;
+  width: var(--product-frame-width);
+  overflow: hidden;
+  aspect-ratio: var(--product-frame-aspect);
+  transition: transform 180ms ease;
+}
+
+.artworkImage {
+  position: absolute;
+  top: var(--product-image-top);
+  left: var(--product-image-left);
+  width: var(--product-image-width);
+  height: auto;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.galleryArrow {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  display: block;
+  width: 10px;
+  height: 10px;
+  color: var(--mcm-color-muted);
+  transform: translateY(-50%);
+}
+
+.galleryArrow svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 8%));
+}
+
+.previous {
+  left: 10px;
+}
+
+.next {
+  right: 10px;
+}
+
+.pagination {
+  position: absolute;
+  z-index: 2;
+  bottom: 8px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+.dot,
+.activeDot {
+  display: block;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+}
+
+.dot {
+  background: var(--mcm-color-border);
+}
+
+.activeDot {
+  background: var(--mcm-color-ink);
+}
+
+.information {
+  position: relative;
+  display: block;
+  height: 80px;
+  overflow: hidden;
+  padding: 4px 10px 0;
+  background: var(--mcm-color-canvas);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.productName,
+.price {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.productName {
+  color: var(--mcm-color-ink);
+}
+
+.price {
+  color: var(--mcm-color-muted);
+}
+
+.swatches {
+  position: absolute;
+  bottom: 9px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.swatch {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border: 0.5px solid transparent;
+  border-radius: 1px;
+  background: var(--swatch-color);
+  transform: rotate(45deg);
+}
+
+.selectedSwatch {
+  border-color: var(--mcm-color-ink);
+}
+
+.wishlistButton {
+  position: absolute;
+  z-index: 4;
+  top: -9px;
+  right: -7px;
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--mcm-color-ink);
+  background: transparent;
+}
+
+.wishlistButton:focus-visible {
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: -9px;
+}
+
+.heartIcon {
+  width: 11px;
+  height: 11px;
+}
+
+.wishlisted {
+  color: var(--mcm-color-brand-brown);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cardLink:hover .artworkFrame {
+    transform: scale(1.025);
+  }
+
+  .wishlistButton:hover {
+    color: var(--mcm-color-brand-brown);
+  }
+}
