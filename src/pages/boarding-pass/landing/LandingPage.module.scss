@@ -1,0 +1,258 @@
+/* (23) 랜딩 — Figma 492:4896 · rem (hairline만 px) */
+
+.stage {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  /* Figma 492:4942 Rectangle 125 */
+  background-color: #41210b;
+  /* 상태바(44) 제외 · 크롬(91) 아래 스테이지 */
+  min-height: calc(var(--mcm-viewport-stable) - 5.6875rem);
+}
+
+/* Figma 492:4942 글로우 SVG — complete 스테이지와 동일 배치 보정 */
+.stageBack {
+  position: absolute;
+  z-index: 0;
+  top: -32%;
+  left: -50%;
+  width: 207%;
+  max-width: none;
+  height: auto;
+  pointer-events: none;
+  object-fit: cover;
+}
+
+.footerFade {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  height: 16.9375rem; /* 271 */
+  background: linear-gradient(to bottom, rgba(90, 54, 33, 0), rgba(25, 25, 25, 0.6));
+  pointer-events: none;
+}
+
+.close {
+  position: absolute;
+  z-index: 3;
+  /* Figma 492:4939 — left 20 / top 161 → 스테이지 기준 top ≈ 26 */
+  top: 1.625rem;
+  left: 1.25rem;
+  display: grid;
+  width: 0.875rem;
+  height: 0.875rem;
+  place-items: center;
+}
+
+.closeImg {
+  display: block;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  /* Figma 492:4954 copy top 206(상태바 포함) → 스테이지 기준 ≈71 */
+  padding: 4.4375rem 1.25rem max(2.125rem, var(--mcm-safe-bottom));
+  /* 남는 하단 여백은 Figma처럼 페이드만 — CTA를 바닥으로 밀지 않음 */
+}
+
+.copyBlock {
+  display: flex;
+  width: 100%;
+  max-width: 18.5625rem; /* 297 */
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem; /* 16 */
+  text-align: center;
+}
+
+.titleGroup {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem; /* 8 */
+  color: #fafafa;
+}
+
+.title {
+  width: 100%;
+  margin: 0;
+  font-family: var(--mcm-font-brand);
+  font-size: 1.75rem; /* 28 */
+  font-weight: 400;
+  line-height: 2.125rem; /* 34 */
+}
+
+.subtitle {
+  width: 100%;
+  margin: 0;
+  font-size: 0.875rem; /* 14 */
+  font-weight: 600;
+  line-height: 1.25rem; /* 20 */
+}
+
+.storeNote {
+  width: 100%;
+  margin: 0;
+  font-size: 0.75rem; /* 12 */
+  font-weight: 400;
+  line-height: 1.25rem; /* 20 */
+  color: #807066;
+}
+
+/* 비행기 — Figma 246×209 대비 ≈ +50% */
+.planeWrap {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 19.59375rem; /* 209 × 1.5 */
+  margin-top: 2.25rem; /* ~36 */
+  margin-bottom: 3.375rem; /* ~54 */
+}
+
+.planeFrame {
+  position: relative;
+  z-index: 1;
+  width: min(23.0625rem, 100%); /* 246 × 1.5 */
+  height: auto;
+  aspect-ratio: 246 / 209;
+}
+
+/* 흰색 소프트 밝기 그림자 (색상 복제 블러 제거) */
+.planeFrame:first-child {
+  position: absolute;
+  z-index: 0;
+  transform: scale(1.04);
+  filter: brightness(0) invert(1) blur(0.75rem); /* 12 */
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.planeGlow {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  pointer-events: none;
+}
+
+.plane {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  pointer-events: none;
+}
+
+.actions {
+  display: flex;
+  width: 100%;
+  max-width: 21.875rem; /* 350 */
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 1.875rem; /* 30 */
+}
+
+.primaryCta {
+  display: inline-flex;
+  height: 3.125rem; /* 50 */
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 0.5rem; /* 8 */
+  background: #c07346;
+  font-size: 0.875rem; /* 14 */
+  font-weight: 600;
+  line-height: 1.125rem; /* 18 */
+  color: #fafafa;
+}
+
+.ctaPlane {
+  display: block;
+  width: 0.75rem; /* 12 */
+  height: 0.75rem;
+  flex-shrink: 0;
+}
+
+.secondaryRow {
+  display: flex;
+  width: 100%;
+  gap: 0.625rem; /* 10 */
+}
+
+.secondaryCta {
+  position: relative;
+  display: flex;
+  height: 2.125rem; /* 34 */
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: none;
+  border-radius: 6.25rem; /* 100 */
+  background: rgba(255, 247, 213, 0.2);
+  font-size: 0.625rem; /* 10 */
+  font-weight: 600;
+  line-height: 1;
+  color: #fafafa;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* (22) Next와 동일한 메탈릭 보더 하이라이트 */
+.secondaryCta::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from 200deg at 50% 50%,
+    rgba(255, 255, 255, 0.05) 0deg,
+    rgba(255, 255, 255, 0.05) 35deg,
+    rgba(255, 247, 213, 0.55) 70deg,
+    rgba(255, 255, 255, 0.7) 95deg,
+    rgba(255, 247, 213, 0.45) 120deg,
+    rgba(255, 255, 255, 0.06) 150deg,
+    rgba(0, 0, 0, 0.22) 185deg,
+    rgba(255, 255, 255, 0.05) 220deg,
+    rgba(255, 247, 213, 0.5) 265deg,
+    rgba(255, 255, 255, 0.65) 295deg,
+    rgba(255, 247, 213, 0.35) 325deg,
+    rgba(255, 255, 255, 0.05) 360deg
+  );
+  pointer-events: none;
+  content: '';
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.secondaryCtaLabel {
+  position: relative;
+  z-index: 1;
+}
