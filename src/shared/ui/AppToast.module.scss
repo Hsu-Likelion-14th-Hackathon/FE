@@ -1,0 +1,30 @@
+/* 토스트 호스트 — 등장/퇴장 페이드 (즉시 삭제 방지) */
+
+.host {
+  position: fixed;
+  inset-inline: 0;
+  z-index: 50;
+  width: fit-content;
+  min-width: 17.5rem; /* 280 */
+  max-width: 21.875rem; /* 350 */
+  margin-inline: auto;
+  padding-inline: 0;
+  opacity: 0;
+  transform: translateY(0.5rem);
+  transition:
+    opacity 0.32s ease,
+    transform 0.32s ease;
+  pointer-events: none;
+}
+
+.hostVisible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.hostExiting {
+  opacity: 0;
+  transform: translateY(0.5rem);
+  pointer-events: none;
+}
