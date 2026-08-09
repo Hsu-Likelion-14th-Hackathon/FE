@@ -18,7 +18,9 @@
 }
 
 html {
-  min-width: 320px;
+  /* rem 기준점 — 필수 고정 px (constraints) */
+  font-size: 16px;
+  min-width: var(--mcm-shell-min);
   min-height: 100%;
   background: var(--mcm-color-canvas);
   -webkit-text-size-adjust: 100%;
@@ -26,12 +28,13 @@ html {
 }
 
 body {
-  min-width: 320px;
+  min-width: var(--mcm-shell-min);
   min-height: 100vh;
   min-height: var(--mcm-viewport-stable);
   margin: 0;
   color: var(--mcm-color-ink);
   background: var(--mcm-color-canvas);
+  font-size: 1rem;
   line-height: 1.5;
 }
 

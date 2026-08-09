@@ -1,4 +1,9 @@
 :root {
+  // 디자인 캔버스 390×844 · 루트 16px = 1rem (constraints §레이아웃·단위)
+  --mcm-design-width: 24.375rem; // 390
+  --mcm-shell-min: 20rem; // 320
+  --mcm-shell-max: 26.875rem; // 430
+
   // Figma source: Page 1 / (1)메인페이지 (24:360)
   --mcm-color-canvas: #fafafa;
   --mcm-color-surface: #fefffb;
@@ -7,8 +12,11 @@
   --mcm-color-brand-brown: #c07346;
   --mcm-color-product-surface: #f2f2f2;
   --mcm-color-kakao: #ffe812;
+  /* Figma 472:4780 — 밴드 배경 */
   --mcm-color-header-start: #200d07;
   --mcm-color-header-end: #38180d;
+  /* 타이틀 폴백 · #E2C5B0 */
+  --mcm-color-header-title: #e2c5b0;
   --mcm-color-hero-start: #c07346;
   --mcm-color-hero-end: #5a3621;
 
@@ -16,6 +24,14 @@
     45deg,
     var(--mcm-color-header-start) 40.069%,
     var(--mcm-color-header-end) 59.931%
+  );
+  /* 타이틀·장식: 상단 하이라이트 가시 대비 (드롭섀도 없음) */
+  --mcm-gradient-header-title: linear-gradient(
+    180deg,
+    rgba(250, 240, 230, 0.78) 0%,
+    rgba(236, 214, 196, 0.62) 28%,
+    rgba(226, 197, 176, 0.5) 55%,
+    rgba(184, 152, 128, 0.45) 100%
   );
   --mcm-gradient-hero: linear-gradient(
     234.04deg,
