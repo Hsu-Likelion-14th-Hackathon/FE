@@ -49,29 +49,8 @@
   }
 }
 
-.spinner {
-  position: relative;
-  width: 4.8125rem; // 77px
-  height: 4.8125rem;
+.spinnerSlot {
   margin-top: 4rem;
-  animation: spin 1.1s linear infinite;
-}
-
-.ring {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
-
-.spinnerCap {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 50%;
-  background: #fafafa;
-  transform: translateX(-50%);
 }
 
 .message {
@@ -116,12 +95,6 @@
   line-height: 1rem;
   color: #fafafa;
   text-align: center;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 @keyframes pulse {

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 
+import LoadingRingSpinner from '@/features/boarding-pass/loading-ring/LoadingRingSpinner.jsx'
+
 import styles from './ScanDepartLoadingOverlay.module.scss'
 
 /**
  * 스캔 성공 후 「비행 이륙하기」 탭 시 동선 탐색 로딩 (38)~(40).
  * progress 0 → 100 연출 후 onComplete.
+ * 로딩 링은 설문과 동일한 LoadingRingSpinner를 재사용한다.
  */
 function ScanDepartLoadingOverlay({ onComplete, durationMs = 2200 }) {
   const [progress, setProgress] = useState(0)
@@ -45,19 +48,7 @@ function ScanDepartLoadingOverlay({ onComplete, durationMs = 2200 }) {
         </span>
       </div>
 
-      <div className={styles.spinner} aria-hidden="true">
-        <div
-          className={styles.ring}
-          style={{
-            background:
-              'conic-gradient(from 90deg, rgba(250,250,250,1) 0deg, rgb(255,219,160) 171deg, rgba(255,219,160,0) 360deg)',
-            WebkitMask:
-              'radial-gradient(farthest-side, transparent calc(100% - 0.75rem), #000 calc(100% - 0.6875rem))',
-            mask: 'radial-gradient(farthest-side, transparent calc(100% - 0.75rem), #000 calc(100% - 0.6875rem))',
-          }}
-        />
-        <span className={styles.spinnerCap} />
-      </div>
+      <LoadingRingSpinner className={styles.spinnerSlot} />
 
       <p className={styles.message}>
         고객님을 위한

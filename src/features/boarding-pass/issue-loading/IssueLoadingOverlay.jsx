@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import LoadingRingSpinner from '@/features/boarding-pass/loading-ring/LoadingRingSpinner.jsx'
 import loadingDots from '@/shared/assets/boarding-pass/issue/loading-spinner.svg'
 
 import styles from './IssueLoadingOverlay.module.scss'
@@ -9,8 +10,7 @@ const PROGRESS_STAGES = [0, 37.037, 100]
 
 /**
  * 설문 최종 제출 후 발급 API 대기 중 풀스크린 오버레이 (30)~(32).
- * 피그마 익스포트 SVG의 #FAFAFA/#898989 사각형이 흰 상자로 보이던 문제를
- * CSS conic-gradient 링으로 대체해 해결한다.
+ * 로딩 링은 LoadingRingSpinner로 공용한다.
  * 전환 타이밍은 SurveyPage의 API 완료 네비게이션을 그대로 유지한다.
  */
 function IssueLoadingOverlay() {
@@ -32,11 +32,7 @@ function IssueLoadingOverlay() {
         <img className={styles.dots} src={loadingDots} alt="" width={14} height={14} aria-hidden="true" />
       </div>
 
-      <div className={styles.spinner} aria-hidden="true">
-        <div className={styles.ring} />
-        {/* conic 링 흰색 선두에 stroke 폭과 같은 둥근 캡 */}
-        <span className={styles.tip} />
-      </div>
+      <LoadingRingSpinner placed="center" />
 
       <p className={styles.caption}>
         <span className={styles.captionLine}>고객님을 위한</span>
