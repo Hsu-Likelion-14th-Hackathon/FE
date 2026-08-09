@@ -1,20 +1,6 @@
 @import 'tailwindcss';
 
 @theme inline {
-  --color-canvas: var(--mcm-color-canvas);
-  --color-surface: var(--mcm-color-surface);
   --color-ink: var(--mcm-color-ink);
-  --color-muted: var(--mcm-color-muted);
-  --color-brand-brown: var(--mcm-color-brand-brown);
-  --color-product-surface: var(--mcm-color-product-surface);
-  --color-kakao: var(--mcm-color-kakao);
-  --color-border: var(--mcm-color-border);
-  --color-cream: var(--mcm-color-cream);
-  --color-pink: var(--mcm-color-pink);
-  --color-burgundy: var(--mcm-color-burgundy);
-  --color-beige: var(--mcm-color-beige);
-  --color-olive: var(--mcm-color-olive);
-
   --font-sans: var(--mcm-font-sans);
-  --font-brand: var(--mcm-font-brand);
 }

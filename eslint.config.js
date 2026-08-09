@@ -17,21 +17,13 @@ export default defineConfig([
       reactRefresh.configs.vite,
     ],
     languageOptions: {
-      ecmaVersion: 'latest',
       globals: globals.browser,
       parserOptions: {
         ecmaFeatures: { jsx: true },
-        sourceType: 'module',
       },
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
-    },
-  },
-  {
-    files: ['vite.config.js'],
-    languageOptions: {
-      globals: globals.node,
     },
   },
   eslintConfigPrettier,
