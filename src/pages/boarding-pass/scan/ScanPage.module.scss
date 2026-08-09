@@ -132,11 +132,12 @@
   background: rgba(62, 54, 50, 0.7);
   color: #fafafa;
   opacity: 0;
-  transform: translateY(0.5rem);
+  transform: translateY(0.875rem);
   transition:
-    opacity 0.32s ease,
-    transform 0.32s ease;
+    opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: none;
+  will-change: opacity, transform;
 }
 
 .creditToastIn {
@@ -148,6 +149,9 @@
 .creditToastOut {
   opacity: 0;
   transform: translateY(0.5rem);
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s ease;
   pointer-events: none;
 }
 

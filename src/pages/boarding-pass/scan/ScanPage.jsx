@@ -31,6 +31,7 @@ function ScanPage() {
   const [scanning, setScanning] = useState(false)
   const [credit, setCredit] = useState(null)
   const [toastOpen, setToastOpen] = useState(false)
+  const [toastEntered, setToastEntered] = useState(false)
   const [toastExiting, setToastExiting] = useState(false)
   const toastClosingRef = useRef(false)
 
@@ -54,11 +55,28 @@ function ScanPage() {
     setToastExiting(true)
     window.setTimeout(() => {
       setToastOpen(false)
+      setToastEntered(false)
       setToastExiting(false)
       setCredit(null)
       toastClosingRef.current = false
     }, TOAST_EXIT_MS)
   }, [])
+
+  useEffect(() => {
+    if (!toastOpen || toastExiting) {
+      setToastEntered(false)
+      return undefined
+    }
+    // 마운트 직후 In 클래스를 붙이면 transition이 스킵되므로 한 프레임 뒤에 올린다.
+    let raf2 = 0
+    const raf1 = window.requestAnimationFrame(() => {
+      raf2 = window.requestAnimationFrame(() => setToastEntered(true))
+    })
+    return () => {
+      window.cancelAnimationFrame(raf1)
+      window.cancelAnimationFrame(raf2)
+    }
+  }, [toastOpen, toastExiting])
 
   useEffect(() => {
     if (!toastOpen || toastExiting) return undefined
@@ -76,6 +94,7 @@ function ScanPage() {
       toastClosingRef.current = false
       setCredit(result.credit)
       setToastExiting(false)
+      setToastEntered(false)
       setToastOpen(true)
     } catch {
       // MSW 실패 시에도 UI 스모크를 막지 않음 — 재시도 가능
@@ -146,7 +165,7 @@ function ScanPage() {
           <div className={styles.ctaCluster}>
             {showCreditToast ? (
               <div
-                className={`${styles.creditToast} ${toastExiting ? styles.creditToastOut : styles.creditToastIn}`}
+                className={`${styles.creditToast} ${toastExiting ? styles.creditToastOut : ''} ${toastEntered && !toastExiting ? styles.creditToastIn : ''}`}
                 role="status"
               >
                 <button
