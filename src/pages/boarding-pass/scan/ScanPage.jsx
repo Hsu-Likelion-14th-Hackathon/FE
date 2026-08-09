@@ -124,7 +124,7 @@ function ScanPage() {
         <button
           type="button"
           aria-label="뒤로"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/boarding-pass')}
           className={styles.back}
           disabled={isDeparting}
         >
