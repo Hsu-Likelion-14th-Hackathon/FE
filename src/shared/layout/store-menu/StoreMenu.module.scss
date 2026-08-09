@@ -1,17 +1,63 @@
-.menuPanel {
+.menuLayer {
   position: fixed;
   z-index: 19;
-  top: calc(97px + var(--mcm-safe-top));
+  top: calc(var(--mcm-header-height, 97px) + var(--mcm-safe-top));
+  right: 0;
+  left: 0;
+  height: calc(var(--mcm-viewport-dynamic) - var(--mcm-header-height, 97px) - var(--mcm-safe-top));
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear var(--mcm-menu-duration, 280ms);
+}
+
+.menuLayer[data-state='open'] {
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  background: rgb(25 25 25 / 28%);
+  transition: opacity var(--mcm-menu-duration, 280ms) var(--mcm-menu-easing, ease);
+}
+
+.menuLayer[data-state='open'] .backdrop {
+  opacity: 1;
+}
+
+.drawerViewport {
+  position: absolute;
+  top: 0;
+  bottom: 0;
   left: 50%;
-  width: min(100%, 430px);
-  height: calc(var(--mcm-viewport-dynamic) - 97px - var(--mcm-safe-top));
+  width: min(100%, var(--mcm-shell-inline-size, 430px));
+  overflow: hidden;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.menuPanel {
+  width: 100%;
+  height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  transform: translateX(-50%);
+  transform: translate3d(-100%, 0, 0);
   outline: none;
   background: var(--mcm-color-canvas);
   overscroll-behavior: contain;
   scrollbar-width: none;
+  pointer-events: auto;
+  transition: transform var(--mcm-menu-duration, 280ms) var(--mcm-menu-easing, ease);
+  will-change: transform;
+}
+
+.menuLayer[data-state='open'] .menuPanel {
+  transform: translate3d(0, 0, 0);
 }
 
 .menuPanel::-webkit-scrollbar {
@@ -21,8 +67,7 @@
 .menuContent {
   display: grid;
   gap: 20px;
-  width: calc(100% - 40px);
-  max-width: 390px;
+  width: min(calc(100% - (var(--mcm-page-gutter) * 2)), var(--mcm-content-max));
   margin-inline: auto;
   padding-bottom: calc(24px + var(--mcm-safe-bottom));
 }
@@ -236,7 +281,38 @@
   outline-offset: 3px;
 }
 
+@media (min-width: 768px) and (max-width: 1199px) {
+  .menuContent {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .loginButton {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1200px) {
+  .menuLayer {
+    position: absolute;
+    top: calc(var(--mcm-header-height, 97px) + var(--mcm-safe-top));
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: auto;
+  }
+
+  .drawerViewport {
+    left: 0;
+    width: 100%;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .menuLayer,
+  .backdrop,
+  .menuPanel,
   .loginButton {
     transition: none;
   }

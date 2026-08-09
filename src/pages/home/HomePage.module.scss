@@ -15,10 +15,10 @@
 .introHero::after {
   position: absolute;
   z-index: 5;
+  top: 521px;
   right: 0;
   bottom: 0;
   left: 0;
-  height: 182px;
   background: linear-gradient(to bottom, transparent, rgb(25 25 25 / 60%));
   content: '';
   pointer-events: none;
@@ -191,7 +191,7 @@
 .boardingButton {
   position: absolute;
   z-index: 6;
-  top: min(68%, 477px);
+  top: 477.31px;
   right: 30px;
   display: inline-flex;
   width: 150px;
@@ -212,9 +212,18 @@
     transform 160ms ease;
 }
 
-.boardingButton img {
+.boardingArrow {
+  display: grid;
   width: 12px;
   height: 14px;
+  flex: none;
+  place-items: center;
+}
+
+.boardingArrow img {
+  width: 10.9px;
+  max-width: none;
+  height: 9.625px;
   transform: rotate(90deg);
 }
 
@@ -248,6 +257,53 @@
   .boardingButton {
     right: 20px;
     width: 136px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .introHero {
+    --mcm-tablet-scene-start: calc(50% - 195px);
+  }
+
+  .heroGlowTop {
+    left: calc(var(--mcm-tablet-scene-start) + 162px);
+  }
+
+  .heroGlowLeft {
+    left: calc(var(--mcm-tablet-scene-start) - 140px);
+  }
+
+  .glowFrame {
+    left: calc(var(--mcm-tablet-scene-start) - 93px);
+  }
+
+  .introSuitcase {
+    left: calc(var(--mcm-tablet-scene-start) + 141.4px);
+  }
+
+  .introPlane {
+    left: calc(var(--mcm-tablet-scene-start) + 77.8px);
+  }
+
+  .introWatch {
+    left: calc(var(--mcm-tablet-scene-start) + 21px);
+  }
+
+  .introCopy {
+    left: calc(var(--mcm-tablet-scene-start) + 30px);
+  }
+
+  .introFlightPathTop,
+  .introFlightPathBottom {
+    left: calc(var(--mcm-tablet-scene-start) + 32px);
+  }
+
+  .introFlightPathBottom {
+    width: 358px;
+  }
+
+  .boardingButton {
+    right: calc(50% - 165px);
   }
 }
 

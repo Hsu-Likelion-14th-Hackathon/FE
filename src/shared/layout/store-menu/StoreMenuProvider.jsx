@@ -1,27 +1,34 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router'
 
 import StoreMenu from './StoreMenu.jsx'
 import StoreMenuContext from './StoreMenuContext.js'
 
 function StoreMenuProvider({ children }) {
-  const [isOpen, setIsOpen] = useState(false)
+  const location = useLocation()
+  const [menuState, setMenuState] = useState(() => ({
+    isOpen: false,
+    locationKey: location.key,
+  }))
+
+  if (menuState.locationKey !== location.key) {
+    setMenuState({ isOpen: false, locationKey: location.key })
+  }
+
+  const isOpen = menuState.locationKey === location.key && menuState.isOpen
 
   const closeMenu = useCallback(() => {
-    setIsOpen(false)
+    setMenuState((currentState) =>
+      currentState.isOpen ? { ...currentState, isOpen: false } : currentState,
+    )
   }, [])
 
   const toggleMenu = useCallback(() => {
-    setIsOpen((currentValue) => !currentValue)
-  }, [])
-
-  useEffect(() => {
-    function handleHistoryNavigation() {
-      setIsOpen(false)
-    }
-
-    window.addEventListener('popstate', handleHistoryNavigation)
-    return () => window.removeEventListener('popstate', handleHistoryNavigation)
-  }, [])
+    setMenuState((currentState) => ({
+      isOpen: currentState.locationKey === location.key ? !currentState.isOpen : true,
+      locationKey: location.key,
+    }))
+  }, [location.key])
 
   useEffect(() => {
     if (!isOpen) {
@@ -53,7 +60,7 @@ function StoreMenuProvider({ children }) {
   return (
     <StoreMenuContext.Provider value={contextValue}>
       {children}
-      {isOpen ? <StoreMenu onNavigate={closeMenu} /> : null}
+      <StoreMenu isOpen={isOpen} onClose={closeMenu} />
     </StoreMenuContext.Provider>
   )
 }

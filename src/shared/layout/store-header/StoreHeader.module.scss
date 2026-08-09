@@ -80,7 +80,7 @@
 .navigationInner {
   position: relative;
   display: flex;
-  width: calc(100% - 40px);
+  width: min(calc(100% - (var(--mcm-page-gutter) * 2)), var(--mcm-content-max));
   height: 24px;
   margin-inline: auto;
   padding-top: 12px;
@@ -147,6 +147,16 @@
 .iconLink:focus-visible {
   outline: 2px solid var(--mcm-color-brand-brown);
   outline-offset: 2px;
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .brandStrip {
+    padding-inline: var(--mcm-page-gutter);
+  }
+
+  .sideGroup {
+    gap: 24px;
+  }
 }
 
 @media (max-width: 349px) {

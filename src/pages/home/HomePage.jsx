@@ -13,12 +13,14 @@ function BoardingButton() {
   return (
     <Link className={styles.boardingButton} to="/products">
       <span>Boarding</span>
-      <img src={boardingArrow} alt="" />
+      <span className={styles.boardingArrow} aria-hidden="true">
+        <img src={boardingArrow} alt="" />
+      </span>
     </Link>
   )
 }
 
-function BoardingIntro() {
+export function Component() {
   return (
     <div className={styles.introPage}>
       <StoreHeader />
@@ -54,8 +56,4 @@ function BoardingIntro() {
       </section>
     </div>
   )
-}
-
-export function Component() {
-  return <BoardingIntro />
 }

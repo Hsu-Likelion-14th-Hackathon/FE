@@ -1,9 +1,203 @@
+.stage,
+.device {
+  width: 100%;
+  min-height: var(--mcm-viewport-stable);
+}
+
+.device {
+  position: relative;
+}
+
 .shell {
   position: relative;
-  width: 100%;
-  max-width: 430px;
+  width: var(--mcm-shell-inline-size);
+  max-width: 100%;
   min-height: var(--mcm-viewport-stable);
   margin-inline: auto;
   color: var(--mcm-color-ink);
   background: var(--mcm-color-canvas);
+}
+
+.dynamicIsland,
+.hardwareButton {
+  display: none;
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .shell {
+    container-type: inline-size;
+  }
+}
+
+@media (min-width: 1200px) {
+  .stage {
+    display: grid;
+    min-height: max(100vh, 948px);
+    padding: 36px;
+    place-items: center;
+  }
+
+  .device {
+    width: 422px;
+    min-height: 0;
+    height: 876px;
+    padding: 16px;
+    border: 1px solid #777a7d;
+    border-radius: 64px;
+    background: linear-gradient(
+      90deg,
+      #5b5d60 0%,
+      #d6d7d8 3%,
+      #77797c 7%,
+      #252628 13%,
+      #151617 50%,
+      #303234 87%,
+      #9a9c9e 94%,
+      #4b4d4f 100%
+    );
+    box-shadow:
+      0 32px 70px rgb(25 25 25 / 22%),
+      0 8px 24px rgb(25 25 25 / 16%),
+      inset 0 0 0 1px rgb(255 255 255 / 52%),
+      inset 0 0 0 5px #111214,
+      inset 0 0 0 7px #343638;
+  }
+
+  .device::before,
+  .device::after {
+    position: absolute;
+    z-index: 3;
+    border-radius: inherit;
+    content: '';
+    pointer-events: none;
+  }
+
+  .device::before {
+    inset: 3px;
+    border: 1px solid rgb(255 255 255 / 32%);
+  }
+
+  .device::after {
+    inset: 10px;
+    border: 2px solid #08090a;
+    border-radius: 54px;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 11%);
+  }
+
+  .shell {
+    --mcm-safe-top: 44px;
+    --mcm-viewport-stable: var(--mcm-design-height);
+    --mcm-viewport-dynamic: var(--mcm-design-height);
+
+    z-index: 2;
+    width: var(--mcm-design-width);
+    max-width: none;
+    height: var(--mcm-design-height);
+    min-height: 0;
+    overflow: hidden;
+    border-radius: 48px;
+    box-shadow: 0 0 0 1px #050607;
+    isolation: isolate;
+  }
+
+  .shell > :first-child {
+    width: 100%;
+    min-height: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .shell > :first-child::-webkit-scrollbar {
+    display: none;
+  }
+
+  :global(html.store-menu-open) .shell > :first-child {
+    overflow: hidden;
+  }
+
+  .dynamicIsland {
+    position: absolute;
+    z-index: 8;
+    top: 27px;
+    left: 50%;
+    display: block;
+    width: 118px;
+    height: 31px;
+    border: 1px solid #020203;
+    border-radius: 999px;
+    transform: translateX(-50%);
+    background: #050506;
+    box-shadow:
+      inset 0 1px 1px rgb(255 255 255 / 7%),
+      0 1px 3px rgb(0 0 0 / 48%);
+    pointer-events: none;
+  }
+
+  .islandSensor,
+  .islandCamera {
+    position: absolute;
+    top: 50%;
+    display: block;
+    border-radius: 50%;
+    transform: translateY(-50%);
+  }
+
+  .islandSensor {
+    right: 22px;
+    width: 4px;
+    height: 4px;
+    background: #9e7900;
+    box-shadow: 0 0 4px rgb(255 198 0 / 38%);
+  }
+
+  .islandCamera {
+    right: 8px;
+    width: 9px;
+    height: 9px;
+    border: 1px solid #111426;
+    background: radial-gradient(circle at 40% 35%, #273f7c 0 18%, #111834 32%, #030408 72%);
+    box-shadow: inset 0 0 2px #425ea2;
+  }
+
+  .hardwareButton {
+    position: absolute;
+    z-index: 0;
+    display: block;
+    width: 4px;
+    border: 1px solid #2b2c2e;
+    background: linear-gradient(90deg, #222325, #85878a 48%, #2b2c2e);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 38%);
+  }
+
+  .actionButton,
+  .volumeUpButton,
+  .volumeDownButton {
+    left: -4px;
+    border-radius: 3px 0 0 3px;
+  }
+
+  .actionButton {
+    top: 152px;
+    height: 32px;
+  }
+
+  .volumeUpButton {
+    top: 211px;
+    height: 58px;
+  }
+
+  .volumeDownButton {
+    top: 282px;
+    height: 58px;
+  }
+
+  .powerButton {
+    top: 224px;
+    right: -4px;
+    height: 94px;
+    border-radius: 0 3px 3px 0;
+  }
 }
