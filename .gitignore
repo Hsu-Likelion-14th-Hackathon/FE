@@ -33,6 +33,7 @@ Thumbs.db
 
 # local only
 local/
+design/
 
 # scratch test
 scratch/

@@ -4,10 +4,12 @@ import { describe, expect, it } from 'vitest'
 import App from './App.jsx'
 
 describe('App', () => {
-  it('초기 설정 완료 화면을 렌더링한다', () => {
+  it('루트 진입 시 보딩패스 인트로 라우트를 렌더링한다', async () => {
+    window.history.pushState({}, '', '/')
     render(<App />)
 
-    expect(screen.getByRole('main')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'MCM BOARDING PASS' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('button', { name: /Next/i }, { timeout: 3000 }),
+    ).toBeInTheDocument()
   })
 })
