@@ -63,11 +63,9 @@ function ScanPage() {
   }, [])
 
   useEffect(() => {
-    if (!toastOpen || toastExiting) {
-      setToastEntered(false)
-      return undefined
-    }
+    if (!toastOpen || toastExiting) return undefined
     // 마운트 직후 In 클래스를 붙이면 transition이 스킵되므로 한 프레임 뒤에 올린다.
+    // toastEntered 초기화는 open/close 핸들러에서 이미 수행한다.
     let raf2 = 0
     const raf1 = window.requestAnimationFrame(() => {
       raf2 = window.requestAnimationFrame(() => setToastEntered(true))

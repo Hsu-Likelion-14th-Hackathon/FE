@@ -20,13 +20,8 @@ export function getCurrentBoardingPass() {
  * 최근 발급 보딩패스 조회 (기존 BP 스캔).
  * 404 → null (T-01 안내 토스트용).
  */
-export async function getLatestBoardingPass() {
-  const response = await fetch(API.boardingPass.latest)
-  if (response.status === 404) return null
-  if (!response.ok) {
-    throw new Error(`API 요청 실패: GET ${API.boardingPass.latest} (${response.status})`)
-  }
-  return response.json()
+export function getLatestBoardingPass() {
+  return apiFetch(API.boardingPass.latest, { notFoundAsNull: true })
 }
 
 /**

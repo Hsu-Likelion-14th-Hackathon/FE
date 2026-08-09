@@ -14,7 +14,7 @@ export const ToastContext = createContext(null)
 export function useToast() {
   const context = useContext(ToastContext)
   if (!context) {
-    throw new Error('useToast는 AppProviders(ToastProvider) 내부에서만 사용할 수 있습니다.')
+    throw new Error('useToast는 AppProviders 내부에서만 사용할 수 있습니다.')
   }
   return context
 }
