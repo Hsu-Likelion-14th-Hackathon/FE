@@ -30,3 +30,11 @@ Thumbs.db
 
 # Local source font packages (selected web assets live in src/assets/fonts)
 /font/
+
+# local only
+local/
+
+# scratch test
+scratch/
+dist-scratch/
+public/mockServiceWorker.js
