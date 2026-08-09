@@ -1,0 +1,230 @@
+.fieldGroup {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  display: flex;
+  height: 18px;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.required {
+  color: var(--mcm-color-brand-brown);
+}
+
+.trigger {
+  display: flex;
+  width: 100%;
+  height: 50px;
+  align-items: center;
+  padding: 0 21px 0 19px;
+  border: 1px solid var(--mcm-color-border);
+  border-radius: 8px;
+  appearance: none;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.triggerActive {
+  border-color: var(--mcm-color-brand-brown);
+}
+
+.controlIcon {
+  width: 24px;
+  max-width: none;
+  height: 24px;
+  flex: none;
+}
+
+.placeholder,
+.value {
+  min-width: 0;
+  flex: 1;
+  margin-left: 9px;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placeholder {
+  color: var(--mcm-color-border);
+  font-weight: 400;
+}
+
+.value {
+  color: var(--mcm-color-ink);
+  font-weight: 600;
+}
+
+.chevron {
+  width: 14px;
+  max-width: none;
+  height: 14px;
+  flex: none;
+  margin-left: 8px;
+  transform: rotate(180deg);
+}
+
+.dialog {
+  width: 100%;
+  padding: 12px 10px;
+  border: 1px solid var(--mcm-color-border);
+  border-radius: 8px;
+  background: var(--mcm-color-canvas);
+  box-shadow: 0 8px 24px rgb(25 25 25 / 10%);
+}
+
+.calendarHeader {
+  display: grid;
+  align-items: center;
+  gap: 6px;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+}
+
+.monthButton,
+.select {
+  min-height: 44px;
+  border: 1px solid var(--mcm-color-border);
+  border-radius: 8px;
+  color: var(--mcm-color-ink);
+  background: var(--mcm-color-canvas);
+}
+
+.monthButton {
+  display: grid;
+  width: 44px;
+  padding: 0;
+  place-items: center;
+  appearance: none;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.monthButton:disabled {
+  color: var(--mcm-color-border);
+  cursor: default;
+  opacity: 0.55;
+}
+
+.selectGroup {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  grid-template-columns: minmax(88px, 1.35fr) minmax(62px, 0.9fr);
+}
+
+.select {
+  width: 100%;
+  min-width: 0;
+  padding: 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.calendar {
+  display: flex;
+  margin-top: 8px;
+  flex-direction: column;
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.weekday,
+.emptyCell,
+.dateCell {
+  display: grid;
+  min-width: 0;
+  min-height: 44px;
+  place-items: center;
+}
+
+.weekday {
+  color: var(--mcm-color-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.dateCell {
+  position: relative;
+}
+
+.dateButton {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  appearance: none;
+  place-items: center;
+  color: var(--mcm-color-ink);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.dateButton[aria-current='date']:not(.dateButtonSelected) {
+  box-shadow: inset 0 0 0 1px var(--mcm-color-brand-brown);
+}
+
+.dateButtonSelected {
+  color: var(--mcm-color-canvas);
+  background: var(--mcm-color-brand-brown);
+  font-weight: 700;
+}
+
+.dateButton:disabled {
+  color: var(--mcm-color-border);
+  cursor: default;
+}
+
+.trigger:focus-visible,
+.monthButton:focus-visible,
+.select:focus-visible,
+.dateButton:focus-visible {
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: 2px;
+}
+
+.monthButton:not(:disabled):active,
+.dateButton:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 339px) {
+  .dialog {
+    width: calc(100% + 40px);
+    padding-right: 5px;
+    padding-left: 5px;
+    margin-inline: -20px;
+  }
+
+  .calendarHeader {
+    gap: 4px;
+  }
+
+  .selectGroup {
+    gap: 4px;
+  }
+
+  .select {
+    padding-right: 4px;
+    padding-left: 4px;
+  }
+}
