@@ -78,7 +78,7 @@ export function Component() {
   return (
     <div className={styles.page}>
       <StoreHeader />
-      <h1 className={styles.visuallyHidden}>위시리스트</h1>
+      <h1 className="sr-only">위시리스트</h1>
       <CartWishlistTabs active="wishlist" />
 
       <section className={styles.summary} aria-labelledby="wishlist-title">

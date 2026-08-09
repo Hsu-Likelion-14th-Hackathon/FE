@@ -8,19 +8,6 @@
   min-height: calc(var(--mcm-viewport-stable) - 97px - var(--mcm-safe-top));
 }
 
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  border: 0;
-  margin: -1px;
-  white-space: nowrap;
-}
-
 .collectionTabs {
   display: flex;
   height: 40px;
@@ -87,5 +74,27 @@
   .collectionDescription p {
     font-size: 11px;
     line-height: 17px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .main {
+    width: calc(100% - (var(--mcm-page-gutter, 32px) * 2));
+    margin-inline: auto;
+  }
+
+  .collectionImage {
+    height: clamp(280px, 35vw, 360px);
+    aspect-ratio: auto;
+  }
+
+  .productGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .productGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

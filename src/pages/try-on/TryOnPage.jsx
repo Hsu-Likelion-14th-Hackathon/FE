@@ -39,14 +39,6 @@ function usePrefersReducedMotion() {
   return prefersReducedMotion
 }
 
-function ProductArtwork() {
-  return (
-    <div className={styles.productCrop}>
-      <img src={pinkBagImage} alt="핑크 Diamant 가방" />
-    </div>
-  )
-}
-
 function UploadStage({ fileInputRef, fileName, onClose, onFileChange, onStartFitting }) {
   return (
     <section
@@ -70,7 +62,9 @@ function UploadStage({ fileInputRef, fileName, onClose, onFileChange, onStartFit
       <div className={styles.uploadContent}>
         <div className={styles.previewCard}>
           <span className={styles.cardPin} aria-hidden="true" />
-          <ProductArtwork />
+          <div className={styles.productCrop}>
+            <img src={pinkBagImage} alt="핑크 Diamant 가방" />
+          </div>
         </div>
 
         <p className={styles.uploadMessage}>
@@ -93,7 +87,7 @@ function UploadStage({ fileInputRef, fileName, onClose, onFileChange, onStartFit
           <span>Upload</span>
           <img src={uploadArrowIcon} alt="" />
         </button>
-        <span className={styles.visuallyHidden} aria-live="polite">
+        <span className="sr-only" aria-live="polite">
           {fileName ? `${fileName} 이미지가 선택되었습니다.` : '선택된 이미지가 없습니다.'}
         </span>
       </div>
@@ -150,7 +144,7 @@ function LoadingStage({ progress, onClose }) {
         </div>
       </div>
 
-      <span className={styles.visuallyHidden} aria-live="polite">
+      <span className="sr-only" aria-live="polite">
         {isComplete ? 'AI Fitting 준비가 완료되었습니다.' : 'AI Fitting을 처리하고 있습니다.'}
       </span>
     </section>
@@ -203,8 +197,7 @@ export function Component() {
   return (
     <div className={styles.page}>
       <StoreHeader />
-      <h1 className={styles.visuallyHidden}>상품 착용</h1>
-      <p className={styles.visuallyHidden}>상품 ID: {productId}</p>
+      <h1 className="sr-only">상품 착용</h1>
 
       {phase === 'upload' ? (
         <UploadStage

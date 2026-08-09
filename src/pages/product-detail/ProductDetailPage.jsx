@@ -79,8 +79,7 @@ export function Component() {
       <StoreHeader />
 
       <div className={styles.main}>
-        <h1 className={styles.visuallyHidden}>상품 상세</h1>
-        <p className={styles.visuallyHidden}>상품 ID: {product.id}</p>
+        <h1 className="sr-only">상품 상세</h1>
 
         <section aria-labelledby="product-name">
           <div className={styles.productMedia}>
@@ -178,12 +177,7 @@ export function Component() {
             >
               {addedToBag ? '쇼핑백에 담겼어요' : '쇼핑백에 추가'}
             </button>
-            <p
-              className={styles.visuallyHidden}
-              id="cart-feedback"
-              role="status"
-              aria-live="polite"
-            >
+            <p className="sr-only" id="cart-feedback" role="status" aria-live="polite">
               {addedToBag
                 ? `${product.name} ${selectedVariant.label} 색상이 쇼핑백에 추가되었습니다.`
                 : ''}

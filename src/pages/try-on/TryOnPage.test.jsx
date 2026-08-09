@@ -23,6 +23,7 @@ describe('TryOnPage', () => {
     renderTryOn()
 
     expect(screen.getByRole('heading', { name: '상품 착용' })).toBeInTheDocument()
+    expect(screen.queryByText(/상품 ID:/)).not.toBeInTheDocument()
     expect(screen.getByText('Credit | 100')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Upload' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Fitting' })).toBeInTheDocument()

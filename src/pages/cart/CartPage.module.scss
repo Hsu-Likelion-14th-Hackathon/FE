@@ -225,16 +225,24 @@
   outline-offset: 2px;
 }
 
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-  margin: -1px;
-  white-space: nowrap;
+@media (min-width: 768px) and (max-width: 1199px) {
+  .summary,
+  .itemList {
+    width: min(calc(100% - (var(--mcm-page-gutter, 32px) * 2)), var(--mcm-content-max, 720px));
+    max-width: var(--mcm-content-max, 720px);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .checkoutButton {
+    width: min(350px, calc(100% - (var(--mcm-page-gutter, 32px) * 2)));
+    max-width: none;
+    margin-right: max(
+      var(--mcm-page-gutter, 32px),
+      calc((100% - var(--mcm-content-max, 720px)) / 2)
+    );
+    margin-left: auto;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {

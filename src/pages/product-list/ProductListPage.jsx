@@ -37,7 +37,7 @@ export function Component() {
       <StoreHeader />
 
       <div className={styles.main}>
-        <h1 className={styles.visuallyHidden}>상품 목록</h1>
+        <h1 className="sr-only">상품 목록</h1>
 
         <div className={styles.collectionTabs} aria-label="상품 컬렉션">
           <span className={styles.activeTab}>신상품</span>
@@ -45,7 +45,7 @@ export function Component() {
         </div>
 
         <section aria-labelledby="aw26-title">
-          <h2 className={styles.visuallyHidden} id="aw26-title">
+          <h2 className="sr-only" id="aw26-title">
             Autumn Winter 2026
           </h2>
           <img

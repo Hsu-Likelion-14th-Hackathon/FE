@@ -113,7 +113,7 @@ export function Component() {
   return (
     <div className={styles.page}>
       <StoreHeader />
-      <h1 className={styles.visuallyHidden}>쇼핑백</h1>
+      <h1 className="sr-only">쇼핑백</h1>
       <CartWishlistTabs active="cart" />
 
       <section className={styles.summary} aria-labelledby="cart-title">

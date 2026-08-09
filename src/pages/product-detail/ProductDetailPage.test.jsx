@@ -20,6 +20,8 @@ describe('ProductDetailPage', () => {
   it('색상을 선택하고 쇼핑백 추가 결과를 안내한다', () => {
     renderPage()
 
+    expect(screen.getByRole('heading', { name: 'Diamant 비세토스 3D 참' })).toBeInTheDocument()
+    expect(screen.queryByText(/상품 ID:/)).not.toBeInTheDocument()
     expect(screen.getByText('2개 남음')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Cinnamon 색상 선택' }))
