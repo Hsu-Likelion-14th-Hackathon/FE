@@ -27,7 +27,7 @@ const FLOOR_ORDER = ['overview', '1f', '2f', '3f']
  * 여행 가이드 (44)(44-1~3)(45)(46)(47).
  * 개요 히어로 넘김 → 1F → 2F → 3F. 상태바 미구현. VoiceDocentMock 스텁 유지.
  */
-function GuidePage() {
+export function Component() {
   const navigate = useNavigate()
   const bagHandlers = useBagHandlers()
   const [floor, setFloor] = useState('overview')
@@ -290,5 +290,3 @@ function ProductCard({ product, wide = false }) {
     </div>
   )
 }
-
-export default GuidePage

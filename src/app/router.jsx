@@ -2,11 +2,6 @@ import { createBrowserRouter } from 'react-router'
 
 import App, { HydrateFallback } from './App.jsx'
 
-const lazyDefault = (importPage) => async () => {
-  const module = await importPage()
-  return { Component: module.default ?? module.Component }
-}
-
 export function createAppRoutes() {
   return [
     {
@@ -48,31 +43,31 @@ export function createAppRoutes() {
         },
         {
           path: 'boarding-pass/intro',
-          lazy: lazyDefault(() => import('@/pages/boarding-pass/intro/IntroPage.jsx')),
+          lazy: () => import('@/pages/boarding-pass/intro/IntroPage.jsx'),
         },
         {
           path: 'boarding-pass',
-          lazy: lazyDefault(() => import('@/pages/boarding-pass/landing/LandingPage.jsx')),
+          lazy: () => import('@/pages/boarding-pass/landing/LandingPage.jsx'),
         },
         {
           path: 'boarding-pass/survey',
-          lazy: lazyDefault(() => import('@/pages/boarding-pass/survey/SurveyPage.jsx')),
+          lazy: () => import('@/pages/boarding-pass/survey/SurveyPage.jsx'),
         },
         {
           path: 'boarding-pass/complete',
-          lazy: lazyDefault(() => import('@/pages/boarding-pass/complete/CompletePage.jsx')),
+          lazy: () => import('@/pages/boarding-pass/complete/CompletePage.jsx'),
         },
         {
           path: 'boarding-pass/scan',
-          lazy: lazyDefault(() => import('@/pages/boarding-pass/scan/ScanPage.jsx')),
+          lazy: () => import('@/pages/boarding-pass/scan/ScanPage.jsx'),
         },
         {
           path: 'boarding-pass/flight',
-          lazy: lazyDefault(() => import('@/pages/boarding-pass/flight/FlightPage.jsx')),
+          lazy: () => import('@/pages/boarding-pass/flight/FlightPage.jsx'),
         },
         {
           path: 'boarding-pass/guide',
-          lazy: lazyDefault(() => import('@/pages/boarding-pass/guide/GuidePage.jsx')),
+          lazy: () => import('@/pages/boarding-pass/guide/GuidePage.jsx'),
         },
         {
           path: '*',

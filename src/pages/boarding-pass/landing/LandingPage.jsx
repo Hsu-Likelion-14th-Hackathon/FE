@@ -22,7 +22,7 @@ import styles from './LandingPage.module.scss'
  * - PASSPORT 확인: D-01 미동작
  * - 상태바·홈 인디케이터는 DOM 미구현
  */
-function LandingPage() {
+export function Component() {
   const navigate = useNavigate()
   const bagHandlers = useBagHandlers()
   const { isAuthenticated, status: sessionStatus } = useSession()
@@ -120,5 +120,3 @@ function LandingPage() {
     </main>
   )
 }
-
-export default LandingPage

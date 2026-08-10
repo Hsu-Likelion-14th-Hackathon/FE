@@ -39,7 +39,7 @@ vi.mock('@/shared/api/cartApi.js', () => ({
   getCart: vi.fn(async () => []),
 }))
 
-import ScanPage from './ScanPage.jsx'
+import { Component as ScanPage } from './ScanPage.jsx'
 
 describe('ScanPage', () => {
   beforeEach(() => {

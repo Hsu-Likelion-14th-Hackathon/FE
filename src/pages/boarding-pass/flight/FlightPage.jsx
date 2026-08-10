@@ -31,7 +31,7 @@ import styles from './FlightPage.module.scss'
  * 비행 종료 = D-02 DeferredButton. 여행 가이드 → /boarding-pass/guide.
  * 음성 도슨트 = M-01 mock (재생/정지 토글만).
  */
-function FlightPage() {
+export function Component() {
   const navigate = useNavigate()
   const bagHandlers = useBagHandlers()
   const [pass, setPass] = useState(null)
@@ -224,5 +224,3 @@ function formatMapDate(pass) {
   }
   return '25 AUG 2026'
 }
-
-export default FlightPage

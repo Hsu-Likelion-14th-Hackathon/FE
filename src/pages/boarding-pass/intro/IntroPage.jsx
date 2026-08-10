@@ -13,7 +13,7 @@ import styles from './IntroPage.module.scss'
  * 패스 카드는 Figma 정적 이미지(보우·리본·카피 포함). Next만 기존 버튼 스타일 유지.
  * Next → (23) 랜딩. 상태바·홈 인디케이터는 구현하지 않는다.
  */
-function IntroPage() {
+export function Component() {
   const navigate = useNavigate()
   const bagHandlers = useBagHandlers()
 
@@ -52,5 +52,3 @@ function IntroPage() {
     </main>
   )
 }
-
-export default IntroPage

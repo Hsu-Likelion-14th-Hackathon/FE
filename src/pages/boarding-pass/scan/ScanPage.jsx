@@ -23,7 +23,7 @@ const TOAST_EXIT_MS = 320
  * 스캔 페이지 (35)~(40).
  * idle → POST scan → SUCCESS + CreditToast(버튼 상단, 3초 페이드) → 비행 이륙하기 → flight.
  */
-function ScanPage() {
+export function Component() {
   const navigate = useNavigate()
   const bagHandlers = useBagHandlers()
   const [pass, setPass] = useState(null)
@@ -201,5 +201,3 @@ function ScanPage() {
     </div>
   )
 }
-
-export default ScanPage

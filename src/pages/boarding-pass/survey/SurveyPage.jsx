@@ -15,7 +15,7 @@ import styles from './SurveyPage.module.scss'
  * 설문 Q1~Q3 (24)~(29).
  * 최종 제출 시 발급 로딩 오버레이(30)~(32) → complete 이동.
  */
-function SurveyPage() {
+export function Component() {
   const navigate = useNavigate()
   const bagHandlers = useBagHandlers()
   const [questions, setQuestions] = useState([])
@@ -162,5 +162,3 @@ function SurveyPage() {
     </main>
   )
 }
-
-export default SurveyPage

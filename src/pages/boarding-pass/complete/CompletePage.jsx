@@ -26,7 +26,7 @@ function readStoredPass() {
  * (33)(34) 보딩패스 발급 완료 — Figma 532:6102.
  * 티켓 개인정보·QR은 API 응답. 저장 CTA → 하단 토스트(3초 페이드아웃).
  */
-function CompletePage() {
+export function Component() {
   const navigate = useNavigate()
   const location = useLocation()
   const { showToast } = useToast()
@@ -110,5 +110,3 @@ function CompletePage() {
     </main>
   )
 }
-
-export default CompletePage
