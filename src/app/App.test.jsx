@@ -38,6 +38,61 @@ describe('App', () => {
     document.body.classList.remove('store-menu-open')
   })
 
+  it('renders the home scene with the original Figma raster assets', async () => {
+    renderRoute('/')
+
+    await screen.findByRole('link', { name: 'Boarding' })
+
+    const scene = document.querySelector('section')
+    const imageSources = [...scene.querySelectorAll('img')].map((image) => image.src)
+
+    expect(imageSources).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/\/hero-plane\.png$/),
+        expect.stringMatching(/\/hero-suitcase\.png$/),
+        expect.stringMatching(/\/hero-watch\.png$/),
+      ]),
+    )
+  })
+
+  it('renders the Figma brand ornaments from their exported SVG assets', async () => {
+    renderRoute('/')
+
+    await screen.findByRole('link', { name: 'Boarding' })
+
+    const ornaments = [...document.querySelectorAll('header [aria-hidden="true"] img')].map(
+      (image) => decodeURIComponent(image.src),
+    )
+
+    expect(ornaments.filter((svg) => svg.includes("d='M14 8L8 15L2 8L8 1L14 8Z'"))).toHaveLength(2)
+    expect(ornaments.filter((svg) => svg.includes("cx='2' cy='2' r='2'"))).toHaveLength(4)
+  })
+
+  it('keeps the boarding path from showing through the translucent button', async () => {
+    renderRoute('/')
+
+    const boardingLink = await screen.findByRole('link', { name: 'Boarding' })
+    const flightPath = boardingLink.previousElementSibling
+    const flightPathStyle = window.getComputedStyle(flightPath)
+
+    expect(Number.parseFloat(flightPathStyle.borderBottomWidth || '0')).toBe(0)
+  })
+
+  it('renders a highlight on the boarding-pass brand text', async () => {
+    renderRoute('/')
+
+    await screen.findByRole('link', { name: 'Boarding' })
+
+    const brandName = [...document.querySelectorAll('header span')].find(
+      (element) => element.textContent === 'MCM BOARDING PASS',
+    )
+
+    const textShadow = window.getComputedStyle(brandName).textShadow
+
+    expect(textShadow).toContain('0 1px 0 rgba(255, 255, 255, 0.1)')
+    expect(textShadow).toContain('0 -1px 0 rgba(0, 0, 0, 0.14)')
+  })
+
   it.each(routeCases)('%s 경로에서 %s 화면을 렌더링한다', async (pathname, heading) => {
     renderRoute(pathname)
 

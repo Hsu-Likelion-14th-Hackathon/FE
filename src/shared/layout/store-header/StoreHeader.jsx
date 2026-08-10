@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 
+import brandStripDiamond from '@/assets/icons/brand-strip-diamond.svg'
+import brandStripDot from '@/assets/icons/brand-strip-dot.svg'
 import {
   CartIcon,
   HeartIcon,
@@ -16,15 +18,15 @@ function BrandStrip() {
   return (
     <div className={styles.brandStrip} aria-hidden="true">
       <span className={`${styles.ornament} ${styles.ornamentLeft}`}>
-        <i className={styles.ornamentDot} />
-        <i className={styles.ornamentDot} />
-        <i className={styles.ornamentDiamond} />
+        <img className={styles.ornamentDot} src={brandStripDot} alt="" />
+        <img className={styles.ornamentDot} src={brandStripDot} alt="" />
+        <img className={styles.ornamentDiamond} src={brandStripDiamond} alt="" />
       </span>
       <span className={styles.brandName}>MCM BOARDING PASS</span>
       <span className={`${styles.ornament} ${styles.ornamentRight}`}>
-        <i className={styles.ornamentDiamond} />
-        <i className={styles.ornamentDot} />
-        <i className={styles.ornamentDot} />
+        <img className={styles.ornamentDiamond} src={brandStripDiamond} alt="" />
+        <img className={styles.ornamentDot} src={brandStripDot} alt="" />
+        <img className={styles.ornamentDot} src={brandStripDot} alt="" />
       </span>
     </div>
   )
