@@ -8,10 +8,7 @@ function LoadingRingSpinner({ className = '', placed = 'flow' }) {
   const placedClass = placed === 'center' ? styles.placedCenter : ''
 
   return (
-    <div
-      className={`${styles.spinner} ${placedClass} ${className}`.trim()}
-      aria-hidden="true"
-    >
+    <div className={`${styles.spinner} ${placedClass} ${className}`.trim()} aria-hidden="true">
       <div className={styles.ring} />
       <span className={styles.tip} />
     </div>

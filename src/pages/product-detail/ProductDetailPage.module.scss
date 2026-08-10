@@ -1,0 +1,325 @@
+.page {
+  min-height: var(--mcm-viewport-stable);
+  background: var(--mcm-color-canvas);
+}
+
+.main {
+  min-height: calc(var(--mcm-viewport-stable) - 97px - var(--mcm-safe-top));
+}
+
+.productMedia {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 390 / 320;
+  background: var(--mcm-color-product-surface);
+}
+
+.collectionLabel {
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  left: 20px;
+  color: var(--mcm-color-muted);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.wishlistButton,
+.galleryButton {
+  position: absolute;
+  z-index: 4;
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--mcm-color-ink);
+  background: transparent;
+}
+
+.wishlistButton {
+  top: -6px;
+  right: 4px;
+}
+
+.wishlistButton:focus-visible,
+.galleryButton:focus-visible,
+.variantButton:focus-visible {
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: -8px;
+}
+
+.heartIcon {
+  width: 12px;
+  height: 12px;
+}
+
+.wishlisted {
+  color: var(--mcm-color-brand-brown);
+}
+
+.galleryButton {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.galleryButton svg {
+  width: 14px;
+  height: 14px;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 8%));
+}
+
+.galleryButton:disabled {
+  cursor: default;
+}
+
+.previousButton {
+  left: -2px;
+}
+
+.nextButton {
+  right: -2px;
+}
+
+.pagination {
+  position: absolute;
+  z-index: 3;
+  bottom: 8px;
+  left: 50%;
+  display: flex;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+.dot,
+.activeDot {
+  display: block;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+}
+
+.dot {
+  background: var(--mcm-color-border);
+}
+
+.activeDot {
+  background: var(--mcm-color-ink);
+}
+
+.productInformation {
+  position: relative;
+  height: 87px;
+  padding: 10px 20px 0;
+  background: var(--mcm-color-canvas);
+  line-height: 18px;
+}
+
+.productInformation h2,
+.productInformation p {
+  margin: 0;
+}
+
+.productInformation h2 {
+  overflow: hidden;
+  color: var(--mcm-color-ink);
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.price {
+  color: var(--mcm-color-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.stock {
+  position: absolute;
+  bottom: 6px;
+  left: 20px;
+  color: var(--mcm-color-muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.actions {
+  padding: 0 20px calc(44px + var(--mcm-safe-bottom));
+}
+
+.tryOnLink {
+  display: inline-flex;
+  height: 34px;
+  padding-inline: 25px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--mcm-color-brand-brown);
+  border-radius: 8px;
+  color: var(--mcm-color-brand-brown);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  text-decoration: none;
+}
+
+.tryOnLink:focus-visible,
+.addToBagButton:focus-visible {
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: 3px;
+}
+
+.variantSummary {
+  display: flex;
+  margin: 30px 0 0;
+  align-items: center;
+  gap: 10px;
+  color: var(--mcm-color-ink);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.variantSummary strong {
+  font-weight: 600;
+}
+
+.variantList {
+  display: flex;
+  margin-top: 10px;
+  align-items: center;
+  gap: 6px;
+}
+
+.variantButton {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  flex: none;
+  padding: 0;
+  overflow: hidden;
+  border: 0.5px solid transparent;
+  border-radius: 8px;
+  background: var(--mcm-color-product-surface);
+}
+
+.selectedVariant {
+  border-color: var(--mcm-color-ink);
+}
+
+.addToBagButton {
+  width: 100%;
+  height: 50px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 8px;
+  margin-top: 20px;
+  color: var(--mcm-color-canvas);
+  background: var(--mcm-color-ink);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+.added {
+  color: var(--mcm-color-ink);
+  background: var(--mcm-color-beige);
+}
+
+.notFound {
+  display: grid;
+  min-height: calc(var(--mcm-viewport-stable) - 97px - var(--mcm-safe-top));
+  padding: 48px 20px;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.notFound h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.notFound p {
+  margin: 12px 0 24px;
+  color: var(--mcm-color-muted);
+  font-size: 14px;
+}
+
+.notFound a {
+  color: var(--mcm-color-brand-brown);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@media (max-width: 349px) {
+  .productInformation,
+  .actions {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .collectionLabel,
+  .stock {
+    left: 16px;
+  }
+
+  .variantSummary {
+    gap: 8px;
+    font-size: 9px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .main > section {
+    display: grid;
+    width: min(calc(100% - (var(--mcm-page-gutter, 32px) * 2)), 1000px);
+    margin-inline: auto;
+    grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
+    grid-template-rows: auto 1fr;
+    column-gap: clamp(20px, 3vw, 36px);
+  }
+
+  .productMedia {
+    grid-column: 1;
+    grid-row: 1 / 3;
+  }
+
+  .productInformation {
+    height: auto;
+    min-height: 87px;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .actions {
+    min-width: 0;
+    padding-bottom: calc(44px + var(--mcm-safe-bottom));
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .variantList {
+    flex-wrap: wrap;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .wishlistButton:hover,
+  .tryOnLink:hover {
+    color: var(--mcm-color-brand-brown);
+  }
+
+  .variantButton:hover {
+    border-color: var(--mcm-color-muted);
+  }
+}

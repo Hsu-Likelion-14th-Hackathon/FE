@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import CreditToast from '@/features/boarding-pass/credit-toast/CreditToast.jsx'
@@ -139,12 +139,7 @@ function ScanPage() {
 
         <div className={styles.status}>
           {isSuccess ? (
-            <img
-              src={checkCircleIcon}
-              alt=""
-              aria-hidden="true"
-              className={styles.statusIcon}
-            />
+            <img src={checkCircleIcon} alt="" aria-hidden="true" className={styles.statusIcon} />
           ) : (
             <div className={styles.scanTarget} aria-hidden="true">
               <img src={scanFrameIcon} alt="" className={styles.scanFrame} />

@@ -38,6 +38,19 @@ body {
   line-height: 1.5;
 }
 
+@media (min-width: 1200px) {
+  html,
+  body {
+    background: #eeeae7;
+  }
+}
+
+html.store-menu-open,
+body.store-menu-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 button,
 input,
 select,

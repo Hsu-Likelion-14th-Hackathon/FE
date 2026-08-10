@@ -1,0 +1,314 @@
+.introPage {
+  min-height: var(--mcm-viewport-stable);
+  background: var(--mcm-color-canvas);
+}
+
+.introHero {
+  position: relative;
+  min-height: calc(var(--mcm-viewport-stable) - 97px - var(--mcm-safe-top));
+  overflow: hidden;
+  color: #fafafa;
+  background: var(--mcm-gradient-hero);
+  isolation: isolate;
+}
+
+.introHero::after {
+  position: absolute;
+  z-index: 5;
+  top: 521px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(to bottom, transparent, rgb(25 25 25 / 60%));
+  content: '';
+  pointer-events: none;
+}
+
+.heroGlowTop,
+.heroGlowLeft,
+.glowFrame,
+.introSuitcase,
+.introPlane,
+.introWatch {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+}
+
+.heroGlowTop {
+  z-index: 0;
+  top: -219px;
+  left: 41.54%;
+  width: min(91.29vw, 356px);
+  height: min(81.37vw, 317.34px);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgb(255 219 160 / 25%) 0%, transparent 70%);
+  filter: blur(28px);
+}
+
+.heroGlowLeft {
+  z-index: 0;
+  top: 148px;
+  left: -140px;
+  width: min(67.4vw, 262.85px);
+  height: min(58.51vw, 228.17px);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgb(255 247 213 / 18%) 0%, transparent 72%);
+  filter: blur(24px);
+}
+
+.glowFrame {
+  z-index: 0;
+  top: -272px;
+  left: -93px;
+  width: min(147.6vw, 575.65px);
+  height: min(312.25vw, 1217.78px);
+}
+
+.glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(12.12vw, 47.26px);
+  height: min(336.29vw, 1311.55px);
+  transform: translate(-50%, -50%) rotate(23.95deg);
+  background: linear-gradient(rgb(255 219 160 / 20%), rgb(211 134 53 / 20%));
+  filter: blur(40px);
+}
+
+.introSuitcase img,
+.introPlane img,
+.introWatch img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  max-width: none;
+  object-fit: fill;
+}
+
+.introSuitcase {
+  z-index: 1;
+  top: -34.53px;
+  left: 36.26%;
+  width: min(57.57vw, 224.51px);
+  height: min(67.76vw, 264.25px);
+}
+
+.introSuitcase img {
+  width: min(33.87vw, 132.11px);
+  height: min(58.72vw, 229.01px);
+  transform: translate(-50%, -50%) rotate(-28.14deg);
+  opacity: 0.9;
+}
+
+.introPlane {
+  z-index: 2;
+  top: 161.56px;
+  left: 19.94%;
+  width: min(100.42vw, 391.66px);
+  height: min(83.54vw, 325.81px);
+}
+
+.introPlane img {
+  width: min(91.54vw, 357px);
+  height: min(71.79vw, 280px);
+  transform: translate(-50%, -50%) rotate(-7.79deg);
+  filter: blur(5px);
+}
+
+.introWatch {
+  z-index: 1;
+  top: 492px;
+  left: 5.38%;
+  width: min(46.79vw, 182.47px);
+  height: min(45.07vw, 175.79px);
+}
+
+.introWatch img {
+  width: min(36.31vw, 141.6px);
+  height: min(29.8vw, 116.23px);
+  transform: translate(-50%, -50%) rotate(34.27deg);
+  opacity: 0.7;
+  filter: blur(5px);
+}
+
+.introCopy {
+  position: absolute;
+  z-index: 4;
+  top: 257px;
+  left: 30px;
+}
+
+.planeIconLarge {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 10px;
+  margin-left: 3px;
+}
+
+.introCopy h1 {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--mcm-font-brand);
+  font-size: clamp(42px, 12.82vw, 50px);
+  font-weight: 400;
+  line-height: 0.8;
+}
+
+.introFlightPathTop,
+.introFlightPathBottom {
+  position: absolute;
+  z-index: 3;
+  left: 32px;
+  border-left: 1px solid #fff7d5;
+}
+
+.introFlightPathTop {
+  top: 0;
+  height: 240px;
+}
+
+.introFlightPathTop::after {
+  position: absolute;
+  bottom: -1px;
+  left: -4px;
+  width: 7px;
+  height: 9px;
+  background: #fff7d5;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  content: '';
+}
+
+.introFlightPathBottom {
+  top: 462px;
+  width: calc(100% - 32px);
+  height: 33px;
+  border-bottom: 1px solid #fff7d5;
+}
+
+.boardingButton {
+  position: absolute;
+  z-index: 6;
+  top: 477.31px;
+  right: 30px;
+  display: inline-flex;
+  width: 150px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 100px;
+  color: #fafafa;
+  background: rgb(255 247 213 / 20%);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.boardingArrow {
+  display: grid;
+  width: 12px;
+  height: 14px;
+  flex: none;
+  place-items: center;
+}
+
+.boardingArrow img {
+  width: 10.9px;
+  max-width: none;
+  height: 9.625px;
+  transform: rotate(90deg);
+}
+
+.boardingButton:hover {
+  background: rgb(255 247 213 / 30%);
+}
+
+.boardingButton:active {
+  transform: scale(0.98);
+}
+
+.boardingButton:focus-visible {
+  outline: 2px solid #fafafa;
+  outline-offset: 3px;
+}
+
+@media (max-width: 349px) {
+  .introCopy {
+    left: 24px;
+  }
+
+  .introFlightPathTop,
+  .introFlightPathBottom {
+    left: 25px;
+  }
+
+  .introFlightPathBottom {
+    width: calc(100% - 25px);
+  }
+
+  .boardingButton {
+    right: 20px;
+    width: 136px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .introHero {
+    --mcm-tablet-scene-start: calc(50% - 195px);
+  }
+
+  .heroGlowTop {
+    left: calc(var(--mcm-tablet-scene-start) + 162px);
+  }
+
+  .heroGlowLeft {
+    left: calc(var(--mcm-tablet-scene-start) - 140px);
+  }
+
+  .glowFrame {
+    left: calc(var(--mcm-tablet-scene-start) - 93px);
+  }
+
+  .introSuitcase {
+    left: calc(var(--mcm-tablet-scene-start) + 141.4px);
+  }
+
+  .introPlane {
+    left: calc(var(--mcm-tablet-scene-start) + 77.8px);
+  }
+
+  .introWatch {
+    left: calc(var(--mcm-tablet-scene-start) + 21px);
+  }
+
+  .introCopy {
+    left: calc(var(--mcm-tablet-scene-start) + 30px);
+  }
+
+  .introFlightPathTop,
+  .introFlightPathBottom {
+    left: calc(var(--mcm-tablet-scene-start) + 32px);
+  }
+
+  .introFlightPathBottom {
+    width: 358px;
+  }
+
+  .boardingButton {
+    right: calc(50% - 165px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boardingButton {
+    transition: none;
+  }
+}

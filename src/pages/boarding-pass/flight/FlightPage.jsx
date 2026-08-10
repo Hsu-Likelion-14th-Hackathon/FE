@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import { useBagHandlers } from '@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx'
@@ -113,7 +113,11 @@ function FlightPage() {
 
             <div className={styles.bezel}>
               <div className={styles.screen}>
-                <img src={mapImg} alt="서울에서 뮌헨으로 가는 항로 지도" className={styles.mapImg} />
+                <img
+                  src={mapImg}
+                  alt="서울에서 뮌헨으로 가는 항로 지도"
+                  className={styles.mapImg}
+                />
                 <div className={styles.overlay}>
                   <p className={styles.date}>{mapDate}</p>
                   <div className={styles.routeRow}>

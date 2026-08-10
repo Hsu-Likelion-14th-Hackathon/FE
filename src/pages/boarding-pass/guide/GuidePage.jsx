@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { useBagHandlers } from '@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx'
 import {
@@ -150,22 +150,12 @@ function OverviewView({ heroIndex, onSelectFloor }) {
           </p>
         </div>
         <p className={styles.introQuote}>“ {content.quote} ”</p>
-        <img
-          src={guideDecoTopImg}
-          alt=""
-          aria-hidden="true"
-          className={styles.planeDecoTop}
-        />
+        <img src={guideDecoTopImg} alt="" aria-hidden="true" className={styles.planeDecoTop} />
       </div>
 
       <div className={styles.overviewStage}>
         <img src={hero.src} alt={hero.alt} className={styles.overviewMain} />
-        <img
-          src={overviewFigureImg}
-          alt=""
-          aria-hidden="true"
-          className={styles.overviewFigure}
-        />
+        <img src={overviewFigureImg} alt="" aria-hidden="true" className={styles.overviewFigure} />
 
         <div className={styles.floorChips}>
           {content.floors.map((item) => (

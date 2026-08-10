@@ -1,0 +1,366 @@
+.page {
+  width: 100%;
+  min-height: var(--mcm-viewport-stable);
+  background: var(--mcm-color-canvas);
+}
+
+.stage {
+  position: relative;
+  min-height: max(703px, calc(var(--mcm-viewport-stable) - 97px - var(--mcm-safe-top)));
+  overflow: hidden;
+  color: var(--mcm-color-canvas);
+  background:
+    radial-gradient(ellipse 180px 150px at -18% 47%, rgb(255 219 160 / 16%), transparent 72%),
+    radial-gradient(ellipse 190px 250px at 112% 76%, rgb(255 219 160 / 14%), transparent 74%),
+    radial-gradient(ellipse 220px 180px at 84% -8%, rgb(255 219 160 / 12%), transparent 76%),
+    var(--mcm-gradient-hero);
+}
+
+.stage::before,
+.stage::after {
+  position: absolute;
+  z-index: 0;
+  content: '';
+  pointer-events: none;
+}
+
+.stage::before {
+  inset: 0;
+  background: rgb(0 0 0 / 30%);
+}
+
+.stage::after {
+  top: -235px;
+  bottom: -280px;
+  left: 42%;
+  width: 48px;
+  background: linear-gradient(rgb(255 219 160 / 18%), rgb(211 134 53 / 14%));
+  filter: blur(40px);
+  transform: rotate(24deg);
+}
+
+.loadingStage::before {
+  background: rgb(0 0 0 / 60%);
+}
+
+.closeButton {
+  position: absolute;
+  z-index: 3;
+  top: 5px;
+  left: 5px;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.closeButton img {
+  width: 14px;
+  height: 14px;
+}
+
+.credit {
+  position: absolute;
+  z-index: 2;
+  top: 94px;
+  left: 50%;
+  display: flex;
+  height: 16px;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.credit img {
+  width: 10px;
+  height: 12px;
+}
+
+.uploadContent {
+  position: absolute;
+  z-index: 2;
+  top: 130px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  transform: translateX(-50%);
+}
+
+.previewCard {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  overflow: hidden;
+  flex: none;
+  border: 0.5px solid var(--mcm-color-canvas);
+  border-radius: 8px;
+  background: rgb(250 250 250 / 20%);
+  box-shadow: 2px 2px 14px rgb(0 0 0 / 20%);
+}
+
+.cardPin {
+  position: absolute;
+  z-index: 2;
+  top: 11px;
+  left: 11px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--mcm-color-hero-end) 72%, transparent);
+}
+
+.productCrop {
+  position: absolute;
+  top: 108px;
+  left: 50%;
+  width: 140px;
+  height: 92px;
+  overflow: hidden;
+  transform: translateX(-50%);
+}
+
+.productCrop img {
+  position: absolute;
+  top: -242.19%;
+  left: -61.45%;
+  width: 226.76%;
+  max-width: none;
+  height: 375.69%;
+}
+
+.uploadMessage,
+.loadingMessage {
+  display: flex;
+  margin: 0;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.uploadMessage {
+  margin-top: 20px;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadButton {
+  display: flex;
+  width: 124px;
+  height: 34px;
+  margin-top: 24px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 0;
+  border-radius: 100px;
+  color: var(--mcm-color-canvas);
+  background: rgb(255 247 213 / 20%);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.uploadButton img {
+  width: 12px;
+  height: 11px;
+}
+
+.fittingButton {
+  position: absolute;
+  z-index: 2;
+  bottom: 74px;
+  left: 50%;
+  display: flex;
+  width: calc(100% - 40px);
+  max-width: 350px;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--mcm-color-canvas);
+  background: var(--mcm-color-brand-brown);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  transform: translateX(-50%);
+}
+
+.fittingButton img {
+  width: 14px;
+  height: 14px;
+}
+
+.loadingLabel {
+  position: absolute;
+  z-index: 2;
+  top: 94px;
+  left: 50%;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.spinner {
+  position: absolute;
+  z-index: 2;
+  top: 212px;
+  left: 50%;
+  width: 80px;
+  height: 80px;
+  animation: fitting-spin 900ms linear infinite;
+  transform: translateX(-50%);
+  transform-origin: center;
+}
+
+.loadingMessage {
+  position: absolute;
+  z-index: 2;
+  top: 389px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.loadingMessage strong {
+  color: var(--mcm-color-cream);
+  font: inherit;
+}
+
+.progressGroup {
+  position: absolute;
+  z-index: 2;
+  bottom: 74px;
+  left: 50%;
+  display: flex;
+  width: min(270px, calc(100% - 80px));
+  flex-direction: column;
+  gap: 13px;
+  transform: translateX(-50%);
+}
+
+.progressTrack {
+  width: 100%;
+  height: 21px;
+  overflow: hidden;
+  border-radius: 100px;
+  background: var(--mcm-color-canvas);
+}
+
+.progressValue {
+  display: block;
+  width: var(--fitting-progress);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--mcm-color-brand-brown);
+  transition: width 80ms linear;
+}
+
+.progressLabels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.closeButton:focus-visible,
+.uploadButton:focus-visible,
+.fittingButton:focus-visible {
+  outline: 2px solid var(--mcm-color-canvas);
+  outline-offset: 3px;
+}
+
+@keyframes fitting-spin {
+  from {
+    transform: translateX(-50%) rotate(0deg);
+  }
+
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .credit,
+  .loadingLabel {
+    top: calc(50% - 257.5px);
+  }
+
+  .uploadContent {
+    top: calc(50% - 221.5px);
+  }
+
+  .spinner {
+    top: calc(50% - 139.5px);
+  }
+
+  .loadingMessage {
+    top: calc(50% + 37.5px);
+  }
+
+  .fittingButton,
+  .progressGroup {
+    bottom: calc(50% - 277.5px);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .closeButton:hover,
+  .uploadButton:hover {
+    background-color: rgb(255 255 255 / 28%);
+  }
+
+  .fittingButton:hover {
+    background-color: color-mix(in srgb, var(--mcm-color-brand-brown) 88%, var(--mcm-color-ink));
+  }
+}
+
+@media (max-width: 349px) {
+  .uploadContent {
+    top: 112px;
+  }
+
+  .previewCard {
+    width: 220px;
+    height: 220px;
+  }
+
+  .productCrop {
+    top: 98px;
+  }
+
+  .loadingMessage {
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+
+  .progressValue {
+    transition: none;
+  }
+}

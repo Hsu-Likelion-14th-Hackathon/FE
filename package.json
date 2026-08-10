@@ -19,10 +19,11 @@
     "verify": "npm run lint && npm run format:check && npm run test:run && npm run build"
   },
   "dependencies": {
+    "country-flag-icons": "^1.6.20",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-qr-code": "^2.2.0",
-    "react-router-dom": "^7.18.2"
+    "react-router": "7.18.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

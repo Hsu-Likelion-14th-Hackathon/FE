@@ -29,7 +29,14 @@ function IssueLoadingOverlay() {
     <div className={styles.overlay} role="status" aria-live="polite" aria-label="보딩패스 발급 중">
       <div className={styles.loadingRow}>
         <p className={styles.loadingLabel}>Loading</p>
-        <img className={styles.dots} src={loadingDots} alt="" width={14} height={14} aria-hidden="true" />
+        <img
+          className={styles.dots}
+          src={loadingDots}
+          alt=""
+          width={14}
+          height={14}
+          aria-hidden="true"
+        />
       </div>
 
       <LoadingRingSpinner placed="center" />

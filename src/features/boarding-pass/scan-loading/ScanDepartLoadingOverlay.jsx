@@ -33,12 +33,7 @@ function ScanDepartLoadingOverlay({ onComplete, durationMs = 2200 }) {
   }, [durationMs, onComplete])
 
   return (
-    <div
-      className={styles.overlay}
-      role="status"
-      aria-live="polite"
-      aria-label="비행 동선 탐색 중"
-    >
+    <div className={styles.overlay} role="status" aria-live="polite" aria-label="비행 동선 탐색 중">
       <div className={styles.loadingLabel}>
         <p className={styles.loadingText}>Loading</p>
         <span className={styles.dots} aria-hidden="true">

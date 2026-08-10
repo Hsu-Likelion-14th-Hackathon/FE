@@ -1,0 +1,186 @@
+.header {
+  position: relative;
+  z-index: 20;
+  width: 100%;
+  color: var(--mcm-color-ink);
+  background: var(--mcm-color-canvas);
+  padding-top: var(--mcm-safe-top);
+}
+
+.brandStrip {
+  position: relative;
+  display: flex;
+  height: 43px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: rgb(226 197 176 / 40%);
+  background: var(--mcm-gradient-header);
+  white-space: nowrap;
+}
+
+.brandName {
+  position: absolute;
+  left: 50%;
+  font-family: var(--mcm-font-brand);
+  font-size: 22px;
+  line-height: 40px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.ornament {
+  position: absolute;
+  top: 14px;
+  display: flex;
+  height: 16px;
+  align-items: center;
+  gap: 10px;
+}
+
+.ornamentLeft {
+  left: 16px;
+}
+
+.ornamentRight {
+  right: 17px;
+}
+
+.ornamentDot {
+  width: 4px;
+  height: 4px;
+  flex: none;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+.ornamentDiamond {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.ornamentDiamond::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 11.3px;
+  height: 11.3px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: currentcolor;
+  content: '';
+}
+
+.navigation {
+  height: 54px;
+  background: var(--mcm-color-canvas);
+}
+
+.navigationInner {
+  position: relative;
+  display: flex;
+  width: min(calc(100% - (var(--mcm-page-gutter) * 2)), var(--mcm-content-max));
+  height: 24px;
+  margin-inline: auto;
+  padding-top: 12px;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: content-box;
+}
+
+.sideGroup {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.icon,
+.logo {
+  display: block;
+  flex: none;
+  color: var(--mcm-color-ink);
+}
+
+.icon {
+  width: 22px;
+  height: 24px;
+}
+
+.heartIcon {
+  width: 24px;
+}
+
+.logo {
+  width: 61px;
+  height: 24px;
+}
+
+.logoLink,
+.iconLink {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.logoLink {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.iconLink {
+  margin: -11px;
+}
+
+.iconButton {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+}
+
+.logoLink:focus-visible,
+.iconLink:focus-visible {
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .brandStrip {
+    padding-inline: var(--mcm-page-gutter);
+  }
+
+  .sideGroup {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 349px) {
+  .brandName {
+    font-size: 19px;
+  }
+
+  .ornamentLeft {
+    left: 12px;
+  }
+
+  .ornamentRight {
+    right: 12px;
+  }
+
+  .ornament {
+    gap: 7px;
+  }
+
+  .navigationInner {
+    width: calc(100% - 32px);
+  }
+
+  .sideGroup {
+    gap: 14px;
+  }
+}

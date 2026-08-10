@@ -1,9 +1,4 @@
 :root {
-  // 디자인 캔버스 390×844 · 루트 16px = 1rem (constraints §레이아웃·단위)
-  --mcm-design-width: 24.375rem; // 390
-  --mcm-shell-min: 20rem; // 320
-  --mcm-shell-max: 26.875rem; // 430
-
   // Figma source: Page 1 / (1)메인페이지 (24:360)
   --mcm-color-canvas: #fafafa;
   --mcm-color-surface: #fefffb;
@@ -12,7 +7,12 @@
   --mcm-color-brand-brown: #c07346;
   --mcm-color-product-surface: #f2f2f2;
   --mcm-color-kakao: #ffe812;
-  /* Figma 472:4780 — 밴드 배경 */
+  --mcm-color-border: #bfbfbf;
+  --mcm-color-cream: #fff7d5;
+  --mcm-color-pink: #f4bfc5;
+  --mcm-color-burgundy: #7c3c44;
+  --mcm-color-beige: #e0ceba;
+  --mcm-color-olive: #7e8b6a;
   --mcm-color-header-start: #200d07;
   --mcm-color-header-end: #38180d;
   /* 타이틀 폴백 · #E2C5B0 */
@@ -50,6 +50,18 @@
   --mcm-safe-left: env(safe-area-inset-left, 0px);
   --mcm-viewport-stable: 100vh;
   --mcm-viewport-dynamic: 100vh;
+
+  // Responsive application shell. The Figma source frames are 390 x 844.
+  --mcm-design-width: 390px;
+  --mcm-design-height: 844px;
+  --mcm-header-height: 97px;
+  --mcm-shell-inline-size: min(100vw, 430px);
+  --mcm-shell-min: 20rem; // 320
+  --mcm-shell-max: 26.875rem; // 430
+  --mcm-page-gutter: 20px;
+  --mcm-content-max: 720px;
+  --mcm-menu-duration: 280ms;
+  --mcm-menu-easing: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @supports (height: 100svh) {
@@ -61,5 +73,18 @@
 @supports (height: 100dvh) {
   :root {
     --mcm-viewport-dynamic: 100dvh;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  :root {
+    --mcm-shell-inline-size: 100vw;
+    --mcm-page-gutter: clamp(24px, 4vw, 48px);
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --mcm-shell-inline-size: var(--mcm-design-width);
   }
 }

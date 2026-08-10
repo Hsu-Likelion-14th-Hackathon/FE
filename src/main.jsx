@@ -1,12 +1,17 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { RouterProvider } from 'react-router'
 
-import App from '@/app/App.jsx'
+import { router } from '@/app/router.jsx'
 import '@/styles/tailwind.css'
 import '@/styles/globals.scss'
 
-// 백엔드 없이 동작하는 데모이므로 MSW를 항상 활성화한다.
 async function enableMocking() {
+  if (!import.meta.env.DEV) {
+    return
+  }
+
+  // onUnhandledRequest: bypass — 보딩패스 외 요청은 그대로 통과
   const { worker } = await import('@/mocks/browser.js')
   await worker.start({ onUnhandledRequest: 'bypass' })
 }
@@ -14,7 +19,7 @@ async function enableMocking() {
 enableMocking().then(() => {
   createRoot(document.getElementById('root')).render(
     <StrictMode>
-      <App />
+      <RouterProvider router={router} />
     </StrictMode>,
   )
 })
