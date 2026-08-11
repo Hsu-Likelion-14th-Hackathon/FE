@@ -20,6 +20,7 @@ describe('application startup', () => {
   })
 
   afterEach(() => {
+    vi.restoreAllMocks()
     vi.unstubAllEnvs()
   })
 
@@ -34,10 +35,28 @@ describe('application startup', () => {
 
   test('renders when starting MSW fails', async () => {
     vi.stubEnv('VITE_ENABLE_MSW', 'true')
-    start.mockRejectedValueOnce(new Error('worker failed'))
+    const error = new Error('worker failed')
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    start.mockRejectedValueOnce(error)
 
     await import('./main.jsx')
 
     await vi.waitFor(() => expect(render).toHaveBeenCalledOnce())
+    expect(start).toHaveBeenCalledOnce()
+    expect(warn).toHaveBeenCalledWith('MSW 시작 실패, 실제 API를 사용합니다.', error)
+  })
+
+  test.each([
+    ['development is disabled', false, 'true'],
+    ['the MSW flag is missing', true, undefined],
+    ['the MSW flag differs in case', true, 'TRUE'],
+  ])('does not start MSW when %s', async (_, dev, mswEnabled) => {
+    vi.stubEnv('DEV', dev)
+    vi.stubEnv('VITE_ENABLE_MSW', mswEnabled)
+
+    await import('./main.jsx')
+
+    await vi.waitFor(() => expect(render).toHaveBeenCalledOnce())
+    expect(start).not.toHaveBeenCalled()
   })
 })

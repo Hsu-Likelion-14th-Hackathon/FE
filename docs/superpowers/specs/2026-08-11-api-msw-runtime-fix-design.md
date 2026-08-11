@@ -29,4 +29,3 @@ Vercel 배포에서는 백엔드 API 호스트로 요청하고, 로컬 개발에
 - MSW 비활성화 시 worker를 시작하지 않는지 검증한다.
 - worker 시작 실패 시에도 React render가 호출되는지 검증한다.
 - `npm run verify`로 lint, format, 전체 테스트, production build를 확인한다.
-

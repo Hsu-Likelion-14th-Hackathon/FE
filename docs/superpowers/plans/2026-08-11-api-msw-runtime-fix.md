@@ -127,4 +127,3 @@ Expected: lint, format check, 전체 테스트, production build가 모두 exit 
 git add src/main.jsx src/main.test.jsx
 git commit -m "fix: MSW 실패 시 앱 렌더링 복구"
 ```
-
