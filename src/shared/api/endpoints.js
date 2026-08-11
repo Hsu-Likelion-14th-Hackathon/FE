@@ -1,14 +1,17 @@
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
+const apiUrl = (path) => `${API_BASE_URL}${path}`
+
 export const API = {
-  session: '/api/session',
-  wishlist: '/api/wishlist',
-  cart: '/api/cart',
+  session: apiUrl('/api/session'),
+  wishlist: apiUrl('/api/wishlist'),
+  cart: apiUrl('/api/cart'),
   survey: {
-    questions: '/api/surveys/questions',
+    questions: apiUrl('/api/surveys/questions'),
   },
   boardingPass: {
-    issue: '/api/boarding-passes',
-    current: '/api/boarding-passes/latest',
-    latest: '/api/boarding-passes/latest',
-    scan: '/api/boarding-pass/scan',
+    issue: apiUrl('/api/boarding-passes'),
+    current: apiUrl('/api/boarding-passes/latest'),
+    latest: apiUrl('/api/boarding-passes/latest'),
+    scan: apiUrl('/api/boarding-pass/scan'),
   },
 }
