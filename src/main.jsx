@@ -7,7 +7,7 @@ import '@/styles/tailwind.css'
 import '@/styles/globals.scss'
 
 async function enableMocking() {
-  if (!import.meta.env.DEV) {
+  if (!import.meta.env.DEV || import.meta.env.VITE_ENABLE_MSW !== 'true') {
     return
   }
 
@@ -16,10 +16,14 @@ async function enableMocking() {
   await worker.start({ onUnhandledRequest: 'bypass' })
 }
 
-enableMocking().then(() => {
+function renderApp() {
   createRoot(document.getElementById('root')).render(
     <StrictMode>
       <RouterProvider router={router} />
     </StrictMode>,
   )
-})
+}
+
+enableMocking()
+  .catch((error) => console.warn('MSW 시작 실패, 실제 API를 사용합니다.', error))
+  .then(renderApp)
