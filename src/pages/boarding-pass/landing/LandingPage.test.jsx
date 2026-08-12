@@ -1,10 +1,11 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import AppProviders from '@/app/providers.jsx'
 
 const mockSession = vi.hoisted(() => ({ isAuthenticated: false, status: 'success' }))
+const activeRouters = []
 
 vi.mock('@/entities/session/useSession.js', () => ({
   useSession: () => mockSession,
@@ -32,10 +33,17 @@ function renderLanding() {
     </AppProviders>,
   )
 
+  activeRouters.push(router)
   return router
 }
 
 describe('LandingPage', () => {
+  afterEach(() => {
+    activeRouters.splice(0).forEach((router) => router.dispose())
+    mockSession.isAuthenticated = false
+    mockSession.status = 'success'
+  })
+
   it('routes authenticated users to Passport from the Passport button', async () => {
     mockSession.isAuthenticated = true
     const router = renderLanding()
@@ -52,5 +60,30 @@ describe('LandingPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'PASSPORT \uD655\uC778' }))
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/login'))
+  })
+
+  it('does not navigate from the Passport button while authentication is loading', async () => {
+    mockSession.isAuthenticated = false
+    mockSession.status = 'loading'
+    const router = renderLanding()
+
+    fireEvent.click(await screen.findByRole('button', { name: 'PASSPORT \uD655\uC778' }))
+
+    expect(router.state.location.pathname).toBe('/boarding-pass')
+  })
+
+  it('returns to landing after one back from a rapid double-click Passport navigation', async () => {
+    mockSession.isAuthenticated = true
+    mockSession.status = 'success'
+    const router = renderLanding()
+    const passportButton = await screen.findByRole('button', { name: 'PASSPORT \uD655\uC778' })
+
+    fireEvent.click(passportButton)
+    fireEvent.click(passportButton)
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/passport'))
+    await router.navigate(-1)
+
+    expect(router.state.location.pathname).toBe('/boarding-pass')
   })
 })
