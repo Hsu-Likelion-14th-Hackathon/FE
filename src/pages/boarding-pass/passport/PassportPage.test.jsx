@@ -146,12 +146,13 @@ describe('PassportPage', () => {
     expect(router.state.location.pathname).toBe('/boarding-pass')
   })
 
-  it('키보드로 다음 단계로 이동하고 닫기 버튼에 44px 터치 영역을 준다', () => {
+  it('네이티브 키보드 클릭으로 한 단계만 이동하고 닫기 버튼에 44px 터치 영역을 준다', () => {
     renderPassport()
 
     const next = screen.getByRole('button', { name: '다음 단계' })
     next.focus()
     fireEvent.keyDown(next, { key: 'Enter' })
+    fireEvent.click(next)
     expect(screen.getByRole('progressbar', { name: '여권 진행률' })).toHaveAttribute(
       'aria-valuenow',
       '50',

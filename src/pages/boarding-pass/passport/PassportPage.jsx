@@ -50,13 +50,6 @@ export function Component() {
     setSheet(null)
     requestAnimationFrame(() => sheetTriggerRef.current?.focus())
   }
-  const handleStepKeyDown = (event, delta) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      moveStep(delta)
-    }
-  }
-
   useEffect(() => {
     if (!sheet) return undefined
     const dialog = dialogRef.current
@@ -110,7 +103,6 @@ export function Component() {
               aria-label="이전 단계"
               disabled={step === 0}
               onClick={() => moveStep(-1)}
-              onKeyDown={(event) => handleStepKeyDown(event, -1)}
             >
               <img src={navPrev} alt="" />
             </button>
@@ -130,7 +122,6 @@ export function Component() {
               aria-label="다음 단계"
               disabled={step === 3}
               onClick={() => moveStep(1)}
-              onKeyDown={(event) => handleStepKeyDown(event, 1)}
             >
               <img src={navNext} alt="" />
             </button>

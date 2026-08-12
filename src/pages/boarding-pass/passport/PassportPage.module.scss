@@ -129,12 +129,6 @@
   max-width: none;
   height: 122.36%;
 }
-.coverWordmark {
-  position: absolute;
-  top: 15.4%;
-  left: 11.9%;
-  width: 75.8%;
-}
 .coverMcm,
 .coverStar,
 .coverPassportWord {
@@ -390,7 +384,6 @@
 .journeys time {
   font-size: 0.625rem;
 }
-.products,
 .history {
   margin-top: 0.5rem;
   padding: 0.75rem;
@@ -455,13 +448,6 @@
   background: #894a26;
   box-shadow: 0 -0.625rem 1.875rem rgba(0, 0, 0, 0.2);
 }
-.sheetEyebrow,
-.detailDate {
-  margin: 0;
-  color: #f3c497;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-}
 .sheetTitle {
   margin: 0;
   color: #fff7d5;
@@ -524,17 +510,6 @@ button.historyCard {
   color: #f3c497;
   font-size: 0.75rem;
 }
-.ticketButton {
-  width: 100%;
-  margin-top: 1.5rem;
-  padding: 0.875rem;
-  border: 1px solid #fff7d5;
-  border-radius: 6.25rem;
-  background: #fff7d5;
-  color: #41210b;
-  font-weight: 700;
-}
-
 .detailCopy {
   color: #fff7d5;
   font-size: 0.6875rem;
