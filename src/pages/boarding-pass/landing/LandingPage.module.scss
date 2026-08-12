@@ -8,8 +8,8 @@
   overflow: hidden;
   /* Figma 492:4942 Rectangle 125 */
   background-color: #41210b;
-  /* 상태바(44) 제외 · 크롬(91) 아래 스테이지 */
-  min-height: calc(var(--mcm-viewport-stable) - 6.0625rem);
+  /* Safe area and shared header tokens define the stage boundary. */
+  min-height: calc(var(--mcm-viewport-stable) - var(--mcm-header-height) - var(--mcm-safe-top));
 }
 
 /* Figma 492:4942 글로우 SVG — complete 스테이지와 동일 배치 보정 */

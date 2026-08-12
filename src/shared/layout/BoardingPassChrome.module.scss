@@ -1,5 +1,10 @@
 /* 공통 타이틀 밴드 — #E2C5B0 계열 + 얇은 밝기 그라데이션(겹침 없는 메탈릭) */
 
+.header {
+  padding-top: var(--mcm-safe-top);
+  background: var(--mcm-color-canvas);
+}
+
 .titleBand {
   display: grid;
   height: 2.6875rem; /* 43 */

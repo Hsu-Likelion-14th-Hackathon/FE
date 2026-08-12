@@ -32,7 +32,7 @@ function BoardingPassChrome({
   }, [isOpen])
 
   return (
-    <header className={className}>
+    <header className={`${styles.header} ${className}`}>
       {showTitleBand ? (
         <div className={styles.titleBand}>
           <span aria-hidden="true" className={styles.ornamentLeft}>
