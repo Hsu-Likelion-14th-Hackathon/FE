@@ -11,6 +11,7 @@ const { createRoot, render, start } = vi.hoisted(() => {
 })
 
 vi.mock('react-dom/client', () => ({ createRoot }))
+vi.mock('@/app/router.jsx', () => ({ router: {} }))
 vi.mock('@/mocks/browser.js', () => ({ worker: { start } }))
 
 describe('application startup', () => {
