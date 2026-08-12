@@ -259,28 +259,46 @@ describe('App', () => {
     expect(document.body).not.toHaveClass('store-menu-open')
   })
 
-  it('\uba54\uc778 Boarding\uc73c\ub85c \ubcf4\ub529\ud328\uc2a4 \uc778\ud2b8\ub85c\uc5d0 \uc9c4\uc785\ud55c\ub2e4', async () => {
+  it('메인 Boarding에서 인트로를 거쳐 보딩패스 랜딩에 진입한다', async () => {
     const router = renderRoute('/')
 
     fireEvent.click(await screen.findByRole('link', { name: 'Boarding' }))
 
-    expect(await screen.findByRole('button', { name: 'Next' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/boarding-pass/intro')
+    fireEvent.click(await screen.findByRole('button', { name: 'Next' }))
+
+    expect(await screen.findByRole('button', { name: '비행 시작하기' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/boarding-pass')
   })
 
-  it('\uba54\ub274 Boarding\uc73c\ub85c \uc778\ud2b8\ub85c\uc5d0 \uc9c4\uc785\ud558\uace0 \uba54\ub274\ub97c \ub2eb\ub294\ub2e4', async () => {
+  it('보딩패스 랜딩에서 로그인 없이 비행 설문에 진입한다', async () => {
+    const router = renderRoute('/boarding-pass')
+
+    fireEvent.click(await screen.findByRole('button', { name: '비행 시작하기' }))
+
+    expect(await screen.findByRole('button', { name: '이전' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/boarding-pass/survey')
+  })
+
+  it('보딩패스 랜딩에서 로그인 없이 Passport에 진입한다', async () => {
+    const router = renderRoute('/boarding-pass')
+
+    fireEvent.click(await screen.findByRole('button', { name: 'PASSPORT 확인' }))
+
+    expect(
+      await screen.findByRole('heading', { name: 'MCM PASSPORT' }, { timeout: 10_000 }),
+    ).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/boarding-pass/passport')
+  })
+
+  it('메뉴 Boarding으로 인트로에 진입하고 메뉴를 닫는다', async () => {
     const router = renderRoute('/')
 
-    fireEvent.click(await screen.findByRole('button', { name: '\uba54\ub274 \uc5f4\uae30' }))
-    fireEvent.click(
-      screen.getByRole('link', { name: 'MCM Boarding Pass \ub458\ub7ec\ubcf4\uae30' }),
-    )
+    fireEvent.click(await screen.findByRole('button', { name: '메뉴 열기' }))
+    fireEvent.click(screen.getByRole('link', { name: 'MCM Boarding Pass 둘러보기' }))
 
     expect(await screen.findByRole('button', { name: 'Next' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/boarding-pass/intro')
-    expect(
-      screen.queryByRole('dialog', { name: '\uc804\uccb4 \uba54\ub274' }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: '전체 메뉴' })).not.toBeInTheDocument()
     expect(document.documentElement).not.toHaveClass('store-menu-open')
     expect(document.body).not.toHaveClass('store-menu-open')
   })

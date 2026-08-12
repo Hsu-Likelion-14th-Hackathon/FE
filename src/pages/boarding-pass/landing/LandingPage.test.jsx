@@ -24,7 +24,6 @@ function renderLanding() {
       { path: '/boarding-pass/survey', element: <p>Survey</p> },
       { path: '/boarding-pass/scan', element: <p>Scan</p> },
       { path: '/boarding-pass/passport', element: <p>Passport</p> },
-      { path: '/login', element: <p>Login</p> },
     ],
     { initialEntries: ['/boarding-pass'] },
   )
@@ -62,7 +61,7 @@ describe('LandingPage', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/scan'))
   })
 
-  it('routes to Passport without a session provider', async () => {
+  it('routes guests to Passport from the Passport button', async () => {
     const router = renderLanding()
 
     fireEvent.click(await screen.findByRole('button', { name: 'PASSPORT \uD655\uC778' }))
