@@ -22,13 +22,12 @@ import routePathImg from '@/shared/assets/boarding-pass/flight/route-path.svg'
 import tabletLogoImg from '@/shared/assets/boarding-pass/flight/tablet-logo.png'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
-import DeferredButton from '@/shared/ui/DeferredButton.jsx'
 
 import styles from './FlightPage.module.scss'
 
 /**
  * 비행 MAPS 페이지 (41)(43) + 티켓 시트 (42).
- * 비행 종료 = D-02 DeferredButton. 여행 가이드 → /boarding-pass/guide.
+ * 여행 가이드 → /boarding-pass/guide.
  * 음성 도슨트 = M-01 mock (재생/정지 토글만).
  */
 export function Component() {
@@ -172,9 +171,13 @@ export function Component() {
             >
               여행 가이드
             </button>
-            <DeferredButton deferredId="D-02" className={styles.actionBtn}>
+            <button
+              type="button"
+              onClick={() => navigate('/boarding-pass')}
+              className={styles.actionBtn}
+            >
               비행 종료
-            </DeferredButton>
+            </button>
           </div>
           <p className={styles.passportHint}>
             비행 종료 후 여행의 기록이 담긴 Passport가 발급됩니다

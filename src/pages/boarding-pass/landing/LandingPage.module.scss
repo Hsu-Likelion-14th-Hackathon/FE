@@ -9,7 +9,7 @@
   /* Figma 492:4942 Rectangle 125 */
   background-color: #41210b;
   /* 상태바(44) 제외 · 크롬(91) 아래 스테이지 */
-  min-height: calc(var(--mcm-viewport-stable) - 5.6875rem);
+  min-height: calc(var(--mcm-viewport-stable) - 6.0625rem);
 }
 
 /* Figma 492:4942 글로우 SVG — complete 스테이지와 동일 배치 보정 */
@@ -112,7 +112,7 @@
   color: #807066;
 }
 
-/* 비행기 — Figma 246×209 대비 ≈ +50% */
+/* 비행기 — Figma 246×209 대비 */
 .planeWrap {
   position: relative;
   display: flex;
@@ -120,15 +120,15 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 19.59375rem; /* 209 × 1.5 */
+  height: 13.0625rem; /* 209 */
   margin-top: 2.25rem; /* ~36 */
-  margin-bottom: 3.375rem; /* ~54 */
+  margin-bottom: 2.25rem; /* ~36 */
 }
 
 .planeFrame {
   position: relative;
   z-index: 1;
-  width: min(23.0625rem, 100%); /* 246 × 1.5 */
+  width: min(15.375rem, 100%); /* 246 */
   height: auto;
   aspect-ratio: 246 / 209;
 }
@@ -255,4 +255,8 @@
 .secondaryCtaLabel {
   position: relative;
   z-index: 1;
+}
+
+.iconRow {
+  height: 3.375rem !important;
 }

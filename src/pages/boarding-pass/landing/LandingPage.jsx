@@ -10,7 +10,6 @@ import ctaPlaneIcon from '@/shared/assets/boarding-pass/landing/cta-plane.svg'
 import planeImage from '@/shared/assets/boarding-pass/landing/plane.png'
 import stageBack from '@/shared/assets/boarding-pass/landing/stage-back.svg'
 import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
-import DeferredButton from '@/shared/ui/DeferredButton.jsx'
 import { useToast } from '@/shared/ui/toastContext.js'
 
 import styles from './LandingPage.module.scss'
@@ -19,7 +18,6 @@ import styles from './LandingPage.module.scss'
  * (23) 보딩패스 랜딩 — Figma 492:4896.
  * - 비행 시작하기: 미로그인 → /login, 로그인 → /boarding-pass/survey
  * - 기존 BP 스캔: latest 200 → /boarding-pass/scan, 404 → T-01
- * - PASSPORT 확인: D-01 미동작
  * - 상태바·홈 인디케이터는 DOM 미구현
  */
 export function Component() {
@@ -64,7 +62,7 @@ export function Component() {
 
   return (
     <main className="flex min-h-[var(--mcm-viewport-stable)] flex-col bg-[#fafafa]">
-      <BoardingPassChrome {...bagHandlers} />
+      <BoardingPassChrome {...bagHandlers} iconRowClassName={styles.iconRow} />
       <section className={styles.stage}>
         <img src={stageBack} alt="" aria-hidden="true" className={styles.stageBack} />
         <div className={styles.footerFade} aria-hidden="true" />
@@ -110,9 +108,13 @@ export function Component() {
               >
                 <span className={styles.secondaryCtaLabel}>기존 BOARDING PASS 스캔</span>
               </button>
-              <DeferredButton deferredId="D-01" className={styles.secondaryCta}>
+              <button
+                type="button"
+                className={styles.secondaryCta}
+                onClick={() => requireAuthOr(() => navigate('/boarding-pass/passport'))}
+              >
                 <span className={styles.secondaryCtaLabel}>PASSPORT 확인</span>
-              </DeferredButton>
+              </button>
             </div>
           </div>
         </div>
