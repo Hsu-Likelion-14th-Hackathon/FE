@@ -17,6 +17,21 @@ function renderPage() {
 describe('ProductListPage', () => {
   afterEach(() => router?.dispose())
 
+  it('접근성 제목을 화면에서 숨긴다', () => {
+    renderPage()
+
+    for (const heading of [
+      screen.getByRole('heading', { level: 1, name: '상품 목록' }),
+      screen.getByRole('heading', { level: 2, name: 'Autumn Winter 2026' }),
+    ]) {
+      const style = window.getComputedStyle(heading)
+      expect(style.position).toBe('absolute')
+      expect(style.width).toBe('1px')
+      expect(style.height).toBe('1px')
+      expect(style.overflow).toBe('hidden')
+    }
+  })
+
   it('상품 상세 링크와 위시리스트 토글을 제공한다', () => {
     renderPage()
 

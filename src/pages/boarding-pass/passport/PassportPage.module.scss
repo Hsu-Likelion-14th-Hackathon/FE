@@ -114,6 +114,20 @@
   isolation: isolate;
 }
 
+@media (min-width: 768px) and (max-width: 1199px) {
+  .openPassport {
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+@media (min-width: 1200px) {
+  .openPassport {
+    margin-right: 0;
+    margin-left: 2.925rem;
+  }
+}
+
 .passportImage {
   width: 100%;
   height: 100%;
