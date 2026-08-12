@@ -29,6 +29,13 @@
   height: 0.875rem;
 }
 
+.content {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
 .passport {
   position: relative;
   width: min(100%, 21.875rem);
@@ -124,7 +131,8 @@
 .journeys time {
   font-size: 0.625rem;
 }
-.products {
+.products,
+.history {
   margin-top: 0.5rem;
   padding: 0.75rem;
   border: 1px solid #fff7d5;
@@ -132,6 +140,87 @@
   background: rgba(255, 247, 213, 0.14);
   color: #fff7d5;
   font-weight: 600;
+}
+.history {
+  margin-top: 0;
+}
+
+.sheetRoot {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+}
+.scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.35);
+}
+.sheet {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: min(100%, var(--mcm-shell-max));
+  max-height: calc(var(--mcm-viewport-stable) - 6rem);
+  margin: 0 auto;
+  overflow-y: auto;
+  padding: 0.75rem 1.25rem max(2rem, var(--mcm-safe-bottom));
+  border-radius: 1.875rem 1.875rem 0 0;
+  background: #894a26;
+  box-shadow: 0 -0.625rem 1.875rem rgba(0, 0, 0, 0.2);
+}
+.sheetEyebrow,
+.detailDate {
+  margin: 0;
+  color: #f3c497;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+.sheetTitle {
+  margin: 0.25rem 0 1rem;
+  color: #fff7d5;
+  font-family: var(--mcm-font-brand);
+  font-size: 1.5rem;
+}
+.historyList {
+  display: grid;
+  gap: 0.625rem;
+}
+.historyCard {
+  display: flex;
+  min-height: 5.25rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px solid rgba(255, 247, 213, 0.38);
+  border-radius: 0.75rem;
+  background: rgba(65, 33, 11, 0.28);
+  color: #fff7d5;
+  text-align: left;
+}
+button.historyCard {
+  cursor: pointer;
+}
+.journeyCardContent {
+  display: grid;
+  gap: 0.25rem;
+}
+.journeyCardContent > span,
+.journeyCardContent time {
+  color: #f3c497;
+  font-size: 0.75rem;
+}
+.ticketButton {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.875rem;
+  border: 1px solid #fff7d5;
+  border-radius: 6.25rem;
+  background: #fff7d5;
+  color: #41210b;
+  font-weight: 700;
 }
 
 .progress {

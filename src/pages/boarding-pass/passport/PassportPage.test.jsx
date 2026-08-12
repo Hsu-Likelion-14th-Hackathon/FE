@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -29,6 +29,52 @@ function renderPassport() {
 }
 
 describe('PassportPage', () => {
+  it('여행 기록에서 1F 상세와 티켓을 열고 Escape로 닫는다', async () => {
+    renderPassport()
+    const nextButton = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(nextButton)
+    fireEvent.click(nextButton)
+    fireEvent.click(nextButton)
+
+    const historyTrigger = screen.getByRole('button', { name: '여행 기록 보기' })
+    fireEvent.click(historyTrigger)
+    expect(screen.getByRole('dialog', { name: '여행 기록' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' })).toHaveFocus()
+
+    fireEvent.click(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' }))
+    expect(screen.getByRole('dialog', { name: '1F JOURNEY 상세' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '티켓 보기' }))
+    expect(screen.getByRole('dialog', { name: '탑승권' })).toHaveFocus()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    await waitFor(() => expect(historyTrigger).toHaveFocus())
+  })
+
+  it('시트가 열린 동안 배경을 inert로 만들고 상단 닫기는 시트만 닫는다', async () => {
+    const router = renderPassport()
+    const nextButton = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(nextButton)
+    fireEvent.click(nextButton)
+    fireEvent.click(nextButton)
+
+    const historyTrigger = screen.getByRole('button', { name: '여행 기록 보기' })
+    fireEvent.click(historyTrigger)
+    expect(screen.getByRole('progressbar').closest('[inert]')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/boarding-pass/passport')
+    await waitFor(() => expect(historyTrigger).toHaveFocus())
+  })
+
+  it('시트가 없을 때 상단 닫기는 보딩패스로 이동한다', () => {
+    const router = renderPassport()
+
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }))
+    expect(router.state.location.pathname).toBe('/boarding-pass')
+  })
+
   it('25%에서 시작해 네 단계 사이만 이동한다', () => {
     renderPassport()
 
