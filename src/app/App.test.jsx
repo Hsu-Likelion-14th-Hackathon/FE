@@ -270,11 +270,15 @@ describe('App', () => {
     const router = renderRoute('/')
 
     fireEvent.click(await screen.findByRole('button', { name: '\uba54\ub274 \uc5f4\uae30' }))
-    fireEvent.click(screen.getByRole('link', { name: 'MCM Boarding Pass \ub458\ub7ec\ubcf4\uae30' }))
+    fireEvent.click(
+      screen.getByRole('link', { name: 'MCM Boarding Pass \ub458\ub7ec\ubcf4\uae30' }),
+    )
 
     expect(await screen.findByRole('button', { name: 'Next' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/boarding-pass/intro')
-    expect(screen.queryByRole('dialog', { name: '\uc804\uccb4 \uba54\ub274' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('dialog', { name: '\uc804\uccb4 \uba54\ub274' }),
+    ).not.toBeInTheDocument()
     expect(document.documentElement).not.toHaveClass('store-menu-open')
     expect(document.body).not.toHaveClass('store-menu-open')
   })
