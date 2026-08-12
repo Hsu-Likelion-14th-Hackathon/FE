@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
-import { useSession } from '@/entities/session/useSession.js'
 import { useBagHandlers } from '@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx'
 import NoPassToast from '@/features/boarding-pass/no-pass-toast/NoPassToast.jsx'
 import { getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
@@ -16,48 +15,36 @@ import styles from './LandingPage.module.scss'
 
 /**
  * (23) 보딩패스 랜딩 — Figma 492:4896.
- * - 비행 시작하기: 미로그인 → /login, 로그인 → /boarding-pass/survey
+ * - 비행 시작하기: /boarding-pass/survey
  * - 기존 BP 스캔: latest 200 → /boarding-pass/scan, 404 → T-01
  * - 상태바·홈 인디케이터는 DOM 미구현
  */
 export function Component() {
   const navigate = useNavigate()
   const bagHandlers = useBagHandlers()
-  const { isAuthenticated, status: sessionStatus } = useSession()
   const { showToast } = useToast()
   const [scanning, setScanning] = useState(false)
 
-  function requireAuthOr(action) {
-    if (sessionStatus === 'loading') return
-    if (!isAuthenticated) {
-      navigate('/login')
-      return
-    }
-    action()
-  }
-
   function handleStartFlight() {
-    requireAuthOr(() => navigate('/boarding-pass/survey'))
+    navigate('/boarding-pass/survey')
   }
 
   async function handleScanExisting() {
-    requireAuthOr(async () => {
-      if (scanning) return
-      setScanning(true)
-      try {
-        const pass = await getLatestBoardingPass()
-        if (pass) {
-          navigate('/boarding-pass/scan')
-          return
-        }
-        // T-01: 저장 완료 토스트 셸 재사용 · 안내 카피만 · CTA 없음
-        showToast(<NoPassToast />, { position: 'center' })
-      } catch {
-        // 네트워크 등 기타 오류는 조용히 무시 (404만 null 처리)
-      } finally {
-        setScanning(false)
+    if (scanning) return
+    setScanning(true)
+    try {
+      const pass = await getLatestBoardingPass()
+      if (pass) {
+        navigate('/boarding-pass/scan')
+        return
       }
-    })
+      // T-01: 저장 완료 토스트 셸 재사용 · 안내 카피만 · CTA 없음
+      showToast(<NoPassToast />, { position: 'center' })
+    } catch {
+      // 네트워크 등 기타 오류는 조용히 무시 (404만 null 처리)
+    } finally {
+      setScanning(false)
+    }
   }
 
   return (
@@ -111,7 +98,7 @@ export function Component() {
               <button
                 type="button"
                 className={styles.secondaryCta}
-                onClick={() => requireAuthOr(() => navigate('/boarding-pass/passport'))}
+                onClick={() => navigate('/boarding-pass/passport')}
               >
                 <span className={styles.secondaryCtaLabel}>PASSPORT 확인</span>
               </button>

@@ -4,15 +4,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import AppProviders from '@/app/providers.jsx'
 
-const mockSession = vi.hoisted(() => ({ isAuthenticated: false, status: 'success' }))
+const mockGetLatestBoardingPass = vi.hoisted(() => vi.fn())
 const activeRouters = []
-
-vi.mock('@/entities/session/useSession.js', () => ({
-  useSession: () => mockSession,
-}))
 
 vi.mock('@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx', () => ({
   useBagHandlers: () => ({}),
+}))
+
+vi.mock('@/shared/api/boardingPassApi.js', () => ({
+  getLatestBoardingPass: mockGetLatestBoardingPass,
 }))
 
 import { Component as LandingPage } from './LandingPage.jsx'
@@ -21,6 +21,8 @@ function renderLanding() {
   const router = createMemoryRouter(
     [
       { path: '/boarding-pass', Component: LandingPage },
+      { path: '/boarding-pass/survey', element: <p>Survey</p> },
+      { path: '/boarding-pass/scan', element: <p>Scan</p> },
       { path: '/boarding-pass/passport', element: <p>Passport</p> },
       { path: '/login', element: <p>Login</p> },
     ],
@@ -40,12 +42,27 @@ function renderLanding() {
 describe('LandingPage', () => {
   afterEach(() => {
     activeRouters.splice(0).forEach((router) => router.dispose())
-    mockSession.isAuthenticated = false
-    mockSession.status = 'success'
+    mockGetLatestBoardingPass.mockReset()
   })
 
-  it('routes authenticated users to Passport from the Passport button', async () => {
-    mockSession.isAuthenticated = true
+  it('routes guests to survey from the start flight button', async () => {
+    const router = renderLanding()
+
+    fireEvent.click(await screen.findByRole('button', { name: '비행 시작하기' }))
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/survey'))
+  })
+
+  it('routes guests with an existing pass to scan', async () => {
+    mockGetLatestBoardingPass.mockResolvedValue({ id: 'pass-1' })
+    const router = renderLanding()
+
+    fireEvent.click(await screen.findByRole('button', { name: '기존 BOARDING PASS 스캔' }))
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/scan'))
+  })
+
+  it('routes to Passport without a session provider', async () => {
     const router = renderLanding()
 
     fireEvent.click(await screen.findByRole('button', { name: 'PASSPORT \uD655\uC778' }))
@@ -53,28 +70,7 @@ describe('LandingPage', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/passport'))
   })
 
-  it('routes unauthenticated users to login from the Passport button', async () => {
-    mockSession.isAuthenticated = false
-    const router = renderLanding()
-
-    fireEvent.click(await screen.findByRole('button', { name: 'PASSPORT \uD655\uC778' }))
-
-    await waitFor(() => expect(router.state.location.pathname).toBe('/login'))
-  })
-
-  it('does not navigate from the Passport button while authentication is loading', async () => {
-    mockSession.isAuthenticated = false
-    mockSession.status = 'loading'
-    const router = renderLanding()
-
-    fireEvent.click(await screen.findByRole('button', { name: 'PASSPORT \uD655\uC778' }))
-
-    expect(router.state.location.pathname).toBe('/boarding-pass')
-  })
-
   it('returns to landing after one back from a rapid double-click Passport navigation', async () => {
-    mockSession.isAuthenticated = true
-    mockSession.status = 'success'
     const router = renderLanding()
     const passportButton = await screen.findByRole('button', { name: 'PASSPORT \uD655\uC778' })
 
