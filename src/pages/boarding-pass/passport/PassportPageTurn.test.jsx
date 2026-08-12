@@ -11,6 +11,7 @@ const rendererControl = vi.hoisted(() => ({
   domElement: null,
   disconnect: vi.fn(),
   cancelFrame: vi.fn(),
+  resize: null,
 }))
 
 vi.mock('three/addons/renderers/CSS3DRenderer.js', async (importOriginal) => {
@@ -64,12 +65,19 @@ beforeEach(() => {
   rendererControl.domElement = null
   rendererControl.disconnect.mockReset()
   rendererControl.cancelFrame.mockReset()
+  rendererControl.resize = null
   vi.useFakeTimers({ shouldAdvanceTime: true })
   vi.stubGlobal('requestAnimationFrame', (callback) => setTimeout(() => callback(Date.now()), 16))
-  vi.stubGlobal('cancelAnimationFrame', rendererControl.cancelFrame)
+  vi.stubGlobal('cancelAnimationFrame', (frame) => {
+    rendererControl.cancelFrame(frame)
+    clearTimeout(frame)
+  })
   vi.stubGlobal(
     'ResizeObserver',
     class {
+      constructor(callback) {
+        rendererControl.resize = callback
+      }
       observe() {}
       disconnect = rendererControl.disconnect
     },
@@ -184,6 +192,29 @@ describe('PassportPageTurn', () => {
       expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
     )
     expect(rendererControl.domElement).not.toBeInTheDocument()
+  })
+
+  it('active turn 중 observer failure는 target을 제거하고 fallback navigation을 다시 연다', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'settling')
+
+    rendererControl.failRender = true
+    act(() => rendererControl.resize())
+
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+    )
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+    expect(screen.queryByText('Step 2')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
   })
 
   it('unmount 시 observer, animation frame과 renderer DOM을 정리한다', async () => {

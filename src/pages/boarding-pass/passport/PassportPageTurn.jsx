@@ -155,7 +155,10 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     const teardown = () => {
       observer?.disconnect()
       observer = undefined
-      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current)
+        frameRef.current = null
+      }
       rendererRef.current?.domElement.remove()
       rendererRef.current = null
       sceneRef.current = null
@@ -170,7 +173,10 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
       teardown()
       console.warn('Passport page renderer is unavailable; using fallback.', error)
       queueMicrotask(() => {
-        if (mounted) setRendererMode('fallback')
+        if (!mounted) return
+        setTargetStep(null)
+        setTurnState('idle')
+        setRendererMode('fallback')
       })
     }
     fallbackRef.current = fallback
