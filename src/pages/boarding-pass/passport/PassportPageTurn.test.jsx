@@ -118,6 +118,22 @@ afterEach(() => {
 })
 
 describe('PassportPageTurn', () => {
+  it('첫 portal 측정이 surface mount보다 빨라도 첫 여권 면을 노출한다', async () => {
+    const querySelector = Element.prototype.querySelector
+    let surfaceQueries = 0
+    vi.spyOn(Element.prototype, 'querySelector').mockImplementation(function (selector) {
+      if (selector === '[data-passport-surface]' && surfaceQueries++ === 0) return null
+      return querySelector.call(this, selector)
+    })
+    render(<TurnHarness />)
+
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+
+    expect(screen.getByRole('region', { name: '여권 1단계' })).toBeVisible()
+  })
+
   it('여권 폭의 25%를 넘긴 왼쪽 스와이프로 다음 단계에 이동한다', async () => {
     render(<TurnHarness />)
     await waitFor(() =>

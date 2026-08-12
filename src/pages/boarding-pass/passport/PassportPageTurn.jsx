@@ -112,6 +112,15 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     renderScene()
   }, [renderScene, step])
 
+  const syncCurrentFace = useCallback((node) => {
+    if (!node) return
+    try {
+      resizeRef.current()
+    } catch (error) {
+      fallbackRef.current(error)
+    }
+  }, [])
+
   const settleTurn = useCallback(
     ({ direction, fromProgress, toProgress, duration, commit }) => {
       let startedAt = null
@@ -437,7 +446,12 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
       >
         <div ref={rendererMountRef} />
         {rendererMode === 'ready' && hosts.current
-          ? createPortal(<div className={styles.face}>{renderStep(step)}</div>, hosts.current)
+          ? createPortal(
+              <div ref={syncCurrentFace} className={styles.face}>
+                {renderStep(step)}
+              </div>,
+              hosts.current,
+            )
           : null}
         {rendererMode === 'ready' && hosts.target && targetStep !== null
           ? createPortal(
