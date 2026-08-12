@@ -99,7 +99,7 @@ Expected: ESLint, Prettier, 전체 Vitest, production build가 모두 exit code 
 - Consumes: `BoardingPassChrome(props)`, `useBagHandlers()`, `useNavigate()`, Figma nodes `52:18494`, `52:18588`, `52:18724`, `52:19004`
 - Produces: `Component()` lazy route export, `passportProfile`, `passportStamps`, `journeyRecords`, `passportTicket`
 
-- [ ] **Step 1: 라우트와 단계 동작의 실패 테스트를 작성한다**
+- [x] **Step 1: 라우트와 단계 동작의 실패 테스트를 작성한다**
 
 ```jsx
 it('25%에서 시작해 네 단계 사이만 이동한다', async () => {
@@ -123,7 +123,7 @@ it('25%에서 시작해 네 단계 사이만 이동한다', async () => {
 
 `renderPassport()`는 `createMemoryRouter`로 `/boarding-pass/passport`, `/boarding-pass`, `/products` 세 경로를 만들고 `AppProviders` 안에서 렌더한다. `useBagHandlers`는 `{}`를 반환하도록 모킹한다.
 
-- [ ] **Step 2: 테스트가 새 라우트와 컴포넌트 부재로 실패하는지 확인한다**
+- [x] **Step 2: 테스트가 새 라우트와 컴포넌트 부재로 실패하는지 확인한다**
 
 ```powershell
 npm.cmd run test:run -- src/pages/boarding-pass/passport/PassportPage.test.jsx src/app/App.test.jsx
@@ -131,7 +131,7 @@ npm.cmd run test:run -- src/pages/boarding-pass/passport/PassportPage.test.jsx s
 
 Expected: `PassportPage.jsx` 또는 `/boarding-pass/passport` 라우트를 찾지 못해 FAIL한다.
 
-- [ ] **Step 3: Figma 자산을 내려받아 의미 있는 로컬 이름으로 저장한다**
+- [x] **Step 3: Figma 자산을 내려받아 의미 있는 로컬 이름으로 저장한다**
 
 Figma `download_assets`를 `52:18494`, `52:18588`, `52:18724`, `52:19004`에 호출하고 다음 기준으로 저장한다.
 
@@ -145,7 +145,7 @@ journey-decoration.png  = 여행 기록 면의 비행기·건물 장식
 
 동일 원본 해시의 파일은 한 번만 저장하고 기존 `icons/close.svg`, `guide/nav-prev.svg`, `guide/nav-next.svg`는 복제하지 않는다.
 
-- [ ] **Step 4: 정적 여권 모델을 구현한다**
+- [x] **Step 4: 정적 여권 모델을 구현한다**
 
 ```js
 export const passportProfile = {
@@ -176,7 +176,7 @@ export const journeyRecords = [
 
 `passportTicket`은 `BoardingTicketCard`가 이미 소비하는 `passengerName`, `flightCode`, `cabinClass`, `from`, `to`, `gate`, `boardingLabel`, `timeStart`, `timeEnd`, `passCode` 필드를 같은 파일에서 내보낸다.
 
-- [ ] **Step 5: 네 단계 상태와 라우트를 최소 구현한다**
+- [x] **Step 5: 네 단계 상태와 라우트를 최소 구현한다**
 
 ```jsx
 export function Component() {
@@ -226,7 +226,7 @@ export function Component() {
 
 `PassportSpread`는 `step`에 따라 표지, 프로필/크레딧, 방문 스탬프, 여행 기록 중 하나만 렌더한다. 마지막 단계의 `상품 보러가기`는 `navigate('/products')`를 호출한다.
 
-- [ ] **Step 6: Figma 치수에 맞춰 SCSS를 구현한다**
+- [x] **Step 6: Figma 치수에 맞춰 SCSS를 구현한다**
 
 ```scss
 .stage {
@@ -259,7 +259,7 @@ export function Component() {
 
 정적 이미지 위 이름·국적·날짜·크레딧·버튼을 DOM 텍스트로 배치하고, 이미지 자체에 포함된 동일 텍스트는 배경 장식으로만 사용한다.
 
-- [ ] **Step 7: 단계·라우트 테스트를 통과시킨다**
+- [x] **Step 7: 단계·라우트 테스트를 통과시킨다**
 
 ```powershell
 npm.cmd run test:run -- src/pages/boarding-pass/passport/PassportPage.test.jsx src/app/App.test.jsx
@@ -267,7 +267,7 @@ npm.cmd run test:run -- src/pages/boarding-pass/passport/PassportPage.test.jsx s
 
 Expected: 새 테스트와 기존 앱 라우트 테스트가 모두 PASS한다.
 
-- [ ] **Step 8: 기본 여권 기능을 커밋한다**
+- [x] **Step 8: 기본 여권 기능을 커밋한다**
 
 ```powershell
 git add src/pages/boarding-pass/passport src/shared/assets/boarding-pass/passport src/shared/assets/boarding-pass/assets-manifest.md src/app/router.jsx src/app/App.test.jsx
@@ -287,7 +287,7 @@ git commit -m "feat: 디지털 여권 기본 화면과 단계 이동 구현"
 - Consumes: Task 2의 `journeyRecords`, `passportTicket`, 기존 `BoardingTicketCard({ pass, size, className })`
 - Produces: `sheet = null | 'history' | 'history-detail' | 'ticket'` 전환과 접근 가능한 modal dialog
 
-- [ ] **Step 1: 시트 흐름과 닫기 동작의 실패 테스트를 작성한다**
+- [x] **Step 1: 시트 흐름과 닫기 동작의 실패 테스트를 작성한다**
 
 ```jsx
 it('여행 기록에서 1F 상세와 티켓을 열고 Escape로 닫는다', async () => {
@@ -315,7 +315,7 @@ it('여행 기록에서 1F 상세와 티켓을 열고 Escape로 닫는다', asyn
 
 별도 테스트에서 시트가 열린 동안 배경이 `inert`인지, 상단 닫기 버튼이 시트만 닫고 페이지에 머무는지, 시트가 없을 때 상단 닫기가 `/boarding-pass`로 이동하는지 검증한다.
 
-- [ ] **Step 2: 테스트가 dialog 부재로 실패하는지 확인한다**
+- [x] **Step 2: 테스트가 dialog 부재로 실패하는지 확인한다**
 
 ```powershell
 npm.cmd run test:run -- src/pages/boarding-pass/passport/PassportPage.test.jsx
@@ -323,7 +323,7 @@ npm.cmd run test:run -- src/pages/boarding-pass/passport/PassportPage.test.jsx
 
 Expected: `여행 기록` dialog를 찾지 못해 FAIL한다.
 
-- [ ] **Step 3: 단일 sheet 상태와 포커스 복원을 구현한다**
+- [x] **Step 3: 단일 sheet 상태와 포커스 복원을 구현한다**
 
 ```jsx
 const [sheet, setSheet] = useState(null)
@@ -355,7 +355,7 @@ useEffect(() => {
 
 상단 닫기는 `sheet ? closeSheet() : navigate('/boarding-pass')`로 분기한다. 닫기 버튼은 inert 영역 밖에 두고, 나머지 배경 래퍼에는 `inert={sheet ? '' : undefined}`를 준다. progressbar 상태를 숨길 필요가 없으므로 `aria-hidden`은 추가하지 않는다.
 
-- [ ] **Step 4: 세 dialog를 같은 바텀시트 틀로 렌더한다**
+- [x] **Step 4: 세 dialog를 같은 바텀시트 틀로 렌더한다**
 
 ```jsx
 {sheet ? (
@@ -378,7 +378,7 @@ useEffect(() => {
 
 2F·3F 카드는 세부 디자인이 없으므로 일반 정보 카드로만 렌더하고 클릭 가능한 가짜 버튼을 만들지 않는다.
 
-- [ ] **Step 5: Figma 53~55의 시트 크기와 안전영역을 구현한다**
+- [x] **Step 5: Figma 53~55의 시트 크기와 안전영역을 구현한다**
 
 ```scss
 .sheetRoot {
@@ -403,7 +403,7 @@ useEffect(() => {
 }
 ```
 
-- [ ] **Step 6: 시트 테스트를 통과시킨다**
+- [x] **Step 6: 시트 테스트를 통과시킨다**
 
 ```powershell
 npm.cmd run test:run -- src/pages/boarding-pass/passport/PassportPage.test.jsx
@@ -411,7 +411,7 @@ npm.cmd run test:run -- src/pages/boarding-pass/passport/PassportPage.test.jsx
 
 Expected: 단계와 세 dialog 테스트가 모두 PASS한다.
 
-- [ ] **Step 7: 시트 기능을 커밋한다**
+- [x] **Step 7: 시트 기능을 커밋한다**
 
 ```powershell
 git add src/pages/boarding-pass/passport
@@ -433,7 +433,7 @@ git commit -m "feat: 여권 여행 기록과 티켓 시트 구현"
 - Consumes: 기존 `requireAuthOr(action)`, `useNavigate()`, Figma node `52:18416`
 - Produces: 인증된 Passport 이동, 비인증 로그인 이동, 비행 종료 후 랜딩 이동
 
-- [ ] **Step 1: Passport 인증 경계와 비행 종료의 실패 테스트를 작성한다**
+- [x] **Step 1: Passport 인증 경계와 비행 종료의 실패 테스트를 작성한다**
 
 ```jsx
 it('인증 사용자는 Passport로 이동한다', async () => {
@@ -457,7 +457,7 @@ it('비행 종료 후 보딩패스 랜딩으로 이동한다', async () => {
 })
 ```
 
-- [ ] **Step 2: DeferredButton 때문에 테스트가 실패하는지 확인한다**
+- [x] **Step 2: DeferredButton 때문에 테스트가 실패하는지 확인한다**
 
 ```powershell
 npm.cmd run test:run -- src/pages/boarding-pass/landing/LandingPage.test.jsx src/pages/boarding-pass/flight/FlightPage.test.jsx
@@ -465,7 +465,7 @@ npm.cmd run test:run -- src/pages/boarding-pass/landing/LandingPage.test.jsx src
 
 Expected: 두 버튼이 경로를 변경하지 않아 FAIL한다.
 
-- [ ] **Step 3: 두 placeholder를 기본 button과 기존 navigate 흐름으로 교체한다**
+- [x] **Step 3: 두 placeholder를 기본 button과 기존 navigate 흐름으로 교체한다**
 
 ```jsx
 <button
@@ -485,7 +485,7 @@ Expected: 두 버튼이 경로를 변경하지 않아 FAIL한다.
 
 두 파일에서 더 이상 쓰지 않는 `DeferredButton` import를 삭제한다. Flight의 음성 도슨트와 이전·다음 placeholder는 이번 기능과 독립적이므로 유지한다.
 
-- [ ] **Step 4: 랜딩만 Figma 48 치수로 보정한다**
+- [x] **Step 4: 랜딩만 Figma 48 치수로 보정한다**
 
 `BoardingPassChrome` 호출에 `iconRowClassName={styles.iconRow}`를 추가하고 다음 SCSS를 적용한다.
 
@@ -512,7 +512,7 @@ Expected: 두 버튼이 경로를 변경하지 않아 FAIL한다.
 
 글로우는 동일 이미지 복제와 CSS filter를 유지하되 Figma 캡처에 맞춰 과도한 `scale`과 blur만 줄인다. 공통 `BoardingPassChrome` 자체의 높이는 수정하지 않는다.
 
-- [ ] **Step 5: 라우팅 테스트와 관련 회귀 테스트를 통과시킨다**
+- [x] **Step 5: 라우팅 테스트와 관련 회귀 테스트를 통과시킨다**
 
 ```powershell
 npm.cmd run test:run -- src/pages/boarding-pass/landing/LandingPage.test.jsx src/pages/boarding-pass/flight/FlightPage.test.jsx src/pages/boarding-pass/passport/PassportPage.test.jsx
@@ -520,7 +520,7 @@ npm.cmd run test:run -- src/pages/boarding-pass/landing/LandingPage.test.jsx src
 
 Expected: 인증·비인증·비행 종료 동선과 여권 회귀 테스트가 모두 PASS한다.
 
-- [ ] **Step 6: 동선과 시각 보정을 커밋한다**
+- [x] **Step 6: 동선과 시각 보정을 커밋한다**
 
 ```powershell
 git add src/pages/boarding-pass/landing src/pages/boarding-pass/flight
@@ -539,7 +539,7 @@ git commit -m "fix: 보딩패스 랜딩과 여권 진입 흐름 보정"
 - Consumes: 실제 구현 결과와 최신 Figma node 목록
 - Produces: 화면 구현 이후 API 연동 전 남은 프론트엔드 작업의 단일 기준 문서
 
-- [ ] **Step 1: 미구현 문서를 실제 근거와 함께 작성한다**
+- [x] **Step 1: 미구현 문서를 실제 근거와 함께 작성한다**
 
 ```markdown
 ## 20. 현재 미구현 및 후속 백로그
@@ -568,11 +568,11 @@ git commit -m "fix: 보딩패스 랜딩과 여권 진입 흐름 보정"
 
 이미 구현한 Figma 48~55 최종 상태는 이 문서의 미구현 표에 넣지 않는다.
 
-- [ ] **Step 2: 구현 계획 체크박스를 실제 결과에 맞게 갱신한다**
+- [x] **Step 2: 구현 계획 체크박스를 실제 결과에 맞게 갱신한다**
 
 완료한 Step만 `[x]`로 바꾸고, 실행하지 못한 검증은 `[ ]`로 남기며 바로 아래에 원인을 한 문장으로 기록한다.
 
-- [ ] **Step 3: 320·390·430px 레이아웃을 확인한다**
+- [x] **Step 3: 320·390·430px 레이아웃을 확인한다**
 
 ```powershell
 npm.cmd run dev -- --host 127.0.0.1
@@ -580,7 +580,7 @@ npm.cmd run dev -- --host 127.0.0.1
 
 각 폭에서 `/boarding-pass`, `/boarding-pass/passport`의 네 단계와 세 시트를 확인한다. 가로 overflow, 텍스트 잘림, 버튼 겹침, 시트의 MobileShell 이탈이 없어야 한다.
 
-- [ ] **Step 4: 전체 자동 검증을 실행한다**
+- [x] **Step 4: 전체 자동 검증을 실행한다**
 
 ```powershell
 npm.cmd run verify
@@ -589,13 +589,13 @@ git diff --check
 
 Expected: lint, format, 전체 tests, production build, whitespace 검사가 모두 exit code 0이다.
 
-- [ ] **Step 5: 미구현 문서를 커밋한다**
+- [x] **Step 5: 미구현 문서를 커밋한다**
 
 ```powershell
 git add docs/frontend-development-plan.md docs/superpowers/plans/2026-08-12-passport-pages.md
 git commit -m "docs: 프론트엔드 미구현 항목 정리"
 ```
 
-- [ ] **Step 6: PR 브랜치 통합 전 사용자에게 보고한다**
+- [x] **Step 6: PR 브랜치 통합 전 사용자에게 보고한다**
 
 보고에는 merge commit과 세 기능·문서 커밋, 변경 파일 요약, 자동·수동 검증 결과, 미구현 P1/P2 목록을 포함한다. `fix/boarding-pass-final` 통합과 원격 push는 사용자 허가 후에만 수행한다.
