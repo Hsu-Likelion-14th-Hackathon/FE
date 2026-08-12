@@ -20,11 +20,18 @@ export function Component() {
   const bagHandlers = useBagHandlers()
   const [step, setStep] = useState(0)
   const progress = (step + 1) * 25
+  const moveStep = (delta) => setStep((current) => Math.min(3, Math.max(0, current + delta)))
+  const handleStepKeyDown = (event, delta) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      moveStep(delta)
+    }
+  }
 
   return (
     <div className={styles.page}>
       <BoardingPassChrome {...bagHandlers} />
-      <main className={styles.stage} aria-labelledby="passport-title">
+      <section className={styles.stage} aria-labelledby="passport-title">
         <button
           type="button"
           aria-label="닫기"
@@ -52,7 +59,8 @@ export function Component() {
             type="button"
             aria-label="이전 단계"
             disabled={step === 0}
-            onClick={() => setStep((current) => Math.max(0, current - 1))}
+            onClick={() => moveStep(-1)}
+            onKeyDown={(event) => handleStepKeyDown(event, -1)}
           >
             <img src={navPrev} alt="" />
           </button>
@@ -60,12 +68,13 @@ export function Component() {
             type="button"
             aria-label="다음 단계"
             disabled={step === 3}
-            onClick={() => setStep((current) => Math.min(3, current + 1))}
+            onClick={() => moveStep(1)}
+            onKeyDown={(event) => handleStepKeyDown(event, 1)}
           >
             <img src={navNext} alt="" />
           </button>
         </nav>
-      </main>
+      </section>
     </div>
   )
 }
@@ -85,7 +94,7 @@ function PassportSpread({ step, onProducts }) {
       <section className={styles.passport} aria-label="여권 프로필">
         <img src={passportSpread} alt="" className={styles.passportImage} />
         <div className={styles.profile}>
-          <img src={mcmHaus} alt="MCM HAUS" className={styles.haus} />
+          <img src={mcmHaus} alt="MCM HAUS 매장 사진" className={styles.haus} />
           <p>{passportProfile.passportNumber}</p>
           <p>
             {passportProfile.surname} / {passportProfile.givenName}
@@ -118,7 +127,7 @@ function PassportSpread({ step, onProducts }) {
 
   return (
     <section className={styles.passport} aria-label="여권 여행 기록">
-      <img src={journeyDecoration} alt="" className={styles.passportImage} />
+      <img src={journeyDecoration} alt="" className={styles.journeyDecoration} />
       <div className={styles.journeys}>
         {journeyRecords.map((record) => (
           <p key={record.id}>

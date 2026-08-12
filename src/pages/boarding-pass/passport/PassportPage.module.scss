@@ -19,14 +19,14 @@
   position: relative;
   z-index: 1;
   display: grid;
-  width: 0.875rem;
-  height: 0.875rem;
+  width: 2.75rem;
+  height: 2.75rem;
   place-items: center;
 }
 
 .close img {
-  width: 100%;
-  height: 100%;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .passport {
@@ -43,8 +43,7 @@
 .passportImage {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  opacity: 0.72;
+  object-fit: contain;
 }
 .coverTitle {
   position: absolute;
@@ -82,6 +81,13 @@
   width: 6rem;
   max-height: 3rem;
   object-fit: contain;
+}
+.journeyDecoration {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 5.6875rem;
+  height: auto;
 }
 .stamps ul {
   display: grid;

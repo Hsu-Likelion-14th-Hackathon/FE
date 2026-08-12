@@ -113,10 +113,10 @@
 
 ## passport/
 
-| id                 | path                                                            | Figma node | type | use                      |
-| ------------------ | --------------------------------------------------------------- | ---------- | ---- | ------------------------ |
-| passport-cover     | src/shared/assets/boarding-pass/passport/passport-cover.png     | 52:18494   | png  | Passport cover stage     |
-| passport-spread    | src/shared/assets/boarding-pass/passport/passport-spread.png    | 52:18588   | png  | Profile and credit stage |
-| passport-mcm-haus  | src/shared/assets/boarding-pass/passport/mcm-haus.png           | 52:18588   | png  | Profile ornament         |
-| passport-stamps    | src/shared/assets/boarding-pass/passport/passport-stamps.png    | 52:18724   | png  | Visit stamps stage       |
-| journey-decoration | src/shared/assets/boarding-pass/passport/journey-decoration.png | 52:19004   | png  | Journey records stage    |
+| id                 | path                                                            | Figma node | type | use                        |
+| ------------------ | --------------------------------------------------------------- | ---------- | ---- | -------------------------- |
+| passport-cover     | src/shared/assets/boarding-pass/passport/passport-cover.png     | 52:18570   | png  | Isolated Visetos cover     |
+| passport-spread    | src/shared/assets/boarding-pass/passport/passport-spread.png    | 52:18663   | png  | Isolated open passport     |
+| passport-mcm-haus  | src/shared/assets/boarding-pass/passport/mcm-haus.png           | 52:18723   | png  | MCM HAUS storefront        |
+| passport-stamps    | src/shared/assets/boarding-pass/passport/passport-stamps.png    | 52:18838   | png  | Isolated stamp ornaments   |
+| journey-decoration | src/shared/assets/boarding-pass/passport/journey-decoration.png | 52:19131   | png  | Isolated airplane ornament |

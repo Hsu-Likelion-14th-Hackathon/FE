@@ -42,6 +42,7 @@ describe('App', () => {
     renderRoute('/boarding-pass/passport')
 
     expect(await screen.findByRole('heading', { name: 'MCM PASSPORT' })).toBeInTheDocument()
+    expect(screen.getAllByRole('main')).toHaveLength(1)
   })
 
   it('renders the home scene with the original Figma raster assets', async () => {
