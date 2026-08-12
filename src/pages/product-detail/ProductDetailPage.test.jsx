@@ -17,6 +17,19 @@ function renderPage() {
 describe('ProductDetailPage', () => {
   afterEach(() => router?.dispose())
 
+  it('페이지 제목을 화면에서 숨기고 접근성 이름은 유지한다', () => {
+    renderPage()
+
+    const heading = screen.getByRole('heading', { level: 1, name: '상품 상세' })
+    const style = window.getComputedStyle(heading)
+
+    expect(heading).toBeInTheDocument()
+    expect(style.position).toBe('absolute')
+    expect(style.width).toBe('1px')
+    expect(style.height).toBe('1px')
+    expect(style.overflow).toBe('hidden')
+  })
+
   it('색상을 선택하고 쇼핑백 추가 결과를 안내한다', () => {
     renderPage()
 
