@@ -144,7 +144,7 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
       const nextStep = step + direction
       const isActiveDrag = turnState === 'dragging' && Object.hasOwn(options, 'fromProgress')
       if (
-        disabled ||
+        (disabled && (!isActiveDrag || commit)) ||
         nextStep < 0 ||
         nextStep > LAST_STEP ||
         (turnState !== 'idle' && !isActiveDrag)
@@ -346,7 +346,6 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     const pointer = pointerRef.current
     if (pointer.id !== event.pointerId) return
 
-    event.currentTarget.releasePointerCapture?.(event.pointerId)
     pointerRef.current = {
       id: null,
       startX: 0,
@@ -355,16 +354,19 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
       direction: null,
       progress: 0,
     }
+    event.currentTarget.releasePointerCapture?.(event.pointerId)
     if (pointer.direction === null) return
 
     const width = Math.max(event.currentTarget.getBoundingClientRect().width, 1)
     const distance = Math.abs(event.clientX - pointer.startX)
     const fromProgress = Math.min(distance / width, 1)
-    const commit = shouldCommitTurn({
-      distance,
-      elapsed: performance.now() - pointer.startedAt,
-      width,
-    })
+    const commit =
+      !disabled &&
+      shouldCommitTurn({
+        distance,
+        elapsed: performance.now() - pointer.startedAt,
+        width,
+      })
     requestTurn(pointer.direction, {
       fromProgress,
       commit,
@@ -376,7 +378,28 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     const pointer = pointerRef.current
     if (pointer.id !== event.pointerId) return
 
+    pointerRef.current = {
+      id: null,
+      startX: 0,
+      startY: 0,
+      startedAt: 0,
+      direction: null,
+      progress: 0,
+    }
     event.currentTarget.releasePointerCapture?.(event.pointerId)
+    if (pointer.direction !== null) {
+      requestTurn(pointer.direction, {
+        fromProgress: pointer.progress,
+        commit: false,
+        duration: CANCEL_DURATION,
+      })
+    }
+  }
+
+  const onLostPointerCapture = (event) => {
+    const pointer = pointerRef.current
+    if (pointer.id !== event.pointerId) return
+
     pointerRef.current = {
       id: null,
       startX: 0,
@@ -410,6 +433,7 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
+        onLostPointerCapture={onLostPointerCapture}
       >
         <div ref={rendererMountRef} />
         {rendererMode === 'ready' && hosts.current

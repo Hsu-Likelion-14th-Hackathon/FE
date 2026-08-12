@@ -251,6 +251,68 @@ describe('PassportPageTurn', () => {
     expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
   })
 
+  it('drag 중 disabled로 바뀌면 release를 cancel로 정리한다', async () => {
+    const { rerender } = render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+    const surface = setSurfaceRect()
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 11,
+      button: 0,
+      isPrimary: true,
+      clientX: 300,
+      clientY: 100,
+    })
+    fireEvent.pointerMove(surface, { pointerId: 11, clientX: 160, clientY: 100 })
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'dragging')
+
+    rerender(<TurnHarness disabled />)
+    fireEvent.pointerUp(surface, { pointerId: 11, clientX: 160, clientY: 100 })
+    await finishAnimation(240)
+
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
+    expect(screen.queryByText('Step 2')).not.toBeInTheDocument()
+  })
+
+  it('pointer capture를 잃으면 cancel 후 새 swipe를 받을 수 있다', async () => {
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+    const surface = setSurfaceRect()
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 12,
+      button: 0,
+      isPrimary: true,
+      clientX: 300,
+      clientY: 100,
+    })
+    fireEvent.pointerMove(surface, { pointerId: 12, clientX: 160, clientY: 100 })
+    fireEvent.lostPointerCapture(surface, { pointerId: 12 })
+    await finishAnimation(240)
+
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
+    expect(screen.queryByText('Step 2')).not.toBeInTheDocument()
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 13,
+      button: 0,
+      isPrimary: true,
+      clientX: 300,
+      clientY: 100,
+    })
+    fireEvent.pointerMove(surface, { pointerId: 13, clientX: 190, clientY: 100 })
+    fireEvent.pointerUp(surface, { pointerId: 13, clientX: 190, clientY: 100 })
+    await finishAnimation(500)
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
+  })
+
   it('방향 잠금 뒤 시작점에서 release해도 dragging을 종료한다', async () => {
     render(<TurnHarness />)
     await waitFor(() =>
