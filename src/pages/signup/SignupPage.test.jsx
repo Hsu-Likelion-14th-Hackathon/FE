@@ -62,6 +62,21 @@ describe('SignupPage', () => {
     expect(getSignupFormData().get('nationality')).toBe('Kingdom of Bahrain')
   })
 
+  it('RTL 현지어 국가명도 목록의 왼쪽 기준선에 맞춘다', () => {
+    renderSignupPage()
+
+    fireEvent.click(screen.getByRole('button', { name: /국적/ }))
+    fireEvent.change(screen.getByRole('searchbox', { name: '국가 검색' }), {
+      target: { value: 'Bahrain' },
+    })
+
+    const bahrainOption = screen.getByRole('option', { name: /Bahrain/ })
+    const nativeName = within(bahrainOption).getByText('البحرين')
+
+    expect(nativeName).toHaveAttribute('dir', 'auto')
+    expect(window.getComputedStyle(nativeName).textAlign).toBe('left')
+  })
+
   it('달력에서 윤년 생년월일을 선택하고 YYYY-MM-DD 값으로 보관한다', () => {
     renderSignupPage()
 

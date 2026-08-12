@@ -6,14 +6,14 @@ import styles from './CartWishlistTabs.module.scss'
 
 const TABS = [
   {
-    id: 'cart',
-    label: '쇼핑백',
-    to: '/cart',
-  },
-  {
     id: 'wishlist',
     label: '위시리스트',
     to: '/wishlist',
+  },
+  {
+    id: 'cart',
+    label: '쇼핑백',
+    to: '/cart',
   },
 ]
 

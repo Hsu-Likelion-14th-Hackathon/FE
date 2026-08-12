@@ -2,9 +2,9 @@ import { Link } from 'react-router'
 
 import boardingArrow from '@/assets/icons/boarding-arrow.svg'
 import planeIcon from '@/assets/icons/plane.svg'
-import heroPlaneImage from '@/assets/images/home/hero-plane.webp'
-import heroSuitcaseImage from '@/assets/images/home/hero-suitcase.webp'
-import heroWatchImage from '@/assets/images/home/hero-watch.webp'
+import heroPlaneImage from '@/assets/images/home/hero-plane.png'
+import heroSuitcaseImage from '@/assets/images/home/hero-suitcase.png'
+import heroWatchImage from '@/assets/images/home/hero-watch.png'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './HomePage.module.scss'

@@ -23,21 +23,21 @@
 }
 
 .active {
-  color: var(--mcm-color-ink);
-  background: var(--mcm-color-canvas);
+  color: var(--mcm-color-canvas);
+  background-color: var(--mcm-color-brand-brown);
 }
 
 .inactive {
-  color: var(--mcm-color-canvas);
-  background: var(--mcm-color-brand-brown);
+  color: var(--mcm-color-ink);
+  background-color: var(--mcm-color-canvas);
 }
 
-.cart.inactive {
-  border-bottom-right-radius: 8px;
-}
-
-.wishlist.inactive {
+.cart.active {
   border-bottom-left-radius: 8px;
+}
+
+.wishlist.active {
+  border-bottom-right-radius: 8px;
 }
 
 .icon {
@@ -51,12 +51,6 @@
   z-index: 1;
   outline: 2px solid var(--mcm-color-ink);
   outline-offset: -4px;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .inactive:hover {
-    background: color-mix(in srgb, var(--mcm-color-brand-brown) 88%, var(--mcm-color-ink));
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
