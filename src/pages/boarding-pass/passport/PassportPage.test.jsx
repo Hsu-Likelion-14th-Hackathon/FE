@@ -91,6 +91,33 @@ describe('PassportPage', () => {
     await waitFor(() => expect(historyTrigger).toHaveFocus())
   })
 
+  it('시트가 열린 동안 pointer 제스처로 여권 단계를 바꾸지 않는다', () => {
+    renderPassport()
+    const nextButton = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(nextButton)
+    fireEvent.click(nextButton)
+    fireEvent.click(nextButton)
+    fireEvent.click(screen.getByRole('button', { name: 'TRAVEL HISTORY' }))
+    const surface = screen.getByTestId('passport-turn-surface')
+    vi.spyOn(surface, 'getBoundingClientRect').mockReturnValue({ width: 400 })
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 1,
+      button: 0,
+      isPrimary: true,
+      clientX: 100,
+      clientY: 100,
+    })
+    fireEvent.pointerMove(surface, { pointerId: 1, clientX: 220, clientY: 100 })
+    fireEvent.pointerUp(surface, { pointerId: 1, clientX: 220, clientY: 100 })
+
+    expect(screen.getByRole('progressbar', { hidden: true })).toHaveAttribute(
+      'aria-valuenow',
+      '100',
+    )
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+  })
+
   it('시트 배경을 클릭하면 닫고 원래 트리거에 포커스를 복원한다', async () => {
     renderPassport()
     const nextButton = screen.getByRole('button', { name: '다음 단계' })

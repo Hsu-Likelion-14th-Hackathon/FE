@@ -58,6 +58,26 @@ function TurnHarness({ disabled = false, initialStep = 0 }) {
   )
 }
 
+function setSurfaceRect(width = 400) {
+  const surface = screen.getByTestId('passport-turn-surface')
+  vi.spyOn(surface, 'getBoundingClientRect').mockReturnValue({
+    x: 0,
+    y: 0,
+    top: 0,
+    left: 0,
+    right: width,
+    bottom: 394,
+    width,
+    height: 394,
+    toJSON() {},
+  })
+  return surface
+}
+
+async function finishAnimation(duration) {
+  await act(() => vi.advanceTimersByTimeAsync(duration))
+}
+
 beforeEach(() => {
   rendererControl.fail = false
   rendererControl.failRender = false
@@ -98,6 +118,263 @@ afterEach(() => {
 })
 
 describe('PassportPageTurn', () => {
+  it('여권 폭의 25%를 넘긴 왼쪽 스와이프로 다음 단계에 이동한다', async () => {
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+    const surface = setSurfaceRect()
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 1,
+      button: 0,
+      isPrimary: true,
+      clientX: 300,
+      clientY: 100,
+    })
+    fireEvent.pointerMove(surface, { pointerId: 1, clientX: 190, clientY: 104 })
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'dragging')
+    fireEvent.pointerUp(surface, { pointerId: 1, clientX: 190, clientY: 104 })
+    await finishAnimation(500)
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
+  })
+
+  it('25% 미만의 느린 스와이프는 220ms 안에 원래 단계로 복귀한다', async () => {
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+    const surface = setSurfaceRect()
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 2,
+      button: 0,
+      isPrimary: true,
+      clientX: 300,
+      clientY: 100,
+    })
+    await act(() => vi.advanceTimersByTimeAsync(300))
+    fireEvent.pointerMove(surface, { pointerId: 2, clientX: 240, clientY: 102 })
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'dragging')
+    fireEvent.pointerUp(surface, { pointerId: 2, clientX: 240, clientY: 102 })
+    await finishAnimation(240)
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+  })
+
+  it('오른쪽 스와이프로 이전 단계에 이동한다', async () => {
+    render(<TurnHarness initialStep={1} />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+    const surface = setSurfaceRect()
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 3,
+      button: 0,
+      isPrimary: true,
+      clientX: 100,
+      clientY: 100,
+    })
+    fireEvent.pointerMove(surface, { pointerId: 3, clientX: 210, clientY: 104 })
+    fireEvent.pointerUp(surface, { pointerId: 3, clientX: 210, clientY: 104 })
+    await finishAnimation(500)
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
+  })
+
+  it('25% 미만이어도 빠른 스와이프면 다음 단계에 이동한다', async () => {
+    vi.spyOn(performance, 'now').mockReturnValueOnce(0).mockReturnValueOnce(40)
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+    const surface = setSurfaceRect()
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 4,
+      button: 0,
+      isPrimary: true,
+      clientX: 300,
+      clientY: 100,
+    })
+    fireEvent.pointerMove(surface, { pointerId: 4, clientX: 270, clientY: 100 })
+    fireEvent.pointerUp(surface, { pointerId: 4, clientX: 270, clientY: 100 })
+    await finishAnimation(500)
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
+  })
+
+  it('수직 제스처는 page turn을 시작하지 않고 브라우저 스크롤에 남긴다', async () => {
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+    const surface = setSurfaceRect()
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 5,
+      button: 0,
+      isPrimary: true,
+      clientX: 300,
+      clientY: 100,
+    })
+    fireEvent.pointerMove(surface, { pointerId: 5, clientX: 290, clientY: 150 })
+    fireEvent.pointerUp(surface, { pointerId: 5, clientX: 290, clientY: 150 })
+
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
+  })
+
+  it('pointer cancel은 220ms 안에 현재 단계로 복귀한다', async () => {
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+    const surface = setSurfaceRect()
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 6,
+      button: 0,
+      isPrimary: true,
+      clientX: 300,
+      clientY: 100,
+    })
+    fireEvent.pointerMove(surface, { pointerId: 6, clientX: 160, clientY: 100 })
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'dragging')
+    fireEvent.pointerCancel(surface, { pointerId: 6 })
+    await finishAnimation(240)
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+  })
+
+  it('방향 잠금 뒤 시작점에서 release해도 dragging을 종료한다', async () => {
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+    const surface = setSurfaceRect()
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 10,
+      button: 0,
+      isPrimary: true,
+      clientX: 300,
+      clientY: 100,
+    })
+    fireEvent.pointerMove(surface, { pointerId: 10, clientX: 260, clientY: 100 })
+    fireEvent.pointerMove(surface, { pointerId: 10, clientX: 300, clientY: 100 })
+    fireEvent.pointerUp(surface, { pointerId: 10, clientX: 300, clientY: 100 })
+    await finishAnimation(240)
+
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
+  })
+
+  it('reduced motion의 스와이프는 release 직후 commit하고 RAF를 예약하지 않는다', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true }))
+    const requestFrame = vi.fn()
+    vi.stubGlobal('requestAnimationFrame', requestFrame)
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+    )
+    const surface = setSurfaceRect()
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 7,
+      button: 0,
+      isPrimary: true,
+      clientX: 300,
+      clientY: 100,
+    })
+    fireEvent.pointerMove(surface, { pointerId: 7, clientX: 180, clientY: 100 })
+    fireEvent.pointerUp(surface, { pointerId: 7, clientX: 180, clientY: 100 })
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+    expect(requestFrame).not.toHaveBeenCalled()
+  })
+
+  it('CSS3D 미지원 fallback의 화살표는 즉시 한 단계만 이동한다', async () => {
+    vi.stubGlobal('CSS', { supports: () => false })
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
+  })
+
+  it('disabled이면 화살표와 pointer 입력을 모두 무시한다', async () => {
+    render(<TurnHarness disabled />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+    const surface = setSurfaceRect()
+
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    fireEvent.pointerDown(surface, {
+      pointerId: 8,
+      button: 0,
+      isPrimary: true,
+      clientX: 300,
+      clientY: 100,
+    })
+    fireEvent.pointerMove(surface, { pointerId: 8, clientX: 180, clientY: 100 })
+    fireEvent.pointerUp(surface, { pointerId: 8, clientX: 180, clientY: 100 })
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
+    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+  })
+
+  it.each([
+    [0, '이전 단계', 100, 210, '25'],
+    [3, '다음 단계', 300, 190, '100'],
+  ])(
+    '%i단계 경계는 불가능한 화살표와 pointer 방향을 막는다',
+    async (initialStep, buttonName, startX, endX, progress) => {
+      render(<TurnHarness initialStep={initialStep} />)
+      await waitFor(() =>
+        expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+      )
+      const surface = setSurfaceRect()
+
+      expect(screen.getByRole('button', { name: buttonName })).toBeDisabled()
+      fireEvent.pointerDown(surface, {
+        pointerId: 9,
+        button: 0,
+        isPrimary: true,
+        clientX: startX,
+        clientY: 100,
+      })
+      fireEvent.pointerMove(surface, { pointerId: 9, clientX: endX, clientY: 100 })
+      fireEvent.pointerUp(surface, { pointerId: 9, clientX: endX, clientY: 100 })
+
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+      expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', progress)
+    },
+  )
+
+  it('전환 target portal은 inert로 숨기고 현재 단계 region만 노출한다', async () => {
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+
+    expect(screen.getByRole('region', { name: '여권 1단계' })).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '여권 2단계' })).not.toBeInTheDocument()
+    expect(screen.getByText('Step 2').closest('[aria-hidden="true"]')).toHaveAttribute('inert')
+    await finishAnimation(500)
+  })
+
   it('다음 화살표 전환은 애니메이션 완료 후 다음 단계만 확정한다', async () => {
     render(<TurnHarness />)
     await waitFor(() =>

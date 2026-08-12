@@ -10,6 +10,7 @@
   flex: 0 0 auto;
   overflow: visible;
   touch-action: pan-y;
+  user-select: none;
 }
 
 .viewport[data-open='true'] {

@@ -11,6 +11,21 @@ import styles from './PassportPageTurn.module.scss'
 
 const LAST_STEP = 3
 const COMMIT_DURATION = 480
+const DIRECTION_LOCK_PX = 8
+const MIN_FAST_DISTANCE_PX = 24
+const FAST_VELOCITY_PX_MS = 0.45
+const CANCEL_DURATION = 220
+
+function isInteractiveTarget(target) {
+  return target instanceof Element && Boolean(target.closest('button, a, input, select, textarea'))
+}
+
+function shouldCommitTurn({ distance, elapsed, width }) {
+  return (
+    distance >= width * 0.25 ||
+    (distance >= MIN_FAST_DISTANCE_PX && distance / Math.max(elapsed, 1) >= FAST_VELOCITY_PX_MS)
+  )
+}
 
 export default function PassportPageTurn({ step, disabled, onCommit, renderStep }) {
   const [rendererMode, setRendererMode] = useState('fallback')
@@ -26,10 +41,17 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
   const currentObjectRef = useRef(null)
   const targetObjectRef = useRef(null)
   const currentHostRef = useRef(null)
-  const targetHostRef = useRef(null)
   const frameRef = useRef(null)
   const resizeRef = useRef(() => {})
   const fallbackRef = useRef(() => {})
+  const pointerRef = useRef({
+    id: null,
+    startX: 0,
+    startY: 0,
+    startedAt: 0,
+    direction: null,
+    progress: 0,
+  })
 
   const renderScene = useCallback(() => {
     const renderer = rendererRef.current
@@ -120,7 +142,13 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     (direction, options = {}) => {
       const { fromProgress = 0, commit = true, duration = COMMIT_DURATION } = options
       const nextStep = step + direction
-      if (disabled || nextStep < 0 || nextStep > LAST_STEP || turnState !== 'idle') {
+      const isActiveDrag = turnState === 'dragging' && Object.hasOwn(options, 'fromProgress')
+      if (
+        disabled ||
+        nextStep < 0 ||
+        nextStep > LAST_STEP ||
+        (turnState !== 'idle' && !isActiveDrag)
+      ) {
         return
       }
 
@@ -167,7 +195,6 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
       currentObjectRef.current = null
       targetObjectRef.current = null
       currentHostRef.current = null
-      targetHostRef.current = null
     }
     const fallback = (error) => {
       teardown()
@@ -191,7 +218,6 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
       const targetObject = new CSS3DObject(targetHost)
 
       currentHostRef.current = currentHost
-      targetHostRef.current = targetHost
       currentHost.className = styles.host
       targetHost.className = `${styles.host} ${styles.target}`
       targetObject.visible = false
@@ -245,6 +271,129 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
   const progress = (step + 1) * 25
   const inputLocked = disabled || turnState !== 'idle'
 
+  const onPointerDown = (event) => {
+    if (
+      !event.isPrimary ||
+      event.button !== 0 ||
+      isInteractiveTarget(event.target) ||
+      inputLocked
+    ) {
+      return
+    }
+
+    pointerRef.current = {
+      id: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startedAt: performance.now(),
+      direction: null,
+      progress: 0,
+    }
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+  }
+
+  const onPointerMove = (event) => {
+    const pointer = pointerRef.current
+    if (pointer.id !== event.pointerId) return
+
+    const dx = event.clientX - pointer.startX
+    const dy = event.clientY - pointer.startY
+    if (pointer.direction === null) {
+      if (Math.abs(dx) < DIRECTION_LOCK_PX) return
+      if (Math.abs(dy) >= Math.abs(dx)) {
+        event.currentTarget.releasePointerCapture?.(event.pointerId)
+        pointerRef.current = {
+          id: null,
+          startX: 0,
+          startY: 0,
+          startedAt: 0,
+          direction: null,
+          progress: 0,
+        }
+        return
+      }
+
+      const direction = dx < 0 ? 1 : -1
+      const nextStep = step + direction
+      if (nextStep < 0 || nextStep > LAST_STEP) {
+        event.currentTarget.releasePointerCapture?.(event.pointerId)
+        pointerRef.current = {
+          id: null,
+          startX: 0,
+          startY: 0,
+          startedAt: 0,
+          direction: null,
+          progress: 0,
+        }
+        return
+      }
+
+      pointer.direction = direction
+      if (rendererMode === 'ready') {
+        targetObjectRef.current.visible = true
+        setTargetStep(nextStep)
+        setTurnState('dragging')
+      }
+    }
+
+    const width = Math.max(event.currentTarget.getBoundingClientRect().width, 1)
+    pointer.progress = Math.min(Math.abs(dx) / width, 1)
+    if (rendererMode === 'ready') applyProgress(pointer.direction, pointer.progress)
+    event.preventDefault()
+  }
+
+  const onPointerUp = (event) => {
+    const pointer = pointerRef.current
+    if (pointer.id !== event.pointerId) return
+
+    event.currentTarget.releasePointerCapture?.(event.pointerId)
+    pointerRef.current = {
+      id: null,
+      startX: 0,
+      startY: 0,
+      startedAt: 0,
+      direction: null,
+      progress: 0,
+    }
+    if (pointer.direction === null) return
+
+    const width = Math.max(event.currentTarget.getBoundingClientRect().width, 1)
+    const distance = Math.abs(event.clientX - pointer.startX)
+    const fromProgress = Math.min(distance / width, 1)
+    const commit = shouldCommitTurn({
+      distance,
+      elapsed: performance.now() - pointer.startedAt,
+      width,
+    })
+    requestTurn(pointer.direction, {
+      fromProgress,
+      commit,
+      duration: commit ? COMMIT_DURATION : CANCEL_DURATION,
+    })
+  }
+
+  const onPointerCancel = (event) => {
+    const pointer = pointerRef.current
+    if (pointer.id !== event.pointerId) return
+
+    event.currentTarget.releasePointerCapture?.(event.pointerId)
+    pointerRef.current = {
+      id: null,
+      startX: 0,
+      startY: 0,
+      startedAt: 0,
+      direction: null,
+      progress: 0,
+    }
+    if (pointer.direction !== null) {
+      requestTurn(pointer.direction, {
+        fromProgress: pointer.progress,
+        commit: false,
+        duration: CANCEL_DURATION,
+      })
+    }
+  }
+
   return (
     <div
       className={styles.root}
@@ -257,6 +406,10 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
         className={styles.viewport}
         data-open={step > 0}
         data-testid="passport-turn-surface"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
       >
         <div ref={rendererMountRef} />
         {rendererMode === 'ready' && hosts.current
