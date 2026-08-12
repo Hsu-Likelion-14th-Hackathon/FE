@@ -40,11 +40,11 @@
   position: absolute;
   z-index: 3;
   /* Figma 492:4939 — left 20 / top 161 → 스테이지 기준 top ≈ 26 */
-  top: 1.625rem;
-  left: 1.25rem;
+  top: 0.6875rem;
+  left: 0.3125rem;
   display: grid;
-  width: 0.875rem;
-  height: 0.875rem;
+  width: 2.75rem;
+  height: 2.75rem;
   place-items: center;
 }
 
@@ -150,6 +150,7 @@
   object-fit: contain;
   object-position: bottom;
   pointer-events: none;
+  transform: scale(1.3226);
 }
 
 .plane {
@@ -159,6 +160,7 @@
   object-fit: contain;
   object-position: bottom;
   pointer-events: none;
+  transform: scale(1.3226);
 }
 
 .actions {
@@ -197,19 +199,20 @@
   display: flex;
   width: 100%;
   gap: 0.625rem; /* 10 */
+  margin-block: -0.3125rem;
 }
 
 .secondaryCta {
   position: relative;
   display: flex;
-  height: 2.125rem; /* 34 */
+  height: 2.75rem; /* 44px hit target; visual capsule stays 34px */
   flex: 1;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
   border: none;
   border-radius: 6.25rem; /* 100 */
-  background: rgba(255, 247, 213, 0.2);
+  background: transparent;
   font-size: 0.625rem; /* 10 */
   font-weight: 600;
   line-height: 1;
@@ -221,8 +224,8 @@
 /* (22) Next와 동일한 메탈릭 보더 하이라이트 */
 .secondaryCta::before {
   position: absolute;
-  inset: 0;
-  z-index: 0;
+  inset: 0.3125rem 0;
+  z-index: 1;
   border-radius: inherit;
   padding: 1px;
   background: conic-gradient(
@@ -252,9 +255,18 @@
   mask-composite: exclude;
 }
 
+.secondaryCta::after {
+  position: absolute;
+  inset: 0.3125rem 0;
+  z-index: 0;
+  border-radius: 6.25rem;
+  background: rgba(255, 247, 213, 0.2);
+  content: '';
+}
+
 .secondaryCtaLabel {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .iconRow {

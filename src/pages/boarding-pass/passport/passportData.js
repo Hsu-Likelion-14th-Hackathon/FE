@@ -38,7 +38,7 @@ export const passportTicket = {
   flightCode: 'MCM 6506',
   cabinClass: 'FIRST CLASS',
   from: { city: 'Seoul', code: 'ICN', localName: '서울' },
-  to: { city: 'Munich', code: 'MUC', localName: 'MCM HAUS' },
+  to: { city: 'Munich', code: 'MUC', localName: 'MCM' },
   gate: '1ST FLOOR',
   boardingLabel: 'TUE, 25 AUG 2026',
   timeStart: '11:00 AM',

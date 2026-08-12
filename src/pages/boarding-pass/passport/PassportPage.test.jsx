@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import AppProviders from '@/app/providers.jsx'
 import { Component as PassportPage } from './PassportPage.jsx'
+import { passportTicket } from './passportData.js'
 
 vi.mock('@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx', () => ({
   useBagHandlers: () => ({}),
@@ -122,8 +123,10 @@ describe('PassportPage', () => {
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
     expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent('0001')
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    expect(screen.getByRole('region', { name: '여권 방문 스탬프' })).toHaveTextContent(
-      '총 방문 횟수 6회',
+    const stamps = screen.getByRole('region', { name: '여권 방문 스탬프' })
+    expect(stamps).toHaveTextContent('총 방문 횟수 | 6회')
+    expect(window.getComputedStyle(screen.getByText('총 방문 횟수 | 6회')).borderRadius).toBe(
+      '0.5rem',
     )
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
     expect(screen.getByRole('region', { name: '여권 여행 기록' })).toHaveTextContent('MCM HAUS')
@@ -180,6 +183,63 @@ describe('PassportPage', () => {
 
     expect(screen.getByText('1976년, München - 밤의 도시가 낳은 대담함')).toBeInTheDocument()
     expect(screen.getByText('Modern Creation München')).toBeInTheDocument()
+    expect(screen.getByText(/미하엘 크로머\(Michael Cromer\)/)).toBeInTheDocument()
+    expect(screen.getByText(/‘어디론가 떠날 수 있는 태도’를/)).toBeInTheDocument()
+    expect(passportTicket.to.localName).toBe('MCM')
     expect(screen.getByRole('dialog', { name: '1F JOURNEY 상세' })).not.toHaveTextContent('TICKET')
+  })
+
+  it('열린 여권 원본의 투명 여백만 장면 밖으로 잘라낸다', () => {
+    renderPassport()
+
+    const coverImage = screen.getByRole('region', { name: '여권 표지' }).querySelector('img')
+    expect(window.getComputedStyle(coverImage).position).not.toBe('absolute')
+
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const openPassport = screen.getByRole('region', { name: '여권 프로필' })
+    const openImage = openPassport.querySelector('img')
+    const profile = openPassport.querySelector('h3').parentElement
+    const openImageStyle = window.getComputedStyle(openImage)
+
+    expect(window.getComputedStyle(openPassport).width).toBe('31.6875rem')
+    expect(window.getComputedStyle(openPassport).isolation).toBe('isolate')
+    expect(openImageStyle.position).toBe('absolute')
+    expect(openImageStyle.maxWidth).toBe('none')
+    expect(openImageStyle.width).toBe('120.43%')
+    expect(openImageStyle.height).toBe('122.36%')
+    expect(openImageStyle.left).toBe('-10.21%')
+    expect(openImageStyle.top).toBe('-11.8%')
+    expect(window.getComputedStyle(profile).gap).toBe('1rem')
+  })
+
+  it('프로필 제품 CTA와 현재 여권 단계 정보를 제공한다', async () => {
+    const router = renderPassport()
+    const progress = screen.getByRole('progressbar', { name: '여권 진행률' })
+
+    expect(progress).toHaveAttribute('aria-valuetext', '1단계 / 4단계')
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    expect(progress).toHaveAttribute('aria-valuetext', '2단계 / 4단계')
+
+    const products = screen.getByRole('button', { name: '제품 보러가기' })
+    expect(window.getComputedStyle(products).minHeight).toBe('2.75rem')
+    expect(window.getComputedStyle(products).minWidth).toBe('2.75rem')
+    fireEvent.click(products)
+    await waitFor(() => expect(router.state.location.pathname).toBe('/products'))
+  })
+
+  it('최종 단계 장식을 투명 비행기와 티켓 레이어를 담은 두 카드로 구성한다', () => {
+    renderPassport()
+    const next = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(next)
+    fireEvent.click(next)
+    fireEvent.click(next)
+
+    expect(screen.getByRole('heading', { name: 'PASSPORT' })).toBeInTheDocument()
+    const artwork = screen.getByRole('img', { name: '비행기와 탑승권' })
+    expect(artwork.children).toHaveLength(2)
+    expect(artwork.querySelectorAll('img')).toHaveLength(3)
+    for (const card of artwork.children) {
+      expect(window.getComputedStyle(card).backgroundColor).toBe('rgb(29, 12, 0)')
+    }
   })
 })

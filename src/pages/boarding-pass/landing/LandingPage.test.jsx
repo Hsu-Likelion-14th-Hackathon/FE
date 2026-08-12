@@ -86,4 +86,19 @@ describe('LandingPage', () => {
 
     expect(router.state.location.pathname).toBe('/boarding-pass')
   })
+
+  it('keeps the close and Passport controls at least 44px tall without enlarging their glyphs', async () => {
+    renderLanding()
+
+    const close = screen.getByRole('button', { name: '닫기' })
+    const passport = await screen.findByRole('button', { name: 'PASSPORT 확인' })
+
+    expect(window.getComputedStyle(close).width).toBe('2.75rem')
+    expect(window.getComputedStyle(close).height).toBe('2.75rem')
+    expect(window.getComputedStyle(passport).height).toBe('2.75rem')
+    expect(close.querySelector('img')).toHaveStyle({ width: '0.875rem', height: '0.875rem' })
+    expect(
+      window.getComputedStyle(document.querySelector('[class*="planeFrame"] img')).transform,
+    ).toBe('scale(1.3226)')
+  })
 })

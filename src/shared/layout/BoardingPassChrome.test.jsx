@@ -15,5 +15,11 @@ describe('BoardingPassChrome', () => {
     expect(window.getComputedStyle(row).height).toBe('3.375rem')
     expect(window.getComputedStyle(left).display).toBe('flex')
     expect(window.getComputedStyle(right).display).toBe('flex')
+    expect(window.getComputedStyle(screen.getByRole('button', { name: '메뉴' })).width).toBe(
+      '2.75rem',
+    )
+    expect(window.getComputedStyle(screen.getByRole('button', { name: '메뉴' })).height).toBe(
+      '2.75rem',
+    )
   })
 })
