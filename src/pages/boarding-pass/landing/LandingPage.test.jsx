@@ -92,4 +92,16 @@ describe('LandingPage', () => {
       window.getComputedStyle(document.querySelector('[class*="planeFrame"] img')).transform,
     ).toBe('scale(1.3226)')
   })
+
+  it('subtracts the shared header and safe top from the stage height', () => {
+    renderLanding()
+
+    const stage = screen
+      .getByRole('heading', { level: 2, name: 'MCM BOARDING PASS' })
+      .closest('section')
+
+    expect(stage.style.minHeight).toBe(
+      'calc(var(--mcm-viewport-stable) - var(--mcm-header-height) - var(--mcm-safe-top))',
+    )
+  })
 })

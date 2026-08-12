@@ -63,7 +63,14 @@ export function Component() {
       <div inert={sheet || undefined} className={sheet ? styles.dimmed : undefined}>
         <BoardingPassChrome />
       </div>
-      <section className={styles.stage} aria-labelledby="passport-title">
+      <section
+        className={styles.stage}
+        aria-labelledby="passport-title"
+        style={{
+          minHeight:
+            'calc(var(--mcm-viewport-stable) - var(--mcm-header-height) - var(--mcm-safe-top))',
+        }}
+      >
         <img src={stageBack} alt="" aria-hidden="true" className={styles.stageBack} />
         <div className={styles.footerFade} aria-hidden="true" />
         <button

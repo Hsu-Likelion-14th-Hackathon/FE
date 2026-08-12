@@ -3,7 +3,6 @@ import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 
 import BoardingPassChrome from './BoardingPassChrome.jsx'
-import styles from './BoardingPassChrome.module.scss'
 
 describe('BoardingPassChrome', () => {
   it('메뉴·로고·위시리스트·장바구니의 조작 영역을 2.75rem으로 유지한다', () => {
@@ -33,7 +32,7 @@ describe('BoardingPassChrome', () => {
     }
   })
 
-  it('preserves a consumer header class alongside the safe-area header class', () => {
+  it('preserves the consumer class and exposes the safe-area canvas styles', () => {
     const { container } = render(
       <MemoryRouter>
         <BoardingPassChrome className="custom-chrome" />
@@ -42,6 +41,8 @@ describe('BoardingPassChrome', () => {
 
     const header = container.querySelector('header')
 
-    expect(header).toHaveClass(styles.header, 'custom-chrome')
+    expect(header).toHaveClass('custom-chrome')
+    expect(header.style.paddingTop).toBe('var(--mcm-safe-top)')
+    expect(header.style.background).toBe('var(--mcm-color-canvas)')
   })
 })

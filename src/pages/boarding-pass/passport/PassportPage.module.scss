@@ -10,7 +10,6 @@
   position: relative;
   display: flex;
   box-sizing: border-box;
-  min-height: calc(var(--mcm-viewport-stable) - var(--mcm-header-height) - var(--mcm-safe-top));
   flex: 1;
   flex-direction: column;
   overflow: hidden;

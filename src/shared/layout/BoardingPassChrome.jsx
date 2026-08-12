@@ -32,7 +32,13 @@ function BoardingPassChrome({
   }, [isOpen])
 
   return (
-    <header className={`${styles.header} ${className}`}>
+    <header
+      className={className}
+      style={{
+        paddingTop: 'var(--mcm-safe-top)',
+        background: 'var(--mcm-color-canvas)',
+      }}
+    >
       {showTitleBand ? (
         <div className={styles.titleBand}>
           <span aria-hidden="true" className={styles.ornamentLeft}>

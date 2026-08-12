@@ -48,7 +48,13 @@ export function Component() {
   return (
     <main className="flex min-h-[var(--mcm-viewport-stable)] flex-col bg-[#fafafa]">
       <BoardingPassChrome iconRowClassName={styles.iconRow} />
-      <section className={styles.stage}>
+      <section
+        className={styles.stage}
+        style={{
+          minHeight:
+            'calc(var(--mcm-viewport-stable) - var(--mcm-header-height) - var(--mcm-safe-top))',
+        }}
+      >
         <img src={stageBack} alt="" aria-hidden="true" className={styles.stageBack} />
         <div className={styles.footerFade} aria-hidden="true" />
 

@@ -207,6 +207,16 @@ describe('PassportPage', () => {
     expect(window.getComputedStyle(stage).boxSizing).toBe('border-box')
   })
 
+  it('subtracts the shared header and safe top from the stage height', () => {
+    renderPassport()
+
+    const stage = screen.getByRole('heading', { level: 2, name: 'MCM PASSPORT' }).closest('section')
+
+    expect(stage.style.minHeight).toBe(
+      'calc(var(--mcm-viewport-stable) - var(--mcm-header-height) - var(--mcm-safe-top))',
+    )
+  })
+
   it('모든 단계에 여권 안내 카피와 상세 여행 콘텐츠를 제공한다', () => {
     renderPassport()
 
