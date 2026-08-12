@@ -1,0 +1,50 @@
+.root {
+  display: contents;
+}
+
+.viewport {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: calc(2.25rem + min(79.5vw, 19.375rem) * 394 / 310);
+  flex: 0 0 auto;
+  overflow: visible;
+  touch-action: pan-y;
+}
+
+.viewport[data-open='true'] {
+  height: calc(2.25rem + 24.625rem);
+}
+
+.renderer {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  transform-style: preserve-3d;
+}
+
+.host,
+.face,
+.fallback {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.face {
+  backface-visibility: hidden;
+}
+
+.target {
+  pointer-events: none;
+}
+
+@media (max-width: 22rem) {
+  .viewport {
+    height: calc(1.25rem + min(79.5vw, 19.375rem) * 394 / 310);
+  }
+
+  .viewport[data-open='true'] {
+    height: calc(1.25rem + 24.625rem);
+  }
+}

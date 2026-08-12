@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router'
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import { useBagHandlers } from '@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
-import navNext from '@/shared/assets/boarding-pass/guide/nav-next.svg'
-import navPrev from '@/shared/assets/boarding-pass/guide/nav-prev.svg'
 import stageBack from '@/shared/assets/boarding-pass/landing/stage-back.svg'
 import journeyDecoration from '@/shared/assets/boarding-pass/passport/journey-decoration.png'
 import journeyTicket from '@/shared/assets/boarding-pass/passport/journey-ticket.png'
@@ -25,6 +23,7 @@ import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
 
 import { journeyRecords, passportProfile, passportStamps, passportTicket } from './passportData.js'
 import styles from './PassportPage.module.scss'
+import PassportPageTurn from './PassportPageTurn.jsx'
 
 const sheetLabels = {
   history: '여행 기록',
@@ -39,8 +38,6 @@ export function Component() {
   const [sheet, setSheet] = useState(null)
   const dialogRef = useRef(null)
   const sheetTriggerRef = useRef(null)
-  const progress = (step + 1) * 25
-  const moveStep = (delta) => setStep((current) => Math.min(3, Math.max(0, current + delta)))
 
   const openSheet = (nextSheet, trigger) => {
     if (!sheet) sheetTriggerRef.current = trigger
@@ -91,41 +88,21 @@ export function Component() {
             <strong>당신의 MCM 비행에 완벽한 맞춤형 동선을 추천합니다</strong>
             <span>이 행사는 MCM HAUS 매장 기반으로 진행됩니다</span>
           </div>
-          <PassportSpread
+          <PassportPageTurn
             step={step}
-            onHistory={(event) => openSheet('history', event.currentTarget)}
-            onTicket={(event) => openSheet('ticket', event.currentTarget)}
-            onProducts={() => navigate('/products')}
+            disabled={Boolean(sheet)}
+            onCommit={(direction) =>
+              setStep((current) => Math.min(3, Math.max(0, current + direction)))
+            }
+            renderStep={(visibleStep) => (
+              <PassportSpread
+                step={visibleStep}
+                onHistory={(event) => openSheet('history', event.currentTarget)}
+                onTicket={(event) => openSheet('ticket', event.currentTarget)}
+                onProducts={() => navigate('/products')}
+              />
+            )}
           />
-          <nav className={styles.navigation} aria-label="여권 단계 이동">
-            <button
-              type="button"
-              aria-label="이전 단계"
-              disabled={step === 0}
-              onClick={() => moveStep(-1)}
-            >
-              <img src={navPrev} alt="" />
-            </button>
-            <div
-              role="progressbar"
-              aria-label="여권 진행률"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              aria-valuenow={progress}
-              aria-valuetext={`${step + 1}단계 / 4단계`}
-              className={styles.progress}
-            >
-              <span style={{ width: `${progress}%` }} />
-            </div>
-            <button
-              type="button"
-              aria-label="다음 단계"
-              disabled={step === 3}
-              onClick={() => moveStep(1)}
-            >
-              <img src={navNext} alt="" />
-            </button>
-          </nav>
         </div>
         {sheet ? (
           <div className={styles.sheetRoot}>
@@ -166,7 +143,11 @@ export function Component() {
 function PassportSpread({ step, onHistory, onTicket, onProducts }) {
   if (step === 0) {
     return (
-      <section className={`${styles.passport} ${styles.coverPassport}`} aria-label="여권 표지">
+      <section
+        data-passport-surface
+        className={`${styles.passport} ${styles.coverPassport}`}
+        aria-label="여권 표지"
+      >
         <img src={passportCover} alt="" className={styles.passportImage} />
         <img src={coverMcm} alt="MCM" className={styles.coverMcm} />
         <img src={coverStar} alt="" className={styles.coverStar} />
@@ -180,7 +161,11 @@ function PassportSpread({ step, onHistory, onTicket, onProducts }) {
 
   if (step === 1) {
     return (
-      <section className={`${styles.passport} ${styles.openPassport}`} aria-label="여권 프로필">
+      <section
+        data-passport-surface
+        className={`${styles.passport} ${styles.openPassport}`}
+        aria-label="여권 프로필"
+      >
         <img
           src={passportSpread}
           alt=""
@@ -221,6 +206,7 @@ function PassportSpread({ step, onHistory, onTicket, onProducts }) {
   if (step === 2) {
     return (
       <section
+        data-passport-surface
         className={`${styles.passport} ${styles.openPassport}`}
         aria-label="여권 방문 스탬프"
       >
@@ -247,7 +233,11 @@ function PassportSpread({ step, onHistory, onTicket, onProducts }) {
   }
 
   return (
-    <section className={`${styles.passport} ${styles.openPassport}`} aria-label="여권 여행 기록">
+    <section
+      data-passport-surface
+      className={`${styles.passport} ${styles.openPassport}`}
+      aria-label="여권 여행 기록"
+    >
       <img
         src={passportSpread}
         alt=""

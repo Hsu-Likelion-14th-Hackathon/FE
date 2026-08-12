@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import AppProviders from '@/app/providers.jsx'
 import { Component as PassportPage } from './PassportPage.jsx'
@@ -9,6 +9,21 @@ import { passportTicket } from './passportData.js'
 vi.mock('@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx', () => ({
   useBagHandlers: () => ({}),
 }))
+
+vi.mock('three/addons/renderers/CSS3DRenderer.js', async (importOriginal) => {
+  const actual = await importOriginal()
+
+  class FailingRenderer {
+    constructor() {
+      throw new Error('renderer failed')
+    }
+  }
+
+  return { ...actual, CSS3DRenderer: FailingRenderer }
+})
+
+beforeEach(() => vi.spyOn(console, 'warn').mockImplementation(() => {}))
+afterEach(() => vi.restoreAllMocks())
 
 function renderPassport() {
   const router = createMemoryRouter(
