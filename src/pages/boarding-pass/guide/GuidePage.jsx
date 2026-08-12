@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
-import { useBagHandlers } from '@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx'
 import {
   guideFloorContent,
   overviewHeroes,
@@ -29,7 +28,6 @@ const FLOOR_ORDER = ['overview', '1f', '2f', '3f']
  */
 export function Component() {
   const navigate = useNavigate()
-  const bagHandlers = useBagHandlers()
   const [floor, setFloor] = useState('overview')
   const [heroIndex, setHeroIndex] = useState(0)
   const floorIndex = FLOOR_ORDER.indexOf(floor)
@@ -69,7 +67,7 @@ export function Component() {
 
   return (
     <div className={styles.stage}>
-      <BoardingPassChrome {...bagHandlers} />
+      <BoardingPassChrome />
 
       <div aria-hidden="true" className={styles.deco}>
         <img src={cloudLargeImg} alt="" className={styles.cloudTop} />

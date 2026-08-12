@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import { PASS_STORAGE_KEY } from '@/features/boarding-pass/boarding-ticket/passStorage.js'
-import { useBagHandlers } from '@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx'
 import SavePassToast from '@/features/boarding-pass/save-pass-toast/SavePassToast.jsx'
 import { getCurrentBoardingPass } from '@/shared/api/boardingPassApi.js'
 import stageBack from '@/shared/assets/boarding-pass/complete/stage-back.svg'
@@ -30,7 +29,6 @@ export function Component() {
   const navigate = useNavigate()
   const location = useLocation()
   const { showToast } = useToast()
-  const bagHandlers = useBagHandlers()
   const [pass, setPass] = useState(() => location.state?.pass ?? readStoredPass())
   const [error, setError] = useState(null)
 
@@ -66,7 +64,7 @@ export function Component() {
       <div className={styles.fade} aria-hidden="true" />
 
       <div className={styles.content}>
-        <BoardingPassChrome {...bagHandlers} />
+        <BoardingPassChrome />
 
         <section className={styles.body}>
           <button

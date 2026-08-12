@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
 
@@ -16,6 +16,12 @@ const routeCases = [
   ['/unknown', '페이지를 찾을 수 없습니다'],
   ['/products/mcm-001/unknown', '페이지를 찾을 수 없습니다'],
   ['/products//try-on', '페이지를 찾을 수 없습니다'],
+]
+
+const boardingChromeRouteCases = [
+  ['MCM 메인', '/', '메인'],
+  ['위시리스트', '/wishlist', '위시리스트'],
+  ['장바구니', '/cart', '쇼핑백'],
 ]
 
 const activeRouters = []
@@ -223,6 +229,41 @@ describe('App', () => {
 
     expect(screen.queryByRole('dialog', { name: '전체 메뉴' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '메뉴 열기' })).toHaveFocus()
+  })
+
+  it('보딩패스 Chrome 메뉴를 Escape로 닫으면 트리거에 포커스를 복원한다', async () => {
+    renderRoute('/boarding-pass')
+    const menuButton = await screen.findByRole('button', { name: '메뉴 열기' })
+
+    fireEvent.click(menuButton)
+    expect(screen.getByRole('dialog', { name: '전체 메뉴' })).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog', { name: '전체 메뉴' })).not.toBeInTheDocument()
+    expect(menuButton).toHaveFocus()
+  })
+
+  it.each(boardingChromeRouteCases)(
+    '보딩패스 Chrome의 %s 링크가 %s로 이동한다',
+    async (linkName, pathname, heading) => {
+      const router = renderRoute('/boarding-pass')
+
+      fireEvent.click(await screen.findByRole('link', { name: linkName }))
+
+      expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
+      expect(router.state.location.pathname).toBe(pathname)
+    },
+  )
+
+  it('일반 헤더 SVG와 보딩패스 Chrome 이미지에서 검색 glyph를 제거한다', async () => {
+    renderRoute('/')
+    await screen.findByRole('link', { name: 'Boarding' })
+    expect(document.querySelectorAll('header svg')).toHaveLength(4)
+
+    cleanup()
+    renderRoute('/boarding-pass')
+    const menuButton = await screen.findByRole('button', { name: '메뉴 열기' })
+    expect(menuButton.closest('header').querySelectorAll('img')).toHaveLength(4)
   })
 
   it('열린 메뉴 안에서 Tab 포커스를 순환한다', async () => {

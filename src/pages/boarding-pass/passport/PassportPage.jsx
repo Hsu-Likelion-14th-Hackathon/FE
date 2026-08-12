@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
-import { useBagHandlers } from '@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import stageBack from '@/shared/assets/boarding-pass/landing/stage-back.svg'
 import journeyDecoration from '@/shared/assets/boarding-pass/passport/journey-decoration.png'
@@ -33,7 +32,6 @@ const sheetLabels = {
 
 export function Component() {
   const navigate = useNavigate()
-  const bagHandlers = useBagHandlers()
   const [step, setStep] = useState(0)
   const [sheet, setSheet] = useState(null)
   const dialogRef = useRef(null)
@@ -63,7 +61,7 @@ export function Component() {
   return (
     <div className={styles.page}>
       <div inert={sheet || undefined} className={sheet ? styles.dimmed : undefined}>
-        <BoardingPassChrome {...bagHandlers} />
+        <BoardingPassChrome />
       </div>
       <section className={styles.stage} aria-labelledby="passport-title">
         <img src={stageBack} alt="" aria-hidden="true" className={styles.stageBack} />

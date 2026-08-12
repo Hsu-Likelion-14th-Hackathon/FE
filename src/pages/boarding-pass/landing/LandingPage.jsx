@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
-import { useBagHandlers } from '@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx'
 import NoPassToast from '@/features/boarding-pass/no-pass-toast/NoPassToast.jsx'
 import { getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
@@ -21,7 +20,6 @@ import styles from './LandingPage.module.scss'
  */
 export function Component() {
   const navigate = useNavigate()
-  const bagHandlers = useBagHandlers()
   const { showToast } = useToast()
   const [scanning, setScanning] = useState(false)
 
@@ -49,7 +47,7 @@ export function Component() {
 
   return (
     <main className="flex min-h-[var(--mcm-viewport-stable)] flex-col bg-[#fafafa]">
-      <BoardingPassChrome {...bagHandlers} iconRowClassName={styles.iconRow} />
+      <BoardingPassChrome iconRowClassName={styles.iconRow} />
       <section className={styles.stage}>
         <img src={stageBack} alt="" aria-hidden="true" className={styles.stageBack} />
         <div className={styles.footerFade} aria-hidden="true" />

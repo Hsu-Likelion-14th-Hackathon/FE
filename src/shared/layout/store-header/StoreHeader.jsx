@@ -3,13 +3,7 @@ import { Link } from 'react-router'
 
 import brandStripDiamond from '@/assets/icons/brand-strip-diamond.svg'
 import brandStripDot from '@/assets/icons/brand-strip-dot.svg'
-import {
-  CartIcon,
-  HeartIcon,
-  McmLogoIcon,
-  MenuIcon,
-  SearchIcon,
-} from '@/shared/ui/icons/StoreIcons.jsx'
+import { CartIcon, HeartIcon, McmLogoIcon, MenuIcon } from '@/shared/ui/icons/StoreIcons.jsx'
 import useStoreMenu from '@/shared/layout/store-menu/useStoreMenu.js'
 
 import styles from './StoreHeader.module.scss'
@@ -62,9 +56,6 @@ function StoreHeader() {
             >
               <MenuIcon className={styles.icon} />
             </button>
-            <span aria-hidden="true">
-              <SearchIcon className={styles.icon} />
-            </span>
           </div>
 
           <Link className={styles.logoLink} to="/" aria-label="MCM 메인" onClick={closeMenu}>

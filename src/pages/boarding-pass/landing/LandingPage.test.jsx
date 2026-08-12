@@ -7,10 +7,6 @@ import AppProviders from '@/app/providers.jsx'
 const mockGetLatestBoardingPass = vi.hoisted(() => vi.fn())
 const activeRouters = []
 
-vi.mock('@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx', () => ({
-  useBagHandlers: () => ({}),
-}))
-
 vi.mock('@/shared/api/boardingPassApi.js', () => ({
   getLatestBoardingPass: mockGetLatestBoardingPass,
 }))

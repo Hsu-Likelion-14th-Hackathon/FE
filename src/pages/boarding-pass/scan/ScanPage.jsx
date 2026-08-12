@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import CreditToast from '@/features/boarding-pass/credit-toast/CreditToast.jsx'
-import { useBagHandlers } from '@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx'
 import ScanDepartLoadingOverlay from '@/features/boarding-pass/scan-loading/ScanDepartLoadingOverlay.jsx'
 import { getCurrentBoardingPass, simulateScan } from '@/shared/api/boardingPassApi.js'
 import backArrowIcon from '@/shared/assets/boarding-pass/icons/back-arrow.svg'
@@ -25,7 +24,6 @@ const TOAST_EXIT_MS = 320
  */
 export function Component() {
   const navigate = useNavigate()
-  const bagHandlers = useBagHandlers()
   const [pass, setPass] = useState(null)
   const [phase, setPhase] = useState('idle')
   const [scanning, setScanning] = useState(false)
@@ -116,7 +114,7 @@ export function Component() {
 
   return (
     <div className={styles.page}>
-      <BoardingPassChrome {...bagHandlers} />
+      <BoardingPassChrome />
 
       <main className={styles.main}>
         <button

@@ -24,17 +24,6 @@ export function MenuIcon({ className }) {
   )
 }
 
-export function SearchIcon({ className }) {
-  return (
-    <IconSvg className={className} viewBox="42 0 22 24">
-      <path
-        d="M51 2C55.9706 2 60 6.02944 60 11C60 12.8682 59.4296 14.6027 58.4551 16.041L63.0713 20.6572C63.4615 21.0478 63.4617 21.6809 63.0713 22.0713C62.6809 22.4617 62.0478 22.4615 61.6572 22.0713L57.1514 17.5654C55.542 19.074 53.3799 20 51 20C46.0294 20 42 15.9706 42 11C42 6.02944 46.0294 2 51 2ZM51 4C47.134 4 44 7.13401 44 11C44 14.866 47.134 18 51 18C54.866 18 58 14.866 58 11C58 7.13401 54.866 4 51 4Z"
-        fill="currentColor"
-      />
-    </IconSvg>
-  )
-}
-
 export function McmLogoIcon({ className }) {
   return (
     <IconSvg className={className} viewBox="145 0 61 24">

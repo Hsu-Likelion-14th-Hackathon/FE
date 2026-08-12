@@ -10,7 +10,6 @@
 | 키                  | 경로                                                     | 원본 nodeId | 타입 | 사용처                                                       |
 | ------------------- | -------------------------------------------------------- | ----------- | ---- | ------------------------------------------------------------ |
 | icon-menu           | src/shared/assets/boarding-pass/icons/menu.svg           | 472:4759    | svg  | 헤더 좌측 메뉴 (전 화면 공통)                                |
-| icon-search         | src/shared/assets/boarding-pass/icons/search.svg         | 472:4763    | svg  | 헤더 검색 (전 화면 공통)                                     |
 | icon-heart          | src/shared/assets/boarding-pass/icons/heart.svg          | 472:4768    | svg  | 헤더 위시리스트 (전 화면 공통)                               |
 | icon-cart           | src/shared/assets/boarding-pass/icons/cart.svg           | 472:4770    | svg  | 헤더 장바구니 (전 화면 공통)                                 |
 | logo-mcm-wordmark   | src/shared/assets/boarding-pass/icons/mcm-wordmark.svg   | 472:4772    | svg  | 헤더 중앙 MCM 워드마크 로고 (전 화면 공통)                   |

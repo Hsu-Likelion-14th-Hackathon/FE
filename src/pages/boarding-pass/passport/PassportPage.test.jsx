@@ -6,10 +6,6 @@ import AppProviders from '@/app/providers.jsx'
 import { Component as PassportPage } from './PassportPage.jsx'
 import { passportTicket } from './passportData.js'
 
-vi.mock('@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx', () => ({
-  useBagHandlers: () => ({}),
-}))
-
 vi.mock('three/addons/renderers/CSS3DRenderer.js', async (importOriginal) => {
   const actual = await importOriginal()
 
@@ -78,12 +74,12 @@ describe('PassportPage', () => {
     const historyTrigger = screen.getByRole('button', { name: 'TRAVEL HISTORY' })
     fireEvent.click(historyTrigger)
     expect(screen.getByRole('progressbar').closest('[inert]')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '메뉴' }).closest('[inert]')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '메뉴 열기' }).closest('[inert]')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '닫기' }).closest('[inert]')).not.toBeInTheDocument()
     fireEvent.keyDown(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' }), {
       key: 'Tab',
     })
-    expect(screen.getByRole('button', { name: '메뉴' }).closest('[inert]')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '메뉴 열기' }).closest('[inert]')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: '닫기' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()

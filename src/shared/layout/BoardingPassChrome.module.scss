@@ -102,14 +102,16 @@
   place-items: center;
 }
 
+.logoLink {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+}
+
 .menuIcon {
   width: 1.375rem;
   height: 1.125rem;
-}
-
-.searchIcon {
-  width: 1.3125rem;
-  height: 1.3125rem;
 }
 
 .wordmark {

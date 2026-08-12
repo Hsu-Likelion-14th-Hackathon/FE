@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
-import { useBagHandlers } from '@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx'
 import { getCurrentBoardingPass } from '@/shared/api/boardingPassApi.js'
 import cameraDotImg from '@/shared/assets/boarding-pass/flight/camera-dot.svg'
 import cloudLargeImg from '@/shared/assets/boarding-pass/flight/cloud-large.png'
@@ -32,7 +31,6 @@ import styles from './FlightPage.module.scss'
  */
 export function Component() {
   const navigate = useNavigate()
-  const bagHandlers = useBagHandlers()
   const [pass, setPass] = useState(null)
   const [ticketOpen, setTicketOpen] = useState(false)
   const [docentPlaying, setDocentPlaying] = useState(false)
@@ -55,7 +53,7 @@ export function Component() {
 
   return (
     <div className={styles.page}>
-      <BoardingPassChrome {...bagHandlers} />
+      <BoardingPassChrome />
 
       <div aria-hidden="true" className={styles.ambiance}>
         <img src={cloudLargeImg} alt="" className={styles.cloudTop} />

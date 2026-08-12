@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { PASS_STORAGE_KEY } from '@/features/boarding-pass/boarding-ticket/passStorage.js'
-import { useBagHandlers } from '@/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx'
 import IssueLoadingOverlay from '@/features/boarding-pass/issue-loading/IssueLoadingOverlay.jsx'
 import { getSurveyQuestions, issueBoardingPass } from '@/shared/api/boardingPassApi.js'
 import backArrow from '@/shared/assets/boarding-pass/icons/back-arrow.svg'
@@ -17,7 +16,6 @@ import styles from './SurveyPage.module.scss'
  */
 export function Component() {
   const navigate = useNavigate()
-  const bagHandlers = useBagHandlers()
   const [questions, setQuestions] = useState([])
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState({})
@@ -83,7 +81,7 @@ export function Component() {
 
   return (
     <main className={styles.page}>
-      <BoardingPassChrome {...bagHandlers} />
+      <BoardingPassChrome />
       <hr className={styles.divider} />
 
       <div className={styles.progressRow}>
