@@ -506,7 +506,7 @@ Figma `52:18416`, `52:18494`, `52:18588`, `52:18724`, `52:19004`, `52:19144`, `5
 | --- | --- | --- | --- |
 | P1 | 여권 여행 기록 전환 프레임 | Figma `52:18864`; 현재 구현은 최종 상태 `52:19004` 기준 | 좌우 페이지 전환 상태를 디자인과 동일하게 추가 |
 | P1 | 스캔 실패·재시도 UI | `src/pages/boarding-pass/scan/ScanPage.jsx:97`이 실패를 별도 안내하지 않음 | 업무·네트워크 실패에 오류 안내와 재시도 제공 |
-| P1 | Tailwind 빌드 파이프라인 정상화 | production CSS에 utility 생성 대신 `@tailwind utilities`가 남아 공통 Chrome은 CSS Module로 우회함 | Vite production build에서 utility가 실제 CSS로 생성되고 전역 사용 화면을 회귀 검증 |
+| P0 | Tailwind 빌드 파이프라인 정상화 | production CSS에 raw `@tailwind utilities`와 `@theme`이 남아 utility가 생성되지 않으며 App fallback, NotFound, Intro/Landing, toast 등 여러 화면에 영향을 줌 | Vite production build에서 utility가 실제 CSS로 생성되고 전역 사용 화면을 회귀 검증 |
 | P2 | Flight 이전·다음 진행 | `src/pages/boarding-pass/flight/FlightPage.jsx:188`의 두 버튼이 상태를 변경하지 않음 | 단계 상태와 진행률이 실제로 변경 |
 | P2 | 음성 도슨트 실제 재생 | `FlightPage.jsx:83`, `GuidePage.jsx:91`은 재생 UI 상태만 제공 | 음원 정책 확정 후 재생·정지 연결 |
 | P2 | 보딩패스 메뉴·검색 | `src/shared/layout/BoardingPassChrome.jsx:45`의 `D-04` | 기획된 메뉴와 검색 화면으로 이동 |
