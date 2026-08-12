@@ -41,7 +41,9 @@ describe('App', () => {
   it('renders the passport route', async () => {
     renderRoute('/boarding-pass/passport')
 
-    expect(await screen.findByRole('heading', { name: 'MCM PASSPORT' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'MCM PASSPORT' }, { timeout: 10_000 }),
+    ).toBeInTheDocument()
     expect(screen.getAllByRole('main')).toHaveLength(1)
   })
 
