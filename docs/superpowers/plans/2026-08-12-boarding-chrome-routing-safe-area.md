@@ -55,7 +55,7 @@
 - Produces: 보딩패스 Chrome의 실제 menu button과 `/`, `/wishlist`, `/cart` 링크
 - Removes: `BoardingPassChrome({ onWishlistClick, onCartClick })`, `useBagHandlers()`, 보딩패스 빈 가방 토스트, 두 헤더의 검색 glyph
 
-- [ ] **Step 1: 실제 앱 경계의 실패 테스트를 먼저 작성한다**
+- [x] **Step 1: 실제 앱 경계의 실패 테스트를 먼저 작성한다**
 
 `src/app/App.test.jsx`의 기존 `renderRoute()`를 재사용해 다음 사용자 동작을 검증한다.
 
@@ -77,7 +77,7 @@ it('보딩패스 Chrome 메뉴를 Escape로 닫으면 트리거에 포커스를 
 
 `src/shared/layout/BoardingPassChrome.test.jsx`는 `MemoryRouter`로 감싸고, 메뉴·로고·위시리스트·쇼핑백의 각 조작 영역이 `2.75rem`인지 확인한다.
 
-- [ ] **Step 2: RED를 확인한다**
+- [x] **Step 2: RED를 확인한다**
 
 ```powershell
 npm.cmd run test:run -- src/app/App.test.jsx src/shared/layout/BoardingPassChrome.test.jsx
@@ -85,7 +85,7 @@ npm.cmd run test:run -- src/app/App.test.jsx src/shared/layout/BoardingPassChrom
 
 Expected: 현재 Chrome에 `메뉴 열기` 버튼과 세 링크가 없고 검색 glyph가 남아 있어 새 테스트가 FAIL한다.
 
-- [ ] **Step 3: `BoardingPassChrome`을 기존 메뉴와 라우터에 연결한다**
+- [x] **Step 3: `BoardingPassChrome`을 기존 메뉴와 라우터에 연결한다**
 
 ```jsx
 const { isOpen, toggleMenu, closeMenu } = useStoreMenu()
@@ -119,13 +119,13 @@ useEffect(() => {
 
 위시리스트와 쇼핑백도 같은 방식의 `Link`로 구현한다. `StoreHeader`의 기존 메뉴 포커스 복원 패턴을 그대로 사용하고 별도 hook이나 헤더 추상화를 만들지 않는다. `StoreMenuContext`는 기본 no-op 값을 제공하므로 isolated page test에는 새 Provider를 추가하지 않고, 실제 메뉴 동작은 `App.test.jsx`의 `StoreMenuProvider` 경계에서 검증한다.
 
-- [ ] **Step 4: 검색과 더 이상 사용하지 않는 가방 선조회 계층을 삭제한다**
+- [x] **Step 4: 검색과 더 이상 사용하지 않는 가방 선조회 계층을 삭제한다**
 
 두 헤더에서 검색 import와 JSX를 제거하고 `SearchIcon`, 보딩패스 `search.svg`, manifest 항목을 삭제한다. 8개 보딩패스 페이지에서 `useBagHandlers` import·호출·spread props를 제거한 뒤 hook과 `EmptyBagToast` 파일을 삭제한다. 세 페이지 테스트에서 해당 hook mock도 제거한다.
 
 `StoreMenu`, wishlist/cart 페이지의 자체 빈 상태, session/API 코드는 변경하지 않는다.
 
-- [ ] **Step 5: GREEN과 영향받은 페이지 회귀를 확인한다**
+- [x] **Step 5: GREEN과 영향받은 페이지 회귀를 확인한다**
 
 ```powershell
 npm.cmd run test:run -- src/app/App.test.jsx src/shared/layout/BoardingPassChrome.test.jsx
@@ -135,7 +135,7 @@ rg "useBagHandlers|EmptyBagToast|SearchIcon|icons/search.svg" src
 
 Expected: 두 테스트 명령이 PASS하고 마지막 검색은 exit code 1로 일치 항목이 없다.
 
-- [ ] **Step 6: 라우팅 기능 단위를 커밋한다**
+- [x] **Step 6: 라우팅 기능 단위를 커밋한다**
 
 ```powershell
 git add -A src
@@ -159,7 +159,7 @@ git commit -m "feat: 보딩패스 공통 헤더 라우팅 연결"
 - Consumes: `--mcm-safe-top`, `--mcm-header-height`, `--mcm-viewport-stable`
 - Produces: safe inset + 43px title band + 54px icon row, 그리고 남은 높이를 채우는 Landing/Passport stage
 
-- [ ] **Step 1: CSS 계약의 실패 테스트를 작성한다**
+- [x] **Step 1: CSS 계약의 실패 테스트를 작성한다**
 
 `BoardingPassChrome.test.jsx`에서 banner의 `padding-top`과 배경색, 타이틀 43px, 아이콘 행 54px을 computed style로 검증한다. `LandingPage.test.jsx`와 `PassportPage.test.jsx`는 기존 접근 가능한 요소에서 stage를 찾고 다음 값을 검증한다.
 
@@ -169,7 +169,7 @@ expect(window.getComputedStyle(stage).minHeight).toBe(
 )
 ```
 
-- [ ] **Step 2: RED를 확인한다**
+- [x] **Step 2: RED를 확인한다**
 
 ```powershell
 npm.cmd run test:run -- src/shared/layout/BoardingPassChrome.test.jsx src/pages/boarding-pass/landing/LandingPage.test.jsx src/pages/boarding-pass/passport/PassportPage.test.jsx
@@ -177,7 +177,7 @@ npm.cmd run test:run -- src/shared/layout/BoardingPassChrome.test.jsx src/pages/
 
 Expected: header에 safe padding/background 계약이 없고 두 stage가 safe top을 빼지 않아 FAIL한다.
 
-- [ ] **Step 3: 공통 Chrome에 safe area를 한 번 적용한다**
+- [x] **Step 3: 공통 Chrome에 safe area를 한 번 적용한다**
 
 ```scss
 .header {
@@ -188,7 +188,7 @@ Expected: header에 safe padding/background 계약이 없고 두 stage가 safe t
 
 `BoardingPassChrome`의 `<header>`에는 `styles.header`와 전달받은 `className`을 함께 적용한다. `--mcm-header-height`와 `MobileShell`, Dynamic Island, `StoreMenu` 위치 계산은 변경하지 않는다.
 
-- [ ] **Step 4: Landing과 Passport stage 높이를 보정한다**
+- [x] **Step 4: Landing과 Passport stage 높이를 보정한다**
 
 ```scss
 min-height: calc(
@@ -198,7 +198,7 @@ min-height: calc(
 
 Landing과 Passport에서만 위 계산을 적용한다. 나머지 여섯 화면의 flex 본문은 헤더가 커진 만큼 자동으로 줄어드므로 페이지별 보정 코드를 만들지 않는다.
 
-- [ ] **Step 5: GREEN과 전체 보딩패스 route smoke를 확인한다**
+- [x] **Step 5: GREEN과 전체 보딩패스 route smoke를 확인한다**
 
 ```powershell
 npm.cmd run test:run -- src/shared/layout/BoardingPassChrome.test.jsx src/pages/boarding-pass/landing/LandingPage.test.jsx src/pages/boarding-pass/passport/PassportPage.test.jsx src/app/App.test.jsx
@@ -206,7 +206,7 @@ npm.cmd run test:run -- src/shared/layout/BoardingPassChrome.test.jsx src/pages/
 
 Expected: 모든 테스트가 PASS하고 8개 보딩패스 라우트가 공통 Chrome을 렌더한다.
 
-- [ ] **Step 6: 실제 Edge rect로 safe area를 검증한다**
+- [x] **Step 6: 실제 Edge rect로 safe area를 검증한다**
 
 새 npm 패키지는 추가하지 않는다. SDD scratch workspace에 일회성 Edge CDP 스크립트를 두고 repo 밖 임시 user-data-dir로 실행한다. `1200px` 이상 데스크톱 shell에서 screen-relative rect는 오차 `0.5px` 이내로 다음을 만족해야 한다.
 
@@ -222,7 +222,7 @@ open StoreMenu    top=141
 
 safe top `0px`에서는 header 97px, stage y=97·height=747이어야 한다. `320×844`, `390×844`, `430×932`에서 safe top `0px`와 강제 `44px`을 각각 측정해 `scrollWidth === innerWidth`, 헤더·stage가 shell 밖으로 벗어나지 않는지 확인한다. 브라우저 프로필과 캡처 산출물은 git-ignored SDD workspace에만 둔다.
 
-- [ ] **Step 7: safe-area 기능 단위를 커밋한다**
+- [x] **Step 7: safe-area 기능 단위를 커밋한다**
 
 ```powershell
 git add src/shared/layout/BoardingPassChrome.jsx src/shared/layout/BoardingPassChrome.module.scss src/shared/layout/BoardingPassChrome.test.jsx src/pages/boarding-pass/landing/LandingPage.module.scss src/pages/boarding-pass/landing/LandingPage.test.jsx src/pages/boarding-pass/passport/PassportPage.module.scss src/pages/boarding-pass/passport/PassportPage.test.jsx
@@ -241,11 +241,11 @@ git commit -m "fix: 보딩패스 상단 safe area 적용"
 - Consumes: Task 1~2의 실제 구현·테스트·브라우저 측정 결과
 - Produces: 헤더 D-04/D-06/D-07 제거가 반영된 최신 후속 백로그와 검증 기록
 
-- [ ] **Step 1: 후속 백로그를 실제 구현 상태로 갱신한다**
+- [x] **Step 1: 후속 백로그를 실제 구현 상태로 갱신한다**
 
 `docs/frontend-development-plan.md`에서 보딩패스 메뉴·검색, 빈 가방 토스트 상품 이동, 데이터가 있는 위시리스트·쇼핑백 이동을 미구현 항목에서 제거한다. 검색은 구현 완료가 아니라 기획 부재로 삭제했음을 한 문장으로 남긴다. API 기반 빈 상태 개선이 별도 항목으로 이미 존재하면 중복 항목을 만들지 않는다.
 
-- [ ] **Step 2: 전체 자동 검증을 새로 실행한다**
+- [x] **Step 2: 전체 자동 검증을 새로 실행한다**
 
 ```powershell
 npm.cmd run verify
@@ -254,7 +254,7 @@ git diff --check
 
 Expected: lint, format, 전체 Vitest, production build, whitespace 검사가 모두 exit code 0이다. 기존 Lightning CSS 경고가 다시 나오면 경고 원문을 보고하되 exit code 0을 실패로 바꾸지 않는다.
 
-- [ ] **Step 3: 라우팅과 브라우저 결과를 교차 확인한다**
+- [x] **Step 3: 라우팅과 브라우저 결과를 교차 확인한다**
 
 ```powershell
 git status --short
@@ -263,7 +263,7 @@ git log --oneline -5
 
 메인과 메뉴 Boarding은 `/boarding-pass/intro`, 보딩패스 Chrome의 메뉴는 기존 StoreMenu, 로고·위시리스트·쇼핑백은 각각 `/`, `/wishlist`, `/cart`, 검색 아이콘은 없음, safe-area rect는 Task 2 기준을 만족하는지 결과 파일과 테스트를 대조한다.
 
-- [ ] **Step 4: 문서 단위를 커밋한다**
+- [x] **Step 4: 문서 단위를 커밋한다**
 
 ```powershell
 git add docs/frontend-development-plan.md docs/superpowers/plans/2026-08-12-boarding-chrome-routing-safe-area.md

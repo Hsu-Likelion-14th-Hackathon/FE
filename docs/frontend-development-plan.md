@@ -502,6 +502,8 @@ Vercel Preview 환경에서 모바일 조건으로 측정한다.
 
 Figma `52:18416`, `52:18494`, `52:18588`, `52:18724`, `52:19004`, `52:19144`, `52:19302`, `52:19464` 화면은 구현했다. 아래에는 실제로 남은 프론트엔드 작업만 기록한다.
 
+보딩패스 Chrome 메뉴와 MCM 메인·위시리스트·쇼핑백 이동은 구현했으며, 검색은 기획된 화면과 API가 없어 구현 완료로 처리하지 않고 백로그에서 제외했다.
+
 | 우선순위 | 항목 | 근거 | 완료 조건 |
 | --- | --- | --- | --- |
 | P1 | 여권 여행 기록 전환 프레임 | Figma `52:18864`; 현재 구현은 최종 상태 `52:19004` 기준 | 좌우 페이지 전환 상태를 디자인과 동일하게 추가 |
@@ -509,9 +511,6 @@ Figma `52:18416`, `52:18494`, `52:18588`, `52:18724`, `52:19004`, `52:19144`, `5
 | P0 | Tailwind 빌드 파이프라인 정상화 | production CSS에 raw `@tailwind utilities`와 `@theme`이 남아 utility가 생성되지 않으며 App fallback, NotFound, Intro/Landing, toast 등 여러 화면에 영향을 줌 | Vite production build에서 utility가 실제 CSS로 생성되고 전역 사용 화면을 회귀 검증 |
 | P2 | Flight 이전·다음 진행 | `src/pages/boarding-pass/flight/FlightPage.jsx:188`의 두 버튼이 상태를 변경하지 않음 | 단계 상태와 진행률이 실제로 변경 |
 | P2 | 음성 도슨트 실제 재생 | `FlightPage.jsx:83`, `GuidePage.jsx:91`은 재생 UI 상태만 제공 | 음원 정책 확정 후 재생·정지 연결 |
-| P2 | 보딩패스 메뉴·검색 | `src/shared/layout/BoardingPassChrome.jsx:45`의 `D-04` | 기획된 메뉴와 검색 화면으로 이동 |
-| P2 | 빈 위시리스트·쇼핑백의 상품 이동 | `src/features/boarding-pass/empty-bag-toast/EmptyBagToast.jsx:20`의 `D-06` | 토스트 CTA로 상품 목록 이동 |
-| P2 | 데이터가 있는 위시리스트·쇼핑백 이동 | `src/features/boarding-pass/empty-bag-toast/useBagHandlers.jsx:29`의 `D-07` | 비어 있지 않은 경우 각 페이지로 이동 |
 
 ### API 연동 대기
 
