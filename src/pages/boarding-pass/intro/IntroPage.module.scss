@@ -1,5 +1,12 @@
 /* (22) 인트로 — 패스 카드 정적 이미지 + Next 버튼(기존 스타일 유지) */
 
+.page {
+  display: flex;
+  min-height: var(--mcm-viewport-stable);
+  flex-direction: column;
+  background: #fafafa;
+}
+
 .stage {
   position: relative;
   display: flex;

@@ -24,7 +24,7 @@ export function Component() {
   }
 
   return (
-    <main className="flex min-h-[var(--mcm-viewport-stable)] flex-col bg-[#fafafa]">
+    <main className={styles.page}>
       <BoardingPassChrome {...bagHandlers} />
       <section className={styles.stage}>
         <button type="button" className={styles.close} aria-label="닫기" onClick={handleClose}>
