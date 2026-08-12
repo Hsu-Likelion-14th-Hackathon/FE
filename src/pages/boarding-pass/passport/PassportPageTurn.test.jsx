@@ -6,6 +6,7 @@ import PassportPageTurn from './PassportPageTurn.jsx'
 
 const rendererControl = vi.hoisted(() => ({
   fail: false,
+  failRender: false,
   render: vi.fn(),
   domElement: null,
   disconnect: vi.fn(),
@@ -30,6 +31,7 @@ vi.mock('three/addons/renderers/CSS3DRenderer.js', async (importOriginal) => {
           this.domElement.append(object.element)
         }
       })
+      if (rendererControl.failRender) throw new Error('render failed')
       rendererControl.render(scene, camera)
     }
   }
@@ -57,6 +59,7 @@ function TurnHarness({ disabled = false, initialStep = 0 }) {
 
 beforeEach(() => {
   rendererControl.fail = false
+  rendererControl.failRender = false
   rendererControl.render.mockReset()
   rendererControl.domElement = null
   rendererControl.disconnect.mockReset()
@@ -128,6 +131,59 @@ describe('PassportPageTurn', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
+  })
+
+  it('reduced motion이면 화살표 단계가 즉시 이동한다', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true }))
+    render(<TurnHarness />)
+
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+    )
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
+  })
+
+  it.each([
+    ['CSS 전역이 없을 때', undefined],
+    ['CSS.supports가 없을 때', {}],
+  ])('%s fallback으로 전환한다', async (_, css) => {
+    vi.stubGlobal('CSS', css)
+    render(<TurnHarness />)
+
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+    )
+  })
+
+  it('ResizeObserver 생성 실패 시 renderer DOM을 정리하고 fallback으로 전환한다', async () => {
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor() {
+          throw new Error('observer failed')
+        }
+      },
+    )
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(<TurnHarness />)
+
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+    )
+    expect(rendererControl.domElement).not.toBeInTheDocument()
+  })
+
+  it('initial render 실패 시 renderer DOM을 정리하고 fallback으로 전환한다', async () => {
+    rendererControl.failRender = true
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(<TurnHarness />)
+
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+    )
+    expect(rendererControl.domElement).not.toBeInTheDocument()
   })
 
   it('unmount 시 observer, animation frame과 renderer DOM을 정리한다', async () => {

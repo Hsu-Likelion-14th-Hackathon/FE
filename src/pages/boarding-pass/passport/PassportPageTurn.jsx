@@ -29,6 +29,7 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
   const targetHostRef = useRef(null)
   const frameRef = useRef(null)
   const resizeRef = useRef(() => {})
+  const fallbackRef = useRef(() => {})
 
   const renderScene = useCallback(() => {
     const renderer = rendererRef.current
@@ -140,14 +141,39 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     const viewport = viewportRef.current
     const rendererMount = rendererMountRef.current
     const hasNoCss3d =
-      typeof CSS?.supports === 'function' &&
+      typeof CSS === 'undefined' ||
+      typeof CSS.supports !== 'function' ||
       CSS.supports('transform-style', 'preserve-3d') === false
-    if (!viewport || !rendererMount || hasNoCss3d) {
+    const prefersReducedMotion =
+      typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!viewport || !rendererMount || hasNoCss3d || prefersReducedMotion) {
       return undefined
     }
 
     let observer
     let mounted = true
+    const teardown = () => {
+      observer?.disconnect()
+      observer = undefined
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
+      rendererRef.current?.domElement.remove()
+      rendererRef.current = null
+      sceneRef.current = null
+      cameraRef.current = null
+      pivotRef.current = null
+      currentObjectRef.current = null
+      targetObjectRef.current = null
+      currentHostRef.current = null
+      targetHostRef.current = null
+    }
+    const fallback = (error) => {
+      teardown()
+      console.warn('Passport page renderer is unavailable; using fallback.', error)
+      queueMicrotask(() => {
+        if (mounted) setRendererMode('fallback')
+      })
+    }
+    fallbackRef.current = fallback
     try {
       const renderer = new CSS3DRenderer()
       const scene = new Scene()
@@ -175,7 +201,13 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
       currentObjectRef.current = currentObject
       targetObjectRef.current = targetObject
 
-      observer = new ResizeObserver(() => resizeRef.current())
+      observer = new ResizeObserver(() => {
+        try {
+          resizeRef.current()
+        } catch (error) {
+          fallback(error)
+        }
+      })
       observer.observe(viewport)
       queueMicrotask(() => {
         if (!mounted) return
@@ -183,28 +215,25 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
         setRendererMode('ready')
       })
     } catch (error) {
-      console.warn('Passport page renderer is unavailable; using fallback.', error)
+      fallback(error)
     }
 
     return () => {
       mounted = false
-      observer?.disconnect()
-      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
-      rendererRef.current?.domElement.remove()
-      rendererRef.current = null
-      sceneRef.current = null
-      cameraRef.current = null
-      pivotRef.current = null
-      currentObjectRef.current = null
-      targetObjectRef.current = null
-      currentHostRef.current = null
-      targetHostRef.current = null
+      teardown()
+      fallbackRef.current = () => {}
     }
   }, [])
 
   useLayoutEffect(() => {
     resizeRef.current = resizeScene
-    if (rendererMode === 'ready') resizeScene()
+    if (rendererMode === 'ready') {
+      try {
+        resizeScene()
+      } catch (error) {
+        fallbackRef.current(error)
+      }
+    }
   }, [rendererMode, resizeScene, targetStep])
 
   const progress = (step + 1) * 25
