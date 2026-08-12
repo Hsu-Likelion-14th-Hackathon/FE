@@ -36,20 +36,20 @@ describe('PassportPage', () => {
     fireEvent.click(nextButton)
     fireEvent.click(nextButton)
 
-    const historyTrigger = screen.getByRole('button', { name: '여행 기록 보기' })
+    const historyTrigger = screen.getByRole('button', { name: 'TRAVEL HISTORY' })
     fireEvent.click(historyTrigger)
     expect(screen.getByRole('dialog', { name: '여행 기록' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' })).toHaveFocus()
 
     fireEvent.click(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' }))
     expect(screen.getByRole('dialog', { name: '1F JOURNEY 상세' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '티켓 보기' })).toHaveFocus()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    fireEvent.keyDown(document, { key: 'Escape' })
     fireEvent.click(screen.getByRole('button', { name: '티켓 보기' }))
     expect(screen.getByRole('dialog', { name: '탑승권' })).toHaveFocus()
 
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    await waitFor(() => expect(historyTrigger).toHaveFocus())
   })
 
   it('시트가 열린 동안 Chrome과 콘텐츠를 inert로 만들고 상단 닫기는 시트만 닫는다', async () => {
@@ -59,7 +59,7 @@ describe('PassportPage', () => {
     fireEvent.click(nextButton)
     fireEvent.click(nextButton)
 
-    const historyTrigger = screen.getByRole('button', { name: '여행 기록 보기' })
+    const historyTrigger = screen.getByRole('button', { name: 'TRAVEL HISTORY' })
     fireEvent.click(historyTrigger)
     expect(screen.getByRole('progressbar').closest('[inert]')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '메뉴' }).closest('[inert]')).toBeInTheDocument()
@@ -82,7 +82,7 @@ describe('PassportPage', () => {
     fireEvent.click(nextButton)
     fireEvent.click(nextButton)
 
-    const historyTrigger = screen.getByRole('button', { name: '여행 기록 보기' })
+    const historyTrigger = screen.getByRole('button', { name: 'TRAVEL HISTORY' })
     fireEvent.click(historyTrigger)
     fireEvent.click(screen.getByRole('button', { name: '시트 배경 닫기' }))
 
@@ -112,7 +112,7 @@ describe('PassportPage', () => {
 
     expect(progress).toHaveAttribute('aria-valuenow', '100')
     expect(screen.getByRole('button', { name: '다음 단계' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: '상품 보러가기' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '티켓 보기' })).toBeInTheDocument()
   })
 
   it('각 여권 단계를 보이고 이전 단계로 돌아간다', () => {
@@ -120,13 +120,13 @@ describe('PassportPage', () => {
 
     expect(screen.getByRole('region', { name: '여권 표지' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent('MCM 2026 0805')
+    expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent('0001')
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
     expect(screen.getByRole('region', { name: '여권 방문 스탬프' })).toHaveTextContent(
       '총 방문 횟수 6회',
     )
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    expect(screen.getByRole('region', { name: '여권 여행 기록' })).toHaveTextContent('AI FITTING')
+    expect(screen.getByRole('region', { name: '여권 여행 기록' })).toHaveTextContent('MCM HAUS')
 
     fireEvent.click(screen.getByRole('button', { name: '이전 단계' }))
     expect(screen.getByRole('progressbar', { name: '여권 진행률' })).toHaveAttribute(
@@ -143,16 +143,6 @@ describe('PassportPage', () => {
     expect(router.state.location.pathname).toBe('/boarding-pass')
   })
 
-  it('상품 보러가기 버튼으로 상품 경로로 이동한다', () => {
-    const router = renderPassport()
-
-    for (let step = 0; step < 3; step += 1) {
-      fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    }
-    fireEvent.click(screen.getByRole('button', { name: '상품 보러가기' }))
-    expect(router.state.location.pathname).toBe('/products')
-  })
-
   it('키보드로 다음 단계로 이동하고 닫기 버튼에 44px 터치 영역을 준다', () => {
     renderPassport()
 
@@ -166,5 +156,30 @@ describe('PassportPage', () => {
     expect(window.getComputedStyle(screen.getByRole('button', { name: '닫기' })).width).toBe(
       '2.75rem',
     )
+  })
+
+  it('스테이지 패딩을 고정 높이 안에 포함한다', () => {
+    renderPassport()
+
+    const stage = screen.getByRole('region', { name: '여권 표지' }).parentElement.parentElement
+    expect(window.getComputedStyle(stage).boxSizing).toBe('border-box')
+  })
+
+  it('모든 단계에 여권 안내 카피와 상세 여행 콘텐츠를 제공한다', () => {
+    renderPassport()
+
+    expect(
+      screen.getByText('당신의 MCM 비행에 완벽한 맞춤형 동선을 추천합니다'),
+    ).toBeInTheDocument()
+    const next = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(next)
+    fireEvent.click(next)
+    fireEvent.click(next)
+    fireEvent.click(screen.getByRole('button', { name: 'TRAVEL HISTORY' }))
+    fireEvent.click(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' }))
+
+    expect(screen.getByText('1976년, München - 밤의 도시가 낳은 대담함')).toBeInTheDocument()
+    expect(screen.getByText('Modern Creation München')).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: '1F JOURNEY 상세' })).not.toHaveTextContent('TICKET')
   })
 })

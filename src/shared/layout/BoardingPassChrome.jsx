@@ -40,22 +40,32 @@ function BoardingPassChrome({
       ) : null}
 
       {showIconRow ? (
-        <div className={`flex h-12 items-center bg-[#fafafa] px-5 ${iconRowClassName}`}>
-          <div className="flex flex-1 items-center gap-5">
-            <DeferredButton deferredId="D-04" aria-label="메뉴">
-              <img src={menuIcon} alt="" className="h-[1.125rem] w-[1.375rem]" />
+        <div className={`${styles.iconRow} ${iconRowClassName}`}>
+          <div className={styles.iconGroup}>
+            <DeferredButton deferredId="D-04" aria-label="메뉴" className={styles.iconAction}>
+              <img src={menuIcon} alt="" className={styles.menuIcon} />
             </DeferredButton>
-            <DeferredButton deferredId="D-04" aria-label="검색">
-              <img src={searchIcon} alt="" className="size-[1.3125rem]" />
+            <DeferredButton deferredId="D-04" aria-label="검색" className={styles.iconAction}>
+              <img src={searchIcon} alt="" className={styles.searchIcon} />
             </DeferredButton>
           </div>
-          <img src={wordmarkLogo} alt="MCM" className="h-5" />
-          <div className="flex flex-1 items-center justify-end gap-5">
-            <button type="button" aria-label="위시리스트" onClick={onWishlistClick}>
-              <img src={heartIcon} alt="" className="size-6" />
+          <img src={wordmarkLogo} alt="MCM" className={styles.wordmark} />
+          <div className={`${styles.iconGroup} ${styles.iconGroupRight}`}>
+            <button
+              type="button"
+              aria-label="위시리스트"
+              onClick={onWishlistClick}
+              className={styles.iconAction}
+            >
+              <img src={heartIcon} alt="" className={styles.heartIcon} />
             </button>
-            <button type="button" aria-label="장바구니" onClick={onCartClick}>
-              <img src={cartIcon} alt="" className="size-[1.375rem]" />
+            <button
+              type="button"
+              aria-label="장바구니"
+              onClick={onCartClick}
+              className={styles.iconAction}
+            >
+              <img src={cartIcon} alt="" className={styles.cartIcon} />
             </button>
           </div>
         </div>

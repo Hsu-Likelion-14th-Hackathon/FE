@@ -7,8 +7,15 @@ import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import navNext from '@/shared/assets/boarding-pass/guide/nav-next.svg'
 import navPrev from '@/shared/assets/boarding-pass/guide/nav-prev.svg'
 import journeyDecoration from '@/shared/assets/boarding-pass/passport/journey-decoration.png'
+import journeyTicket from '@/shared/assets/boarding-pass/passport/journey-ticket.png'
 import mcmHaus from '@/shared/assets/boarding-pass/passport/mcm-haus.png'
+import bowLeft from '@/shared/assets/boarding-pass/passport/passport-bow-left.png'
+import bowRight from '@/shared/assets/boarding-pass/passport/passport-bow-right.png'
+import coverMcm from '@/shared/assets/boarding-pass/passport/cover-mcm.png'
+import coverPassport from '@/shared/assets/boarding-pass/passport/cover-passport.png'
+import coverStar from '@/shared/assets/boarding-pass/passport/cover-star.png'
 import passportCover from '@/shared/assets/boarding-pass/passport/passport-cover.png'
+import passportEmblem from '@/shared/assets/boarding-pass/passport/passport-emblem.png'
 import passportSpread from '@/shared/assets/boarding-pass/passport/passport-spread.png'
 import passportStampsImage from '@/shared/assets/boarding-pass/passport/passport-stamps.png'
 import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
@@ -50,6 +57,7 @@ export function Component() {
   useEffect(() => {
     if (!sheet) return undefined
     const dialog = dialogRef.current
+    dialog.scrollTop = 0
     const initialFocus = dialog?.querySelector('button') ?? dialog
     initialFocus?.focus()
     const onKeyDown = (event) => {
@@ -61,7 +69,7 @@ export function Component() {
 
   return (
     <div className={styles.page}>
-      <div inert={sheet || undefined}>
+      <div inert={sheet || undefined} className={sheet ? styles.dimmed : undefined}>
         <BoardingPassChrome {...bagHandlers} />
       </div>
       <section className={styles.stage} aria-labelledby="passport-title">
@@ -73,25 +81,23 @@ export function Component() {
         >
           <img src={closeIcon} alt="" />
         </button>
-        <div className={styles.content} inert={sheet || undefined}>
+        <div
+          className={`${styles.content} ${sheet ? styles.dimmed : ''}`}
+          inert={sheet || undefined}
+        >
           <h2 id="passport-title" className={styles.srOnly}>
             MCM PASSPORT
           </h2>
+          <div className={styles.introCopy}>
+            <p>MCM BOARDING PASS</p>
+            <strong>당신의 MCM 비행에 완벽한 맞춤형 동선을 추천합니다</strong>
+            <span>이 행사는 MCM HAUS 매장 기반으로 진행됩니다</span>
+          </div>
           <PassportSpread
             step={step}
-            onProducts={() => navigate('/products')}
             onHistory={(event) => openSheet('history', event.currentTarget)}
+            onTicket={(event) => openSheet('ticket', event.currentTarget)}
           />
-          <div
-            role="progressbar"
-            aria-label="여권 진행률"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-valuenow={progress}
-            className={styles.progress}
-          >
-            <span style={{ width: `${progress}%` }} />
-          </div>
           <nav className={styles.navigation} aria-label="여권 단계 이동">
             <button
               type="button"
@@ -102,6 +108,16 @@ export function Component() {
             >
               <img src={navPrev} alt="" />
             </button>
+            <div
+              role="progressbar"
+              aria-label="여권 진행률"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow={progress}
+              className={styles.progress}
+            >
+              <span style={{ width: `${progress}%` }} />
+            </div>
             <button
               type="button"
               aria-label="다음 단계"
@@ -127,17 +143,20 @@ export function Component() {
               aria-modal="true"
               aria-label={sheetLabels[sheet]}
               tabIndex="-1"
-              className={styles.sheet}
+              className={`${styles.sheet} ${styles[`sheet-${sheet}`]}`}
             >
               {sheet === 'history' ? (
                 <HistoryList
                   onSelectJourney={(event) => openSheet('history-detail', event.currentTarget)}
                 />
               ) : null}
-              {sheet === 'history-detail' ? (
-                <JourneyDetail onTicket={(event) => openSheet('ticket', event.currentTarget)} />
+              {sheet === 'history-detail' ? <JourneyDetail /> : null}
+              {sheet === 'ticket' ? (
+                <>
+                  <h3 className={styles.sheetTitle}>TICKET</h3>
+                  <BoardingTicketCard pass={passportTicket} size="md" />
+                </>
               ) : null}
-              {sheet === 'ticket' ? <BoardingTicketCard pass={passportTicket} size="md" /> : null}
             </section>
           </div>
         ) : null}
@@ -146,29 +165,47 @@ export function Component() {
   )
 }
 
-function PassportSpread({ step, onProducts, onHistory }) {
+function PassportSpread({ step, onHistory, onTicket }) {
   if (step === 0) {
     return (
-      <section className={styles.passport} aria-label="여권 표지">
+      <section className={`${styles.passport} ${styles.coverPassport}`} aria-label="여권 표지">
         <img src={passportCover} alt="" className={styles.passportImage} />
-        <p className={styles.coverTitle}>MCM PASSPORT</p>
+        <img src={coverMcm} alt="MCM" className={styles.coverMcm} />
+        <img src={coverStar} alt="" className={styles.coverStar} />
+        <img src={coverPassport} alt="PASSPORT" className={styles.coverPassportWord} />
+        <img src={passportEmblem} alt="" className={styles.coverEmblem} />
+        <img src={bowLeft} alt="" className={styles.coverBowLeft} />
+        <img src={bowRight} alt="" className={styles.coverBowRight} />
       </section>
     )
   }
 
   if (step === 1) {
     return (
-      <section className={styles.passport} aria-label="여권 프로필">
+      <section className={`${styles.passport} ${styles.openPassport}`} aria-label="여권 프로필">
         <img src={passportSpread} alt="" className={styles.passportImage} />
         <div className={styles.profile}>
+          <h3>PASSPORT</h3>
           <img src={mcmHaus} alt="MCM HAUS 매장 사진" className={styles.haus} />
-          <p>{passportProfile.passportNumber}</p>
           <p>
-            {passportProfile.surname} / {passportProfile.givenName}
+            NUMBER <strong>{passportProfile.passportNumber}</strong>
           </p>
-          <p>{passportProfile.nationality}</p>
-          <p>{passportProfile.issueDate}</p>
-          <p>CREDIT {passportProfile.credit}</p>
+          <p>
+            NATIONALITY <strong>{passportProfile.nationality}</strong>
+          </p>
+          <p>
+            NAME{' '}
+            <strong>
+              {passportProfile.givenName} {passportProfile.surname}
+            </strong>
+          </p>
+          <p>
+            DATE OF ISSUE <strong>{passportProfile.issueDate}</strong>
+          </p>
+          <p>
+            CREDIT <strong>{passportProfile.credit}</strong>
+          </p>
+          <small>크레딧으로 AI 가상 피팅 가능 · 제품 보러가기</small>
         </div>
       </section>
     )
@@ -176,15 +213,17 @@ function PassportSpread({ step, onProducts, onHistory }) {
 
   if (step === 2) {
     return (
-      <section className={styles.passport} aria-label="여권 방문 스탬프">
-        <img src={passportStampsImage} alt="" className={styles.passportImage} />
+      <section
+        className={`${styles.passport} ${styles.openPassport}`}
+        aria-label="여권 방문 스탬프"
+      >
+        <img src={passportSpread} alt="" className={styles.passportImage} />
+        <img src={passportStampsImage} alt="" className={styles.stampComposite} />
         <div className={styles.stamps}>
           <p>총 방문 횟수 {passportProfile.visits}회</p>
           <ul>
             {passportStamps.map((stamp) => (
-              <li key={stamp.id}>
-                <strong>{stamp.floor}</strong> {stamp.date}
-              </li>
+              <li key={stamp.id}>{stamp.date}</li>
             ))}
           </ul>
         </div>
@@ -193,22 +232,32 @@ function PassportSpread({ step, onProducts, onHistory }) {
   }
 
   return (
-    <section className={styles.passport} aria-label="여권 여행 기록">
+    <section className={`${styles.passport} ${styles.openPassport}`} aria-label="여권 여행 기록">
+      <img src={passportSpread} alt="" className={styles.passportImage} />
       <img src={journeyDecoration} alt="" className={styles.journeyDecoration} />
+      <img src={journeyTicket} alt="" className={styles.journeyTicket} />
       <div className={styles.journeys}>
-        {journeyRecords.map((record) => (
-          <p key={record.id}>
-            <span>{record.floor}</span>
-            <strong>{record.title}</strong>
-            <time>{record.date}</time>
-          </p>
-        ))}
-        <button type="button" onClick={onHistory} className={styles.history}>
-          여행 기록 보기
-        </button>
-        <button type="button" onClick={onProducts} className={styles.products}>
-          상품 보러가기
-        </button>
+        <p>
+          <time>2026 07 27</time>
+          <strong>MCM HAUS</strong>
+          <span>412 Apgujeong-ro, Gangnam-gu, Seoul of Korea</span>
+        </p>
+        <p>
+          <strong>입장 번호 00001 | 비행 시간 46M</strong>
+        </p>
+        <div className={styles.journeyActions}>
+          <button type="button" onClick={onHistory} className={styles.history}>
+            TRAVEL HISTORY
+          </button>
+          <button
+            type="button"
+            onClick={onTicket}
+            className={styles.history}
+            aria-label="티켓 보기"
+          >
+            TICKET
+          </button>
+        </div>
       </div>
     </section>
   )
@@ -217,8 +266,7 @@ function PassportSpread({ step, onProducts, onHistory }) {
 function HistoryList({ onSelectJourney }) {
   return (
     <>
-      <p className={styles.sheetEyebrow}>TRAVEL HISTORY</p>
-      <h3 className={styles.sheetTitle}>여행 기록</h3>
+      <h3 className={styles.sheetTitle}>TRAVEL HISTORY</h3>
       <div className={styles.historyList}>
         {journeyRecords.map((record) =>
           record.id === 'journey' ? (
@@ -243,16 +291,31 @@ function HistoryList({ onSelectJourney }) {
   )
 }
 
-function JourneyDetail({ onTicket }) {
+function JourneyDetail() {
   const journey = journeyRecords[0]
   return (
     <>
-      <p className={styles.sheetEyebrow}>{journey.floor}</p>
-      <h3 className={styles.sheetTitle}>{journey.title}</h3>
-      <p className={styles.detailDate}>{journey.date}</p>
-      <button type="button" className={styles.ticketButton} onClick={onTicket}>
-        티켓 보기
-      </button>
+      <h3 className={styles.sheetTitle}>TRAVEL HISTORY</h3>
+      <article className={styles.historyCard}>
+        <JourneyCard record={journey} />
+      </article>
+      <div className={styles.detailCopy}>
+        <h4>1976년, München - 밤의 도시가 낳은 대담함</h4>
+        <p>
+          1976년 뮌헨, 데이비드 보위와 프레디 머큐리가 밤거리를 자유롭게 거닐며 예술과 반항을
+          모의하던 시절
+        </p>
+        <p>
+          배우이자 창립자인 미하엘 크로머는 이 도시의 시대 정신을 담아낼 하나의 이름을 지었습니다
+        </p>
+        <h4>Modern Creation München</h4>
+        <p>
+          그것은 단순한 가방 브랜드의 탄생이 아닌 정체되어 있던 당시 럭셔리 씬을 향한 대담한
+          선언이었습니다
+        </p>
+        <p>화려함 그 자체보다 어디론가 떠날 수 있는 태도를 가방에 주입하고자 했던 순간</p>
+        <p>MCM의 여정을 지금 시작합니다</p>
+      </div>
     </>
   )
 }
@@ -262,7 +325,6 @@ function JourneyCard({ record }) {
     <span className={styles.journeyCardContent}>
       <span>{record.floor}</span>
       <strong>{record.title}</strong>
-      <time>{record.date}</time>
     </span>
   )
 }

@@ -39,3 +39,4 @@ design/
 scratch/
 dist-scratch/
 public/mockServiceWorker.js
+.superpowers/sdd/*/visual/

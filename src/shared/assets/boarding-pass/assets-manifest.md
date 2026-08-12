@@ -120,3 +120,15 @@
 | passport-mcm-haus  | src/shared/assets/boarding-pass/passport/mcm-haus.png           | 52:18723   | png  | MCM HAUS storefront        |
 | passport-stamps    | src/shared/assets/boarding-pass/passport/passport-stamps.png    | 52:18838   | png  | Isolated stamp ornaments   |
 | journey-decoration | src/shared/assets/boarding-pass/passport/journey-decoration.png | 52:19131   | png  | Isolated airplane ornament |
+
+2026-08-12 검증: `passport-spread.png`는 최신 Figma 파일 `aklj7UjNcG6PDFJVRU9JXv`의 exact child `52:18665` raw source를 Figma 배치 크기 507×394로 저장했다. 스탬프 단계는 흰 배경 raster 대신 이 spread와 DOM 스탬프를 사용한다.
+
+| id                 | path                                                            | Figma node | type | use                    |
+| ------------------ | --------------------------------------------------------------- | ---------- | ---- | ---------------------- |
+| passport-emblem    | src/shared/assets/boarding-pass/passport/passport-emblem.png    | 52:18581   | png  | Cover emblem composite |
+| cover-mcm          | src/shared/assets/boarding-pass/passport/cover-mcm.png          | 52:18583   | png  | Cover MCM word         |
+| cover-star         | src/shared/assets/boarding-pass/passport/cover-star.png         | 52:18585   | png  | Cover center star      |
+| cover-passport     | src/shared/assets/boarding-pass/passport/cover-passport.png     | 52:18584   | png  | Cover PASSPORT word    |
+| passport-bow-left  | src/shared/assets/boarding-pass/passport/passport-bow-left.png  | 52:18586   | png  | Cover left bow         |
+| passport-bow-right | src/shared/assets/boarding-pass/passport/passport-bow-right.png | 52:18587   | png  | Cover right bow        |
+| journey-ticket     | src/shared/assets/boarding-pass/passport/journey-ticket.png     | 52:19138   | png  | Journey ticket tile    |
