@@ -11,7 +11,7 @@ import styles from './HomePage.module.scss'
 
 function BoardingButton() {
   return (
-    <Link className={styles.boardingButton} to="/products">
+    <Link className={styles.boardingButton} to="/boarding-pass/intro">
       <span>Boarding</span>
       <span className={styles.boardingArrow} aria-hidden="true">
         <img src={boardingArrow} alt="" />
