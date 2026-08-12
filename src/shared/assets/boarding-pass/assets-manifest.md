@@ -80,7 +80,9 @@
 | flight-route-path         | src/shared/assets/boarding-pass/flight/route-path.svg         | 635:8226    | svg  | (41)(43) 지도 하단 SEOUL→MUNICH 항로 체인 라인                                      |
 | flight-plane-marker       | src/shared/assets/boarding-pass/flight/plane-marker.svg       | 635:8229    | svg  | (41)(43) 항로 위 현재 위치 비행기 마커                                              |
 | flight-tablet-logo        | src/shared/assets/boarding-pass/flight/tablet-logo.png        | 635:8156    | png  | (41)(43) 모니터 하단 MCM 로고                                                       |
+| flight-control-arrow      | src/shared/assets/boarding-pass/flight/control-arrow.svg      | 635:8172    | svg  | (41)(43) 모니터 컨트롤바 증감 화살표 (밝기·사운드 슬롯)                             |
 | flight-camera-dot         | src/shared/assets/boarding-pass/flight/camera-dot.svg         | 635:8180    | svg  | (41)(43) 모니터 상단 카메라 점                                                      |
+| flight-hinge              | src/shared/assets/boarding-pass/flight/hinge.svg              | 635:8147    | svg  | (41)(43) 모니터 하단 스탠드 마감                                                    |
 | flight-hinge-screw        | src/shared/assets/boarding-pass/flight/hinge-screw.svg        | 635:8149    | svg  | (41)(43) 모니터 힌지 나사 (좌·우 미러)                                              |
 | flight-control-brightness | src/shared/assets/boarding-pass/flight/control-brightness.svg | 635:8165    | svg  | (41)(43) 모니터 컨트롤바 밝기 아이콘                                                |
 | flight-control-power      | src/shared/assets/boarding-pass/flight/control-power.svg      | 635:8163    | svg  | (41)(43) 모니터 컨트롤바 전원 아이콘                                                |
@@ -89,6 +91,12 @@
 | flight-docent-stop        | src/shared/assets/boarding-pass/flight/docent-stop.svg        | 635:8141    | svg  | (41)(43)(42) 음성 도슨트 정지 아이콘                                                |
 | flight-nav-prev           | src/shared/assets/boarding-pass/flight/nav-prev.svg           | 635:8194    | svg  | (41)(43) 하단 재생바 이전 버튼                                                      |
 | flight-nav-next           | src/shared/assets/boarding-pass/flight/nav-next.svg           | 635:8206    | svg  | (41)(43) 하단 재생바 다음 버튼                                                      |
+
+## stage/
+
+| 키        | 경로                                          | 원본 nodeId | 타입 | 사용처                                                                 |
+| --------- | --------------------------------------------- | ----------- | ---- | ---------------------------------------------------------------------- |
+| stage-bg  | src/shared/assets/boarding-pass/stage-bg.png  | 1025:293    | png  | (43)~(47) 상단 바 아래 배경. Figma `GHEgor3gw7V9BMj2KLVZqf` 프레임 PNG |
 
 ## guide/
 

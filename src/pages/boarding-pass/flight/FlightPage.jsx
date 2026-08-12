@@ -1,26 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import { getCurrentBoardingPass } from '@/shared/api/boardingPassApi.js'
 import cameraDotImg from '@/shared/assets/boarding-pass/flight/camera-dot.svg'
-import cloudLargeImg from '@/shared/assets/boarding-pass/flight/cloud-large.png'
+import controlArrowImg from '@/shared/assets/boarding-pass/flight/control-arrow.svg'
 import controlBrightnessImg from '@/shared/assets/boarding-pass/flight/control-brightness.svg'
 import controlPowerImg from '@/shared/assets/boarding-pass/flight/control-power.svg'
 import controlSoundImg from '@/shared/assets/boarding-pass/flight/control-sound.svg'
 import decoRightImg from '@/shared/assets/boarding-pass/flight/deco-right.png'
 import docentPlayImg from '@/shared/assets/boarding-pass/flight/docent-play.svg'
 import docentStopImg from '@/shared/assets/boarding-pass/flight/docent-stop.svg'
-import hingeScrewImg from '@/shared/assets/boarding-pass/flight/hinge-screw.svg'
+import hingeImg from '@/shared/assets/boarding-pass/flight/hinge.svg'
 import mapImg from '@/shared/assets/boarding-pass/flight/map.png'
 import navNextImg from '@/shared/assets/boarding-pass/flight/nav-next.svg'
 import navPrevImg from '@/shared/assets/boarding-pass/flight/nav-prev.svg'
-import planeDecoImg from '@/shared/assets/boarding-pass/flight/plane-deco.png'
 import planeMarkerImg from '@/shared/assets/boarding-pass/flight/plane-marker.svg'
 import routePathImg from '@/shared/assets/boarding-pass/flight/route-path.svg'
 import tabletLogoImg from '@/shared/assets/boarding-pass/flight/tablet-logo.png'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
+import BoardingPassStageBackdrop from '@/shared/layout/BoardingPassStageBackdrop.jsx'
 
 import styles from './FlightPage.module.scss'
 
@@ -34,6 +34,55 @@ export function Component() {
   const [pass, setPass] = useState(null)
   const [ticketOpen, setTicketOpen] = useState(false)
   const [docentPlaying, setDocentPlaying] = useState(false)
+  const sheetRef = useRef(null)
+  const dragRef = useRef({ pointerId: null, startY: 0, startAt: 0, dy: 0 })
+
+  function setSheetDrag(dy, dragging) {
+    const sheet = sheetRef.current
+    if (!sheet) return
+    sheet.style.setProperty('--sheet-drag', `${Math.max(0, dy)}px`)
+    sheet.dataset.dragging = dragging ? 'true' : 'false'
+  }
+
+  function openTicketSheet() {
+    setSheetDrag(0, false)
+    setTicketOpen(true)
+  }
+
+  function onSheetPointerDown(event) {
+    if (!ticketOpen || !event.isPrimary || event.button !== 0) return
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startAt: performance.now(),
+      dy: 0,
+    }
+    event.currentTarget.setPointerCapture(event.pointerId)
+    setSheetDrag(0, true)
+  }
+
+  function onSheetPointerMove(event) {
+    const drag = dragRef.current
+    if (drag.pointerId !== event.pointerId) return
+    const dy = Math.max(0, event.clientY - drag.startY)
+    drag.dy = dy
+    setSheetDrag(dy, true)
+  }
+
+  function onSheetPointerEnd(event) {
+    const drag = dragRef.current
+    if (drag.pointerId !== event.pointerId) return
+    const dy = drag.dy
+    const elapsed = Math.max(performance.now() - drag.startAt, 1)
+    const velocity = dy / elapsed
+    const height = sheetRef.current?.offsetHeight ?? 1
+    drag.pointerId = null
+    event.currentTarget.releasePointerCapture?.(event.pointerId)
+
+    const shouldClose = dy > 72 || dy > height * 0.22 || velocity > 0.55
+    setSheetDrag(shouldClose ? dy : 0, false)
+    if (shouldClose) setTicketOpen(false)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -49,32 +98,27 @@ export function Component() {
     }
   }, [])
 
-  const mapDate = formatMapDate(pass)
+  const mapDate = formatMapDate()
 
   return (
     <div className={styles.page}>
       <BoardingPassChrome />
 
-      <div aria-hidden="true" className={styles.ambiance}>
-        <img src={cloudLargeImg} alt="" className={styles.cloudTop} />
-        <img src={cloudLargeImg} alt="" className={styles.cloudBottom} />
-        <img src={planeDecoImg} alt="" className={styles.planeDeco} />
-        <img src={decoRightImg} alt="" className={styles.chestAmbientA} />
-        <img src={decoRightImg} alt="" className={styles.chestAmbientB} />
-        <img src={decoRightImg} alt="" className={styles.chestAmbientC} />
-        <div className={styles.footerFade} />
-      </div>
+      <div className={styles.stage}>
+        <BoardingPassStageBackdrop />
 
-      <main className={styles.main}>
-        <div className={styles.topRow}>
-          <button
-            type="button"
-            aria-label="닫기"
-            onClick={() => navigate('/boarding-pass/scan')}
-            className={styles.close}
-          >
-            <img src={closeIcon} alt="" className={styles.closeImg} />
-          </button>
+        <main className={styles.main}>
+        <button
+          type="button"
+          aria-label="닫기"
+          onClick={() => navigate('/boarding-pass/scan')}
+          className={styles.close}
+        >
+          <img src={closeIcon} alt="" className={styles.closeImg} />
+        </button>
+
+        <div className={styles.titleRow}>
+          <h2 className={styles.title}>MAPS</h2>
 
           <div className={styles.docentBlock}>
             <p className={styles.docentHint}>음성 AI 도슨트가 고객님의 여정을 안내합니다</p>
@@ -102,8 +146,6 @@ export function Component() {
           </div>
         </div>
 
-        <h2 className={styles.title}>MAPS</h2>
-
         <div className={styles.monitorWrap}>
           <div className={styles.monitor}>
             <img src={cameraDotImg} alt="" aria-hidden="true" className={styles.camera} />
@@ -121,7 +163,12 @@ export function Component() {
                     <span className={styles.city}>SEOUL</span>
                     <div className={styles.routeTrack}>
                       <img src={routePathImg} alt="" className={styles.routePath} />
-                      <img src={planeMarkerImg} alt="" className={styles.planeMarker} />
+                      <img
+                        src={planeMarkerImg}
+                        alt=""
+                        className={styles.planeMarker}
+                        data-testid="plane-marker"
+                      />
                     </div>
                     <span className={styles.city}>MUNICH</span>
                   </div>
@@ -130,28 +177,32 @@ export function Component() {
 
               <div className={styles.controlBar} aria-hidden="true">
                 <div className={styles.controlSlot}>
+                  <img
+                    src={controlArrowImg}
+                    alt=""
+                    className={`${styles.controlArrow} ${styles.controlArrowDown}`}
+                  />
                   <img src={controlBrightnessImg} alt="" className={styles.controlIcon} />
+                  <img src={controlArrowImg} alt="" className={styles.controlArrow} />
                 </div>
                 <div className={styles.controlSlot}>
                   <img src={controlPowerImg} alt="" className={styles.controlIcon} />
                 </div>
                 <div className={styles.controlSlot}>
+                  <img
+                    src={controlArrowImg}
+                    alt=""
+                    className={`${styles.controlArrow} ${styles.controlArrowDown}`}
+                  />
                   <img src={controlSoundImg} alt="" className={styles.controlIcon} />
+                  <img src={controlArrowImg} alt="" className={styles.controlArrow} />
                 </div>
               </div>
             </div>
 
             <img src={tabletLogoImg} alt="" aria-hidden="true" className={styles.tabletLogo} />
 
-            <div className={styles.hinge} aria-hidden="true">
-              <div className={styles.hingeBar} />
-              <img src={hingeScrewImg} alt="" className={styles.hingeScrew} />
-              <img
-                src={hingeScrewImg}
-                alt=""
-                className={`${styles.hingeScrew} ${styles.hingeScrewFlip}`}
-              />
-            </div>
+            <img src={hingeImg} alt="" aria-hidden="true" className={styles.hinge} />
           </div>
 
           <img src={decoRightImg} alt="" aria-hidden="true" className={styles.trunk} />
@@ -159,22 +210,22 @@ export function Component() {
 
         <div className={styles.actions}>
           <div className={styles.actionRow}>
-            <button type="button" onClick={() => setTicketOpen(true)} className={styles.actionBtn}>
-              티켓 정보
+            <button type="button" onClick={openTicketSheet} className={styles.actionBtn}>
+              <span className={styles.actionBtnLabel}>티켓 정보</span>
             </button>
             <button
               type="button"
               onClick={() => navigate('/boarding-pass/guide')}
               className={styles.actionBtn}
             >
-              여행 가이드
+              <span className={styles.actionBtnLabel}>여행 가이드</span>
             </button>
             <button
               type="button"
               onClick={() => navigate('/boarding-pass')}
               className={styles.actionBtn}
             >
-              비행 종료
+              <span className={styles.actionBtnLabel}>비행 종료</span>
             </button>
           </div>
           <p className={styles.passportHint}>
@@ -194,18 +245,38 @@ export function Component() {
           </button>
         </div>
       </main>
+      </div>
 
-      {ticketOpen ? (
-        <div className={styles.sheetRoot}>
-          <button
-            type="button"
-            aria-label="티켓 시트 닫기"
-            className={styles.sheetScrim}
-            onClick={() => setTicketOpen(false)}
-          />
-          <div role="dialog" aria-label="티켓 정보" className={styles.sheet}>
+      <div
+        className={styles.sheetRoot}
+        data-state={ticketOpen ? 'open' : 'closed'}
+        aria-hidden={!ticketOpen}
+      >
+        <button
+          type="button"
+          aria-label="티켓 시트 닫기"
+          className={styles.sheetScrim}
+          onClick={() => setTicketOpen(false)}
+          tabIndex={ticketOpen ? 0 : -1}
+        />
+        <div
+          ref={sheetRef}
+          role="dialog"
+          aria-modal={ticketOpen}
+          aria-label="티켓 정보"
+          className={styles.sheet}
+        >
+          <div
+            className={styles.sheetGrab}
+            aria-label="아래로 밀어 닫기"
+            onPointerDown={onSheetPointerDown}
+            onPointerMove={onSheetPointerMove}
+            onPointerUp={onSheetPointerEnd}
+            onPointerCancel={onSheetPointerEnd}
+          >
             <div className={styles.handle} />
             <p className={styles.sheetTitle}>TICKET</p>
+          </div>
             {pass ? (
               <BoardingTicketCard pass={pass} size="md" className={styles.ticketSlot} />
             ) : (
@@ -213,15 +284,26 @@ export function Component() {
             )}
           </div>
         </div>
-      ) : null}
     </div>
   )
 }
 
-function formatMapDate(pass) {
-  if (pass?.boardingLabel) {
-    const match = String(pass.boardingLabel).match(/\d{1,2}\s+[A-Z]{3}\s+\d{4}/i)
-    if (match) return match[0].toUpperCase()
-  }
-  return '25 AUG 2026'
+function formatMapDate() {
+  const now = new Date()
+  const months = [
+    'JAN',
+    'FEB',
+    'MAR',
+    'APR',
+    'MAY',
+    'JUN',
+    'JUL',
+    'AUG',
+    'SEP',
+    'OCT',
+    'NOV',
+    'DEC',
+  ]
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${day} ${months[now.getMonth()]} ${now.getFullYear()}`
 }

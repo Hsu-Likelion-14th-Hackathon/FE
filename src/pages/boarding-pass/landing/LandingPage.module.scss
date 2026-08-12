@@ -121,6 +121,18 @@
   height: 13.0625rem; /* 209 */
   margin-top: 2.25rem; /* ~36 */
   margin-bottom: 2.25rem; /* ~36 */
+  animation: planeFloat 3.2s ease-in-out infinite;
+}
+
+@keyframes planeFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-0.75rem); /* 12 */
+  }
 }
 
 .planeFrame {

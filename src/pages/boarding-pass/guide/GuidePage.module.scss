@@ -1,54 +1,23 @@
 /* (44)~(47) 여행 가이드 — Figma 390×844 · rem */
 
-.stage {
+.page {
   position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
   overflow: hidden;
   min-height: var(--mcm-viewport-stable);
-  background: #2a1810;
+  background: #41210b;
 }
 
-.deco {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+.stage {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
   overflow: hidden;
-  pointer-events: none;
-}
-
-.cloudTop {
-  position: absolute;
-  top: 6.25rem;
-  right: 0;
-  width: 12.625rem;
-  opacity: 0.1;
-}
-
-.cloudBottom {
-  position: absolute;
-  bottom: 6.25rem;
-  left: 0;
-  width: 22.125rem;
-  opacity: 0.1;
-}
-
-.planeDeco {
-  position: absolute;
-  bottom: 12.5rem;
-  left: -2.5rem;
-  width: 10rem;
-  opacity: 0.1;
-}
-
-.footerFade {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 16.9375rem;
-  background: linear-gradient(to bottom, rgba(90, 54, 33, 0), rgba(25, 25, 25, 0.6));
+  background: #41210b;
 }
 
 .main {

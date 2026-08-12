@@ -66,7 +66,9 @@ function BoardingTicketCard({ pass, className = '', size = 'md' }) {
             </div>
           </div>
 
-          <img src={ticketLogoImg} alt="MCM" className={styles.mainLogo} />
+          <div className={styles.logoRow}>
+            <img src={ticketLogoImg} alt="MCM" className={styles.mainLogo} />
+          </div>
         </div>
 
         <div className={styles.tear} aria-hidden="true">

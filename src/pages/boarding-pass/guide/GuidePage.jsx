@@ -5,8 +5,6 @@ import {
   guideFloorContent,
   overviewHeroes,
 } from '@/features/boarding-pass/travel-guide/guideFloorContent.js'
-import cloudLargeImg from '@/shared/assets/boarding-pass/flight/cloud-large.png'
-import planeDecoImg from '@/shared/assets/boarding-pass/flight/plane-deco.png'
 import guideDecoTopImg from '@/shared/assets/boarding-pass/guide/deco-top.png'
 import emblemCrestImg from '@/shared/assets/boarding-pass/guide/emblem-crest.png'
 import emblemLaurelImg from '@/shared/assets/boarding-pass/guide/emblem-laurel.png'
@@ -15,6 +13,7 @@ import navPrevImg from '@/shared/assets/boarding-pass/guide/nav-prev.svg'
 import overviewFigureImg from '@/shared/assets/boarding-pass/guide/overview-figure.png'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
+import BoardingPassStageBackdrop from '@/shared/layout/BoardingPassStageBackdrop.jsx'
 import VoiceDocentMock from '@/shared/ui/VoiceDocentMock.jsx'
 
 import styles from './GuidePage.module.scss'
@@ -66,17 +65,13 @@ export function Component() {
   }
 
   return (
-    <div className={styles.stage}>
+    <div className={styles.page}>
       <BoardingPassChrome />
 
-      <div aria-hidden="true" className={styles.deco}>
-        <img src={cloudLargeImg} alt="" className={styles.cloudTop} />
-        <img src={cloudLargeImg} alt="" className={styles.cloudBottom} />
-        <img src={planeDecoImg} alt="" className={styles.planeDeco} />
-        <div className={styles.footerFade} />
-      </div>
+      <div className={styles.stage}>
+        <BoardingPassStageBackdrop />
 
-      <main className={styles.main}>
+        <main className={styles.main}>
         <div className={styles.toolbar}>
           <button
             type="button"
@@ -129,6 +124,7 @@ export function Component() {
           <p className={styles.footerNote}>AI가 고객님만의 MCM 비행 가이드를 준비했습니다</p>
         </div>
       </main>
+      </div>
     </div>
   )
 }

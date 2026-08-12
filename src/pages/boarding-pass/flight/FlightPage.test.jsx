@@ -7,6 +7,7 @@ vi.mock('@/shared/api/boardingPassApi.js', () => ({
 }))
 
 import { Component as FlightPage } from './FlightPage.jsx'
+import styles from './FlightPage.module.scss'
 
 const activeRouters = []
 
@@ -36,5 +37,13 @@ describe('FlightPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: '\uBE44\uD589 \uC885\uB8CC' }))
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass'))
+  })
+
+  it('flies the route marker from SEOUL to MUNICH then jumps back', () => {
+    renderFlight()
+
+    const marker = screen.getByTestId('plane-marker')
+    expect(marker).toHaveClass(styles.planeMarker)
+    expect(marker.getAttribute('src')).toBeTruthy()
   })
 })
