@@ -70,6 +70,10 @@ export function createAppRoutes() {
           lazy: () => import('@/pages/boarding-pass/guide/GuidePage.jsx'),
         },
         {
+          path: 'boarding-pass/passport',
+          lazy: () => import('@/pages/boarding-pass/passport/PassportPage.jsx'),
+        },
+        {
           path: '*',
           lazy: () => import('@/pages/not-found/NotFoundPage.jsx'),
         },

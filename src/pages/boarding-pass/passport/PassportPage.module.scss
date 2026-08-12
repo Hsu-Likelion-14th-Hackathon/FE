@@ -1,0 +1,181 @@
+.page {
+  display: flex;
+  min-height: var(--mcm-viewport-stable);
+  flex-direction: column;
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  min-height: calc(var(--mcm-viewport-stable) - 5.6875rem);
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 1rem 1.25rem max(1.5rem, var(--mcm-safe-bottom));
+  background: #41210b;
+}
+
+.close {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 0.875rem;
+  height: 0.875rem;
+  place-items: center;
+}
+
+.close img {
+  width: 100%;
+  height: 100%;
+}
+
+.passport {
+  position: relative;
+  width: min(100%, 21.875rem);
+  margin: auto;
+  aspect-ratio: 350 / 452;
+  overflow: hidden;
+  border-radius: 0.875rem;
+  background: #1d0c00;
+  box-shadow: 0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.26);
+}
+
+.passportImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.72;
+}
+.coverTitle {
+  position: absolute;
+  inset: 44% 0 auto;
+  margin: 0;
+  color: #fff7d5;
+  font-family: var(--mcm-font-brand);
+  font-size: 1.875rem;
+  text-align: center;
+}
+.profile,
+.stamps,
+.journeys {
+  position: absolute;
+  inset: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: #fff7d5;
+  font-size: 0.75rem;
+  line-height: 1.15;
+}
+.profile {
+  padding-top: 4.75rem;
+}
+.profile p,
+.stamps p,
+.journeys p {
+  margin: 0;
+}
+.haus {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6rem;
+  max-height: 3rem;
+  object-fit: contain;
+}
+.stamps ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  list-style: none;
+}
+.stamps li {
+  display: flex;
+  flex-direction: column;
+  min-height: 3.25rem;
+  justify-content: center;
+  padding: 0.5rem;
+  border: 1px solid rgba(255, 247, 213, 0.45);
+  border-radius: 50%;
+  text-align: center;
+}
+.journeys {
+  justify-content: center;
+}
+.journeys p {
+  display: grid;
+  padding: 0.625rem;
+  grid-template-columns: 1fr;
+  gap: 0.25rem;
+  border-bottom: 1px solid rgba(255, 247, 213, 0.38);
+}
+.journeys span {
+  color: #c07346;
+  font-size: 0.625rem;
+}
+.journeys time {
+  font-size: 0.625rem;
+}
+.products {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid #fff7d5;
+  border-radius: 6.25rem;
+  background: rgba(255, 247, 213, 0.14);
+  color: #fff7d5;
+  font-weight: 600;
+}
+
+.progress {
+  width: min(100%, 12.5rem);
+  height: 0.625rem;
+  margin: 1rem auto;
+  overflow: hidden;
+  border-radius: 6.25rem;
+  background: #e0e0e0;
+}
+.progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #c07346;
+  transition: width 160ms ease;
+}
+.navigation {
+  display: flex;
+  width: min(100%, 21.875rem);
+  margin: 0 auto;
+  justify-content: space-between;
+}
+.navigation button {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+}
+.navigation button:disabled {
+  opacity: 0.35;
+}
+.navigation img {
+  width: 100%;
+  height: 100%;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 22rem) {
+  .stage {
+    padding-inline: 0.75rem;
+  }
+  .passport {
+    width: min(100%, 19rem);
+  }
+}

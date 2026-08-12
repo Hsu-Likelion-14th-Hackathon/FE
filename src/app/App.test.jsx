@@ -38,6 +38,12 @@ describe('App', () => {
     document.body.classList.remove('store-menu-open')
   })
 
+  it('renders the passport route', async () => {
+    renderRoute('/boarding-pass/passport')
+
+    expect(await screen.findByRole('heading', { name: 'MCM PASSPORT' })).toBeInTheDocument()
+  })
+
   it('renders the home scene with the original Figma raster assets', async () => {
     renderRoute('/')
 

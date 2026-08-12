@@ -110,3 +110,13 @@
 | guide-product-tote-cognac  | src/shared/assets/boarding-pass/guide/product-tote-cognac.png  | 722:10064   | png  | (46) 2F 뮌헨 비세토스 토트 Cognac                  |
 | guide-product-himmel       | src/shared/assets/boarding-pass/guide/product-himmel.png       | 736:10195   | png  | (47) 3F Himmel Shopper in MIRUM®                   |
 | guide-product-econyl       | src/shared/assets/boarding-pass/guide/product-econyl.png       | 736:10202   | png  | (47) 3F Ottomar ECONYL® 위켄더 백팩                |
+
+## passport/
+
+| id                 | path                                                            | Figma node | type | use                      |
+| ------------------ | --------------------------------------------------------------- | ---------- | ---- | ------------------------ |
+| passport-cover     | src/shared/assets/boarding-pass/passport/passport-cover.png     | 52:18494   | png  | Passport cover stage     |
+| passport-spread    | src/shared/assets/boarding-pass/passport/passport-spread.png    | 52:18588   | png  | Profile and credit stage |
+| passport-mcm-haus  | src/shared/assets/boarding-pass/passport/mcm-haus.png           | 52:18588   | png  | Profile ornament         |
+| passport-stamps    | src/shared/assets/boarding-pass/passport/passport-stamps.png    | 52:18724   | png  | Visit stamps stage       |
+| journey-decoration | src/shared/assets/boarding-pass/passport/journey-decoration.png | 52:19004   | png  | Journey records stage    |
