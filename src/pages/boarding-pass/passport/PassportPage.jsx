@@ -61,7 +61,9 @@ export function Component() {
 
   return (
     <div className={styles.page}>
-      <BoardingPassChrome {...bagHandlers} />
+      <div inert={sheet || undefined}>
+        <BoardingPassChrome {...bagHandlers} />
+      </div>
       <section className={styles.stage} aria-labelledby="passport-title">
         <button
           type="button"

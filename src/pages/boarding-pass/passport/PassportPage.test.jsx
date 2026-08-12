@@ -43,6 +43,7 @@ describe('PassportPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' }))
     expect(screen.getByRole('dialog', { name: '1F JOURNEY 상세' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '티켓 보기' })).toHaveFocus()
     fireEvent.click(screen.getByRole('button', { name: '티켓 보기' }))
     expect(screen.getByRole('dialog', { name: '탑승권' })).toHaveFocus()
 
@@ -51,7 +52,7 @@ describe('PassportPage', () => {
     await waitFor(() => expect(historyTrigger).toHaveFocus())
   })
 
-  it('시트가 열린 동안 배경을 inert로 만들고 상단 닫기는 시트만 닫는다', async () => {
+  it('시트가 열린 동안 Chrome과 콘텐츠를 inert로 만들고 상단 닫기는 시트만 닫는다', async () => {
     const router = renderPassport()
     const nextButton = screen.getByRole('button', { name: '다음 단계' })
     fireEvent.click(nextButton)
@@ -61,10 +62,31 @@ describe('PassportPage', () => {
     const historyTrigger = screen.getByRole('button', { name: '여행 기록 보기' })
     fireEvent.click(historyTrigger)
     expect(screen.getByRole('progressbar').closest('[inert]')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '메뉴' }).closest('[inert]')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '닫기' }).closest('[inert]')).not.toBeInTheDocument()
+    fireEvent.keyDown(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' }), {
+      key: 'Tab',
+    })
+    expect(screen.getByRole('button', { name: '메뉴' }).closest('[inert]')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: '닫기' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/boarding-pass/passport')
+    await waitFor(() => expect(historyTrigger).toHaveFocus())
+  })
+
+  it('시트 배경을 클릭하면 닫고 원래 트리거에 포커스를 복원한다', async () => {
+    renderPassport()
+    const nextButton = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(nextButton)
+    fireEvent.click(nextButton)
+    fireEvent.click(nextButton)
+
+    const historyTrigger = screen.getByRole('button', { name: '여행 기록 보기' })
+    fireEvent.click(historyTrigger)
+    fireEvent.click(screen.getByRole('button', { name: '시트 배경 닫기' }))
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     await waitFor(() => expect(historyTrigger).toHaveFocus())
   })
 
