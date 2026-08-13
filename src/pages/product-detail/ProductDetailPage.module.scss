@@ -159,9 +159,13 @@
   padding-inline: 25px;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--mcm-color-brand-brown);
+  /* Figma 71:564 — 테두리만 있던 버튼이 살구색으로 채워졌다.
+     테두리도 브랜드 브라운에서 옅은 살구색으로 내려왔고, 채움은 위에서
+     아래로 조금 짙어진다. 글자만 브랜드 브라운 그대로다. */
+  border: 1px solid #e0bba4;
   border-radius: 8px;
   color: var(--mcm-color-brand-brown);
+  background: linear-gradient(to bottom, #f8ede7, #f1dbcf);
   font-size: 14px;
   font-weight: 600;
   line-height: 18px;
@@ -314,9 +318,14 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .wishlistButton:hover,
-  .tryOnLink:hover {
+  .wishlistButton:hover {
     color: var(--mcm-color-brand-brown);
+  }
+
+  /* 채움이 생겨 글자색만 바꾸면 티가 안 난다. 채움을 한 단계 짙게 한다. */
+  .tryOnLink:hover {
+    border-color: var(--mcm-color-brand-brown);
+    background: linear-gradient(to bottom, #f4e3d9, #ecd0bf);
   }
 
   .variantButton:hover {
