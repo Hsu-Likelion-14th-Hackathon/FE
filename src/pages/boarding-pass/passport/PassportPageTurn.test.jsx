@@ -590,4 +590,21 @@ describe('PassportPageTurn', () => {
 
     expect(screen.queryByText('옆으로 슬라이드 해보세요')).not.toBeInTheDocument()
   })
+
+  it('슬라이드가 아니라 화살표로 넘겨도 힌트를 거둔다', async () => {
+    // 아이패드처럼 터치와 키보드를 함께 쓰는 기기에서 실제로 일어나는 경로다.
+    rendererControl.fail = true
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+    )
+    expect(screen.getByText('옆으로 슬라이드 해보세요')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+
+    await waitFor(() =>
+      expect(screen.queryByText('옆으로 슬라이드 해보세요')).not.toBeInTheDocument(),
+    )
+    expect(localStorage.getItem('mcm-passport-swipe-hint-seen')).toBe('1')
+  })
 })

@@ -111,6 +111,7 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
       // 저장에 실패해도 이번 세션 동안은 숨어 있으면 충분하다.
     }
   }, [])
+
   const [rendererMode, setRendererMode] = useState('fallback')
   const [turnState, setTurnState] = useState('idle')
 
@@ -285,6 +286,11 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
         return
       }
 
+      // 넘김은 슬라이드든 화살표든 키보드든 전부 여기를 지난다. 한 번이라도
+      // 넘겼으면 방법을 안 것이므로 안내를 거둔다. 아이패드처럼 터치와 키보드를
+      // 함께 쓰는 기기에서는 화살표로 넘기고도 안내가 남아 있었다.
+      if (commit) dismissHint()
+
       if (rendererMode !== 'ready' || !bookRef.current) {
         if (commit) onCommit(direction)
         return
@@ -294,7 +300,7 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
       setTurnState('settling')
       animateTo({ direction, from: fromProgress, to: commit ? 1 : 0, duration, commit })
     },
-    [animateTo, disabled, onCommit, paintBook, rendererMode, step, turnState],
+    [animateTo, disabled, dismissHint, onCommit, paintBook, rendererMode, step, turnState],
   )
 
   // 여권 데이터가 바뀌면 구워둔 면을 버린다.

@@ -3,6 +3,8 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import headerDiamond from '@/shared/assets/boarding-pass/icons/header-diamond.svg'
 import headerDot from '@/shared/assets/boarding-pass/icons/header-dot.svg'
 
+import observeResize from '@/shared/layout/observe-resize.js'
+
 import styles from './BrandStrip.module.scss'
 
 const BRAND_TEXT = 'MCM BOARDING PASS'
@@ -58,9 +60,7 @@ function BrandStrip({ as = 'decorative' }) {
     }
 
     measure()
-    const observer = new ResizeObserver(measure)
-    observer.observe(viewport)
-    return () => observer.disconnect()
+    return observeResize(viewport, measure)
   }, [])
 
   const groups = Array.from({ length: GROUP_REPEAT }, (_, groupIndex) => (

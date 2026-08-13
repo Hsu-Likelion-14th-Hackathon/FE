@@ -1,5 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 
+import observeResize from '@/shared/layout/observe-resize.js'
+
 /**
  * 설계 크기로 그려진 화면을 가용 영역 안에 비율 그대로 넣는다.
  *
@@ -38,9 +40,7 @@ export default function useScaleToFit(designWidth, designHeight, maxScale = 1) {
     measure()
 
     // 주소창이 접히고 펴질 때도 가용 높이가 바뀐다.
-    const observer = new ResizeObserver(measure)
-    observer.observe(frame)
-    return () => observer.disconnect()
+    return observeResize(frame, measure)
   }, [designWidth, designHeight, maxScale])
 
   return [frameRef, scale]
