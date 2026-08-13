@@ -135,6 +135,55 @@
   margin: -11px;
 }
 
+/* 아이콘 자리에 텍스트를 겹쳐 두고 hover에서 서로 바꾼다.
+   둘을 같은 칸에 포개야 폭이 흔들리지 않는다. */
+.swapLink {
+  position: relative;
+  display: inline-grid;
+  padding-inline: 0.25rem;
+  place-items: center;
+}
+
+.swapIcon,
+.swapLabel {
+  grid-area: 1 / 1;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+
+.swapLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  /* 투명해도 겹쳐 있어 클릭 대상이 되므로 이벤트를 흘려보낸다. */
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .swapLink:hover .swapIcon,
+  .swapLink:focus-visible .swapIcon {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  .swapLink:hover .swapLabel,
+  .swapLink:focus-visible .swapLabel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swapIcon,
+  .swapLabel {
+    transition: none;
+    transform: none;
+  }
+}
+
 .iconButton {
   padding: 0;
   border: 0;

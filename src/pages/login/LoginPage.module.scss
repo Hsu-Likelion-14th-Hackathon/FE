@@ -67,7 +67,21 @@
 .textLink {
   color: var(--mcm-color-muted);
   font-weight: 600;
+  text-decoration: none;
   text-underline-offset: 1px;
+  transition: color 0.15s ease;
+}
+
+/* 마우스를 올렸을 때만 밑줄이 생긴다. 터치 기기에서는 hover가 고착되므로 제외한다. */
+@media (hover: hover) and (pointer: fine) {
+  .textLink:hover {
+    color: var(--mcm-color-ink);
+    text-decoration: underline;
+  }
+}
+
+.textLink:focus-visible {
+  text-decoration: underline;
 }
 
 .kakaoButton {

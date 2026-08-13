@@ -45,15 +45,26 @@ function StoreHeader() {
 
           <div className={styles.sideGroup}>
             <Link
-              className={styles.iconLink}
+              className={`${styles.iconLink} ${styles.swapLink}`}
               to="/wishlist"
               aria-label="위시리스트"
               onClick={closeMenu}
             >
-              <HeartIcon className={`${styles.icon} ${styles.heartIcon}`} />
+              <HeartIcon className={`${styles.icon} ${styles.heartIcon} ${styles.swapIcon}`} />
+              <span aria-hidden="true" className={styles.swapLabel}>
+                위시리스트
+              </span>
             </Link>
-            <Link className={styles.iconLink} to="/cart" aria-label="쇼핑백" onClick={closeMenu}>
-              <CartIcon className={styles.icon} />
+            <Link
+              className={`${styles.iconLink} ${styles.swapLink}`}
+              to="/cart"
+              aria-label="쇼핑백"
+              onClick={closeMenu}
+            >
+              <CartIcon className={`${styles.icon} ${styles.swapIcon}`} />
+              <span aria-hidden="true" className={styles.swapLabel}>
+                쇼핑백
+              </span>
             </Link>
           </div>
         </div>
