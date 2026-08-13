@@ -40,13 +40,18 @@ function paintBase(ctx, w, h, seed = 0) {
  * 펼침 한 장을 코드로 잘라 쓰면 좌우가 뒤바뀌거나 여백이 어긋나므로 분할본을 쓴다.
  */
 function paintSpread(ctx, w, h, assets, side) {
-  const image = side === 'left' ? assets.pageLeft : assets.pageRight
+  // 낱장은 내용이 있는 왼쪽 지면 그림을 쓴다.
+  const image = side === 'right' ? assets.pageRight : assets.pageLeft
   if (!image) return
   ctx.drawImage(image, 0, 0, w, h)
 }
 
-/** 접지선(안쪽) 그림자. side가 'left'면 오른쪽 가장자리가 어두워진다. */
+/**
+ * 접지선(안쪽) 그림자. side가 'left'면 오른쪽 가장자리가 어두워진다.
+ * 낱장('sheet')은 제본이 없으므로 그림자도 없다.
+ */
 function paintGutter(ctx, w, h, side) {
+  if (side === 'sheet') return
   const from = side === 'left' ? w : 0
   const to = side === 'left' ? w - 46 : 46
   const gradient = ctx.createLinearGradient(from, 0, to, 0)
@@ -309,6 +314,19 @@ export function paintFace(face, data, side = 'left', pixelRatio = 2) {
   const paint = PAINTERS[face] ?? PAINTERS.blankLeft
   paint(ctx, width, height, { ...data, side })
   return canvas
+}
+
+/**
+ * 한 장 모드에서 단계마다 세울 면.
+ *
+ * 표지는 310, 내지는 253.5로 폭이 다르다. 내지 좌표가 펼침 507의 절반을
+ * 기준으로 잡혀 있어서다. 실제 여권도 표지가 내지를 감싸므로 그대로 둔다.
+ */
+export const SHEET_FACES = ['cover', 'profile', 'stamps', 'journey']
+
+/** 면 하나가 설계상 차지하는 크기. */
+export function sheetSize(face) {
+  return { width: face === 'cover' ? COVER_W : PAGE_W, height: PAGE_H }
 }
 
 /** step(펼침 장면) → 좌·우 면 구성. 표지는 왼쪽 없이 단독으로 선다. */
