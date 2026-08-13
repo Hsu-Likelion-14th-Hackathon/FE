@@ -153,8 +153,10 @@
   border-radius: 0;
   appearance: none;
   background: transparent;
-  font-size: 14px;
-  line-height: 18px;
+  /* iOS 사파리는 16px 미만 입력에 포커스가 가면 화면을 자동으로 확대한다.
+     확대되면 레이아웃이 밀려 사용자가 직접 되돌려야 한다. */
+  font-size: 16px;
+  line-height: 20px;
 }
 
 .fieldInput:focus {
@@ -163,8 +165,15 @@
 }
 
 .revealButton {
+  /* 글자는 작지만 손가락으로 누를 수 있어야 한다. 44px 판을 만들고 그만큼
+     음수 여백으로 당겨, 보이는 위치는 그대로 두고 누를 면적만 넓힌다. */
+  display: inline-grid;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  place-items: center;
   padding: 0;
   border: 0;
+  margin: -0.875rem -0.5rem;
   background: transparent;
   color: var(--mcm-color-muted);
   font-size: 11px;
