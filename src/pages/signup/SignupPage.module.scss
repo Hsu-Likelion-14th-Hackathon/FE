@@ -199,3 +199,11 @@
     padding-left: 0;
   }
 }
+
+/* 한글처럼 허용되지 않는 글자를 걸러냈을 때만 나타나는 안내. */
+.inputNotice {
+  margin: 0.375rem 0 0;
+  color: var(--mcm-color-brand-brown);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+}
