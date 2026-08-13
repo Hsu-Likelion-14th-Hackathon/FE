@@ -252,7 +252,10 @@ describe('PassportPage', () => {
     const profile = openPassport.querySelector('h3').parentElement
     const openImageStyle = window.getComputedStyle(openImage)
 
-    expect(window.getComputedStyle(openPassport).width).toBe('31.6875rem')
+    // 낱장 한 장 크기다. 캔버스가 그리는 지면과 클릭 영역이 같아야 한다.
+    expect(window.getComputedStyle(openPassport).width).toBe(
+      'calc(var(--passport-h) * 253.5 / 394)',
+    )
     expect(window.getComputedStyle(openPassport).isolation).toBe('isolate')
     expect(openImageStyle.position).toBe('absolute')
     expect(openImageStyle.maxWidth).toBe('none')

@@ -145,29 +145,15 @@
 }
 
 .openPassport {
-  /* Figma 원래 크기. 좌측 페이지가 화면 중앙에 오고 우측은 화면 밖으로 잘린다.
-     내지의 클릭 영역(.profile, .journeyTile 등)이 이 크기를 전제로 rem 좌표에
-     박혀 있어, 여기를 줄이면 캔버스가 그리는 그림과 터치 영역이 어긋난다.
-     그래서 펼침은 줄이지 않고, 부족한 세로는 위 여백에서만 걷어낸다. */
-  width: 31.6875rem;
-  aspect-ratio: 507 / 394;
+  /* 낱장 한 장 크기(253.5×394). 캔버스가 이 크기로 지면을 그리므로 DOM도
+     같아야 한다. 펼침(507) 기준으로 두면 클릭 영역이 그림보다 두 배 넓어져
+     TICKET 같은 버튼이 보이는 위치와 어긋난다.
+     내지 좌표(.profile, .journeyTile 등)는 원래 한 지면 기준이라 그대로 맞는다. */
+  width: calc(var(--passport-h) * 253.5 / 394);
+  aspect-ratio: 253.5 / 394;
   margin-inline: auto;
   align-self: center;
   isolation: isolate;
-}
-
-@media (min-width: 744px) and (max-width: 1199px) {
-  .openPassport {
-    margin-right: auto;
-    margin-left: auto;
-  }
-}
-
-@media (min-width: 1200px) {
-  .openPassport {
-    margin-right: 0;
-    margin-left: 2.925rem;
-  }
 }
 
 .passportImage {
