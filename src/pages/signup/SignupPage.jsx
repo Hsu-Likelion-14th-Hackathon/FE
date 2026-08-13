@@ -9,7 +9,10 @@ import BirthDateField from './components/BirthDateField.jsx'
 import NationalitySelect from './components/NationalitySelect.jsx'
 import styles from './SignupPage.module.scss'
 
-/** 여권 표기와 맞추기 위해 영문 대문자만 남긴다. 한글은 애초에 들어오지 않는다. */
+/**
+ * 여권 표기와 맞추기 위해 영문 대문자만 남긴다.
+ * 한글은 조합 중에 잠시 입력창에 보였다가 조합이 확정되는 시점에 제거된다.
+ */
 function toPassportName(value) {
   return value.replace(/[^A-Za-z\s'-]/g, '').toUpperCase()
 }
@@ -22,12 +25,30 @@ export function Component() {
   // 한글은 ㅇ→아→안 처럼 조합을 거친다. 조합 중에 값을 바꾸면 IME가 이를
   // 되돌리므로(모바일 키보드에서 특히) 조합이 끝난 뒤에 걸러낸다.
   const composingRef = useRef(false)
+  // 조합 중인 글자가 받을 수 없는 문자면 흐리게 보여 유효하지 않음을 드러낸다.
+  const [nameBlocked, setNameBlocked] = useState(false)
 
-  const applyNameFilter = (raw) => {
+  // 입력 경로가 onChange와 onCompositionEnd 둘이라 필터는 이 함수 하나로 모은다.
+  // 같은 입력에 같은 결과를 내므로 두 경로가 겹쳐도 상태가 흔들리지 않는다.
+  const handleNameInput = (raw) => {
+    if (composingRef.current) {
+      // 조합 중에는 IME가 값을 관리하도록 두고 화면만 따라간다.
+      setName(raw)
+      return
+    }
     const next = toPassportName(raw)
     setNameRejected(next !== raw.toUpperCase())
     setName(next)
   }
+
+  // 조합이 확정되기 전에도 받을 수 없는 글자면 바로 알린다.
+  // 조합 중인 글자는 값에 남지 않으므로 event.data로만 판별할 수 있다.
+  const handleNameComposing = (data) => {
+    const blocked = Boolean(data) && toPassportName(data) !== data.toUpperCase()
+    setNameBlocked(blocked)
+    if (blocked) setNameRejected(true)
+  }
+
   const [birthDate, setBirthDate] = useState('')
   const [countryCode, setCountryCode] = useState('')
 
@@ -67,7 +88,7 @@ export function Component() {
                   <img className={styles.userIcon} src={userIcon} alt="" />
                 </span>
                 <input
-                  className={styles.input}
+                  className={`${styles.input} ${nameBlocked ? styles.inputBlocked : ''}`}
                   id="signup-name"
                   name="name"
                   type="text"
@@ -77,20 +98,17 @@ export function Component() {
                   placeholder="영문 이름을 입력해 주세요"
                   aria-describedby="signup-name-hint"
                   value={name}
-                  onChange={(event) => {
-                    if (composingRef.current) {
-                      // 조합 중에는 IME가 값을 관리하도록 두고 화면만 따라간다.
-                      setName(event.target.value)
-                      return
-                    }
-                    applyNameFilter(event.target.value)
-                  }}
-                  onCompositionStart={() => {
+                  onChange={(event) => handleNameInput(event.target.value)}
+                  onCompositionStart={(event) => {
                     composingRef.current = true
+                    handleNameComposing(event.data)
                   }}
+                  onCompositionUpdate={(event) => handleNameComposing(event.data)}
                   onCompositionEnd={(event) => {
                     composingRef.current = false
-                    applyNameFilter(event.target.value)
+                    setNameBlocked(false)
+                    // compositionend 뒤에 input이 오지 않는 브라우저가 있어 여기서도 확정한다.
+                    handleNameInput(event.target.value)
                   }}
                   required
                 />
