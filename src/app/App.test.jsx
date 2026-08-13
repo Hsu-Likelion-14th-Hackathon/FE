@@ -263,7 +263,11 @@ describe('App', () => {
     cleanup()
     renderRoute('/boarding-pass')
     const menuButton = await screen.findByRole('button', { name: '메뉴 열기' })
-    expect(menuButton.closest('header').querySelectorAll('img')).toHaveLength(4)
+    const chrome = menuButton.closest('header')
+    // 조작 요소는 메뉴·로고·위시리스트·장바구니 4개뿐이어야 한다(검색이 생기면 5개가 된다).
+    // 타이틀 밴드의 점·마름모는 aria-hidden 장식이라 개수 검증 대상이 아니다.
+    expect(chrome.querySelectorAll('a, button')).toHaveLength(4)
+    expect(chrome.querySelector('[aria-label*="검색"]')).toBeNull()
   })
 
   it('열린 메뉴 안에서 Tab 포커스를 순환한다', async () => {

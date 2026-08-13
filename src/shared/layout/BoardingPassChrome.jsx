@@ -1,4 +1,6 @@
 import cartIcon from '@/shared/assets/boarding-pass/icons/cart.svg'
+import headerDiamond from '@/shared/assets/boarding-pass/icons/header-diamond.svg'
+import headerDot from '@/shared/assets/boarding-pass/icons/header-dot.svg'
 import heartIcon from '@/shared/assets/boarding-pass/icons/heart.svg'
 import wordmarkLogo from '@/shared/assets/boarding-pass/icons/mcm-wordmark.svg'
 import menuIcon from '@/shared/assets/boarding-pass/icons/menu.svg'
@@ -42,17 +44,17 @@ function BoardingPassChrome({
       {showTitleBand ? (
         <div className={styles.titleBand}>
           <span aria-hidden="true" className={styles.ornamentLeft}>
-            <span className={styles.dot} />
-            <span className={styles.dot} />
-            <span className={styles.diamond} />
+            <img src={headerDot} alt="" className={styles.dot} />
+            <img src={headerDot} alt="" className={styles.dot} />
+            <img src={headerDiamond} alt="" className={styles.diamond} />
           </span>
 
           <h1 className={styles.title}>MCM BOARDING PASS</h1>
 
           <span aria-hidden="true" className={styles.ornamentRight}>
-            <span className={styles.diamond} />
-            <span className={styles.dot} />
-            <span className={styles.dot} />
+            <img src={headerDiamond} alt="" className={styles.diamond} />
+            <img src={headerDot} alt="" className={styles.dot} />
+            <img src={headerDot} alt="" className={styles.dot} />
           </span>
         </div>
       ) : null}
