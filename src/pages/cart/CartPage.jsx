@@ -121,23 +121,17 @@ export function Component() {
       </section>
 
       {!isEmpty && (
-        <>
-          <ul className={styles.itemList} aria-label="쇼핑백 상품">
-            {items.map((item) => (
-              <CartItem
-                item={item}
-                key={item.id}
-                selected={selectedIds.has(item.id)}
-                onRemove={removeItem}
-                onToggle={toggleItem}
-              />
-            ))}
-          </ul>
-
-          <button className={styles.checkoutButton} type="button" disabled={selectedIds.size === 0}>
-            결제하기
-          </button>
-        </>
+        <ul className={styles.itemList} aria-label="쇼핑백 상품">
+          {items.map((item) => (
+            <CartItem
+              item={item}
+              key={item.id}
+              selected={selectedIds.has(item.id)}
+              onRemove={removeItem}
+              onToggle={toggleItem}
+            />
+          ))}
+        </ul>
       )}
     </div>
   )
