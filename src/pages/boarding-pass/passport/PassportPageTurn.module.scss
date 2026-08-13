@@ -6,7 +6,8 @@
   position: relative;
   box-sizing: border-box;
   width: 100%;
-  height: calc(2.25rem + min(79.5vw, 19.375rem) * 394 / 310);
+  /* 표지 높이는 폭에서 나오지만, 세로가 모자라면 --passport-h가 먼저 걸린다. */
+  height: calc(2.25rem + min(calc(79.5vw * 394 / 310), 24.625rem, var(--passport-h)));
   flex: 0 0 auto;
   overflow: visible;
   touch-action: pan-y;
@@ -14,6 +15,7 @@
 }
 
 .viewport[data-open='true'] {
+  /* 펼침은 설계 크기를 유지한다(내지 클릭 영역이 rem 좌표에 박혀 있다). */
   height: calc(2.25rem + 24.625rem);
 }
 
@@ -51,10 +53,56 @@
 
 @media (max-width: 22rem) {
   .viewport {
-    height: calc(1.25rem + min(79.5vw, 19.375rem) * 394 / 310);
+    height: calc(1.25rem + min(calc(79.5vw * 394 / 310), 24.625rem, var(--passport-h)));
   }
 
   .viewport[data-open='true'] {
     height: calc(1.25rem + 24.625rem);
+  }
+}
+
+/* 모바일에는 넘김 화살표가 없어 슬라이드가 유일한 방법이다. 처음 온 사람에게만
+   한 번 알린다. 마우스가 있는 환경에는 화살표가 보이므로 띄우지 않는다. */
+.swipeHint {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .swipeHint {
+    position: absolute;
+    z-index: 3;
+    right: 0;
+    bottom: 0.75rem;
+    left: 0;
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    padding: 0.5rem 0.875rem;
+    border-radius: 999px;
+    background: rgb(25 25 25 / 55%);
+    color: #fff7d5;
+    font-size: 0.75rem;
+    line-height: 1.0625rem;
+    /* 책 위에 떠 있을 뿐이므로 드래그를 가로채면 안 된다. */
+    pointer-events: none;
+    animation: swipe-hint-in 320ms ease-out both;
+  }
+}
+
+@keyframes swipe-hint-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.375rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swipeHint {
+    animation: none;
   }
 }

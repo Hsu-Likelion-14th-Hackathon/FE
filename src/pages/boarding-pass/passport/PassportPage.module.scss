@@ -1,4 +1,37 @@
 .page {
+  /* 모바일 브라우저는 주소창과 툴바가 화면을 먹어 설계 높이(844)만큼 안 남는다.
+     페이지가 고정 높이라 넘치면 스크롤도 못 하고 잘린다.
+
+     여권은 설계 폭이 화면(390)보다 넓어 좌우로 흘러넘치는 게 의도다. 줄이면
+     화면 안에 얌전히 들어와 그 의도가 깨진다. 그래서 여권은 마지막에 건드리고,
+     부족분은 주변 여백이 먼저 흡수한다.
+
+     746px 아래부터 모자라기 시작한다. 설계에는 그만큼 여유가 있다. */
+  --height-deficit: max(0px, calc(46.625rem - var(--mcm-viewport-stable)));
+
+  /* 줄일 수 있는 여백은 모두 83px다. 각자 제 몫만큼 나눠 부담한다. */
+  --passport-gap-top: max(1.25rem, calc(4.0625rem - var(--height-deficit) * 0.542));
+  --passport-gap-mid: max(0.75rem, calc(2.25rem - var(--height-deficit) * 0.289));
+  --intro-gap: max(0.25rem, calc(0.5rem - var(--height-deficit) * 0.048));
+  --intro-note-gap: max(0.375rem, calc(1rem - var(--height-deficit) * 0.12));
+
+  /* 13.4375rem은 줄일 수 없는 몫 — 헤더 97, 카피 세 줄 74, 아래 넘김 버튼 44.
+     여백을 다 걷어내고도 모자라면 그제야 여권이 줄어들되, 내지 글씨가 뭉개지지
+     않도록 20rem을 하한으로 둔다. 하한에 닿으면 다시 잘리지만 그런 화면은
+     가로 모드처럼 극단적인 경우뿐이다. */
+  --passport-h: max(
+    20rem,
+    min(
+      24.625rem,
+      calc(
+        var(--mcm-viewport-stable) -
+          13.4375rem - var(--passport-gap-top) - var(--passport-gap-mid) - var(--intro-gap) - var(
+            --intro-note-gap
+          ) - max(0.75rem, var(--mcm-safe-bottom))
+      )
+    )
+  );
+
   display: flex;
   min-height: var(--mcm-viewport-stable);
   flex-direction: column;
@@ -68,7 +101,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 4.0625rem;
+  margin-top: var(--passport-gap-top);
   color: #fafafa;
   text-align: center;
 }
@@ -81,7 +114,7 @@
 }
 
 .introCopy strong {
-  margin-top: 0.5rem;
+  margin-top: var(--intro-gap);
   /* Figma 52:18555 — Pretendard SemiBold. 700을 쓰면 폰트에 없어 합성 볼드가 된다. */
   font-weight: 600;
   font-size: 0.875rem;
@@ -89,7 +122,7 @@
 }
 
 .introCopy span {
-  margin-top: 1rem;
+  margin-top: var(--intro-note-gap);
   color: #807066;
   font-size: 0.75rem;
   line-height: 1.25rem;
@@ -98,20 +131,24 @@
 .passport {
   position: relative;
   flex: 0 0 auto;
-  margin-top: 2.25rem;
+  margin-top: var(--passport-gap-mid);
   overflow: hidden;
   background: transparent;
 }
 
 /* Figma 52:18570 — 표지 310×394가 390px 화면 기준 x=40, 즉 좌우 40px 균등. */
 .coverPassport {
-  width: min(79.5vw, 19.375rem);
+  /* 세로가 모자라면 비율을 지킨 채 폭도 함께 줄인다. */
+  width: min(79.5vw, 19.375rem, calc(var(--passport-h) * 310 / 394));
   margin-inline: auto;
   aspect-ratio: 310 / 394;
 }
 
 .openPassport {
-  /* Figma 원래 크기. 좌측 페이지가 화면 중앙에 오고 우측은 화면 밖으로 잘린다. */
+  /* Figma 원래 크기. 좌측 페이지가 화면 중앙에 오고 우측은 화면 밖으로 잘린다.
+     내지의 클릭 영역(.profile, .journeyTile 등)이 이 크기를 전제로 rem 좌표에
+     박혀 있어, 여기를 줄이면 캔버스가 그리는 그림과 터치 영역이 어긋난다.
+     그래서 펼침은 줄이지 않고, 부족한 세로는 위 여백에서만 걷어낸다. */
   width: 31.6875rem;
   aspect-ratio: 507 / 394;
   margin-inline: auto;
@@ -610,5 +647,25 @@ button.historyCard {
   }
   .navigation {
     margin-top: 0.75rem;
+  }
+}
+
+/* 모바일은 좌우 슬라이드로 넘긴다. 화살표 줄이 68px을 차지하는데, 이걸 걷어내야
+   펼침 여권이 설계 크기(394px) 그대로 한 화면에 들어간다.
+   다만 키보드로 넘길 길은 남겨야 하므로 지우지 않고 접어 두었다가,
+   포커스가 들어오면 다시 펼친다. */
+@media (hover: none) and (pointer: coarse) {
+  .navigation {
+    height: 0;
+    margin: 0;
+    overflow: hidden;
+    opacity: 0;
+  }
+
+  .navigation:focus-within {
+    height: auto;
+    margin: 1.5rem auto 0;
+    overflow: visible;
+    opacity: 1;
   }
 }

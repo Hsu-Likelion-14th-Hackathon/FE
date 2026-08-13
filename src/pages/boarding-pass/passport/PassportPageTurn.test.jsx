@@ -70,6 +70,7 @@ async function finishAnimation(duration) {
 }
 
 beforeEach(() => {
+  localStorage.clear()
   rendererControl.fail = false
   rendererControl.render.mockReset()
   rendererControl.setSize.mockReset()
@@ -560,5 +561,50 @@ describe('PassportPageTurn', () => {
 
     fireEvent.pointerDown(screen.getByRole('button', { name: '상품 보기' }))
     expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+  })
+
+  it('모바일 슬라이드 힌트는 처음 한 번만 보여준다', async () => {
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+
+    const hint = screen.getByText('옆으로 슬라이드 해보세요')
+    expect(hint).toBeInTheDocument()
+
+    // 손을 대는 순간 방법을 안 것이므로 힌트가 물러난다.
+    fireEvent.pointerDown(screen.getByTestId('passport-turn-surface'), {
+      pointerId: 1,
+      clientX: 200,
+      clientY: 200,
+    })
+    expect(screen.queryByText('옆으로 슬라이드 해보세요')).not.toBeInTheDocument()
+  })
+
+  it('한 번 넘겨 본 뒤에는 힌트를 다시 띄우지 않는다', async () => {
+    localStorage.setItem('mcm-passport-swipe-hint-seen', '1')
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+
+    expect(screen.queryByText('옆으로 슬라이드 해보세요')).not.toBeInTheDocument()
+  })
+
+  it('슬라이드가 아니라 화살표로 넘겨도 힌트를 거둔다', async () => {
+    // 아이패드처럼 터치와 키보드를 함께 쓰는 기기에서 실제로 일어나는 경로다.
+    rendererControl.fail = true
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+    )
+    expect(screen.getByText('옆으로 슬라이드 해보세요')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+
+    await waitFor(() =>
+      expect(screen.queryByText('옆으로 슬라이드 해보세요')).not.toBeInTheDocument(),
+    )
+    expect(localStorage.getItem('mcm-passport-swipe-hint-seen')).toBe('1')
   })
 })

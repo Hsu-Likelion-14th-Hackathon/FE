@@ -88,7 +88,30 @@ function loadImage(src) {
   })
 }
 
+/** 한 번 넘겨 본 사람에게 힌트를 다시 띄우지 않기 위한 표식. */
+const HINT_SEEN_KEY = 'mcm-passport-swipe-hint-seen'
+
+function readHintSeen() {
+  // 사파리 비공개 모드처럼 저장이 막힌 환경에서도 화면은 떠야 한다.
+  try {
+    return localStorage.getItem(HINT_SEEN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
 export default function PassportPageTurn({ step, disabled, onCommit, renderStep }) {
+  const [showHint, setShowHint] = useState(() => step === 0 && !readHintSeen())
+
+  const dismissHint = useCallback(() => {
+    setShowHint(false)
+    try {
+      localStorage.setItem(HINT_SEEN_KEY, '1')
+    } catch {
+      // 저장에 실패해도 이번 세션 동안은 숨어 있으면 충분하다.
+    }
+  }, [])
+
   const [rendererMode, setRendererMode] = useState('fallback')
   const [turnState, setTurnState] = useState('idle')
 
@@ -263,6 +286,11 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
         return
       }
 
+      // 넘김은 슬라이드든 화살표든 키보드든 전부 여기를 지난다. 한 번이라도
+      // 넘겼으면 방법을 안 것이므로 안내를 거둔다. 아이패드처럼 터치와 키보드를
+      // 함께 쓰는 기기에서는 화살표로 넘기고도 안내가 남아 있었다.
+      if (commit) dismissHint()
+
       if (rendererMode !== 'ready' || !bookRef.current) {
         if (commit) onCommit(direction)
         return
@@ -272,7 +300,7 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
       setTurnState('settling')
       animateTo({ direction, from: fromProgress, to: commit ? 1 : 0, duration, commit })
     },
-    [animateTo, disabled, onCommit, paintBook, rendererMode, step, turnState],
+    [animateTo, disabled, dismissHint, onCommit, paintBook, rendererMode, step, turnState],
   )
 
   // 여권 데이터가 바뀌면 구워둔 면을 버린다.
@@ -342,6 +370,8 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
   const onPointerDown = (event) => {
     if (disabled || turnState !== 'idle' || isInteractiveTarget(event.target)) return
     if (event.pointerType === 'mouse' && event.button !== 0) return
+    // 손을 댄 순간 방법을 안 것이므로 힌트는 물러난다.
+    if (showHint) dismissHint()
     pointerRef.current = {
       id: event.pointerId,
       startX: event.clientX,
@@ -440,6 +470,13 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
         <div className={styles.contentLayer} data-transparent={rendererMode === 'ready'}>
           {renderStep(step)}
         </div>
+        {/* 모바일에는 넘김 화살표가 없어 슬라이드가 유일한 방법이다.
+            처음 한 번만 알려주고, 한 장이라도 넘기면 다시 띄우지 않는다. */}
+        {showHint ? (
+          <p className={styles.swipeHint} role="status">
+            옆으로 슬라이드 해보세요
+          </p>
+        ) : null}
       </div>
       <nav className={pageStyles.navigation} aria-label="여권 단계 이동">
         <button
