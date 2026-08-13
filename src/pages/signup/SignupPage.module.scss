@@ -207,3 +207,12 @@
   font-size: 0.75rem;
   line-height: 1.125rem;
 }
+
+/* 조합 중인 한글처럼 받을 수 없는 글자는 흐리게 둔다. 입력되고 있다는 건 보이되
+   확정되지 않을 상태임을 함께 드러낸다. opacity 대신 글자색만 흐리게 해서
+   커서는 또렷하게 남긴다. */
+.inputBlocked {
+  color: color-mix(in srgb, var(--mcm-color-ink) 35%, transparent);
+  caret-color: var(--mcm-color-ink);
+  transition: color 0.12s ease;
+}

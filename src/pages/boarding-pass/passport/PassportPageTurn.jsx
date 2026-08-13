@@ -227,8 +227,7 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
         if (startedAt === null) startedAt = timestamp
         const ratio = duration === 0 ? 1 : Math.min((timestamp - startedAt) / duration, 1)
         // easeInOutCubic — 손을 뗀 직후 갑자기 튀지 않고 끝에서 사뿐히 내려앉는다.
-        const eased =
-          ratio < 0.5 ? 4 * ratio * ratio * ratio : 1 - Math.pow(-2 * ratio + 2, 3) / 2
+        const eased = ratio < 0.5 ? 4 * ratio * ratio * ratio : 1 - Math.pow(-2 * ratio + 2, 3) / 2
         drawFrame(direction, from + (to - from) * eased)
 
         if (ratio < 1) {
