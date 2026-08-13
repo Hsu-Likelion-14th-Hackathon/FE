@@ -113,6 +113,8 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
   }, [])
 
   const [rendererMode, setRendererMode] = useState('fallback')
+  // 이미지 14장을 다 받았는지. 받고 나서 한 번 다시 구워야 빈 면이 남지 않는다.
+  const [assetsReady, setAssetsReady] = useState(false)
   const [turnState, setTurnState] = useState('idle')
 
   const viewportRef = useRef(null)
@@ -270,7 +272,8 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     faceCacheRef.current.clear()
   }, [profile, stamps])
 
-  // 페이지에 그릴 이미지들을 미리 받아둔다.
+  // 페이지에 그릴 이미지들을 미리 받아둔다. 14장이라 단계마다 다시 받으면
+  // 모바일에서 눈에 띄게 끊긴다. 한 번만 받고 준비됐다는 사실만 알린다.
   useEffect(() => {
     let alive = true
     const names = Object.keys(ASSET_SOURCES)
@@ -278,15 +281,12 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
       if (!alive) return
       assetsRef.current = Object.fromEntries(names.map((name, index) => [name, loaded[index]]))
       faceCacheRef.current.clear()
-      if (bookRef.current) {
-        paintSheets()
-        drawFrame(step)
-      }
+      setAssetsReady(true)
     })
     return () => {
       alive = false
     }
-  }, [drawFrame, paintSheets, step])
+  }, [])
 
   useEffect(() => {
     const host = canvasHostRef.current
@@ -317,12 +317,22 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     }
   }, [stopFrame])
 
-  // step이 확정되면 정지 화면을 다시 굽는다.
+  // 장은 내용이 바뀔 때만 다시 굽는다. setSheets는 네 장과 텍스처 여덟 장을
+  // 통째로 새로 만들므로 단계마다 부르면 낭비고, 드래그 중에 끼어들면 장면이
+  // 원래 단계로 되돌아간다.
   useEffect(() => {
     if (rendererMode !== 'ready') return
     paintSheets()
     drawFrame(step)
-  }, [drawFrame, paintSheets, rendererMode, step])
+    // step은 아래 효과가 맡는다. 여기서 다시 그리는 건 새로 구운 직후뿐이다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assetsReady, paintSheets, rendererMode])
+
+  // 단계가 확정되면 각도만 바꿔 다시 그린다.
+  useEffect(() => {
+    if (rendererMode !== 'ready') return
+    drawFrame(step)
+  }, [drawFrame, rendererMode, step])
 
   const resetPointer = (event) => {
     pointerRef.current = { ...IDLE_POINTER }

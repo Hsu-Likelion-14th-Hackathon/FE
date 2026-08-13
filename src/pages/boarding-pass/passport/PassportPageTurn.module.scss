@@ -15,8 +15,9 @@
 }
 
 .viewport[data-open='true'] {
-  /* 펼침은 설계 크기를 유지한다(내지 클릭 영역이 rem 좌표에 박혀 있다). */
-  height: calc(2.25rem + 24.625rem);
+  /* 캔버스 높이도 지면과 같은 값에서 나와야 한다. 여기만 394로 고정하면
+     화면이 짧아 지면이 줄어든 만큼 캔버스가 남아, 그림과 클릭 영역이 어긋난다. */
+  height: calc(2.25rem + var(--passport-h));
 }
 
 /* WebGL이 책을 그리는 레이어. 화면에 보이는 것은 전부 이 캔버스다.
@@ -60,7 +61,7 @@
   }
 
   .viewport[data-open='true'] {
-    height: calc(1.25rem + 24.625rem);
+    height: calc(1.25rem + var(--passport-h));
   }
 }
 
