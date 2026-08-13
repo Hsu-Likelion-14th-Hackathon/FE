@@ -24,6 +24,18 @@
     rgb(25 25 25 / 60%) 100%
   );
   pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+/* 끝에 닿으면 물러난다. 더 볼 게 없는데 덮고 있으면 마지막 항목만 어두워진다. */
+.scrollFade[data-at-end='true'] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollFade {
+    transition: none;
+  }
 }
 
 @media (min-width: 744px) and (max-width: 1199px) {
