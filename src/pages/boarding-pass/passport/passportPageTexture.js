@@ -238,7 +238,13 @@ function drawJourney(ctx, w, h, { assets, side }) {
     ctx.drawImage(assets.journeyDecoration, x + 16 * sx, tileY + 39 * sy, 63 * sx, 37 * sy)
   }
   if (assets.journeyTicket) {
-    ctx.drawImage(assets.journeyTicket, x + tileW + gap + 29 * sx, tileY + 27 * sy, 37 * sx, 55 * sy)
+    ctx.drawImage(
+      assets.journeyTicket,
+      x + tileW + gap + 29 * sx,
+      tileY + 27 * sy,
+      37 * sx,
+      55 * sy,
+    )
   }
 
   // 하단 CTA 96×24, 로컬 y=277
