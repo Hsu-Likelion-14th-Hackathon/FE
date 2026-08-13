@@ -104,12 +104,13 @@ export function createPassportSheets() {
         restZ + (turnedZ - restZ) * progress + curve * leafW * LIFT_RATIO,
       )
 
-      leaf.group.scale.set(1, leafH, 1)
-      leaf.front.scale.set(leafW, 1, 1)
-      leaf.back.scale.set(leafW, 1, 1)
-      leaf.bend.uWidth.value = leafW
+      // 크기는 group에서 세 축을 한 번에 준다. 메시만 x로 늘리면 셰이더가 보는
+      // position.x는 0~1인데 uWidth에는 253.5가 들어가, 굽힘각이 108도가 아니라
+      // 0.43도에 그쳐 종이가 아니라 딱딱한 판이 돈다.
+      leaf.group.scale.set(leafW, leafH, leafW)
+      leaf.bend.uWidth.value = 1
       leaf.bend.uBend.value = curve
-      leaf.bend.uDroop.value = curve * leafW * 0.09
+      leaf.bend.uDroop.value = curve * 0.09
     }
 
     // 오른쪽 지면만 보여주므로 책등을 왼쪽에 두고 지면을 화면 가운데 세운다.
