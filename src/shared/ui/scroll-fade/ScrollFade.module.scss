@@ -1,0 +1,48 @@
+/* Figma 71:1583 / 71:1298 — 목록 화면 바닥에 깔리는 페이드.
+   아래로 더 볼 게 남았다는 신호라 목록이 비어 있으면 붙이지 않는다. */
+.scrollFade {
+  position: fixed;
+  z-index: 4;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--mcm-shell-inline-size);
+  max-width: 100%;
+  /* Figma에서 y=689부터 바닥까지. */
+  height: 155px;
+  margin-inline: auto;
+
+  /* 디자인은 아래에서만 급히 어두워진다. 선형으로 깔면 중간부터 탁해 보인다.
+     정지점은 Figma 이미지에서 잰 밝기를 알파로 환산한 값이다
+     (알파 = (250 - 밝기) / 225). */
+  background: linear-gradient(
+    to bottom,
+    rgb(25 25 25 / 0%) 0%,
+    rgb(25 25 25 / 10%) 25%,
+    rgb(25 25 25 / 23%) 50%,
+    rgb(25 25 25 / 43%) 75%,
+    rgb(25 25 25 / 60%) 100%
+  );
+  pointer-events: none;
+}
+
+@media (min-width: 744px) and (max-width: 1199px) {
+  .scrollFade {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+/* 데스크톱은 아이폰 틀 안에서 스크롤하므로 화면이 아니라 틀 바닥에 붙어야 한다. */
+@media (min-width: 1200px) {
+  .scrollFade {
+    position: sticky;
+    right: auto;
+    bottom: 0;
+    left: auto;
+    width: 100%;
+    max-width: none;
+    margin-top: -155px;
+    margin-inline: 0;
+  }
+}

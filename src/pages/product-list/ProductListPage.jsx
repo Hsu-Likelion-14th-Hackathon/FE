@@ -4,6 +4,7 @@ import collectionImage from '@/assets/images/home/aw26-collection.webp'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import { products } from '@/shared/data/products.js'
 import ProductCard from '@/shared/ui/product-card/ProductCard.jsx'
+import ScrollFade from '@/shared/ui/scroll-fade/ScrollFade.jsx'
 
 import styles from './ProductListPage.module.scss'
 
@@ -72,6 +73,8 @@ export function Component() {
           ))}
         </section>
       </div>
+
+      <ScrollFade />
     </div>
   )
 }
