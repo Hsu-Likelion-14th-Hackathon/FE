@@ -1,30 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 
-import brandStripDiamond from '@/assets/icons/brand-strip-diamond.svg'
-import brandStripDot from '@/assets/icons/brand-strip-dot.svg'
+import BrandStrip from '@/shared/layout/brand-strip/BrandStrip.jsx'
 import { CartIcon, HeartIcon, McmLogoIcon, MenuIcon } from '@/shared/ui/icons/StoreIcons.jsx'
 import useStoreMenu from '@/shared/layout/store-menu/useStoreMenu.js'
 
 import styles from './StoreHeader.module.scss'
-
-function BrandStrip() {
-  return (
-    <div className={styles.brandStrip} aria-hidden="true">
-      <span className={`${styles.ornament} ${styles.ornamentLeft}`}>
-        <img className={styles.ornamentDot} src={brandStripDot} alt="" />
-        <img className={styles.ornamentDot} src={brandStripDot} alt="" />
-        <img className={styles.ornamentDiamond} src={brandStripDiamond} alt="" />
-      </span>
-      <span className={styles.brandName}>MCM BOARDING PASS</span>
-      <span className={`${styles.ornament} ${styles.ornamentRight}`}>
-        <img className={styles.ornamentDiamond} src={brandStripDiamond} alt="" />
-        <img className={styles.ornamentDot} src={brandStripDot} alt="" />
-        <img className={styles.ornamentDot} src={brandStripDot} alt="" />
-      </span>
-    </div>
-  )
-}
 
 function StoreHeader() {
   const { closeMenu, isOpen, toggleMenu } = useStoreMenu()

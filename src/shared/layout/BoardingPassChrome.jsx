@@ -1,12 +1,11 @@
 import cartIcon from '@/shared/assets/boarding-pass/icons/cart.svg'
-import headerDiamond from '@/shared/assets/boarding-pass/icons/header-diamond.svg'
-import headerDot from '@/shared/assets/boarding-pass/icons/header-dot.svg'
 import heartIcon from '@/shared/assets/boarding-pass/icons/heart.svg'
 import wordmarkLogo from '@/shared/assets/boarding-pass/icons/mcm-wordmark.svg'
 import menuIcon from '@/shared/assets/boarding-pass/icons/menu.svg'
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 
+import BrandStrip from '@/shared/layout/brand-strip/BrandStrip.jsx'
 import useStoreMenu from '@/shared/layout/store-menu/useStoreMenu.js'
 
 import styles from './BoardingPassChrome.module.scss'
@@ -41,23 +40,7 @@ function BoardingPassChrome({
         background: 'var(--mcm-color-canvas)',
       }}
     >
-      {showTitleBand ? (
-        <div className={styles.titleBand}>
-          <span aria-hidden="true" className={styles.ornamentLeft}>
-            <img src={headerDot} alt="" className={styles.dot} />
-            <img src={headerDot} alt="" className={styles.dot} />
-            <img src={headerDiamond} alt="" className={styles.diamond} />
-          </span>
-
-          <h1 className={styles.title}>MCM BOARDING PASS</h1>
-
-          <span aria-hidden="true" className={styles.ornamentRight}>
-            <img src={headerDiamond} alt="" className={styles.diamond} />
-            <img src={headerDot} alt="" className={styles.dot} />
-            <img src={headerDot} alt="" className={styles.dot} />
-          </span>
-        </div>
-      ) : null}
+      {showTitleBand ? <BrandStrip as="heading" /> : null}
 
       {showIconRow ? (
         <div className={`${styles.iconRow} ${iconRowClassName}`}>

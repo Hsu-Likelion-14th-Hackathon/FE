@@ -25,11 +25,19 @@
   font-family: var(--mcm-font-brand);
   font-size: 22px;
   line-height: 40px;
-  text-shadow:
-    0 1px 0 rgb(255 255 255 / 10%),
-    0 -1px 0 rgb(0 0 0 / 14%);
   transform: translate(-50%, 1px);
   white-space: nowrap;
+
+  /* Figma의 타이틀은 위가 밝고 아래로 가라앉는 유리 광택을 갖는다.
+     text-shadow로는 그 결이 나오지 않아 보딩패스 헤더와 같은 방식으로 맞춘다.
+     color는 background-clip:text 미지원 환경용 폴백이다. */
+  color: rgb(226 197 176 / 40%);
+  background-image: var(--mcm-gradient-header-title);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .ornament {
