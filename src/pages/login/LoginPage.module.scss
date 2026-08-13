@@ -133,7 +133,9 @@
 
 .fieldHeader {
   display: flex;
-  align-items: baseline;
+  /* 표시 버튼이 44px 높이를 온전히 쓰도록 줄 높이를 확보한다. */
+  min-height: 2.75rem;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
@@ -173,7 +175,8 @@
   place-items: center;
   padding: 0;
   border: 0;
-  margin: -0.875rem -0.5rem;
+  /* 세로로 당기면 위쪽 입력과 겹쳐 그만큼을 입력이 가져간다. 가로만 당긴다. */
+  margin-inline: -0.5rem;
   background: transparent;
   color: var(--mcm-color-muted);
   font-size: 11px;

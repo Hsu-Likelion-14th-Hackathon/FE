@@ -16,7 +16,10 @@ const END_SLACK_PX = 8
 function findScroller(node) {
   for (let el = node?.parentElement; el; el = el.parentElement) {
     const { overflowY } = getComputedStyle(el)
-    if (overflowY === 'auto' || overflowY === 'scroll') return el
+    const scrollable = overflowY === 'auto' || overflowY === 'scroll'
+    // overflow-x만 hidden이어도 계산된 overflow-y가 auto가 된다. 그래서
+    // 실제로 넘칠 내용이 있는지까지 봐야 엉뚱한 조상을 잡지 않는다.
+    if (scrollable && el.scrollHeight > el.clientHeight) return el
   }
   return document.scrollingElement ?? document.documentElement
 }
@@ -35,22 +38,38 @@ function ScrollFade() {
   const [atEnd, setAtEnd] = useState(true)
 
   useEffect(() => {
-    const scroller = findScroller(fadeRef.current)
-    if (!scroller) return undefined
+    let detach = () => {}
 
-    const update = () => {
-      const remaining = scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop
-      setAtEnd(remaining <= END_SLACK_PX)
+    const attach = () => {
+      detach()
+      const scroller = findScroller(fadeRef.current)
+      if (!scroller) return
+
+      const update = () => {
+        const remaining = scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop
+        setAtEnd(remaining <= END_SLACK_PX)
+      }
+
+      update()
+      // 목록이 늘거나 줄어도 남은 양이 달라진다.
+      const stopObserving = observeResize(scroller, update)
+      const target = scroller === document.scrollingElement ? window : scroller
+      target.addEventListener('scroll', update, { passive: true })
+      detach = () => {
+        stopObserving()
+        target.removeEventListener('scroll', update)
+      }
     }
 
-    update()
-    // 목록이 늘거나 줄어도 남은 양이 달라진다.
-    const stopObserving = observeResize(scroller, update)
-    const target = scroller === document.scrollingElement ? window : scroller
-    target.addEventListener('scroll', update, { passive: true })
+    attach()
+
+    // 데스크톱은 문서가 아니라 아이폰 틀 안쪽이 스크롤된다. 경계를 넘나들면
+    // 스크롤되는 요소 자체가 바뀌므로 다시 찾아 붙여야 한다.
+    const desktop = window.matchMedia?.('(min-width: 1200px)')
+    desktop?.addEventListener?.('change', attach)
     return () => {
-      stopObserving()
-      target.removeEventListener('scroll', update)
+      detach()
+      desktop?.removeEventListener?.('change', attach)
     }
   }, [])
 
