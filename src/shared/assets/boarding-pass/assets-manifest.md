@@ -3,7 +3,8 @@
 최종 갱신: 2026-08-09 (SA-COMPLETE)
 규칙: 화면 에이전트는 이 표에 등재된 경로만 import 한다. 미등재 에셋이 필요하면 blocked로 보고. 기존 키 rename 금지, append만 허용.
 
-피그마 fileKey: `rPPEj4gBftgujJDHyS8ev8` (기준 캔버스 390×844)
+피그마 fileKey: `nPoHrwxi0e0738SWNzN7rN` (기준 캔버스 390×844)
+와프: `0:1` / 디자인: `1:2`
 
 ## 공통 (icons/)
 
@@ -105,9 +106,6 @@
 | guide-deco-top             | src/shared/assets/boarding-pass/guide/deco-top.png             | 683:8781    | png  | (44) 가이드 개요 우상단 MCM 비행기 데코 이미지     |
 | guide-overview-main        | src/shared/assets/boarding-pass/guide/overview-main.png        | 683:8782    | png  | (44) 가이드 개요 좌측 메인 MCM HAUS 건물 이미지    |
 | guide-overview-figure      | src/shared/assets/boarding-pass/guide/overview-figure.png      | 683:8794    | png  | (44) 가이드 개요 우측 화살표 참(charm) 장식 이미지 |
-| guide-overview-main-day    | src/shared/assets/boarding-pass/guide/overview-main-day.png    | 686:9390    | png  | (44-1) 개요 히어로 주간 건물 컷                    |
-| guide-overview-main-violet | src/shared/assets/boarding-pass/guide/overview-main-violet.png | 686:9515    | png  | (44-2) 개요 히어로 퍼플 스카이 건물 컷             |
-| guide-overview-main-haus   | src/shared/assets/boarding-pass/guide/overview-main-haus.png   | 686:9640    | png  | (44-3) 개요 히어로 MCM HAUS 나이트 컷              |
 | guide-nav-prev             | src/shared/assets/boarding-pass/guide/nav-prev.svg             | 702:9738    | svg  | (44)~(47) 하단 이전 원형 화살표                    |
 | guide-nav-next             | src/shared/assets/boarding-pass/guide/nav-next.svg             | 702:9750    | svg  | (44)~(47) 하단 다음 원형 화살표                    |
 | guide-product-trolley      | src/shared/assets/boarding-pass/guide/product-trolley.png      | 702:9780    | png  | (45) 1F Ottomar 비세토스 트롤리                    |
