@@ -34,7 +34,15 @@ export function Component() {
           </div>
         </header>
 
-        <form className={styles.form}>
+        <form
+          className={styles.form}
+          onSubmit={(event) => {
+            // 아직 붙일 API가 없다. 막지 않으면 브라우저가 기본 동작으로 GET
+            // 제출을 해서 페이지가 새로고침되고 비밀번호가 주소창과 방문 기록에
+            // 평문으로 남는다. POST /auth/login을 붙일 때 이 자리를 채운다.
+            event.preventDefault()
+          }}
+        >
           <p className={styles.requiredNotice}>* 표시가 있는 모든 입력 항목은 필수입니다.</p>
 
           <div className={styles.field}>
