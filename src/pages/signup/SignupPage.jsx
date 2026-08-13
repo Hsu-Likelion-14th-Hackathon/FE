@@ -9,8 +9,16 @@ import BirthDateField from './components/BirthDateField.jsx'
 import NationalitySelect from './components/NationalitySelect.jsx'
 import styles from './SignupPage.module.scss'
 
+/** 여권 표기와 맞추기 위해 영문 대문자만 남긴다. 한글은 애초에 들어오지 않는다. */
+function toPassportName(value) {
+  return value.replace(/[^A-Za-z\s'-]/g, '').toUpperCase()
+}
+
 export function Component() {
   const [openPicker, setOpenPicker] = useState(null)
+  const [name, setName] = useState('')
+  // 걸러낸 글자가 있을 때만 안내를 띄운다. 처음부터 보여주면 잔소리가 된다.
+  const [nameRejected, setNameRejected] = useState(false)
   const [birthDate, setBirthDate] = useState('')
   const [countryCode, setCountryCode] = useState('')
 
@@ -55,10 +63,28 @@ export function Component() {
                   name="name"
                   type="text"
                   autoComplete="name"
-                  placeholder="이름을 입력해 주세요"
+                  autoCapitalize="characters"
+                  lang="en"
+                  placeholder="영문 이름을 입력해 주세요"
+                  aria-describedby="signup-name-hint"
+                  value={name}
+                  onChange={(event) => {
+                    const next = toPassportName(event.target.value)
+                    setNameRejected(next !== event.target.value.toUpperCase())
+                    setName(next)
+                  }}
                   required
                 />
               </div>
+              {nameRejected ? (
+                <p className={styles.inputNotice} id="signup-name-hint" role="status">
+                  여권 표기에 맞춰 영문만 입력할 수 있습니다
+                </p>
+              ) : (
+                <p className="sr-only" id="signup-name-hint">
+                  여권 표기에 맞춰 영문 대문자로만 입력됩니다. 한글은 입력할 수 없습니다.
+                </p>
+              )}
             </div>
 
             <BirthDateField

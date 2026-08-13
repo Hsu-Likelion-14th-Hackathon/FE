@@ -14,31 +14,30 @@
   column-gap: 1.25rem; /* 20 — 글씨↔마름모 */
 }
 
+/* Figma 52:18449 — 장식은 타이틀이 아니라 밴드 양 끝 기준으로 배치된다.
+   좌 16/30/44, 우 329/355/369 → 요소 사이 간격은 모두 10px. */
 .ornamentLeft,
 .ornamentRight {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 0.875rem; /* 14 */
+  gap: 0.625rem; /* 10 */
 }
 
 .ornamentLeft {
-  justify-self: end;
-}
-
-.ornamentRight {
   justify-self: start;
 }
 
+.ornamentRight {
+  justify-self: end;
+}
+
+/* 장식은 #E2C5B0 40% 단색 SVG 에셋을 그대로 쓴다(Figma와 동일). */
 .dot {
   display: block;
   width: 0.25rem; /* 4 */
   height: 0.25rem;
   flex-shrink: 0;
-  border-radius: 50%;
-  background-image: var(--mcm-gradient-header-title);
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
 }
 
 .diamond {
@@ -46,10 +45,6 @@
   width: 1rem; /* 16 */
   height: 1rem;
   flex-shrink: 0;
-  background-image: var(--mcm-gradient-header-title);
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 }
 
 .title {
@@ -65,7 +60,10 @@
   letter-spacing: normal;
   text-align: center;
   white-space: nowrap;
-  color: rgba(226, 197, 176, 0.5);
+  /* Figma의 타이틀은 위가 밝고 아래로 가라앉는 유리 광택을 갖는다.
+     get_design_context는 fill을 단색으로만 보고하므로 값만 보고 판단하면 안 된다. */
+  /* background-clip:text 미지원 환경용 폴백. Figma 텍스트 fill과 같은 값. */
+  color: rgba(226, 197, 176, 0.4);
   background-image: var(--mcm-gradient-header-title);
   background-repeat: no-repeat;
   background-size: 100% 100%;

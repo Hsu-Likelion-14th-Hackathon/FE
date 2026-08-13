@@ -98,14 +98,21 @@ describe('App', () => {
 
     await screen.findByRole('link', { name: 'Boarding' })
 
+    // 브랜드 스트립은 전광판처럼 흐르도록 텍스트를 여러 벌 두고,
+    // 스크린리더용 sr-only 텍스트를 따로 둔다. 광택은 흐르는 쪽에 있다.
     const brandName = [...document.querySelectorAll('header span')].find(
-      (element) => element.textContent === 'MCM BOARDING PASS',
+      (element) =>
+        element.textContent === 'MCM BOARDING PASS' &&
+        window.getComputedStyle(element).backgroundImage !== '',
     )
 
-    const textShadow = window.getComputedStyle(brandName).textShadow
+    // 하이라이트는 text-shadow가 아니라 위→아래로 떨어지는 유리 광택을
+    // 글자에 클리핑해서 낸다(Figma 52:13290).
+    const style = window.getComputedStyle(brandName)
 
-    expect(textShadow).toContain('0 1px 0 rgba(255, 255, 255, 0.1)')
-    expect(textShadow).toContain('0 -1px 0 rgba(0, 0, 0, 0.14)')
+    // jsdom은 CSS 변수를 풀지 않고 var(...) 그대로 돌려준다.
+    expect(style.backgroundImage).toBe('var(--mcm-gradient-header-title)')
+    expect(style.backgroundClip).toBe('text')
   })
 
   it.each(routeCases)('%s 경로에서 %s 화면을 렌더링한다', async (pathname, heading) => {
@@ -263,7 +270,11 @@ describe('App', () => {
     cleanup()
     renderRoute('/boarding-pass')
     const menuButton = await screen.findByRole('button', { name: '메뉴 열기' })
-    expect(menuButton.closest('header').querySelectorAll('img')).toHaveLength(4)
+    const chrome = menuButton.closest('header')
+    // 조작 요소는 메뉴·로고·위시리스트·장바구니 4개뿐이어야 한다(검색이 생기면 5개가 된다).
+    // 타이틀 밴드의 점·마름모는 aria-hidden 장식이라 개수 검증 대상이 아니다.
+    expect(chrome.querySelectorAll('a, button')).toHaveLength(4)
+    expect(chrome.querySelector('[aria-label*="검색"]')).toBeNull()
   })
 
   it('열린 메뉴 안에서 Tab 포커스를 순환한다', async () => {

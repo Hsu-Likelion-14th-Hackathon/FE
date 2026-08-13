@@ -5,6 +5,7 @@ import menuIcon from '@/shared/assets/boarding-pass/icons/menu.svg'
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 
+import BrandStrip from '@/shared/layout/brand-strip/BrandStrip.jsx'
 import useStoreMenu from '@/shared/layout/store-menu/useStoreMenu.js'
 
 import styles from './BoardingPassChrome.module.scss'
@@ -39,23 +40,7 @@ function BoardingPassChrome({
         background: 'var(--mcm-color-canvas)',
       }}
     >
-      {showTitleBand ? (
-        <div className={styles.titleBand}>
-          <span aria-hidden="true" className={styles.ornamentLeft}>
-            <span className={styles.dot} />
-            <span className={styles.dot} />
-            <span className={styles.diamond} />
-          </span>
-
-          <h1 className={styles.title}>MCM BOARDING PASS</h1>
-
-          <span aria-hidden="true" className={styles.ornamentRight}>
-            <span className={styles.diamond} />
-            <span className={styles.dot} />
-            <span className={styles.dot} />
-          </span>
-        </div>
-      ) : null}
+      {showTitleBand ? <BrandStrip as="heading" /> : null}
 
       {showIconRow ? (
         <div className={`${styles.iconRow} ${iconRowClassName}`}>

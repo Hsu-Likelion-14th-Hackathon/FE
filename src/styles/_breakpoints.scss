@@ -1,0 +1,51 @@
+// 반응형 브레이크포인트 단일 출처.
+//
+// 3단 정책
+// - 모바일 (~743px)      : 320~430px 무결. 셸은 min(100vw, 430px) 중앙 정렬
+// - 태블릿 (744~1199px)  : 셸 전폭 확장. 그리드형 화면은 열 수 증가,
+//                          몰입형(보딩패스) 화면은 중앙 정렬로 비율 보존
+// - 데스크톱 (1200px~)   : 아이폰 목업 프레임 안에 390×844 화면
+//
+// 태블릿 하한이 768이 아니라 744인 이유:
+// iPad mini 세로가 744px이고, 768px 기기도 클래식 스크롤바가 뜨면
+// 뷰포트가 767px로 잡혀 min-width:768 조건을 놓친다.
+
+$compact-max: 349px; // 초소형 기기 (320~349)
+$tablet-min: 744px;
+$desktop-min: 1200px;
+$tablet-max: $desktop-min - 1px; // 1199px
+$tablet-wide-min: 1024px;
+
+// 초소형 기기에서의 축소 보정
+@mixin compact {
+  @media (max-width: $compact-max) {
+    @content;
+  }
+}
+
+// 태블릿 전 구간
+@mixin tablet {
+  @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+    @content;
+  }
+}
+
+// 태블릿 중 넓은 쪽 (가로 모드 등)
+@mixin tablet-wide {
+  @media (min-width: $tablet-wide-min) and (max-width: $tablet-max) {
+    @content;
+  }
+}
+
+// 태블릿 이상 — 모바일에만 적용하지 않을 스타일에 사용
+@mixin tablet-up {
+  @media (min-width: $tablet-min) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: $desktop-min) {
+    @content;
+  }
+}

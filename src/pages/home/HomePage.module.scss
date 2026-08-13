@@ -33,6 +33,30 @@
   position: absolute;
   pointer-events: none;
   user-select: none;
+  /* 회전은 내부 img가 갖고 있으므로 떠다니는 움직임은 컨테이너에 건다. */
+  animation: hero-float var(--float-duration, 6s) ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+  will-change: transform;
+}
+
+/* 주기와 시작 위상을 서로 어긋나게 둬 세 오브젝트가 함께 오르내리지 않게 한다. */
+@keyframes hero-float {
+  from,
+  to {
+    transform: translateY(calc(var(--float-lift, 6px) * -1));
+  }
+
+  50% {
+    transform: translateY(var(--float-lift, 6px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .introSuitcase,
+  .introPlane,
+  .introWatch {
+    animation: none;
+  }
 }
 
 .heroGlowTop {
@@ -88,6 +112,10 @@
 }
 
 .introSuitcase {
+  --float-lift: 7px;
+  --float-duration: 6.4s;
+  --float-delay: -0.6s;
+
   z-index: 1;
   top: -34.53px;
   left: 36.26%;
@@ -103,6 +131,12 @@
 }
 
 .introPlane {
+  /* 비행기만 크게 오르내리게 두고, delay를 주기의 절반으로 줘서
+     가방·시계가 올라갈 때 반대로 내려오도록 위상을 뒤집는다. */
+  --float-lift: 16px;
+  --float-duration: 5.2s;
+  --float-delay: -2.6s;
+
   z-index: 2;
   top: 161.56px;
   left: 19.94%;
@@ -118,6 +152,10 @@
 }
 
 .introWatch {
+  --float-lift: 5px;
+  --float-duration: 5.6s;
+  --float-delay: -4.2s;
+
   z-index: 1;
   top: 492px;
   left: 5.38%;
@@ -275,7 +313,7 @@
   }
 }
 
-@media (min-width: 768px) and (max-width: 1199px) {
+@media (min-width: 744px) and (max-width: 1199px) {
   .introHero {
     --mcm-tablet-scene-start: calc(50% - 195px);
   }

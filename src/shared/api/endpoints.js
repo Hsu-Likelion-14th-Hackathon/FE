@@ -8,6 +8,11 @@ export const API = {
   survey: {
     questions: apiUrl('/api/surveys/questions'),
   },
+  passport: {
+    profile: apiUrl('/api/passport'),
+    stamps: apiUrl('/api/passport/stamps'),
+    visit: (visitLogId) => apiUrl(`/api/passport/visits/${visitLogId}`),
+  },
   boardingPass: {
     issue: apiUrl('/api/boarding-passes'),
     current: apiUrl('/api/boarding-passes/latest'),
