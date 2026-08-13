@@ -46,9 +46,15 @@
 .track {
   display: flex;
   width: max-content;
-  /* 두 벌을 이어 두고 절반만큼 움직이면 이음매 없이 순환한다. */
-  animation: brand-scroll 22s linear infinite;
+  /* 두 묶음을 이어 두고 절반(=한 묶음)만큼 움직이면 이음매 없이 순환한다.
+     묶음 안의 문구 수와 재생 시간은 BrandStrip이 화면 폭에 맞춰 정한다. */
+  animation: brand-scroll var(--brand-duration, 22s) linear infinite;
   will-change: transform;
+}
+
+.group {
+  display: flex;
+  flex: none;
 }
 
 .item {
