@@ -46,8 +46,11 @@
   opacity: 0;
 }
 
-/* 키보드 사용자를 위해 포커스가 들어오면 다시 보이게 한다. */
-.contentLayer[data-transparent='true']:focus-within {
+/* 키보드 사용자를 위해 포커스가 들어오면 다시 보이게 한다.
+   :focus-within은 마우스·터치로 눌러도 걸려서, 버튼을 누르는 순간 투명한
+   DOM 사본이 캔버스 위로 겹쳐 여권이 둘로 보였다. 브라우저가 포커스 링을
+   그려야 한다고 판단할 때(키보드 이동)만 드러내도록 좁힌다. */
+.contentLayer[data-transparent='true']:has(:focus-visible) {
   opacity: 1;
 }
 
