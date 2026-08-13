@@ -15,15 +15,15 @@ const rendererControl = vi.hoisted(() => ({
 }))
 
 // WebGL은 jsdom에 없으므로 종이 렌더러를 통째로 대역으로 바꾼다.
-vi.mock('./passportBookScene.js', () => ({
-  createPassportBook: () => {
+vi.mock('./passportSheetScene.js', () => ({
+  createPassportSheets: () => {
     if (rendererControl.fail) throw new Error('renderer failed')
     const canvas = document.createElement('canvas')
     rendererControl.canvas = canvas
     return {
       canvas,
       setSize: rendererControl.setSize,
-      setPages: rendererControl.setFaces,
+      setSheets: rendererControl.setFaces,
       setTurn: rendererControl.render,
       render: rendererControl.render,
       dispose: rendererControl.dispose,
@@ -449,8 +449,8 @@ describe('PassportPageTurn', () => {
     // 넘어가는 종이는 캔버스가 그리므로 다음 단계 DOM이 미리 생기지 않는다.
     expect(screen.getByRole('region', { name: '여권 1단계' })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: '여권 2단계' })).not.toBeInTheDocument()
-    // 초기 정지 화면 1회 + 넘김 시작 1회
-    expect(rendererControl.setFaces).toHaveBeenCalledTimes(2)
+    // 낱장 네 장을 한 번만 굽는다. 넘길 때는 각도만 바뀌므로 다시 굽지 않는다.
+    expect(rendererControl.setFaces).toHaveBeenCalledTimes(1)
     await finishAnimation(900)
 
     expect(screen.getByRole('region', { name: '여권 2단계' })).toBeInTheDocument()
