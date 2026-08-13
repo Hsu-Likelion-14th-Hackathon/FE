@@ -1,22 +1,10 @@
-import overviewMain from '@/shared/assets/boarding-pass/guide/overview-main.png'
-import overviewMainDay from '@/shared/assets/boarding-pass/guide/overview-main-day.png'
-import overviewMainHaus from '@/shared/assets/boarding-pass/guide/overview-main-haus.png'
-import overviewMainViolet from '@/shared/assets/boarding-pass/guide/overview-main-violet.png'
 import productEconyl from '@/shared/assets/boarding-pass/guide/product-econyl.png'
 import productHimmel from '@/shared/assets/boarding-pass/guide/product-himmel.png'
 import productToteCognac from '@/shared/assets/boarding-pass/guide/product-tote-cognac.png'
 import productTrolley from '@/shared/assets/boarding-pass/guide/product-trolley.png'
 import productWeekender from '@/shared/assets/boarding-pass/guide/product-weekender.png'
 
-/** 개요 히어로 (44)(44-1)(44-2)(44-3) — 동일 레이아웃, 건물 컷만 교체 */
-export const overviewHeroes = [
-  { id: '44', src: overviewMain, alt: 'MCM HAUS 야간 전경' },
-  { id: '44-1', src: overviewMainDay, alt: 'MCM HAUS 주간 전경' },
-  { id: '44-2', src: overviewMainViolet, alt: 'MCM HAUS 퍼플 스카이 전경' },
-  { id: '44-3', src: overviewMainHaus, alt: 'MCM HAUS 나이트 사인 전경' },
-]
-
-/** 여행 가이드 층별 카피 (피그마 (44)~(47)) */
+/** 여행 가이드 층별 카피 (피그마 (44)~(47-1)) */
 export const guideFloorContent = {
   overview: {
     introLead: '1976년 뮌헨에서 태어난 이름 하나가',
@@ -25,10 +13,16 @@ export const guideFloorContent = {
     quote: '우리는 어디로, 왜 떠나는가?',
     floors: [
       {
+        id: '5f',
+        badge: '5F ARRIVE  |  도착',
+        subtitle: '모든 여정은 하나의 이름에서 시작된다',
+        shape: 'top',
+      },
+      {
         id: '3f',
         badge: '3F TRY  |  시도',
         subtitle: '다음 50년을 향한 새로운 시작',
-        shape: 'top',
+        shape: 'mid',
       },
       {
         id: '2f',
@@ -170,5 +164,40 @@ export const guideFloorContent = {
       },
     ],
     productRow: 'stack',
+  },
+  '5f': {
+    badge: '5F ARRIVE  |  도착',
+    subtitle: '모든 여정은 하나의 이름에서 시작된다',
+    headline: '1976년, München',
+    quote: '밤의 도시가 낳은 대담함',
+    panels: [
+      {
+        blocks: [
+          [
+            '1976년, 뮌헨. 데이비드 보위와 프레디 머큐리가',
+            '밤거리를 자유롭게 거닐며 예술과 반항을 모의하던 시절',
+          ],
+          [
+            '배우이자 창립자인 미하엘 크로머(Michael Cromer)는',
+            '이 도시의 시대정신을 담아낼 하나의 이름을 지었습니다',
+          ],
+        ],
+      },
+      {
+        blocks: [
+          [
+            '그것은 단순한 가방 브랜드의 탄생이 아닌',
+            '정체되어 있던 당시 럭셔리 씬을 향한 대담한 선언이었습니다',
+          ],
+          [
+            "화려함 그 자체보다 '어디론가 떠날 수 있는 태도'를",
+            '가방에 주입하고자 했던 순간',
+          ],
+        ],
+      },
+      {
+        blocks: [['MCM의 여정은 끝이 아닙니다', '2026년, 지금부터의 시작입니다']],
+      },
+    ],
   },
 }
