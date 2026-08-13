@@ -145,12 +145,13 @@
 }
 
 .openPassport {
-  /* 낱장 한 장 크기(253.5×394). 캔버스가 이 크기로 지면을 그리므로 DOM도
-     같아야 한다. 펼침(507) 기준으로 두면 클릭 영역이 그림보다 두 배 넓어져
-     TICKET 같은 버튼이 보이는 위치와 어긋난다.
-     내지 좌표(.profile, .journeyTile 등)는 원래 한 지면 기준이라 그대로 맞는다. */
-  width: calc(var(--passport-h) * 253.5 / 394);
+  /* 낱장 한 장의 설계 크기(253.5×394)를 그대로 두고 통째로 축소한다.
+     내지 좌표(.profile, .journeyTile 등)가 394 기준 rem이라, 폭만 줄이면
+     안쪽 버튼들은 그대로 남아 그림과 어긋난다. 배율은 PassportPageTurn이
+     캔버스와 같은 값으로 --passport-scale에 넣어 준다. */
+  width: 15.84375rem;
   aspect-ratio: 253.5 / 394;
+  transform: scale(var(--passport-scale, 1));
   margin-inline: auto;
   align-self: center;
   isolation: isolate;

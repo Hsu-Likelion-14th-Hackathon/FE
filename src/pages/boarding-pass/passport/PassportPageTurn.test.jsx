@@ -11,6 +11,8 @@ const rendererControl = vi.hoisted(() => ({
   setFaces: vi.fn(),
   dispose: vi.fn(),
   cancelFrame: vi.fn(),
+  // ResizeObserver 대역이 쓴다. 없으면 정리 단계에서 undefined를 부른다.
+  disconnect: vi.fn(),
   canvas: null,
 }))
 
@@ -77,6 +79,7 @@ beforeEach(() => {
   rendererControl.setFaces.mockReset()
   rendererControl.dispose.mockReset()
   rendererControl.cancelFrame.mockReset()
+  rendererControl.disconnect.mockReset()
   rendererControl.canvas = null
   // rAF는 아래에서 직접 stub 하므로 fake timer가 가로채지 않게 제외한다.
   vi.useFakeTimers({

@@ -17,6 +17,8 @@ import pageLeftSrc from '@/shared/assets/boarding-pass/passport/passport-page-le
 import pageRightSrc from '@/shared/assets/boarding-pass/passport/passport-page-right.png'
 import stampSrc from '@/shared/assets/boarding-pass/passport/passport-stamp.png'
 
+import observeResize from '@/shared/layout/observe-resize.js'
+
 import { usePassport } from '@/entities/passport/usePassport.js'
 
 import { createPassportSheets } from './passportSheetScene.js'
@@ -122,6 +124,8 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
   const bookRef = useRef(null)
   const assetsRef = useRef({})
   const frameRef = useRef(null)
+  // 지금 화면에 그려진 넘김 정도. 정수면 정지, 소수면 넘어가는 중이다.
+  const turnRef = useRef(0)
   const pointerRef = useRef({ ...IDLE_POINTER })
   // 같은 면을 반복해서 굽지 않도록 캔버스를 보관한다. 데이터가 바뀌면 비운다.
   const faceCacheRef = useRef(new Map())
@@ -172,18 +176,32 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     }
   }, [])
 
-  const drawFrame = useCallback(
-    (turned) => {
-      const sheets = bookRef.current
-      const box = measure()
-      if (!sheets || !box) return
+  /**
+   * 캔버스 버퍼 크기를 맞추고, DOM 오버레이가 쓸 배율을 알린다.
+   *
+   * 프레임마다 부르면 안 된다. setSize는 내부에서 setPixelRatio까지 거쳐
+   * 버퍼를 다시 잡으므로 넘김 도중 매 프레임 재할당이 일어난다.
+   */
+  const fitToBox = useCallback(() => {
+    const sheets = bookRef.current
+    const host = canvasHostRef.current
+    const box = measure()
+    if (!sheets || !box || !host) return
 
-      sheets.setSize(box.width, box.height, { leafW: box.leafW, leafH: box.leafH })
-      sheets.setTurn(turned)
-      sheets.render()
-    },
-    [measure],
-  )
+    sheets.setSize(box.width, box.height, { leafW: box.leafW, leafH: box.leafH })
+    // 내지 좌표는 설계 394 기준 rem이라 화면이 짧아 지면이 줄면 그림과 어긋난다.
+    // 오버레이 전체를 같은 배율로 줄이도록 값을 넘긴다.
+    host.parentElement?.style.setProperty('--passport-scale', String(box.leafH / SHEET_H))
+  }, [measure])
+
+  const drawFrame = useCallback((turned) => {
+    const sheets = bookRef.current
+    if (!sheets) return
+    // 넘김 중에 다시 굽는 일이 생겨도 손이 놓인 지점으로 돌아올 수 있게 남긴다.
+    turnRef.current = turned
+    sheets.setTurn(turned)
+    sheets.render()
+  }, [])
 
   const stopFrame = useCallback(() => {
     if (frameRef.current !== null) {
@@ -323,16 +341,28 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
   useEffect(() => {
     if (rendererMode !== 'ready') return
     paintSheets()
-    drawFrame(step)
-    // step은 아래 효과가 맡는다. 여기서 다시 그리는 건 새로 구운 직후뿐이다.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assetsReady, paintSheets, rendererMode])
+    fitToBox()
+    // 넘김 도중에 이미지나 여권 데이터가 도착할 수 있다. step으로 되돌리면
+    // 손이 놓인 장이 원위치로 튄다. 그려져 있던 값을 그대로 이어 그린다.
+    drawFrame(turnRef.current)
+  }, [assetsReady, drawFrame, fitToBox, paintSheets, rendererMode])
 
   // 단계가 확정되면 각도만 바꿔 다시 그린다.
   useEffect(() => {
     if (rendererMode !== 'ready') return
     drawFrame(step)
   }, [drawFrame, rendererMode, step])
+
+  // 화면이 돌아가거나 창이 바뀔 때만 캔버스 버퍼를 다시 잡는다. 이걸 안 하면
+  // 기존 버퍼가 CSS로 늘어나 흐려진다.
+  useEffect(() => {
+    const host = canvasHostRef.current
+    if (rendererMode !== 'ready' || !host) return undefined
+    return observeResize(host, () => {
+      fitToBox()
+      drawFrame(turnRef.current)
+    })
+  }, [drawFrame, fitToBox, rendererMode])
 
   const resetPointer = (event) => {
     pointerRef.current = { ...IDLE_POINTER }

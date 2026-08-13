@@ -252,10 +252,10 @@ describe('PassportPage', () => {
     const profile = openPassport.querySelector('h3').parentElement
     const openImageStyle = window.getComputedStyle(openImage)
 
-    // 낱장 한 장 크기다. 캔버스가 그리는 지면과 클릭 영역이 같아야 한다.
-    expect(window.getComputedStyle(openPassport).width).toBe(
-      'calc(var(--passport-h) * 253.5 / 394)',
-    )
+    // 낱장 설계 크기를 그대로 두고 --passport-scale로 통째로 줄인다.
+    // 내지 좌표가 394 기준 rem이라 폭만 줄이면 안쪽 버튼이 그림과 어긋난다.
+    expect(window.getComputedStyle(openPassport).width).toBe('15.84375rem')
+    expect(window.getComputedStyle(openPassport).transform).toBe('scale(var(--passport-scale, 1))')
     expect(window.getComputedStyle(openPassport).isolation).toBe('isolate')
     expect(openImageStyle.position).toBe('absolute')
     expect(openImageStyle.maxWidth).toBe('none')
