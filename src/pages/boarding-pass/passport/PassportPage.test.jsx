@@ -203,7 +203,9 @@ describe('PassportPage', () => {
   it('스테이지 패딩을 고정 높이 안에 포함한다', () => {
     renderPassport()
 
-    const stage = screen.getByRole('region', { name: '여권 표지' }).parentElement.parentElement
+    const stage = screen
+      .getByRole('region', { name: '여권 표지' })
+      .closest('[data-testid="passport-turn-surface"]')
     expect(window.getComputedStyle(stage).boxSizing).toBe('border-box')
   })
 

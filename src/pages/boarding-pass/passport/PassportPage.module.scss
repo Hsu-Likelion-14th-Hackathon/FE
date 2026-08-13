@@ -82,6 +82,8 @@
 
 .introCopy strong {
   margin-top: 0.5rem;
+  /* Figma 52:18555 — Pretendard SemiBold. 700을 쓰면 폰트에 없어 합성 볼드가 된다. */
+  font-weight: 600;
   font-size: 0.875rem;
   line-height: 1.25rem;
 }
@@ -101,20 +103,23 @@
   background: transparent;
 }
 
+/* Figma 52:18570 — 표지 310×394가 390px 화면 기준 x=40, 즉 좌우 40px 균등. */
 .coverPassport {
   width: min(79.5vw, 19.375rem);
+  margin-inline: auto;
   aspect-ratio: 310 / 394;
 }
 
 .openPassport {
+  /* Figma 원래 크기. 좌측 페이지가 화면 중앙에 오고 우측은 화면 밖으로 잘린다. */
   width: 31.6875rem;
   aspect-ratio: 507 / 394;
-  margin-left: 12vw;
-  align-self: flex-start;
+  margin-inline: auto;
+  align-self: center;
   isolation: isolate;
 }
 
-@media (min-width: 768px) and (max-width: 1199px) {
+@media (min-width: 744px) and (max-width: 1199px) {
   .openPassport {
     margin-right: auto;
     margin-left: auto;
@@ -232,6 +237,13 @@
 }
 
 .profileFooter {
+  /* 캔버스가 그리는 위치(페이지 로컬 y=349)와 히트박스를 맞춘다.
+     DOM은 투명하지만 클릭·포커스를 담당하므로 좌표가 어긋나면 안 된다.
+     .profile은 페이지 기준 top 24px / left 30px 이므로 바닥에서 7px 위. */
+  position: absolute;
+  right: 0;
+  bottom: 0.4375rem;
+  left: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
