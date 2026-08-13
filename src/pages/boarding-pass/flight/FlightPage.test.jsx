@@ -16,6 +16,7 @@ function renderFlight() {
     [
       { path: '/boarding-pass/flight', Component: FlightPage },
       { path: '/boarding-pass', element: <p>Boarding</p> },
+      { path: '/boarding-pass/guide', element: <p>Guide</p> },
     ],
     { initialEntries: ['/boarding-pass/flight'] },
   )
@@ -29,6 +30,14 @@ function renderFlight() {
 describe('FlightPage', () => {
   afterEach(() => {
     activeRouters.splice(0).forEach((router) => router.dispose())
+  })
+
+  it('goes to the travel guide when next is pressed', async () => {
+    const router = renderFlight()
+
+    fireEvent.click(await screen.findByRole('button', { name: '\uB2E4\uC74C' }))
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/guide'))
   })
 
   it('returns to boarding-pass landing when the flight ends', async () => {

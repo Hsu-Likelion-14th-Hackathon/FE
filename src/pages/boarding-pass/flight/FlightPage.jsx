@@ -9,8 +9,6 @@ import controlBrightnessImg from '@/shared/assets/boarding-pass/flight/control-b
 import controlPowerImg from '@/shared/assets/boarding-pass/flight/control-power.svg'
 import controlSoundImg from '@/shared/assets/boarding-pass/flight/control-sound.svg'
 import decoRightImg from '@/shared/assets/boarding-pass/flight/deco-right.png'
-import docentPlayImg from '@/shared/assets/boarding-pass/flight/docent-play.svg'
-import docentStopImg from '@/shared/assets/boarding-pass/flight/docent-stop.svg'
 import hingeImg from '@/shared/assets/boarding-pass/flight/hinge.svg'
 import mapImg from '@/shared/assets/boarding-pass/flight/map.png'
 import navNextImg from '@/shared/assets/boarding-pass/flight/nav-next.svg'
@@ -18,9 +16,9 @@ import navPrevImg from '@/shared/assets/boarding-pass/flight/nav-prev.svg'
 import planeMarkerImg from '@/shared/assets/boarding-pass/flight/plane-marker.svg'
 import routePathImg from '@/shared/assets/boarding-pass/flight/route-path.svg'
 import tabletLogoImg from '@/shared/assets/boarding-pass/flight/tablet-logo.png'
-import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
 import BoardingPassStageBackdrop from '@/shared/layout/BoardingPassStageBackdrop.jsx'
+import BoardingPassStageHeader from '@/shared/layout/BoardingPassStageHeader.jsx'
 
 import styles from './FlightPage.module.scss'
 
@@ -33,7 +31,6 @@ export function Component() {
   const navigate = useNavigate()
   const [pass, setPass] = useState(null)
   const [ticketOpen, setTicketOpen] = useState(false)
-  const [docentPlaying, setDocentPlaying] = useState(false)
   const sheetRef = useRef(null)
   const dragRef = useRef({ pointerId: null, startY: 0, startAt: 0, dy: 0 })
 
@@ -108,43 +105,11 @@ export function Component() {
         <BoardingPassStageBackdrop />
 
         <main className={styles.main}>
-        <button
-          type="button"
-          aria-label="닫기"
-          onClick={() => navigate('/boarding-pass/scan')}
-          className={styles.close}
-        >
-          <img src={closeIcon} alt="" className={styles.closeImg} />
-        </button>
-
-        <div className={styles.titleRow}>
-          <h2 className={styles.title}>MAPS</h2>
-
-          <div className={styles.docentBlock}>
-            <p className={styles.docentHint}>음성 AI 도슨트가 고객님의 여정을 안내합니다</p>
-            <div className={styles.docentControls} data-deferred-id="M-01">
-              <button
-                type="button"
-                aria-label="도슨트 재생"
-                aria-pressed={docentPlaying}
-                className={styles.playBtn}
-                onClick={() => setDocentPlaying(true)}
-              >
-                <span aria-hidden="true" className={styles.playFill} />
-                <img src={docentPlayImg} alt="" className={styles.playIcon} />
-              </button>
-              <button
-                type="button"
-                aria-label="도슨트 정지"
-                aria-pressed={!docentPlaying}
-                className={styles.stopBtn}
-                onClick={() => setDocentPlaying(false)}
-              >
-                <img src={docentStopImg} alt="" className={styles.stopIcon} />
-              </button>
-            </div>
-          </div>
-        </div>
+        <BoardingPassStageHeader
+          title="MAPS"
+          closeLabel="닫기"
+          onClose={() => navigate('/boarding-pass/scan')}
+        />
 
         <div className={styles.monitorWrap}>
           <div className={styles.monitor}>
@@ -240,7 +205,12 @@ export function Component() {
           <div className={styles.progressTrack}>
             <div className={styles.progressFill} />
           </div>
-          <button type="button" aria-label="다음" className={styles.navBtn}>
+          <button
+            type="button"
+            aria-label="다음"
+            className={styles.navBtn}
+            onClick={() => navigate('/boarding-pass/guide')}
+          >
             <img src={navNextImg} alt="" className={styles.navIcon} />
           </button>
         </div>
