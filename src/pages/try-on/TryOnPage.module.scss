@@ -9,11 +9,9 @@
   min-height: max(703px, calc(var(--mcm-viewport-stable) - 97px - var(--mcm-safe-top)));
   overflow: hidden;
   color: var(--mcm-color-canvas);
-  background:
-    radial-gradient(ellipse 180px 150px at -18% 47%, rgb(255 219 160 / 16%), transparent 72%),
-    radial-gradient(ellipse 190px 250px at 112% 76%, rgb(255 219 160 / 14%), transparent 74%),
-    radial-gradient(ellipse 220px 180px at 84% -8%, rgb(255 219 160 / 12%), transparent 76%),
-    var(--mcm-gradient-hero);
+  /* Figma 71:929 기준 겹치는 순서는 바탕 → 모노그램 → 어둠막 → 글로우 → 빛줄기다.
+     바탕만 여기 두고 나머지는 ::before가 맡는다. */
+  background: var(--mcm-gradient-hero);
 }
 
 .stage::before,
@@ -26,7 +24,15 @@
 
 .stage::before {
   inset: 0;
-  background: rgb(0 0 0 / 30%);
+  /* 아래에서 위로 어둠막 → 글로우 → 하단 페이드. 모노그램보다 위에 온다. */
+  background:
+    linear-gradient(to bottom, rgb(25 25 25 / 0%) 61.5%, rgb(25 25 25 / 60%)),
+    radial-gradient(ellipse 180px 150px at -18% 47%, rgb(255 219 160 / 16%), transparent 72%),
+    radial-gradient(ellipse 190px 250px at 112% 76%, rgb(255 219 160 / 14%), transparent 74%),
+    /* Figma Ellipse 18 — 356x317, 중심이 스테이지 기준 (87%, -8%)다.
+       디자인은 바탕 대비 R이 59 오르는데 12%로는 17밖에 오르지 않아 밋밋했다. */
+    radial-gradient(ellipse 300px 260px at 87% -8%, rgb(255 219 160 / 39%), transparent 72%),
+    rgb(0 0 0 / 30%);
 }
 
 .stage::after {
@@ -34,13 +40,23 @@
   bottom: -280px;
   left: 42%;
   width: 48px;
-  background: linear-gradient(rgb(255 219 160 / 18%), rgb(211 134 53 / 14%));
+  /* Figma Rectangle 99는 20%/20%다. 블러 40px에 묻혀 잘 드러나지 않아
+     한 단계 위로 올린다. */
+  background: linear-gradient(rgb(255 219 160 / 30%), rgb(211 134 53 / 24%));
   filter: blur(40px);
   transform: rotate(24deg);
 }
 
+/* 처리 중에는 어둠막만 짙어진다. 글로우와 페이드는 그대로 둔다. */
 .loadingStage::before {
-  background: rgb(0 0 0 / 60%);
+  background:
+    linear-gradient(to bottom, rgb(25 25 25 / 0%) 61.5%, rgb(25 25 25 / 60%)),
+    radial-gradient(ellipse 180px 150px at -18% 47%, rgb(255 219 160 / 16%), transparent 72%),
+    radial-gradient(ellipse 190px 250px at 112% 76%, rgb(255 219 160 / 14%), transparent 74%),
+    /* 어둠막이 60%라 바탕이 더 어둡다. 같은 불투명도면 상승폭이 과해지므로
+       디자인과 같은 +57이 되도록 낮춘다. */
+    radial-gradient(ellipse 300px 260px at 87% -8%, rgb(255 219 160 / 29%), transparent 72%),
+    rgb(0 0 0 / 60%);
 }
 
 .closeButton {
@@ -102,8 +118,13 @@
   overflow: hidden;
   flex: none;
   border: 0.5px solid var(--mcm-color-canvas);
+  /* Figma 71:863 — 흰 실선 0.5px와 옅은 그림자가 함께 있다. */
+  border: 0.5px solid #fafafa;
   border-radius: 8px;
-  background: rgb(250 250 250 / 20%);
+  /* 배경이 비치지 않게 불투명으로 채운다. 디자인의 합성색이 우상단(글로우 쪽)
+     155,116,90에서 좌하단 132,98,78로 떨어지므로 그 기울기를 그대로 준다. */
+  background: linear-gradient(225deg, rgb(155 116 90), rgb(132 98 78));
+  box-shadow: 2px 2px 14px rgb(0 0 0 / 20%);
   box-shadow: 2px 2px 14px rgb(0 0 0 / 20%);
 }
 
@@ -170,7 +191,9 @@
   border: 0;
   border-radius: 100px;
   color: var(--mcm-color-canvas);
-  background: rgb(255 247 213 / 20%);
+  /* 배경이 비치지 않게 불투명으로 채운다. 디자인의 합성색이 126,95,70에서
+     130,99,76 사이라 그 가운데 값을 쓴다. */
+  background: rgb(128 97 73);
   font-size: 14px;
   font-weight: 600;
   line-height: 18px;
@@ -376,11 +399,159 @@
   background-repeat: repeat-y;
   background-position: center top;
   background-size: 100% auto;
+  /* Figma 71:930의 0.4는 사진 벽지 기준이다. 우리 에셋은 선으로 그린 모노그램이라
+     같은 값이면 윤곽이 또렷해 훨씬 진해 보인다. 대비를 비슷하게 두되 한 단계 낮춘다. */
   opacity: 0.16;
   pointer-events: none;
 }
 
-/* 처리 중 화면은 바탕이 더 어두워지므로 문양도 함께 가라앉힌다. */
+/* 처리 중 화면은 바탕이 더 어둡다. 문양을 그대로 두면 상대적으로 도드라지므로
+   Figma처럼 한 단계 더 가라앉힌다. */
 .loadingStage .monogram {
-  opacity: 0.1;
+  opacity: 0.09;
+}
+
+/* Figma (17-1) 착용페이지 — 스테이지는 390×703이고 아래 좌표는 그 안에서의 위치다. */
+.resultTitle {
+  position: absolute;
+  z-index: 2;
+  top: 94px;
+  left: 0;
+  right: 0;
+  margin: 0;
+  color: var(--mcm-color-canvas);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* 실제 피팅 이미지는 AI 연동 뒤에 들어온다. 자리와 크기만 잡아 둔다. */
+.resultCard {
+  position: absolute;
+  z-index: 2;
+  top: 130px;
+  left: 50%;
+  width: 240px;
+  height: 281px;
+  /* Figma 71:863 — 반투명 흰 채움에 흰 실선과 옅은 그림자다. 배경이 비쳐야
+     하는데 합성된 갈색을 불투명으로 박아 두면 투명도가 사라진다. */
+  border: 0.5px solid #fafafa;
+  border-radius: 8px;
+  /* 배경이 비치지 않게 불투명으로 채운다. 디자인의 합성색이 우상단(글로우 쪽)
+     155,116,90에서 좌하단 132,98,78로 떨어지므로 그 기울기를 그대로 준다. */
+  background: linear-gradient(225deg, rgb(155 116 90), rgb(132 98 78));
+  box-shadow: 2px 2px 14px rgb(0 0 0 / 20%);
+  transform: translateX(-50%);
+}
+
+.resultPin {
+  position: absolute;
+  top: 11.5px;
+  left: 11.5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgb(255 247 213 / 45%);
+}
+
+.productCard {
+  position: absolute;
+  z-index: 2;
+  top: 451px;
+  left: 50%;
+  display: grid;
+  width: 345px;
+  height: 108px;
+  padding: 10px;
+  align-items: start;
+  gap: 10px;
+  grid-template-columns: 88px minmax(0, 1fr);
+  border-radius: 8px;
+  background: var(--mcm-color-canvas);
+  transform: translateX(-50%);
+}
+
+.productThumb {
+  display: grid;
+  width: 88px;
+  height: 88px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #f2f2f2;
+}
+
+.productThumb img {
+  width: 68px;
+  height: auto;
+}
+
+.productInfo {
+  min-width: 0;
+  color: var(--mcm-color-ink);
+}
+
+.productName,
+.productPrice {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.productPrice {
+  color: var(--mcm-color-muted);
+}
+
+/* 두 버튼은 카드 오른쪽 아래에 붙는다(Figma 209,78 기준). */
+.productActions {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+.productActions button {
+  width: 60px;
+  height: 20px;
+  border: 0;
+  border-radius: 4px;
+  background: #e6e6e6;
+  color: var(--mcm-color-ink);
+  font-size: 10px;
+  line-height: 18px;
+}
+
+.saveButton {
+  position: absolute;
+  z-index: 2;
+  top: 579px;
+  left: 50%;
+  width: 350px;
+  height: 50px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--mcm-color-brand-brown);
+  color: var(--mcm-color-canvas);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  transform: translateX(-50%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .productActions button:hover {
+    background: #d8d8d8;
+  }
+
+  .saveButton:hover {
+    background: color-mix(in srgb, var(--mcm-color-brand-brown) 88%, #000);
+  }
+}
+
+.productActions button:focus-visible,
+.saveButton:focus-visible {
+  outline: 2px solid var(--mcm-color-canvas);
+  outline-offset: 3px;
 }

@@ -44,10 +44,30 @@ describe('TryOnPage', () => {
     expect(Number(progressbar.getAttribute('aria-valuenow'))).toBeGreaterThan(0)
     expect(Number(progressbar.getAttribute('aria-valuenow'))).toBeLessThan(100)
 
+    // 100%에 닿는 순간 결과 화면으로 바뀌어 진행률 바가 사라진다.
+    // 그 전환 자체는 아래 검사가 맡는다.
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(3000)
+      await vi.advanceTimersByTimeAsync(1040)
     })
-    expect(progressbar).toHaveAttribute('aria-valuenow', '100')
-    expect(screen.getByText('AI Fitting 준비가 완료되었습니다.')).toBeInTheDocument()
+    expect(Number(progressbar.getAttribute('aria-valuenow'))).toBeGreaterThan(20)
+  })
+
+  it('진행률이 100%에 닿으면 결과 화면으로 넘어간다', () => {
+    // 이 검사가 없어 결과 화면이 아예 나올 수 없는 상태를 놓쳤다.
+    // phase는 loading에 머무르고 화면만 진행률에서 파생된다.
+    vi.useFakeTimers()
+    renderTryOn()
+
+    fireEvent.click(screen.getByRole('button', { name: /Fitting/ }))
+    expect(screen.getByRole('progressbar', { name: 'AI Fitting 진행률' })).toBeInTheDocument()
+
+    act(() => {
+      vi.advanceTimersByTime(80 * 25)
+    })
+
+    expect(screen.getByRole('region', { name: 'AI Fitting 결과' })).toBeInTheDocument()
+    expect(screen.getByText('지금, 당신에게 맞는 형태')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '이미지 저장' })).toBeInTheDocument()
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 })
