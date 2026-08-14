@@ -1,9 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
-import {
-  guideFloorContent,
-} from '@/features/boarding-pass/travel-guide/guideFloorContent.js'
+import { guideFloorContent } from '@/features/boarding-pass/travel-guide/guideFloorContent.js'
 import guideDecoTopImg from '@/shared/assets/boarding-pass/guide/deco-top.png'
 import emblemCrestImg from '@/shared/assets/boarding-pass/guide/emblem-crest.png'
 import emblemLaurelImg from '@/shared/assets/boarding-pass/guide/emblem-laurel.png'
@@ -88,20 +86,20 @@ export function Component() {
         <BoardingPassStageBackdrop />
 
         <main className={styles.main}>
-        <BoardingPassStageHeader
-          title="TRAVEL GUIDE"
-          closeLabel="비행으로 돌아가기"
-          onClose={() => navigate('/boarding-pass/flight')}
-        />
+          <BoardingPassStageHeader
+            title="TRAVEL GUIDE"
+            closeLabel="비행으로 돌아가기"
+            onClose={() => navigate('/boarding-pass/flight')}
+          />
 
-        <div key={floor} className={styles.scroll}>
-          {floor === 'overview' ? (
-            <OverviewView onSelectFloor={selectFloor} />
-          ) : (
-            <FloorView floor={floor} />
-          )}
-        </div>
-      </main>
+          <div key={floor} className={styles.scroll}>
+            {floor === 'overview' ? (
+              <OverviewView onSelectFloor={selectFloor} />
+            ) : (
+              <FloorView floor={floor} />
+            )}
+          </div>
+        </main>
 
         <BoardingPassStepNav
           step={guideFloorStep(floor)}
@@ -110,9 +108,7 @@ export function Component() {
           onSelectStep={goToStep}
           nextDisabled={atEnd}
           groupLabel="여행 진행"
-          note={
-            floor === 'overview' ? 'AI가 고객님만의 MCM 비행 가이드를 준비했습니다' : undefined
-          }
+          note={floor === 'overview' ? 'AI가 고객님만의 MCM 비행 가이드를 준비했습니다' : undefined}
         />
       </div>
     </div>
@@ -125,18 +121,18 @@ function OverviewView({ onSelectFloor }) {
   return (
     <div>
       <div className={styles.introBlock}>
-          <img src={guideDecoTopImg} alt="" aria-hidden="true" className={styles.planeDeco} />
-          <div className={styles.introCard}>
-            <div className={styles.introLines}>
-              <p>{content.introLead}</p>
-              <p>
-                <span className={styles.introEm}>{content.introEmphasis}</span>
-                {content.introTail}
-              </p>
-            </div>
-            <p className={styles.introQuote}>“ {content.quote} ”</p>
+        <img src={guideDecoTopImg} alt="" aria-hidden="true" className={styles.planeDeco} />
+        <div className={styles.introCard}>
+          <div className={styles.introLines}>
+            <p>{content.introLead}</p>
+            <p>
+              <span className={styles.introEm}>{content.introEmphasis}</span>
+              {content.introTail}
+            </p>
           </div>
+          <p className={styles.introQuote}>“ {content.quote} ”</p>
         </div>
+      </div>
 
       <div className={styles.overviewStage}>
         <img src={overviewMainImg} alt="MCM HAUS 야간 전경" className={styles.overviewMain} />

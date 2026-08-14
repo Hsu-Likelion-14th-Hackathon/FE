@@ -83,9 +83,7 @@ describe('GuidePage', { timeout: 15_000 }, () => {
   it('shows the AI note only on the travel guide overview', () => {
     renderGuide()
 
-    expect(
-      screen.getByText('AI가 고객님만의 MCM 비행 가이드를 준비했습니다'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('AI가 고객님만의 MCM 비행 가이드를 준비했습니다')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: '다음' }))
 

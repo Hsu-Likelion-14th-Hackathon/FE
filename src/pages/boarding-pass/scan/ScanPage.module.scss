@@ -30,9 +30,7 @@
 }
 
 .main {
-  --scan-stage-h: calc(
-    var(--mcm-viewport-stable) - var(--mcm-header-height) - var(--mcm-safe-top)
-  );
+  --scan-stage-h: calc(var(--mcm-viewport-stable) - var(--mcm-header-height) - var(--mcm-safe-top));
 
   position: relative;
   z-index: 1;

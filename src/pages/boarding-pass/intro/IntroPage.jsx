@@ -39,7 +39,11 @@ export function Component() {
             />
           </div>
 
-          <button type="button" className={styles.next} onClick={() => navigate('/boarding-pass/survey')}>
+          <button
+            type="button"
+            className={styles.next}
+            onClick={() => navigate('/boarding-pass/survey')}
+          >
             <span className={styles.nextLabel}>Next</span>
             <img src={nextArrow} alt="" aria-hidden="true" className={styles.nextArrow} />
           </button>
