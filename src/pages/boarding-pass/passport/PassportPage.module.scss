@@ -243,7 +243,9 @@
 }
 .profile {
   padding-top: 11.1875rem;
-  gap: 1rem;
+  /* 캔버스가 28px 간격으로 그린다(줄 높이 16 + 사이 12). 여기가 32px이면
+     NAME 클릭 영역이 글자보다 아래로 밀린다. */
+  gap: 0.75rem;
   line-height: 1rem;
 }
 .profile h3 {
@@ -534,6 +536,10 @@
   line-height: 1.5rem;
 }
 .historyList,
+.sheet-history-detail .historyCard {
+  margin-top: 1.875rem;
+}
+
 /* 올라오는 시트 바탕에 비세토스 모노그램을 깐다. 원본이 투명 배경이라 주황
    시트 색 위에 그대로 얹히는데, 그대로 두면 글자를 읽기 어려워지므로 같은
    시트 색을 반투명으로 한 겹 덮는다. 덮개 0.7이면 문양이 #945830으로 앉아
