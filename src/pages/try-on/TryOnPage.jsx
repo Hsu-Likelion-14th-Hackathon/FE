@@ -45,6 +45,7 @@ function UploadStage({ fileInputRef, fileName, onClose, onFileChange, onStartFit
       className={`${styles.stage} ${styles.uploadStage}`}
       aria-label="AI Fitting 이미지 업로드"
     >
+      <span className={styles.monogram} aria-hidden="true" />
       <button
         className={styles.closeButton}
         type="button"
@@ -105,6 +106,7 @@ function LoadingStage({ progress, onClose }) {
 
   return (
     <section className={`${styles.stage} ${styles.loadingStage}`} aria-label="AI Fitting 처리 중">
+      <span className={styles.monogram} aria-hidden="true" />
       <button
         className={styles.closeButton}
         type="button"

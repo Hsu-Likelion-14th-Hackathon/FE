@@ -364,3 +364,23 @@
     transition: none;
   }
 }
+
+/* 비세토스 모노그램 바탕. 배경이 이미 여러 겹이라 세기를 따로 조절할 수 있게
+   전용 레이어로 둔다. 원본 문양 주기가 132px(640 기준)이고 화면 폭에 맞추면
+   여권 시트와 같은 간격이 된다. */
+.monogram {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-image: url('@/shared/assets/boarding-pass/passport/bisepok.svg');
+  background-repeat: repeat-y;
+  background-position: center top;
+  background-size: 100% auto;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+/* 처리 중 화면은 바탕이 더 어두워지므로 문양도 함께 가라앉힌다. */
+.loadingStage .monogram {
+  opacity: 0.1;
+}
