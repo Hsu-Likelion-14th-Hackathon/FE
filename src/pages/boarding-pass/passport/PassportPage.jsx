@@ -293,10 +293,14 @@ function PassportSpread({
   onProducts,
 }) {
   const displayName = toDisplayName(profile)
-  // 표시할 자리는 44px 클릭 영역이 아니라 실제 글자 상자다. 버튼을 재면
-  // 위아래로 28px 더 큰 판이 그려진다.
-  const hoverName = (event) => onNameHover?.(event.currentTarget.querySelector('strong'))
-  const clearNameHover = () => onNameHover?.(null)
+  // 호버와 포커스는 서로 독립이다. 하나로 합치면 키보드로 이름에 머문 채
+  // 마우스가 스치기만 해도(pointerleave) 표시가 사라진다. 둘 다 풀렸을 때만
+  // 지운다. 표시할 자리는 44px 클릭 영역이 아니라 실제 글자 상자다.
+  const nameActive = useRef({ hover: false, focus: false })
+  const syncNameCue = (event) => {
+    const { hover, focus } = nameActive.current
+    onNameHover?.(hover || focus ? event.currentTarget.querySelector('strong') : null)
+  }
 
   if (step === 0) {
     return (
@@ -347,12 +351,22 @@ function PassportSpread({
               aria-label={`이름 ${displayName} 수정`}
               // 캔버스가 글자를 그려 버튼은 보이지 않는다. 눌러서 고칠 수 있다는
               // 걸 알 방법이 없으므로 호버·포커스 때 글자 위에 표시를 얹는다.
-              // 툴팁은 opacity와 무관하게 떠서 무엇을 하는 버튼인지 말해 준다.
-              title="이름 수정"
-              onPointerEnter={hoverName}
-              onPointerLeave={clearNameHover}
-              onFocus={hoverName}
-              onBlur={clearNameHover}
+              onPointerEnter={(event) => {
+                nameActive.current.hover = true
+                syncNameCue(event)
+              }}
+              onPointerLeave={(event) => {
+                nameActive.current.hover = false
+                syncNameCue(event)
+              }}
+              onFocus={(event) => {
+                nameActive.current.focus = true
+                syncNameCue(event)
+              }}
+              onBlur={(event) => {
+                nameActive.current.focus = false
+                syncNameCue(event)
+              }}
               onClick={(event) => onEditName(event, displayName)}
             >
               <strong>{displayName}</strong>

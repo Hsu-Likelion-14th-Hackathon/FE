@@ -1,8 +1,9 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import AppProviders from '@/app/providers.jsx'
+import { triggerResize } from '@/test/setup.js'
 import { Component as PassportPage } from './PassportPage.jsx'
 import { passportTicket } from './passportData.js'
 
@@ -426,6 +427,8 @@ describe('PassportPage', () => {
     fireEvent.pointerEnter(button)
     const cue = screen.getByTestId('passport-name-cue')
     expect(cue.closest('[class*=contentLayer]')).toBeNull()
+    // 무엇을 하는 버튼인지도 알려야 밑줄만 보고 헤매지 않는다.
+    expect(cue).toHaveTextContent('이름 수정')
 
     fireEvent.pointerLeave(button)
     expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
@@ -435,5 +438,48 @@ describe('PassportPage', () => {
     expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
     fireEvent.blur(button)
     expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+  })
+
+  it('호버와 포커스를 따로 세어 둘 다 풀렸을 때만 표시를 지운다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+
+    // 키보드로 이름에 머문 채 마우스가 스쳐 지나간 상황.
+    fireEvent.focus(button)
+    fireEvent.pointerEnter(button)
+    fireEvent.pointerLeave(button)
+    expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
+
+    // 반대로 마우스를 올려 둔 채 포커스만 다른 곳으로 간 상황.
+    fireEvent.pointerEnter(button)
+    fireEvent.blur(button)
+    expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
+
+    fireEvent.pointerLeave(button)
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+  })
+
+  it('창 크기가 바뀌면 밑줄 좌표를 다시 잰다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+    const strong = button.querySelector('strong')
+
+    fireEvent.focus(button)
+    expect(screen.getByTestId('passport-name-cue')).toHaveStyle({ left: '0px' })
+
+    // 지면이 줄면 이름도 움직인다. 좌표를 그대로 두면 밑줄만 남는다.
+    vi.spyOn(strong, 'getBoundingClientRect').mockReturnValue({
+      left: 40,
+      top: 12,
+      right: 96,
+      bottom: 28,
+      width: 56,
+      height: 16,
+    })
+    act(() => triggerResize())
+
+    expect(screen.getByTestId('passport-name-cue')).toHaveStyle({ left: '40px', width: '56px' })
   })
 })
