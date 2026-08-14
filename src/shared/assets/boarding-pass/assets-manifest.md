@@ -46,6 +46,7 @@
 | 키                   | 경로                                                     | 원본 nodeId       | 타입 | 사용처                                                       |
 | -------------------- | -------------------------------------------------------- | ----------------- | ---- | ------------------------------------------------------------ |
 | complete-stage-back  | src/shared/assets/boarding-pass/complete/stage-back.svg  | 532:6148          | svg  | (33)(34) 완료 스테이지 스포트라이트 배경                     |
+| complete-stage-back-png | src/shared/assets/boarding-pass/complete/stage-back.png | 3002:379          | png  | (33)(34) 완료 본문 단색 그라데이션+비세토스 배경. Figma `EcjMcxEJlMBy1c4A1aCKD8` |
 | complete-ticket-card | src/shared/assets/boarding-pass/complete/ticket-card.png | 532:6224+573:6226 | png  | (33)(34) 예전 정적 합성 보관용 — 런타임은 BoardingTicketCard |
 
 ## issue/
@@ -66,6 +67,7 @@
 
 | 키                | 경로                                                      | 원본 nodeId | 타입 | 사용처                                                            |
 | ----------------- | --------------------------------------------------------- | ----------- | ---- | ----------------------------------------------------------------- |
+| scan-stage-back   | src/shared/assets/boarding-pass/scan/stage-back.png       | 1369:685    | png  | (35)~(40) 스캔 페이지 배경. Figma `EcjMcxEJlMBy1c4A1aCKD8` 프레임 PNG |
 | scan-point-scan   | src/shared/assets/boarding-pass/scan/point-scan.svg       | 576:6470    | svg  | (35) 스캔 대기 상태 중앙 point-scan 아이콘                        |
 | scan-button-icon  | src/shared/assets/boarding-pass/scan/scan-button-icon.svg | 576:6454    | svg  | (35) "평가용 탑승권 스캔 시뮬레이션" 버튼 좌측 스캔 프레임 아이콘 |
 | scan-check-circle | src/shared/assets/boarding-pass/scan/check-circle.svg     | 576:6699    | svg  | (36)(37) SUCCESS SCAN 체크 서클 아이콘                            |
@@ -93,6 +95,7 @@
 | flight-docent-stop        | src/shared/assets/boarding-pass/flight/docent-stop.svg        | 635:8141    | svg  | (41)(43)(42) 음성 도슨트 정지 아이콘                                                |
 | flight-nav-prev           | src/shared/assets/boarding-pass/flight/nav-prev.svg           | 635:8194    | svg  | (41)(43) 하단 재생바 이전 버튼                                                      |
 | flight-nav-next           | src/shared/assets/boarding-pass/flight/nav-next.svg           | 635:8206    | svg  | (41)(43) 하단 재생바 다음 버튼                                                      |
+| flight-ticket-sheet-back  | src/shared/assets/boarding-pass/flight/ticket-sheet-back.png  | 3002:368    | png  | (42) 티켓 바텀시트 단색+비세토스 배경. Figma `EcjMcxEJlMBy1c4A1aCKD8` 프레임 PNG     |
 
 ## stage/
 
