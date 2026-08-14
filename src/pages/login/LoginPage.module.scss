@@ -4,19 +4,26 @@
   background: var(--mcm-color-canvas);
 }
 
+/* Figma 93:81 — 아래 좌표는 390 프레임에서 잰 값이다. 헤더 아래 구분선(141)이
+   본문의 시작이라, 여기서부터의 거리로 옮긴다. */
 .main {
   position: relative;
   min-height: calc(var(--mcm-viewport-stable) - 97px - var(--mcm-safe-top));
-  padding: 39px 20px max(32px, var(--mcm-safe-bottom));
+  /* 뒤로가기는 절대 배치라 첫 줄(로그인, 200)까지가 위 여백이다. */
+  padding: 59px 20px max(32px, var(--mcm-safe-bottom));
+  /* 헤더와 본문을 가르는 실선. 0.5px 머리카락 선이다. */
+  border-top: 0.5px solid var(--mcm-color-muted);
 }
 
 .backLink {
   position: absolute;
-  top: 0;
+  /* 구분선에서 20px 아래(161). */
+  top: 20px;
+  /* 아이콘은 20px에 놓고, 왼쪽 패딩만큼 당겨 44px 판을 만든다. */
   left: 8px;
   display: flex;
   width: 44px;
-  height: 39px;
+  height: 44px;
   align-items: flex-start;
   padding-left: 12px;
   color: inherit;
@@ -67,21 +74,18 @@
 .textLink {
   color: var(--mcm-color-muted);
   font-weight: 600;
-  text-decoration: none;
+  /* 디자인은 항상 밑줄이 그어져 있다. 눌러서 가입으로 가는 자리라 평소에도
+     드러나야 한다. */
+  text-decoration: underline;
   text-underline-offset: 1px;
   transition: color 0.15s ease;
 }
 
-/* 마우스를 올렸을 때만 밑줄이 생긴다. 터치 기기에서는 hover가 고착되므로 제외한다. */
+/* 마우스를 올렸을 때만 색이 짙어진다. 터치 기기에서는 hover가 고착되므로 제외한다. */
 @media (hover: hover) and (pointer: fine) {
   .textLink:hover {
     color: var(--mcm-color-ink);
-    text-decoration: underline;
   }
-}
-
-.textLink:focus-visible {
-  text-decoration: underline;
 }
 
 .kakaoButton {
@@ -89,6 +93,8 @@
   display: grid;
   width: 100%;
   height: 50px;
+  /* 로그인 버튼(558)에서 카카오(578)까지. 두 버튼 사이에 선은 없다. */
+  margin-top: 20px;
   place-items: center;
   padding: 0 52px;
   border: 0;
@@ -110,49 +116,57 @@
   height: 24px;
 }
 
-/* 밑줄만 있는 입력 — 라벨이 줄 위에 앉는 형태다. */
+/* 테두리를 두른 상자 입력 — 라벨이 상자 위에 앉는 형태다. */
 .form {
   display: flex;
   flex-direction: column;
-  margin-top: 28px;
+  /* 안내 문구(272)가 소개 블록(101 끝)에서 30px 아래다. */
+  margin-top: 30px;
 }
 
 .requiredNotice {
-  margin: 0 0 22px;
-  color: var(--mcm-color-muted);
-  font-size: 11px;
-  line-height: 16px;
+  margin: 0 0 10px;
+  color: var(--mcm-color-brand-brown);
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 22px;
+}
+
+.field + .field {
+  margin-top: 20px;
 }
 
 .fieldHeader {
   display: flex;
-  /* 표시 버튼이 44px 높이를 온전히 쓰도록 줄 높이를 확보한다. */
-  min-height: 2.75rem;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
 .fieldLabel {
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 18px;
+}
+
+/* 필수 표시는 브랜드 브라운으로 눈에 띄게 둔다. 안내 문구와 같은 색이라
+   무엇을 가리키는지 바로 이어진다. */
+.requiredMark {
+  margin-left: 4px;
+  color: var(--mcm-color-brand-brown);
 }
 
 .fieldInput {
   width: 100%;
-  height: 28px;
-  padding: 0;
-  border: 0;
-  border-bottom: 1px solid var(--mcm-color-ink);
-  border-radius: 0;
+  height: 50px;
+  padding: 0 19px;
+  border: 1px solid var(--mcm-color-border);
+  border-radius: 8px;
   appearance: none;
   background: transparent;
   /* iOS 사파리는 16px 미만 입력에 포커스가 가면 화면을 자동으로 확대한다.
@@ -163,32 +177,41 @@
 
 .fieldInput:focus {
   outline: none;
-  border-bottom-width: 2px;
+  border-color: var(--mcm-color-brand-brown);
 }
 
 .revealButton {
-  /* 글자는 작지만 손가락으로 누를 수 있어야 한다. 44px 판을 만들고 그만큼
-     음수 여백으로 당겨, 보이는 위치는 그대로 두고 누를 면적만 넓힌다. */
-  display: inline-grid;
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  place-items: center;
+  position: relative;
   padding: 0;
   border: 0;
-  /* 세로로 당기면 위쪽 입력과 겹쳐 그만큼을 입력이 가져간다. 가로만 당긴다. */
-  margin-inline: -0.5rem;
   background: transparent;
   color: var(--mcm-color-muted);
-  font-size: 11px;
-  line-height: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+/* 글자는 작지만 손가락으로 누를 수 있어야 한다. 보이는 크기는 디자인대로 두고
+   누를 면적만 투명한 판으로 넓힌다. 줄 높이를 44px로 키우면 라벨 줄이 밀린다. */
+.revealButton::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  content: '';
 }
 
 .submitButton {
   width: 100%;
   height: 50px;
-  margin-top: 26px;
+  /* 비밀번호 상자(468)에서 로그인 버튼(508)까지. */
+  margin-top: 40px;
   border: 0;
   border-radius: 8px;
   appearance: none;
@@ -197,14 +220,6 @@
   font-size: 14px;
   font-weight: 600;
   line-height: 18px;
-}
-
-.divider {
-  width: 100%;
-  height: 0;
-  margin: 30px 0;
-  border: 0;
-  border-top: 1px solid #e6e6e6;
 }
 
 .backLink:focus-visible,
