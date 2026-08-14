@@ -102,7 +102,13 @@ function readHintSeen() {
   }
 }
 
-export default function PassportPageTurn({ step, disabled, onCommit, renderStep }) {
+export default function PassportPageTurn({
+  step,
+  disabled,
+  onCommit,
+  renderStep,
+  profileOverride,
+}) {
   const [showHint, setShowHint] = useState(() => step === 0 && !readHintSeen())
 
   const dismissHint = useCallback(() => {
@@ -136,8 +142,8 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
   // 여권 데이터는 API에서 온다. 연동 전에는 훅이 고정 데이터로 떨어진다.
   const { profile, stamps } = usePassport()
   const pageData = useCallback(
-    () => ({ profile, stamps, assets: assetsRef.current }),
-    [profile, stamps],
+    () => ({ profile: { ...profile, ...profileOverride }, stamps, assets: assetsRef.current }),
+    [profile, profileOverride, stamps],
   )
 
   /** 네 장을 한 번에 굽고 장면에 올린다. 낱장은 step마다 다시 구울 일이 없다. */
@@ -293,7 +299,7 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
   // 여권 데이터가 바뀌면 구워둔 면을 버린다.
   useEffect(() => {
     faceCacheRef.current.clear()
-  }, [profile, stamps])
+  }, [profile, profileOverride, stamps])
 
   // 페이지에 그릴 이미지들을 미리 받아둔다. 14장이라 단계마다 다시 받으면
   // 모바일에서 눈에 띄게 끊긴다. 한 번만 받고 준비됐다는 사실만 알린다.
@@ -474,7 +480,7 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
             스크린리더 읽기와 버튼 클릭을 그대로 담당한다. */}
         <div ref={canvasHostRef} aria-hidden="true" className={styles.bookLayer} />
         <div className={styles.contentLayer} data-transparent={rendererMode === 'ready'}>
-          {renderStep(step)}
+          {renderStep(step, { ...profile, ...profileOverride })}
         </div>
         {/* 모바일에는 넘김 화살표가 없어 슬라이드가 유일한 방법이다.
             처음 한 번만 알려주고, 한 장이라도 넘기면 다시 띄우지 않는다. */}

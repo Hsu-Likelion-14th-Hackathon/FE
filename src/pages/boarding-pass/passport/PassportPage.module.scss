@@ -231,7 +231,8 @@
 .stamps,
 .journeys {
   position: absolute;
-  inset: 1.5rem auto 1.5rem 1.875rem;
+  /* 아래쪽은 안내 문구가 캔버스에서 내려간 만큼(359 → 375) 함께 넓힌다. */
+  inset: 1.5rem auto 0.5rem 1.875rem;
   width: 12.25rem;
   display: flex;
   flex-direction: column;
@@ -281,7 +282,7 @@
 .profileFooter {
   /* 캔버스가 그리는 위치(페이지 로컬 y=349)와 히트박스를 맞춘다.
      DOM은 투명하지만 클릭·포커스를 담당하므로 좌표가 어긋나면 안 된다.
-     .profile은 페이지 기준 top 24px / left 30px 이므로 바닥에서 7px 위. */
+     .profile 바닥이 페이지 기준 386px이므로 거기서 7px 위가 캔버스 baseline 375와 맞는다. */
   position: absolute;
   right: 0;
   bottom: 0.4375rem;
@@ -533,6 +534,34 @@
   line-height: 1.5rem;
 }
 .historyList,
+/* 올라오는 시트 바탕에 비세토스 모노그램을 깐다. 원본이 투명 배경이라 주황
+   시트 색 위에 그대로 얹히는데, 그대로 두면 글자를 읽기 어려워지므로 같은
+   시트 색을 반투명으로 한 겹 덮는다. 덮개 0.7이면 문양이 #945830으로 앉아
+   Figma와 같은 진하기가 된다(바탕 #894a26, 원본 문양 rgb(174,119,71) 역산). */
+.sheet-history,
+.sheet-name {
+  background-image:
+    linear-gradient(rgba(137, 74, 38, 0.7), rgba(137, 74, 38, 0.7)),
+    url('@/shared/assets/boarding-pass/passport/bisepok.svg');
+  background-repeat: no-repeat, no-repeat;
+  background-position:
+    center,
+    center top;
+  /* 원본 문양 주기는 132px(640 기준), Figma는 390 폭에서 81px이다.
+     역산하면 배경 폭을 시트 폭에 맞추면 된다(640 x 81/132 = 393). */
+  background-size:
+    cover,
+    100% auto;
+}
+
+/* 이름 수정은 입력칸 하나뿐이라 화면을 다 덮을 이유가 없다. 내용만큼만 올라온다. */
+.sheet-name {
+  top: auto;
+  bottom: 0;
+  overflow-y: visible;
+  padding-block: 1.5rem max(1.5rem, var(--mcm-safe-bottom));
+}
+
 .sheet-history-detail .historyCard {
   margin-top: 1.875rem;
 }
@@ -677,4 +706,64 @@ button.historyCard {
     overflow: visible;
     opacity: 1;
   }
+}
+
+/* 이름은 눌러서 고칠 수 있다. 캔버스가 글자를 그리고 이 DOM은 투명하므로,
+   버튼 자체는 보이지 않고 클릭만 받는다. 보이는 편집칸은 시트로 꺼낸다. */
+.nameButton {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.nameForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nameLabel {
+  color: #c07346;
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+}
+
+.nameInput {
+  width: 100%;
+  height: 2.75rem;
+  padding-inline: 0.75rem;
+  border: 1px solid #c07346;
+  border-radius: 0.5rem;
+  background: #2a1408;
+  color: #fff7d5;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.nameSubmit {
+  height: 2.75rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: #c07346;
+  color: #fff7d5;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* 조합 중인 한글처럼 받을 수 없는 글자는 흐리게 둔다. 입력되고 있다는 건
+   보이되 확정되지 않을 상태임을 함께 드러낸다. 커서는 또렷하게 남긴다. */
+.nameInputBlocked {
+  color: color-mix(in srgb, #fff7d5 35%, transparent);
+  caret-color: #fff7d5;
+  transition: color 0.12s ease;
+}
+
+.nameNotice {
+  margin: 0;
+  color: #ffd9b0;
+  font-size: 0.75rem;
+  line-height: 1.125rem;
 }

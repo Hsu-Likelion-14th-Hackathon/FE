@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
+import { toPassportName } from '@/shared/lib/passportName.js'
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import stageBack from '@/shared/assets/boarding-pass/landing/stage-back.svg'
@@ -25,6 +26,7 @@ import styles from './PassportPage.module.scss'
 import PassportPageTurn from './PassportPageTurn.jsx'
 
 const sheetLabels = {
+  name: '여권 이름 수정',
   history: '여행 기록',
   'history-detail': '1F JOURNEY 상세',
   ticket: '탑승권',
@@ -34,6 +36,34 @@ export function Component() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [sheet, setSheet] = useState(null)
+  // 여권 이름은 사용자가 직접 고칠 수 있다. 캔버스도 이 값으로 다시 굽는다.
+  const [nameOverride, setNameOverride] = useState(null)
+  const [nameDraft, setNameDraft] = useState('')
+  // 한글은 ㅇ→아→안 처럼 조합을 거친다. 조합 중에 값을 바꾸면 IME가 되돌리므로
+  // (모바일 키보드에서 특히) 조합이 끝난 뒤에 걸러낸다.
+  const composingName = useRef(false)
+  // 걸러낸 글자가 있을 때만 안내를 띄운다. 처음부터 보여주면 잔소리가 된다.
+  const [nameRejected, setNameRejected] = useState(false)
+  // 조합 중인 글자가 받을 수 없는 문자면 흐리게 보여 유효하지 않음을 드러낸다.
+  const [nameBlocked, setNameBlocked] = useState(false)
+
+  // 입력 경로가 onChange와 onCompositionEnd 둘이라 필터는 여기 하나로 모은다.
+  const handleNameInput = (raw) => {
+    if (composingName.current) {
+      setNameDraft(raw)
+      return
+    }
+    const next = toPassportName(raw)
+    setNameRejected(next !== raw.toUpperCase())
+    setNameDraft(next)
+  }
+
+  // 조합이 확정되기 전에도 받을 수 없는 글자면 바로 알린다.
+  const handleNameComposing = (data) => {
+    const blocked = Boolean(data) && toPassportName(data) !== data.toUpperCase()
+    setNameBlocked(blocked)
+    if (blocked) setNameRejected(true)
+  }
   const dialogRef = useRef(null)
   const sheetTriggerRef = useRef(null)
 
@@ -96,12 +126,18 @@ export function Component() {
           <PassportPageTurn
             step={step}
             disabled={Boolean(sheet)}
+            profileOverride={nameOverride ? { name: nameOverride } : null}
             onCommit={(direction) =>
               setStep((current) => Math.min(3, Math.max(0, current + direction)))
             }
-            renderStep={(visibleStep) => (
+            renderStep={(visibleStep, visibleProfile) => (
               <PassportSpread
                 step={visibleStep}
+                profile={visibleProfile}
+                onEditName={(event, current) => {
+                  setNameDraft(current)
+                  openSheet('name', event.currentTarget)
+                }}
                 onHistory={(event) => openSheet('history', event.currentTarget)}
                 onTicket={(event) => openSheet('ticket', event.currentTarget)}
                 onProducts={() => navigate('/products')}
@@ -130,6 +166,57 @@ export function Component() {
                   onSelectJourney={(event) => openSheet('history-detail', event.currentTarget)}
                 />
               ) : null}
+              {sheet === 'name' ? (
+                <form
+                  className={styles.nameForm}
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    const next = nameDraft.trim()
+                    if (next) setNameOverride(next)
+                    closeSheet()
+                  }}
+                >
+                  <h3 className={styles.sheetTitle}>NAME</h3>
+                  <label className={styles.nameLabel} htmlFor="passport-name">
+                    여권에 표기할 영문 이름
+                  </label>
+                  <input
+                    className={`${styles.nameInput} ${nameBlocked ? styles.nameInputBlocked : ''}`}
+                    id="passport-name"
+                    aria-describedby="passport-name-hint"
+                    value={nameDraft}
+                    // 치는 즉시 여권 표기로 바꾼다. 영문·공백·하이픈·아포스트로피만
+                    // 남고 소문자는 대문자로 올라간다.
+                    onChange={(event) => handleNameInput(event.target.value)}
+                    onCompositionStart={(event) => {
+                      composingName.current = true
+                      handleNameComposing(event.data)
+                    }}
+                    onCompositionUpdate={(event) => handleNameComposing(event.data)}
+                    onCompositionEnd={(event) => {
+                      composingName.current = false
+                      setNameBlocked(false)
+                      // compositionend 뒤에 input이 오지 않는 브라우저가 있어 여기서도 확정한다.
+                      handleNameInput(event.target.value)
+                    }}
+                    autoCapitalize="characters"
+                    autoComplete="off"
+                    lang="en"
+                  />
+                  {nameRejected ? (
+                    <p className={styles.nameNotice} id="passport-name-hint" role="status">
+                      여권 표기에 맞춰 영문만 입력할 수 있습니다
+                    </p>
+                  ) : (
+                    <p className={styles.srOnly} id="passport-name-hint">
+                      여권 표기에 맞춰 영문 대문자로만 입력됩니다. 한글은 입력할 수 없습니다.
+                    </p>
+                  )}
+                  <button className={styles.nameSubmit} type="submit">
+                    저장
+                  </button>
+                </form>
+              ) : null}
               {sheet === 'history-detail' ? <JourneyDetail /> : null}
               {sheet === 'ticket' ? (
                 <>
@@ -145,7 +232,15 @@ export function Component() {
   )
 }
 
-function PassportSpread({ step, onHistory, onTicket, onProducts }) {
+/**
+ * 여권 지면의 투명 오버레이.
+ *
+ * 여권 데이터는 PassportPageTurn이 이미 불러왔다. 여기서 다시 부르면 단계를
+ * 넘길 때마다 같은 API를 또 치게 된다.
+ */
+function PassportSpread({ step, profile, onEditName, onHistory, onTicket, onProducts }) {
+  const displayName = profile?.name ?? `${passportProfile.givenName} ${passportProfile.surname}`
+
   if (step === 0) {
     return (
       <section
@@ -185,11 +280,21 @@ function PassportSpread({ step, onHistory, onTicket, onProducts }) {
           <p>
             NATIONALITY <strong>{passportProfile.nationality}</strong>
           </p>
+          {/* 캔버스가 글자를 그리고 이 DOM은 투명하다. 누르면 이름을 고칠 수
+              있다는 표시는 시트를 열어 보여준다. */}
           <p>
             NAME{' '}
-            <strong>
-              {passportProfile.givenName} {passportProfile.surname}
-            </strong>
+            <button
+              className={styles.nameButton}
+              type="button"
+              aria-label={`이름 ${displayName} 수정`}
+              onClick={(event) => onEditName(event, displayName)}
+            >
+              <strong>{displayName}</strong>
+            </button>
+          </p>
+          <p>
+            DATE OF BIRTH <strong>{profile?.birthDate ?? passportProfile.birthDate}</strong>
           </p>
           <p>
             DATE OF ISSUE <strong>{passportProfile.issueDate}</strong>
