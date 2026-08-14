@@ -14,7 +14,7 @@ const simulateScan = vi.fn(async () => ({
 }))
 
 vi.mock('@/shared/api/boardingPassApi.js', () => ({
-  getCurrentBoardingPass: vi.fn(async () => ({
+  getLatestBoardingPass: vi.fn(async () => ({
     id: 'MCM-BP-TEST',
     boardingPassId: 'MCM-BP-TEST',
     passCode: 'MCM-PASS-TEST',

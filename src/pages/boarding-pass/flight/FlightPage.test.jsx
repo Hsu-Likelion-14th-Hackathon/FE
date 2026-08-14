@@ -3,7 +3,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/shared/api/boardingPassApi.js', () => ({
-  getCurrentBoardingPass: vi.fn(async () => null),
+  getLatestBoardingPass: vi.fn(async () => null),
 }))
 
 import { Component as FlightPage } from './FlightPage.jsx'

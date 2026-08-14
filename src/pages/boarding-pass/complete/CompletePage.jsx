@@ -5,7 +5,7 @@ import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/Boardin
 import { PASS_STORAGE_KEY } from '@/features/boarding-pass/boarding-ticket/passStorage.js'
 import noticeStyles from '@/features/boarding-pass/notice-toast/PassNoticeToast.module.scss'
 import SavePassToast from '@/features/boarding-pass/save-pass-toast/SavePassToast.jsx'
-import { getCurrentBoardingPass } from '@/shared/api/boardingPassApi.js'
+import { getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
 import stageBack from '@/shared/assets/boarding-pass/complete/stage-back.png'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
@@ -36,9 +36,13 @@ export function Component() {
   useEffect(() => {
     if (pass) return undefined
     let cancelled = false
-    getCurrentBoardingPass()
+    getLatestBoardingPass()
       .then((data) => {
         if (cancelled) return
+        if (!data) {
+          setError('발급된 보딩패스를 찾을 수 없습니다.')
+          return
+        }
         setPass(data)
         sessionStorage.setItem(PASS_STORAGE_KEY, JSON.stringify(data))
       })

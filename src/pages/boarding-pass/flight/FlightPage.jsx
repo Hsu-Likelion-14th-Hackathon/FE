@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
-import { getCurrentBoardingPass } from '@/shared/api/boardingPassApi.js'
+import { getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
 import cameraDotImg from '@/shared/assets/boarding-pass/flight/camera-dot.svg'
 import controlArrowImg from '@/shared/assets/boarding-pass/flight/control-arrow.svg'
 import controlBrightnessImg from '@/shared/assets/boarding-pass/flight/control-brightness.svg'
@@ -85,7 +85,7 @@ export function Component() {
 
   useEffect(() => {
     let cancelled = false
-    getCurrentBoardingPass()
+    getLatestBoardingPass()
       .then((data) => {
         if (!cancelled) setPass(data)
       })
@@ -256,22 +256,8 @@ export function Component() {
   )
 }
 
-function formatMapDate() {
-  const now = new Date()
-  const months = [
-    'JAN',
-    'FEB',
-    'MAR',
-    'APR',
-    'MAY',
-    'JUN',
-    'JUL',
-    'AUG',
-    'SEP',
-    'OCT',
-    'NOV',
-    'DEC',
-  ]
+function formatMapDate(now = new Date()) {
   const day = String(now.getDate()).padStart(2, '0')
-  return `${day} ${months[now.getMonth()]} ${now.getFullYear()}`
+  const month = now.toLocaleString('en-US', { month: 'short' }).toUpperCase()
+  return `${day} ${month} ${now.getFullYear()}`
 }

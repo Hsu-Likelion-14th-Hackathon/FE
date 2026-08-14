@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import CreditToast from '@/features/boarding-pass/credit-toast/CreditToast.jsx'
 import ScanDepartLoadingOverlay from '@/features/boarding-pass/scan-loading/ScanDepartLoadingOverlay.jsx'
-import { getCurrentBoardingPass, simulateScan } from '@/shared/api/boardingPassApi.js'
+import { getLatestBoardingPass, simulateScan } from '@/shared/api/boardingPassApi.js'
 import backArrowIcon from '@/shared/assets/boarding-pass/icons/back-arrow.svg'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import checkCircleIcon from '@/shared/assets/boarding-pass/scan/check-circle.svg'
@@ -12,6 +12,7 @@ import pointScanIcon from '@/shared/assets/boarding-pass/scan/point-scan.svg'
 import scanButtonIcon from '@/shared/assets/boarding-pass/scan/scan-button-icon.svg'
 import scanFrameIcon from '@/shared/assets/boarding-pass/scan/scan-frame.svg'
 import stageBack from '@/shared/assets/boarding-pass/scan/stage-back.png'
+import scrollDocumentToTop from '@/shared/layout/scrollDocumentToTop.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './ScanPage.module.scss'
@@ -36,7 +37,7 @@ export function Component() {
 
   useEffect(() => {
     let cancelled = false
-    getCurrentBoardingPass()
+    getLatestBoardingPass()
       .then((data) => {
         if (!cancelled) setPass(data)
       })
@@ -106,10 +107,7 @@ export function Component() {
 
   function handleDepart() {
     if (phase !== 'success') return
-    window.scrollTo(0, 0)
-    document.documentElement.scrollTop = 0
-    document.body.scrollTop = 0
-    document.querySelector('[data-device-screen]')?.firstElementChild?.scrollTo?.(0, 0)
+    scrollDocumentToTop()
     setPhase('departing')
   }
 
