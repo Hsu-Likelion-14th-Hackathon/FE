@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
-import { toPassportName } from '@/shared/lib/passportName.js'
+import { PASSPORT_NAME_MAX_LENGTH, toPassportName } from '@/shared/lib/passportName.js'
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import stageBack from '@/shared/assets/boarding-pass/landing/stage-back.svg'
@@ -196,6 +196,13 @@ export function Component() {
                   className={styles.nameForm}
                   onSubmit={(event) => {
                     event.preventDefault()
+                    // 조합 중이면 아직 확정되지 않은 글자다. "홍GIL" 상태로 제출하면
+                    // 영문만 남기고 시트가 닫혀, 사용자는 지운 적 없는 글자가
+                    // 사라진 걸 보게 된다. 조합이 끝날 때까지 기다린다.
+                    if (composingName.current) {
+                      setNameRejected(true)
+                      return
+                    }
                     // 조합 중에는 원본을 그대로 담아 두므로 제출 시점에 한 번 더
                     // 거른다. 조합이 끝나기 전에 제출하면 한글이 그대로 들어간다.
                     const next = toPassportName(nameDraft).trim()
@@ -230,6 +237,8 @@ export function Component() {
                       // compositionend 뒤에 input이 오지 않는 브라우저가 있어 여기서도 확정한다.
                       handleNameInput(event.target.value)
                     }}
+                    // 여권 표기 한도. 이보다 길면 지면 밖으로 넘친다.
+                    maxLength={PASSPORT_NAME_MAX_LENGTH}
                     autoCapitalize="characters"
                     autoComplete="off"
                     lang="en"

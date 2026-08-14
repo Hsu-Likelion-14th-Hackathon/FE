@@ -7,7 +7,20 @@
  *
  * 회원가입과 여권 이름 수정이 같은 규칙을 써야 해서 한곳에 둔다.
  */
+
+/**
+ * 표기명 최대 길이.
+ *
+ * ICAO 9303이 기계판독영역(MRZ)의 이름 칸을 39자로 정한다. 실제 여권이 그
+ * 이상을 담지 못하므로 여기서도 같은 값으로 자른다. 길이를 열어 두면 여권
+ * 지면 밖으로 글자가 넘친다.
+ */
+export const PASSPORT_NAME_MAX_LENGTH = 39
+
 export function toPassportName(value) {
   // \s는 탭과 줄바꿈, 비분리 공백까지 통과시킨다. 이름에 쓰이는 건 보통 공백뿐이다.
-  return value.replace(/[^A-Za-z '-]/g, '').toUpperCase()
+  return value
+    .replace(/[^A-Za-z '-]/g, '')
+    .toUpperCase()
+    .slice(0, PASSPORT_NAME_MAX_LENGTH)
 }

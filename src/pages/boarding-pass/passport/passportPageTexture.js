@@ -68,6 +68,27 @@ function setFont(ctx, { size, weight = 400, family = 'Pretendard, sans-serif' })
   ctx.font = `${weight} ${size}px ${family}`
 }
 
+/**
+ * 현재 폰트 기준으로 maxWidth에 담기게 줄인다. 넘치면 말줄임표를 붙인다.
+ * 호출 전에 ctx.font이 그릴 때와 같아야 폭 계산이 맞는다.
+ */
+export function ellipsize(ctx, text, maxWidth) {
+  if (maxWidth <= 0) return ''
+  if (ctx.measureText(text).width <= maxWidth) return text
+  // 한 글자씩 재면 긴 이름에서 measureText를 수십 번 부른다. 이분 탐색으로 줄인다.
+  let fits = 0
+  let over = text.length
+  while (fits < over) {
+    const mid = Math.ceil((fits + over) / 2)
+    if (ctx.measureText(`${text.slice(0, mid)}…`).width <= maxWidth) fits = mid
+    else over = mid - 1
+  }
+  return fits > 0 ? `${text.slice(0, fits)}…` : ''
+}
+
+/** 라벨과 값 사이 최소 여백. 행 폭에 비례해야 배율이 바뀌어도 붙지 않는다. */
+const ROW_GAP_RATIO = 0.04
+
 /** 우측 정렬 라벨/값 한 행. Figma 프로필의 197px 폭 행 구성을 따른다. */
 function drawRow(ctx, { x, y, width, label, value }) {
   // 10px / line-height 16 → baseline은 행 상단에서 약 12px
@@ -76,10 +97,14 @@ function drawRow(ctx, { x, y, width, label, value }) {
   ctx.fillStyle = INK_LABEL
   ctx.textAlign = 'left'
   ctx.fillText(label, x, baseline)
+  const labelWidth = ctx.measureText(label).width
 
   ctx.fillStyle = INK_VALUE
   ctx.textAlign = 'right'
-  ctx.fillText(value, x + width, baseline)
+  // 라벨과 값이 한 행을 나눠 쓴다. 긴 이름을 그대로 그리면 왼쪽 라벨 위로
+  // 올라타므로 남는 폭에 맞춰 줄인다.
+  const room = width - labelWidth - width * ROW_GAP_RATIO
+  ctx.fillText(ellipsize(ctx, String(value ?? ''), room), x + width, baseline)
   ctx.textAlign = 'left'
 }
 

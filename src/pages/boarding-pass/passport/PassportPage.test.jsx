@@ -322,4 +322,50 @@ describe('PassportPage', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent("O'BRIEN KIM")
   })
+
+  it('조합이 끝나기 전에 제출하면 저장하지 않고 시트를 열어 둔다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    fireEvent.click(screen.getByRole('button', { name: /이름 .* 수정/ }))
+    const input = screen.getByLabelText('여권에 표기할 영문 이름')
+
+    // 영문을 친 뒤 한글 조합을 시작한 상태. 여기서 제출하면 영문만 남기고
+    // 닫혀 버려, 지운 적 없는 글자가 사라진 것처럼 보인다.
+    fireEvent.change(input, { target: { value: 'GIL' } })
+    fireEvent.compositionStart(input, { data: 'ㅎ' })
+    fireEvent.change(input, { target: { value: 'GIL홍' } })
+    fireEvent.submit(input.closest('form'))
+
+    expect(screen.getByRole('dialog', { name: '여권 이름 수정' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '여권 프로필', hidden: true })).not.toHaveTextContent(
+      'GIL',
+    )
+
+    // 조합이 끝나면 평소대로 저장된다.
+    fireEvent.compositionEnd(input, { target: { value: 'GIL홍' } })
+    fireEvent.submit(input.closest('form'))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent('GIL')
+  })
+
+  it('이름을 여권 표기 한도로 자르고 넘치면 말줄임으로 가린다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    fireEvent.click(screen.getByRole('button', { name: /이름 .* 수정/ }))
+    const input = screen.getByLabelText('여권에 표기할 영문 이름')
+
+    // ICAO 9303 MRZ 이름 칸이 39자다. 길이를 열어 두면 지면 밖으로 넘친다.
+    expect(input).toHaveAttribute('maxLength', '39')
+    fireEvent.change(input, { target: { value: 'A'.repeat(60) } })
+    expect(input).toHaveValue('A'.repeat(39))
+
+    fireEvent.submit(input.closest('form'))
+    const value = screen.getByRole('region', { name: '여권 프로필' }).querySelector('button strong')
+    expect(value).toHaveTextContent('A'.repeat(39))
+    // 39자도 197px 행보다 길다. 잘라서 보여 줘야 라벨을 덮지 않는다.
+    const style = window.getComputedStyle(value)
+    expect(style.textOverflow).toBe('ellipsis')
+    expect(style.whiteSpace).toBe('nowrap')
+    expect(style.minWidth).toBe('0px')
+  })
 })

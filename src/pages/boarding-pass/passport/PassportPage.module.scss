@@ -259,12 +259,22 @@
 }
 .profile p {
   display: flex;
+  /* 라벨과 값이 붙지 않게 최소 여백을 둔다. 캔버스도 행 폭의 4%를 띄운다. */
+  gap: 0.5rem;
   justify-content: space-between;
+  overflow: hidden;
   color: #c07346;
 }
 
 .profile strong {
+  /* flex 항목은 기본이 min-width: auto라 내용보다 작아지지 않는다. 긴 이름이
+     그대로 지면 밖으로 나가므로 줄어들 수 있게 풀고 말줄임으로 자른다.
+     캔버스도 같은 자리에서 말줄임표를 붙인다. */
+  min-width: 0;
+  overflow: hidden;
   color: #fff7d5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .profile p,
 .stamps p,
@@ -722,8 +732,11 @@ button.historyCard {
   display: inline-grid;
   min-width: calc(2.75rem / var(--passport-scale, 1));
   min-height: calc(2.75rem / var(--passport-scale, 1));
+  /* 44px은 최소값이라 긴 이름은 그만큼 넓어진다. 행을 넘지 않게 위를 막는다. */
+  max-width: 100%;
   align-items: center;
   justify-items: start;
+  overflow: hidden;
   margin-block: calc(-0.875rem / var(--passport-scale, 1));
   padding: 0;
   border: 0;
