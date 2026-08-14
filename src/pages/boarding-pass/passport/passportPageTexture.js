@@ -9,6 +9,8 @@
 export const PAGE_W = 253.5 // 펼침 507의 한 면
 export const PAGE_H = 394
 export const COVER_W = 310
+/** 신분 정보 줄 간격. 여섯 줄이 안내 문구 위에 들어가는 값이다. */
+export const ROW_PITCH = 28
 
 // Figma 52:18703 / 52:18668 실측값
 const INK_LABEL = '#c07346' // 라벨
@@ -132,14 +134,18 @@ function drawProfile(ctx, w, h, { profile, assets, side }) {
     ['NATIONALITY', profile.nationality],
     // 백엔드는 name 한 필드, 기존 고정 데이터는 givenName/surname 분리다.
     ['NAME', profile.name ?? `${profile.givenName} ${profile.surname}`],
+    ['DATE OF BIRTH', profile.birthDate ?? ''],
     ['DATE OF ISSUE', profile.issueDate],
     ['CREDIT', String(profile.credit)],
   ]
+  // 생년월일이 늘면서 다섯 줄이 여섯 줄이 됐다. 아래 안내 문구(359)와 부딪히지
+  // 않도록 줄 간격을 32에서 28로 좁힌다.
   rows.forEach(([label, value], index) => {
-    drawRow(ctx, { x, y: (203 + index * 32) * sy, width, label, value })
+    drawRow(ctx, { x, y: (203 + index * ROW_PITCH) * sy, width, label, value })
   })
 
-  const noteY = 359 * sy
+  // 생년월일이 늘면서 CREDIT 줄이 343까지 내려왔다. 안내 문구도 그만큼 내린다.
+  const noteY = 375 * sy
   ctx.fillStyle = INK_NOTE
   setFont(ctx, { size: 8, weight: 400 })
   ctx.fillText('크래딧으로 AI 가상 피팅 가능', x, noteY)
