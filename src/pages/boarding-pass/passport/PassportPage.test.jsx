@@ -401,4 +401,27 @@ describe('PassportPage', () => {
     expect(window.getComputedStyle(row.querySelector('strong')).fontWeight).toBe('600')
   })
 
+  it('이름에 호버하면 캔버스 위에 수정 가능 표시를 얹는다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+
+    // 내용 DOM은 캔버스와 겹치지 않게 opacity 0이라, 버튼 안에 그리면 보이지
+    // 않는다. 표시는 투명 레이어 밖에 있어야 한다.
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+
+    fireEvent.pointerEnter(button)
+    const cue = screen.getByTestId('passport-name-cue')
+    expect(cue.closest('[class*=contentLayer]')).toBeNull()
+    expect(button).toHaveAttribute('title', '이름 수정')
+
+    fireEvent.pointerLeave(button)
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+
+    // 키보드 사용자도 같은 표시를 받아야 한다.
+    fireEvent.focus(button)
+    expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
+    fireEvent.blur(button)
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+  })
 })

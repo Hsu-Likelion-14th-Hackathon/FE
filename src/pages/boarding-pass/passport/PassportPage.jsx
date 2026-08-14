@@ -151,11 +151,12 @@ export function Component() {
             onCommit={(direction) =>
               setStep((current) => Math.min(3, Math.max(0, current + direction)))
             }
-            renderStep={(visibleStep, visibleProfile, visibleStamps) => (
+            renderStep={(visibleStep, visibleProfile, visibleStamps, helpers) => (
               <PassportSpread
                 step={visibleStep}
                 profile={visibleProfile}
                 stamps={visibleStamps}
+                onNameHover={helpers?.onNameHover}
                 onEditName={(event, current) => {
                   setNameDraft(current)
                   setNameRejected(false)
@@ -285,12 +286,17 @@ function PassportSpread({
   step,
   profile,
   stamps = [],
+  onNameHover,
   onEditName,
   onHistory,
   onTicket,
   onProducts,
 }) {
   const displayName = toDisplayName(profile)
+  // 표시할 자리는 44px 클릭 영역이 아니라 실제 글자 상자다. 버튼을 재면
+  // 위아래로 28px 더 큰 판이 그려진다.
+  const hoverName = (event) => onNameHover?.(event.currentTarget.querySelector('strong'))
+  const clearNameHover = () => onNameHover?.(null)
 
   if (step === 0) {
     return (
@@ -339,6 +345,14 @@ function PassportSpread({
               className={styles.nameButton}
               type="button"
               aria-label={`이름 ${displayName} 수정`}
+              // 캔버스가 글자를 그려 버튼은 보이지 않는다. 눌러서 고칠 수 있다는
+              // 걸 알 방법이 없으므로 호버·포커스 때 글자 위에 표시를 얹는다.
+              // 툴팁은 opacity와 무관하게 떠서 무엇을 하는 버튼인지 말해 준다.
+              title="이름 수정"
+              onPointerEnter={hoverName}
+              onPointerLeave={clearNameHover}
+              onFocus={hoverName}
+              onBlur={clearNameHover}
               onClick={(event) => onEditName(event, displayName)}
             >
               <strong>{displayName}</strong>

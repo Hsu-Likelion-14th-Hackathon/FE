@@ -91,6 +91,19 @@ function loadImage(src) {
 }
 
 /** 한 번 넘겨 본 사람에게 힌트를 다시 띄우지 않기 위한 표식. */
+/**
+ * 요소 안 글자가 실제로 차지하는 상자. 잴 수 없으면 null.
+ *
+ * jsdom에는 Range.getBoundingClientRect가 없다. 호출부가 요소 상자로 물러설
+ * 수 있게 예외 대신 null을 준다.
+ */
+function measureText(element) {
+  const range = document.createRange()
+  if (typeof range.getBoundingClientRect !== 'function') return null
+  range.selectNodeContents(element)
+  return range.getBoundingClientRect()
+}
+
 const HINT_SEEN_KEY = 'mcm-passport-swipe-hint-seen'
 
 function readHintSeen() {
@@ -120,6 +133,10 @@ export default function PassportPageTurn({
     }
   }, [])
 
+  // 이름 버튼 호버 표시의 위치. 내용 DOM이 투명해 버튼 안에는 그릴 수 없으므로
+  // 실제 글자 상자를 재서 캔버스 위에 따로 얹는다.
+  const [nameCue, setNameCue] = useState(null)
+
   const [rendererMode, setRendererMode] = useState('fallback')
   // 이미지 14장을 다 받았는지. 받고 나서 한 번 다시 구워야 빈 면이 남지 않는다.
   const [assetsReady, setAssetsReady] = useState(false)
@@ -138,6 +155,38 @@ export default function PassportPageTurn({
 
   const progress = ((step + 1) / (LAST_STEP + 1)) * 100
   const inputLocked = disabled || turnState !== 'idle'
+
+  /**
+   * 넘겨받은 글자 상자를 뷰포트 기준 좌표로 옮긴다. null이면 표시를 지운다.
+   *
+   * 기준 요소는 viewportRef 대신 closest로 찾는다. 이 함수는 renderStep으로
+   * 넘어가는데, renderStep은 렌더 중에 불린다. ref를 읽는 함수를 그리로
+   * 넘기면 렌더 중 ref 접근으로 잡힌다.
+   */
+  const showNameCue = useCallback((element) => {
+    const frame = element?.closest('[data-passport-viewport]')
+    if (!frame) {
+      setNameCue(null)
+      return
+    }
+    const box = element.getBoundingClientRect()
+    const frameBox = frame.getBoundingClientRect()
+    // 상자가 아니라 글자에 맞춘다. 이름이 짧으면 44px 최소 폭 때문에 상자가
+    // 글자보다 넓어, 상자를 재면 밑줄이 글자 밖까지 그어진다.
+    const textBox = measureText(element) ?? box
+
+    // 이름이 길면 글자가 상자 밖으로 넘친다(말줄임으로 가려진다). 보이는
+    // 만큼만 그어야 하므로 상자로 자른다.
+    const left = Math.max(textBox.left, box.left)
+    const right = Math.min(textBox.right, box.right)
+
+    setNameCue({
+      left: left - frameBox.left,
+      top: box.top - frameBox.top,
+      width: Math.max(0, right - left),
+      height: box.height,
+    })
+  }, [])
 
   // 여권 데이터는 API에서 온다. 연동 전에는 훅이 고정 데이터로 떨어진다.
   const { profile, stamps } = usePassport()
@@ -276,6 +325,8 @@ export default function PassportPageTurn({
       // 넘겼으면 방법을 안 것이므로 안내를 거둔다. 아이패드처럼 터치와 키보드를
       // 함께 쓰는 기기에서는 화살표로 넘기고도 안내가 남아 있었다.
       if (commit) dismissHint()
+      // 지면이 움직이면 재 둔 좌표가 어긋난다. 표시를 남기면 엉뚱한 자리에 뜬다.
+      setNameCue(null)
 
       if (rendererMode !== 'ready' || !bookRef.current) {
         if (commit) onCommit(direction)
@@ -469,6 +520,8 @@ export default function PassportPageTurn({
         ref={viewportRef}
         className={styles.viewport}
         data-open={step > 0}
+        // 이름 호버 표시가 좌표 기준으로 삼는 요소다.
+        data-passport-viewport=""
         data-testid="passport-turn-surface"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -480,8 +533,24 @@ export default function PassportPageTurn({
             스크린리더 읽기와 버튼 클릭을 그대로 담당한다. */}
         <div ref={canvasHostRef} aria-hidden="true" className={styles.bookLayer} />
         <div className={styles.contentLayer} data-transparent={rendererMode === 'ready'}>
-          {renderStep(step, { ...profile, ...profileOverride }, stamps)}
+          {renderStep(step, { ...profile, ...profileOverride }, stamps, {
+            onNameHover: showNameCue,
+          })}
         </div>
+        {/* 시트가 열렸거나 지면이 넘어가는 중이면 좌표가 어긋난다. */}
+        {nameCue && !inputLocked ? (
+          <span
+            aria-hidden="true"
+            className={styles.nameCue}
+            data-testid="passport-name-cue"
+            style={{
+              left: `${nameCue.left}px`,
+              top: `${nameCue.top}px`,
+              width: `${nameCue.width}px`,
+              height: `${nameCue.height}px`,
+            }}
+          />
+        ) : null}
         {/* 모바일에는 넘김 화살표가 없어 슬라이드가 유일한 방법이다.
             처음 한 번만 알려주고, 한 장이라도 넘기면 다시 띄우지 않는다. */}
         {showHint ? (
