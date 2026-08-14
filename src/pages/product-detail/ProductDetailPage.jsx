@@ -138,7 +138,7 @@ export function Component() {
 
           <div className={styles.actions}>
             <Link className={styles.tryOnLink} to={`/products/${product.id}/try-on`}>
-              착용하기
+              Fitting with Ai
             </Link>
 
             <p className={styles.variantSummary}>

@@ -5,6 +5,7 @@ import walletImage from '@/assets/images/products/aren-burgundy.webp'
 import diamantImage from '@/assets/images/products/diamant-soft-pink.webp'
 import weekenderImage from '@/assets/images/products/duffel-black.webp'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import ScrollFade from '@/shared/ui/scroll-fade/ScrollFade.jsx'
 import CartWishlistTabs from '@/shared/ui/cart-wishlist-tabs/CartWishlistTabs.jsx'
 import { HeartIcon } from '@/shared/ui/icons/StoreIcons.jsx'
 
@@ -96,7 +97,7 @@ export function Component() {
         </ul>
       )}
 
-      {!isEmpty && <div className={styles.scrollFade} aria-hidden="true" />}
+      {!isEmpty && <ScrollFade />}
     </div>
   )
 }

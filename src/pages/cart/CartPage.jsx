@@ -17,7 +17,6 @@ const INITIAL_CART_ITEMS = [
     price: '₩1,690,000',
     color: 'COGNAC',
     size: 'S',
-    quantity: 3,
     sku: '#MWRGAOB01CO001',
     image: pinaImage,
     cropClass: 'pinaCrop',
@@ -28,7 +27,6 @@ const INITIAL_CART_ITEMS = [
     price: '₩350,000',
     color: 'SOFT PINK',
     size: '36 IT / 여성',
-    quantity: 2,
     sku: '#MESGSMM04PZ036',
     image: slidesImage,
     cropClass: 'slidesCrop',
@@ -76,7 +74,6 @@ function CartItem({ item, selected, onRemove, onToggle }) {
               <span>{item.size}</span>
             </div>
           </div>
-          <span className={styles.quantity}>{item.quantity}개 수량</span>
         </div>
       </div>
 
@@ -124,23 +121,17 @@ export function Component() {
       </section>
 
       {!isEmpty && (
-        <>
-          <ul className={styles.itemList} aria-label="쇼핑백 상품">
-            {items.map((item) => (
-              <CartItem
-                item={item}
-                key={item.id}
-                selected={selectedIds.has(item.id)}
-                onRemove={removeItem}
-                onToggle={toggleItem}
-              />
-            ))}
-          </ul>
-
-          <button className={styles.checkoutButton} type="button" disabled={selectedIds.size === 0}>
-            결제하기
-          </button>
-        </>
+        <ul className={styles.itemList} aria-label="쇼핑백 상품">
+          {items.map((item) => (
+            <CartItem
+              item={item}
+              key={item.id}
+              selected={selectedIds.has(item.id)}
+              onRemove={removeItem}
+              onToggle={toggleItem}
+            />
+          ))}
+        </ul>
       )}
     </div>
   )

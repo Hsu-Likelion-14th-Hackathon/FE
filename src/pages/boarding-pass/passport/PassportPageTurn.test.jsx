@@ -6,39 +6,32 @@ import PassportPageTurn from './PassportPageTurn.jsx'
 
 const rendererControl = vi.hoisted(() => ({
   fail: false,
-  failRender: false,
   render: vi.fn(),
-  domElement: null,
-  disconnect: vi.fn(),
+  setSize: vi.fn(),
+  setFaces: vi.fn(),
+  dispose: vi.fn(),
   cancelFrame: vi.fn(),
-  resize: null,
+  // ResizeObserver 대역이 쓴다. 없으면 정리 단계에서 undefined를 부른다.
+  disconnect: vi.fn(),
+  canvas: null,
 }))
 
-vi.mock('three/addons/renderers/CSS3DRenderer.js', async (importOriginal) => {
-  const actual = await importOriginal()
-
-  class TestRenderer {
-    constructor() {
-      if (rendererControl.fail) throw new Error('renderer failed')
-      this.domElement = document.createElement('div')
-      rendererControl.domElement = this.domElement
+// WebGL은 jsdom에 없으므로 종이 렌더러를 통째로 대역으로 바꾼다.
+vi.mock('./passportSheetScene.js', () => ({
+  createPassportSheets: () => {
+    if (rendererControl.fail) throw new Error('renderer failed')
+    const canvas = document.createElement('canvas')
+    rendererControl.canvas = canvas
+    return {
+      canvas,
+      setSize: rendererControl.setSize,
+      setSheets: rendererControl.setFaces,
+      setTurn: rendererControl.render,
+      render: rendererControl.render,
+      dispose: rendererControl.dispose,
     }
-
-    setSize() {}
-
-    render(scene, camera) {
-      scene.traverse((object) => {
-        if (object.element && !this.domElement.contains(object.element)) {
-          this.domElement.append(object.element)
-        }
-      })
-      if (rendererControl.failRender) throw new Error('render failed')
-      rendererControl.render(scene, camera)
-    }
-  }
-
-  return { ...actual, CSS3DRenderer: TestRenderer }
-})
+  },
+}))
 
 function TurnHarness({ disabled = false, initialStep = 0 }) {
   const [step, setStep] = useState(initialStep)
@@ -79,14 +72,20 @@ async function finishAnimation(duration) {
 }
 
 beforeEach(() => {
+  localStorage.clear()
   rendererControl.fail = false
-  rendererControl.failRender = false
   rendererControl.render.mockReset()
-  rendererControl.domElement = null
-  rendererControl.disconnect.mockReset()
+  rendererControl.setSize.mockReset()
+  rendererControl.setFaces.mockReset()
+  rendererControl.dispose.mockReset()
   rendererControl.cancelFrame.mockReset()
-  rendererControl.resize = null
-  vi.useFakeTimers({ shouldAdvanceTime: true })
+  rendererControl.disconnect.mockReset()
+  rendererControl.canvas = null
+  // rAF는 아래에서 직접 stub 하므로 fake timer가 가로채지 않게 제외한다.
+  vi.useFakeTimers({
+    shouldAdvanceTime: true,
+    toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'],
+  })
   vi.stubGlobal('requestAnimationFrame', (callback) => setTimeout(() => callback(Date.now()), 16))
   vi.stubGlobal('cancelAnimationFrame', (frame) => {
     rendererControl.cancelFrame(frame)
@@ -131,7 +130,8 @@ describe('PassportPageTurn', () => {
       expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
     )
 
-    expect(screen.getByRole('region', { name: '여권 1단계' })).toBeVisible()
+    // 캔버스가 그림을 맡으므로 DOM은 투명하지만 접근성 트리에는 남아 있어야 한다.
+    expect(screen.getByRole('region', { name: '여권 1단계' })).toBeInTheDocument()
   })
 
   it('여권 폭의 25%를 넘긴 왼쪽 스와이프로 다음 단계에 이동한다', async () => {
@@ -151,7 +151,7 @@ describe('PassportPageTurn', () => {
     fireEvent.pointerMove(surface, { pointerId: 1, clientX: 190, clientY: 104 })
     expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'dragging')
     fireEvent.pointerUp(surface, { pointerId: 1, clientX: 190, clientY: 104 })
-    await finishAnimation(500)
+    await finishAnimation(900)
 
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
   })
@@ -177,7 +177,9 @@ describe('PassportPageTurn', () => {
     await finishAnimation(240)
 
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
-    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle'),
+    )
   })
 
   it('오른쪽 스와이프로 이전 단계에 이동한다', async () => {
@@ -196,7 +198,7 @@ describe('PassportPageTurn', () => {
     })
     fireEvent.pointerMove(surface, { pointerId: 3, clientX: 210, clientY: 104 })
     fireEvent.pointerUp(surface, { pointerId: 3, clientX: 210, clientY: 104 })
-    await finishAnimation(500)
+    await finishAnimation(900)
 
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
   })
@@ -218,7 +220,7 @@ describe('PassportPageTurn', () => {
     })
     fireEvent.pointerMove(surface, { pointerId: 4, clientX: 270, clientY: 100 })
     fireEvent.pointerUp(surface, { pointerId: 4, clientX: 270, clientY: 100 })
-    await finishAnimation(500)
+    await finishAnimation(900)
 
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
   })
@@ -324,7 +326,7 @@ describe('PassportPageTurn', () => {
     })
     fireEvent.pointerMove(surface, { pointerId: 13, clientX: 190, clientY: 100 })
     fireEvent.pointerUp(surface, { pointerId: 13, clientX: 190, clientY: 100 })
-    await finishAnimation(500)
+    await finishAnimation(900)
 
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
   })
@@ -377,8 +379,8 @@ describe('PassportPageTurn', () => {
     expect(requestFrame).not.toHaveBeenCalled()
   })
 
-  it('CSS3D 미지원 fallback의 화살표는 즉시 한 단계만 이동한다', async () => {
-    vi.stubGlobal('CSS', { supports: () => false })
+  it('종이 렌더러를 못 만들면 fallback으로 즉시 한 단계만 이동한다', async () => {
+    rendererControl.fail = true
     render(<TurnHarness />)
     await waitFor(() =>
       expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
@@ -439,7 +441,7 @@ describe('PassportPageTurn', () => {
     },
   )
 
-  it('전환 target portal은 inert로 숨기고 현재 단계 region만 노출한다', async () => {
+  it('전환 중에도 접근성 트리에는 현재 단계만 남는다', async () => {
     render(<TurnHarness />)
     await waitFor(() =>
       expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
@@ -447,10 +449,15 @@ describe('PassportPageTurn', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
 
+    // 넘어가는 종이는 캔버스가 그리므로 다음 단계 DOM이 미리 생기지 않는다.
     expect(screen.getByRole('region', { name: '여권 1단계' })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: '여권 2단계' })).not.toBeInTheDocument()
-    expect(screen.getByText('Step 2').closest('[aria-hidden="true"]')).toHaveAttribute('inert')
-    await finishAnimation(500)
+    // 낱장 네 장을 한 번만 굽는다. 넘길 때는 각도만 바뀌므로 다시 굽지 않는다.
+    expect(rendererControl.setFaces).toHaveBeenCalledTimes(1)
+    await finishAnimation(900)
+
+    expect(screen.getByRole('region', { name: '여권 2단계' })).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '여권 1단계' })).not.toBeInTheDocument()
   })
 
   it('다음 화살표 전환은 애니메이션 완료 후 다음 단계만 확정한다', async () => {
@@ -466,7 +473,7 @@ describe('PassportPageTurn', () => {
       'true',
     )
 
-    await act(() => vi.advanceTimersByTimeAsync(500))
+    await act(() => vi.advanceTimersByTimeAsync(900))
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
   })
 
@@ -479,7 +486,7 @@ describe('PassportPageTurn', () => {
 
     fireEvent.click(next)
     fireEvent.click(next)
-    await act(() => vi.advanceTimersByTimeAsync(500))
+    await act(() => vi.advanceTimersByTimeAsync(900))
 
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
   })
@@ -511,80 +518,45 @@ describe('PassportPageTurn', () => {
   it.each([
     ['CSS 전역이 없을 때', undefined],
     ['CSS.supports가 없을 때', {}],
-  ])('%s fallback으로 전환한다', async (_, css) => {
+  ])('%s에도 WebGL 렌더러를 그대로 쓴다', async (_, css) => {
+    // WebGL은 CSS 기능 지원과 무관하다. 예전 CSS 3D 렌더러 시절에는 여기서
+    // fallback으로 내려갔는데, 초기값이 fallback이라 그 검사가 항상 통과했다.
+    // 렌더러가 실제로 준비되는지까지 봐야 의미가 있다.
     vi.stubGlobal('CSS', css)
     render(<TurnHarness />)
 
     await waitFor(() =>
-      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
     )
   })
 
-  it('ResizeObserver 생성 실패 시 renderer DOM을 정리하고 fallback으로 전환한다', async () => {
-    vi.stubGlobal(
-      'ResizeObserver',
-      class {
-        constructor() {
-          throw new Error('observer failed')
-        }
-      },
-    )
-    vi.spyOn(console, 'warn').mockImplementation(() => {})
-    render(<TurnHarness />)
-
-    await waitFor(() =>
-      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
-    )
-    expect(rendererControl.domElement).not.toBeInTheDocument()
-  })
-
-  it('initial render 실패 시 renderer DOM을 정리하고 fallback으로 전환한다', async () => {
-    rendererControl.failRender = true
-    vi.spyOn(console, 'warn').mockImplementation(() => {})
-    render(<TurnHarness />)
-
-    await waitFor(() =>
-      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
-    )
-    expect(rendererControl.domElement).not.toBeInTheDocument()
-  })
-
-  it('active turn 중 observer failure는 target을 제거하고 fallback navigation을 다시 연다', async () => {
-    vi.spyOn(console, 'warn').mockImplementation(() => {})
+  it('백그라운드 탭에서는 애니메이션 없이 단계를 확정한다', async () => {
+    // rAF가 멈추는 백그라운드에서 전환이 시작되면 상태가 고착될 수 있다.
+    vi.spyOn(document, 'hidden', 'get').mockReturnValue(true)
     render(<TurnHarness />)
     await waitFor(() =>
       expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
     )
 
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'settling')
 
-    rendererControl.failRender = true
-    act(() => rendererControl.resize())
-
-    await waitFor(() =>
-      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
-    )
     expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
-    expect(screen.queryByText('Step 2')).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
   })
 
-  it('unmount 시 observer, animation frame과 renderer DOM을 정리한다', async () => {
+  it('unmount 시 animation frame과 렌더러 자원을 정리한다', async () => {
     const { unmount } = render(<TurnHarness />)
     await waitFor(() =>
       expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
     )
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    const rendererDom = rendererControl.domElement
+    const canvas = rendererControl.canvas
 
     unmount()
 
-    expect(rendererControl.disconnect).toHaveBeenCalledTimes(1)
     expect(rendererControl.cancelFrame).toHaveBeenCalled()
-    expect(rendererDom).not.toBeInTheDocument()
+    expect(rendererControl.dispose).toHaveBeenCalledTimes(1)
+    expect(canvas).not.toBeInTheDocument()
   })
 
   it('상품 CTA의 pointerDown은 page turn을 시작하지 않는다', async () => {
@@ -595,5 +567,50 @@ describe('PassportPageTurn', () => {
 
     fireEvent.pointerDown(screen.getByRole('button', { name: '상품 보기' }))
     expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-turn-state', 'idle')
+  })
+
+  it('모바일 슬라이드 힌트는 처음 한 번만 보여준다', async () => {
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+
+    const hint = screen.getByText('옆으로 슬라이드 해보세요')
+    expect(hint).toBeInTheDocument()
+
+    // 손을 대는 순간 방법을 안 것이므로 힌트가 물러난다.
+    fireEvent.pointerDown(screen.getByTestId('passport-turn-surface'), {
+      pointerId: 1,
+      clientX: 200,
+      clientY: 200,
+    })
+    expect(screen.queryByText('옆으로 슬라이드 해보세요')).not.toBeInTheDocument()
+  })
+
+  it('한 번 넘겨 본 뒤에는 힌트를 다시 띄우지 않는다', async () => {
+    localStorage.setItem('mcm-passport-swipe-hint-seen', '1')
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+
+    expect(screen.queryByText('옆으로 슬라이드 해보세요')).not.toBeInTheDocument()
+  })
+
+  it('슬라이드가 아니라 화살표로 넘겨도 힌트를 거둔다', async () => {
+    // 아이패드처럼 터치와 키보드를 함께 쓰는 기기에서 실제로 일어나는 경로다.
+    rendererControl.fail = true
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+    )
+    expect(screen.getByText('옆으로 슬라이드 해보세요')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+
+    await waitFor(() =>
+      expect(screen.queryByText('옆으로 슬라이드 해보세요')).not.toBeInTheDocument(),
+    )
+    expect(localStorage.getItem('mcm-passport-swipe-hint-seen')).toBe('1')
   })
 })

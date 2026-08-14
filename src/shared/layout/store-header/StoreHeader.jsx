@@ -1,30 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 
-import brandStripDiamond from '@/assets/icons/brand-strip-diamond.svg'
-import brandStripDot from '@/assets/icons/brand-strip-dot.svg'
+import BrandStrip from '@/shared/layout/brand-strip/BrandStrip.jsx'
 import useStoreMenu from '@/shared/layout/store-menu/useStoreMenu.js'
 import { CartIcon, HeartIcon, McmLogoIcon, MenuIcon } from '@/shared/ui/icons/StoreIcons.jsx'
 
 import styles from './StoreHeader.module.scss'
-
-function BrandStrip() {
-  return (
-    <div className={styles.brandStrip} aria-hidden="true">
-      <span className={`${styles.ornament} ${styles.ornamentLeft}`}>
-        <img className={styles.ornamentDot} src={brandStripDot} alt="" />
-        <img className={styles.ornamentDot} src={brandStripDot} alt="" />
-        <img className={styles.ornamentDiamond} src={brandStripDiamond} alt="" />
-      </span>
-      <span className={styles.brandName}>MCM BOARDING PASS</span>
-      <span className={`${styles.ornament} ${styles.ornamentRight}`}>
-        <img className={styles.ornamentDiamond} src={brandStripDiamond} alt="" />
-        <img className={styles.ornamentDot} src={brandStripDot} alt="" />
-        <img className={styles.ornamentDot} src={brandStripDot} alt="" />
-      </span>
-    </div>
-  )
-}
 
 function StoreHeader({ onWishlistClick, onCartClick } = {}) {
   const { closeMenu, isOpen, toggleMenu } = useStoreMenu()
@@ -78,20 +59,26 @@ function StoreHeader({ onWishlistClick, onCartClick } = {}) {
 
           <div className={styles.sideGroup}>
             <Link
-              className={styles.iconLink}
+              className={`${styles.iconLink} ${styles.swapLink}`}
               to="/wishlist"
               aria-label="위시리스트"
               onClick={handleWishlistClick}
             >
-              <HeartIcon className={`${styles.icon} ${styles.heartIcon}`} />
+              <HeartIcon className={`${styles.icon} ${styles.heartIcon} ${styles.swapIcon}`} />
+              <span aria-hidden="true" className={styles.swapLabel}>
+                위시리스트
+              </span>
             </Link>
             <Link
-              className={styles.iconLink}
+              className={`${styles.iconLink} ${styles.swapLink}`}
               to="/cart"
               aria-label="쇼핑백"
               onClick={handleCartClick}
             >
-              <CartIcon className={styles.icon} />
+              <CartIcon className={`${styles.icon} ${styles.swapIcon}`} />
+              <span aria-hidden="true" className={styles.swapLabel}>
+                쇼핑백
+              </span>
             </Link>
           </div>
         </div>

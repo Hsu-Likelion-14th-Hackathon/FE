@@ -175,14 +175,6 @@
   flex-direction: column;
 }
 
-.quantity {
-  flex: none;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 1px;
-  white-space: nowrap;
-}
-
 .sku {
   display: flex;
   width: 100%;
@@ -195,37 +187,12 @@
   line-height: 18px;
 }
 
-.checkoutButton {
-  position: sticky;
-  z-index: 5;
-  bottom: max(20px, var(--mcm-safe-bottom));
-  display: block;
-  width: calc(100% - 40px);
-  max-width: 390px;
-  height: 50px;
-  margin: 40px auto;
-  border: 0;
-  border-radius: 8px;
-  color: var(--mcm-color-canvas);
-  background: var(--mcm-color-ink);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 18px;
-}
-
-.checkoutButton:disabled {
-  color: color-mix(in srgb, var(--mcm-color-canvas) 70%, transparent);
-  background: color-mix(in srgb, var(--mcm-color-ink) 68%, var(--mcm-color-canvas));
-  cursor: not-allowed;
-}
-
-.iconButton:focus-visible,
-.checkoutButton:focus-visible {
+.iconButton:focus-visible {
   outline: 2px solid var(--mcm-color-brand-brown);
   outline-offset: 2px;
 }
 
-@media (min-width: 768px) and (max-width: 1199px) {
+@media (min-width: 744px) and (max-width: 1199px) {
   .summary,
   .itemList {
     width: min(calc(100% - (var(--mcm-page-gutter, 32px) * 2)), var(--mcm-content-max, 720px));
@@ -233,24 +200,10 @@
     margin-right: auto;
     margin-left: auto;
   }
-
-  .checkoutButton {
-    width: min(350px, calc(100% - (var(--mcm-page-gutter, 32px) * 2)));
-    max-width: none;
-    margin-right: max(
-      var(--mcm-page-gutter, 32px),
-      calc((100% - var(--mcm-content-max, 720px)) / 2)
-    );
-    margin-left: auto;
-  }
 }
 
 @media (hover: hover) and (pointer: fine) {
   .iconButton:hover {
     background: rgb(192 115 70 / 10%);
-  }
-
-  .checkoutButton:not(:disabled):hover {
-    background: color-mix(in srgb, var(--mcm-color-ink) 86%, var(--mcm-color-brand-brown));
   }
 }

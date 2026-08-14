@@ -12,10 +12,24 @@
   isolation: isolate;
 }
 
+/* 390×844에서 헤더 97과 상태바 44를 뺀 설계 캔버스.
+   내부 좌표는 Figma 값을 그대로 두고, 화면이 짧으면 이 캔버스만 균일 축소한다.
+   배율은 useScaleToFit이 --hero-scale로 넣는다. */
+.heroStage {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 390px;
+  height: 703px;
+  transform: translateX(-50%) scale(var(--hero-scale, 1));
+  transform-origin: top center;
+}
+
 .introHero::after {
   position: absolute;
   z-index: 5;
-  top: 521px;
+  /* 설계 521/703 — 히어로 높이에 따라 함께 내려오도록 비율로 둔다. */
+  top: 74.1%;
   right: 0;
   bottom: 0;
   left: 0;
@@ -33,14 +47,38 @@
   position: absolute;
   pointer-events: none;
   user-select: none;
+  /* 회전은 내부 img가 갖고 있으므로 떠다니는 움직임은 컨테이너에 건다. */
+  animation: hero-float var(--float-duration, 6s) ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+  will-change: transform;
+}
+
+/* 주기와 시작 위상을 서로 어긋나게 둬 세 오브젝트가 함께 오르내리지 않게 한다. */
+@keyframes hero-float {
+  from,
+  to {
+    transform: translateY(calc(var(--float-lift, 6px) * -1));
+  }
+
+  50% {
+    transform: translateY(var(--float-lift, 6px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .introSuitcase,
+  .introPlane,
+  .introWatch {
+    animation: none;
+  }
 }
 
 .heroGlowTop {
   z-index: 0;
   top: -219px;
   left: 41.54%;
-  width: min(91.29vw, 356px);
-  height: min(81.37vw, 317.34px);
+  width: 356px;
+  height: 317.34px;
   border-radius: 50%;
   background: radial-gradient(ellipse, rgb(255 219 160 / 25%) 0%, transparent 70%);
   filter: blur(28px);
@@ -50,8 +88,8 @@
   z-index: 0;
   top: 148px;
   left: -140px;
-  width: min(67.4vw, 262.85px);
-  height: min(58.51vw, 228.17px);
+  width: 262.85px;
+  height: 228.17px;
   border-radius: 50%;
   background: radial-gradient(ellipse, rgb(255 247 213 / 18%) 0%, transparent 72%);
   filter: blur(24px);
@@ -61,16 +99,16 @@
   z-index: 0;
   top: -272px;
   left: -93px;
-  width: min(147.6vw, 575.65px);
-  height: min(312.25vw, 1217.78px);
+  width: 575.65px;
+  height: 1217.78px;
 }
 
 .glow {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(12.12vw, 47.26px);
-  height: min(336.29vw, 1311.55px);
+  width: 47.26px;
+  height: 1311.55px;
   transform: translate(-50%, -50%) rotate(23.95deg);
   background: linear-gradient(rgb(255 219 160 / 20%), rgb(211 134 53 / 20%));
   filter: blur(40px);
@@ -88,46 +126,60 @@
 }
 
 .introSuitcase {
+  --float-lift: 7px;
+  --float-duration: 6.4s;
+  --float-delay: -0.6s;
+
   z-index: 1;
   top: -34.53px;
   left: 36.26%;
-  width: min(57.57vw, 224.51px);
-  height: min(67.76vw, 264.25px);
+  width: 224.51px;
+  height: 264.25px;
 }
 
 .introSuitcase img {
-  width: min(33.87vw, 132.11px);
-  height: min(58.72vw, 229.01px);
+  width: 132.11px;
+  height: 229.01px;
   transform: translate(-50%, -50%) rotate(-28.14deg);
   opacity: 0.9;
 }
 
 .introPlane {
+  /* 비행기만 크게 오르내리게 두고, delay를 주기의 절반으로 줘서
+     가방·시계가 올라갈 때 반대로 내려오도록 위상을 뒤집는다. */
+  --float-lift: 16px;
+  --float-duration: 5.2s;
+  --float-delay: -2.6s;
+
   z-index: 2;
   top: 161.56px;
   left: 19.94%;
-  width: min(100.42vw, 391.66px);
-  height: min(83.54vw, 325.81px);
+  width: 391.66px;
+  height: 325.81px;
 }
 
 .introPlane img {
-  width: min(91.54vw, 357px);
-  height: min(71.79vw, 280px);
+  width: 357px;
+  height: 280px;
   transform: translate(-50%, -50%) rotate(-7.79deg);
   filter: blur(1px);
 }
 
 .introWatch {
+  --float-lift: 5px;
+  --float-duration: 5.6s;
+  --float-delay: -4.2s;
+
   z-index: 1;
   top: 492px;
   left: 5.38%;
-  width: min(46.79vw, 182.47px);
-  height: min(45.07vw, 175.79px);
+  width: 182.47px;
+  height: 175.79px;
 }
 
 .introWatch img {
-  width: min(36.31vw, 141.6px);
-  height: min(29.8vw, 116.23px);
+  width: 141.6px;
+  height: 116.23px;
   transform: translate(-50%, -50%) rotate(34.27deg);
   opacity: 0.7;
 }
@@ -151,7 +203,7 @@
   gap: 10px;
   margin: 0;
   font-family: var(--mcm-font-brand);
-  font-size: clamp(42px, 12.82vw, 50px);
+  font-size: 50px;
   font-weight: 400;
   line-height: 0.8;
   transform: translateY(12px);
@@ -275,7 +327,7 @@
   }
 }
 
-@media (min-width: 768px) and (max-width: 1199px) {
+@media (min-width: 744px) and (max-width: 1199px) {
   .introHero {
     --mcm-tablet-scene-start: calc(50% - 195px);
   }
