@@ -3,7 +3,7 @@
 .page {
   position: relative;
   display: flex;
-  min-height: var(--mcm-viewport-stable);
+  min-height: var(--mcm-viewport-dynamic); /* 안드로이드 하단 바가 접히면 갈색 화면이 따라 늘어남 */
   flex-direction: column;
   overflow: hidden;
   background: #41210b;
