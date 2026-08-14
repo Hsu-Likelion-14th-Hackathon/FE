@@ -7,7 +7,7 @@ import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import ctaPlaneIcon from '@/shared/assets/boarding-pass/landing/cta-plane.svg'
 import planeImage from '@/shared/assets/boarding-pass/landing/plane.png'
 import stageBack from '@/shared/assets/boarding-pass/landing/stage-back.svg'
-import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
+import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import { useToast } from '@/shared/ui/toastContext.js'
 
 import styles from './LandingPage.module.scss'
@@ -47,7 +47,7 @@ export function Component() {
 
   return (
     <main className="flex min-h-[var(--mcm-viewport-stable)] flex-col bg-[#fafafa]">
-      <BoardingPassChrome iconRowClassName={styles.iconRow} />
+      <StoreHeader />
       <section
         className={styles.stage}
         style={{

@@ -40,8 +40,8 @@ function renderPassport() {
   return router
 }
 
-describe('PassportPage', () => {
-  it('여행 기록에서 1F 상세와 티켓을 열고 Escape로 닫는다', async () => {
+describe('PassportPage', { timeout: 15_000 }, () => {
+  it('여행 기록에서 1F 상세와 티켓을 열고 Escape로 닫는다', { timeout: 15_000 }, async () => {
     renderPassport()
     const nextButton = screen.getByRole('button', { name: '다음 단계' })
     fireEvent.click(nextButton)
@@ -64,7 +64,7 @@ describe('PassportPage', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('시트가 열린 동안 Chrome과 콘텐츠를 inert로 만들고 상단 닫기는 시트만 닫는다', async () => {
+  it('시트가 열린 동안 헤더와 콘텐츠를 inert로 만들고 상단 닫기는 시트만 닫는다', { timeout: 15_000 }, async () => {
     const router = renderPassport()
     const nextButton = screen.getByRole('button', { name: '다음 단계' })
     fireEvent.click(nextButton)

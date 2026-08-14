@@ -7,7 +7,7 @@ import SavePassToast from '@/features/boarding-pass/save-pass-toast/SavePassToas
 import { getCurrentBoardingPass } from '@/shared/api/boardingPassApi.js'
 import stageBack from '@/shared/assets/boarding-pass/complete/stage-back.svg'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
-import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
+import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import { useToast } from '@/shared/ui/toastContext.js'
 
 import styles from './CompletePage.module.scss'
@@ -64,7 +64,7 @@ export function Component() {
       <div className={styles.fade} aria-hidden="true" />
 
       <div className={styles.content}>
-        <BoardingPassChrome />
+        <StoreHeader />
 
         <section className={styles.body}>
           <button

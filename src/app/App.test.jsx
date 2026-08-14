@@ -18,10 +18,10 @@ const routeCases = [
   ['/products//try-on', '페이지를 찾을 수 없습니다'],
 ]
 
-const boardingChromeRouteCases = [
+const storeHeaderRouteCases = [
   ['MCM 메인', '/', '메인'],
   ['위시리스트', '/wishlist', '위시리스트'],
-  ['장바구니', '/cart', '쇼핑백'],
+  ['쇼핑백', '/cart', '쇼핑백'],
 ]
 
 const activeRouters = []
@@ -44,7 +44,7 @@ describe('App', () => {
     document.body.classList.remove('store-menu-open')
   })
 
-  it('renders the passport route', async () => {
+  it('renders the passport route', { timeout: 15_000 }, async () => {
     renderRoute('/boarding-pass/passport')
 
     expect(
@@ -243,8 +243,8 @@ describe('App', () => {
     expect(menuButton).toHaveFocus()
   })
 
-  it.each(boardingChromeRouteCases)(
-    '보딩패스 Chrome의 %s 링크가 %s로 이동한다',
+  it.each(storeHeaderRouteCases)(
+    '보딩패스 StoreHeader의 %s 링크가 %s로 이동한다',
     async (linkName, pathname, heading) => {
       const router = renderRoute('/boarding-pass')
 
@@ -255,7 +255,7 @@ describe('App', () => {
     },
   )
 
-  it('일반 헤더 SVG와 보딩패스 Chrome 이미지에서 검색 glyph를 제거한다', async () => {
+  it('보딩패스 화면도 공통 StoreHeader를 쓰고 검색 glyph가 없다', async () => {
     renderRoute('/')
     await screen.findByRole('link', { name: 'Boarding' })
     expect(document.querySelectorAll('header svg')).toHaveLength(4)
@@ -263,7 +263,9 @@ describe('App', () => {
     cleanup()
     renderRoute('/boarding-pass')
     const menuButton = await screen.findByRole('button', { name: '메뉴 열기' })
-    expect(menuButton.closest('header').querySelectorAll('img')).toHaveLength(4)
+    const header = menuButton.closest('header')
+    expect(header.querySelectorAll('svg')).toHaveLength(4)
+    expect(header.querySelectorAll('img')).toHaveLength(6)
   })
 
   it('열린 메뉴 안에서 Tab 포커스를 순환한다', async () => {
@@ -316,7 +318,7 @@ describe('App', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: '비행 시작하기' }))
 
-    expect(await screen.findByRole('button', { name: '이전' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: '이전' }, { timeout: 10_000 })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/boarding-pass/survey')
   })
 

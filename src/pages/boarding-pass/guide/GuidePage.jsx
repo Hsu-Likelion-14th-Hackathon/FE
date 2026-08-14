@@ -11,7 +11,7 @@ import navNextImg from '@/shared/assets/boarding-pass/guide/nav-next.svg'
 import navPrevImg from '@/shared/assets/boarding-pass/guide/nav-prev.svg'
 import overviewFigureImg from '@/shared/assets/boarding-pass/guide/overview-figure.png'
 import overviewMainImg from '@/shared/assets/boarding-pass/guide/overview-main.png'
-import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
+import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import BoardingPassStageBackdrop from '@/shared/layout/BoardingPassStageBackdrop.jsx'
 import BoardingPassStageHeader from '@/shared/layout/BoardingPassStageHeader.jsx'
 
@@ -54,7 +54,7 @@ export function Component() {
 
   return (
     <div className={styles.page}>
-      <BoardingPassChrome />
+      <StoreHeader />
 
       <div className={styles.stage}>
         <BoardingPassStageBackdrop />
@@ -66,7 +66,7 @@ export function Component() {
           onClose={() => navigate('/boarding-pass/flight')}
         />
 
-        <div className={styles.scroll} data-overflow={floor === 'overview' ? 'visible' : 'auto'}>
+        <div key={floor} className={styles.scroll}>
           {floor === 'overview' ? (
             <OverviewView onSelectFloor={selectFloor} />
           ) : (

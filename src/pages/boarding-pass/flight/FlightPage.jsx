@@ -16,7 +16,7 @@ import navPrevImg from '@/shared/assets/boarding-pass/flight/nav-prev.svg'
 import planeMarkerImg from '@/shared/assets/boarding-pass/flight/plane-marker.svg'
 import routePathImg from '@/shared/assets/boarding-pass/flight/route-path.svg'
 import tabletLogoImg from '@/shared/assets/boarding-pass/flight/tablet-logo.png'
-import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
+import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import BoardingPassStageBackdrop from '@/shared/layout/BoardingPassStageBackdrop.jsx'
 import BoardingPassStageHeader from '@/shared/layout/BoardingPassStageHeader.jsx'
 
@@ -99,7 +99,7 @@ export function Component() {
 
   return (
     <div className={styles.page}>
-      <BoardingPassChrome />
+      <StoreHeader />
 
       <div className={styles.stage}>
         <BoardingPassStageBackdrop />

@@ -6,7 +6,7 @@ import IssueLoadingOverlay from '@/features/boarding-pass/issue-loading/IssueLoa
 import { getSurveyQuestions, issueBoardingPass } from '@/shared/api/boardingPassApi.js'
 import backArrow from '@/shared/assets/boarding-pass/icons/back-arrow.svg'
 import qPlane from '@/shared/assets/boarding-pass/survey/q-plane.svg'
-import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
+import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './SurveyPage.module.scss'
 
@@ -80,8 +80,8 @@ export function Component() {
   }
 
   return (
-    <main className={styles.page}>
-      <BoardingPassChrome />
+    <main className={`${styles.page}${loading ? ` ${styles.pageLoading}` : ''}`}>
+      <StoreHeader />
       <hr className={styles.divider} />
 
       <div className={styles.progressRow}>

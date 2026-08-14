@@ -11,7 +11,7 @@ import checkCircleIcon from '@/shared/assets/boarding-pass/scan/check-circle.svg
 import pointScanIcon from '@/shared/assets/boarding-pass/scan/point-scan.svg'
 import scanButtonIcon from '@/shared/assets/boarding-pass/scan/scan-button-icon.svg'
 import scanFrameIcon from '@/shared/assets/boarding-pass/scan/scan-frame.svg'
-import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
+import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './ScanPage.module.scss'
 
@@ -113,8 +113,8 @@ export function Component() {
   const showCreditToast = toastOpen && credit
 
   return (
-    <div className={styles.page}>
-      <BoardingPassChrome />
+    <div className={`${styles.page}${isDeparting ? ` ${styles.pageLoading}` : ''}`}>
+      <StoreHeader />
 
       <main className={styles.main}>
         <button

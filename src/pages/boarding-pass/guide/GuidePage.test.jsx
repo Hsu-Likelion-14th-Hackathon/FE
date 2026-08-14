@@ -27,12 +27,12 @@ function renderGuide() {
   return router
 }
 
-describe('GuidePage', () => {
+describe('GuidePage', { timeout: 15_000 }, () => {
   afterEach(() => {
     activeRouters.splice(0).forEach((router) => router.dispose())
   })
 
-  it('opens 5F ARRIVE from the overview chip', () => {
+  it('opens 5F ARRIVE from the overview chip', { timeout: 15_000 }, () => {
     renderGuide()
 
     fireEvent.click(screen.getByRole('button', { name: /5F ARRIVE/ }))

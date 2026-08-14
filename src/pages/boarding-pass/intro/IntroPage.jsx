@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import passCard from '@/shared/assets/boarding-pass/intro/pass-card.png'
 import nextArrow from '@/shared/assets/boarding-pass/intro/next-arrow.svg'
-import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
+import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './IntroPage.module.scss'
 
@@ -23,7 +23,7 @@ export function Component() {
 
   return (
     <main className={styles.page}>
-      <BoardingPassChrome />
+      <StoreHeader />
       <section className={styles.stage}>
         <button type="button" className={styles.close} aria-label="닫기" onClick={handleClose}>
           <img src={closeIcon} alt="" className={styles.closeImg} />
