@@ -1,8 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
+import EmptyBagToast from '@/features/boarding-pass/empty-bag-toast/EmptyBagToast.jsx'
 import NoPassToast from '@/features/boarding-pass/no-pass-toast/NoPassToast.jsx'
+import noticeStyles from '@/features/boarding-pass/notice-toast/PassNoticeToast.module.scss'
 import { getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
+import { getCart } from '@/shared/api/cartApi.js'
+import { getWishlist } from '@/shared/api/wishlistApi.js'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import ctaPlaneIcon from '@/shared/assets/boarding-pass/landing/cta-plane.svg'
 import planeImage from '@/shared/assets/boarding-pass/landing/plane.png'
@@ -16,6 +20,7 @@ import styles from './LandingPage.module.scss'
  * (23) 보딩패스 랜딩 — Figma 492:4896.
  * - 비행 시작하기: /boarding-pass/survey
  * - 기존 BP 스캔: latest 200 → /boarding-pass/scan, 404 → T-01
+ * - 헤더 위시/쇼핑백이 비면 (23-1) 토스트
  * - 상태바·홈 인디케이터는 DOM 미구현
  */
 export function Component() {
@@ -25,6 +30,26 @@ export function Component() {
 
   function handleStartFlight() {
     navigate('/boarding-pass/survey')
+  }
+
+  async function openBag(bag) {
+    const fetchItems = bag === 'cart' ? getCart : getWishlist
+    const path = bag === 'cart' ? '/cart' : '/wishlist'
+    try {
+      const items = await fetchItems()
+      if (!items?.length) {
+        showToast(<EmptyBagToast bag={bag} />, {
+          position: 'bottom',
+          duration: 3000,
+          closeOnOutsideClick: false,
+          className: noticeStyles.shell,
+        })
+        return
+      }
+    } catch {
+      // 조회 실패 시에는 목적 페이지에서 상태를 보여 준다
+    }
+    navigate(path)
   }
 
   async function handleScanExisting() {
@@ -47,7 +72,10 @@ export function Component() {
 
   return (
     <main className="flex min-h-[var(--mcm-viewport-stable)] flex-col bg-[#fafafa]">
-      <StoreHeader />
+      <StoreHeader
+        onWishlistClick={() => openBag('wishlist')}
+        onCartClick={() => openBag('cart')}
+      />
       <section
         className={styles.stage}
         style={{

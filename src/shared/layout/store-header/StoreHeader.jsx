@@ -3,8 +3,8 @@ import { Link } from 'react-router'
 
 import brandStripDiamond from '@/assets/icons/brand-strip-diamond.svg'
 import brandStripDot from '@/assets/icons/brand-strip-dot.svg'
-import { CartIcon, HeartIcon, McmLogoIcon, MenuIcon } from '@/shared/ui/icons/StoreIcons.jsx'
 import useStoreMenu from '@/shared/layout/store-menu/useStoreMenu.js'
+import { CartIcon, HeartIcon, McmLogoIcon, MenuIcon } from '@/shared/ui/icons/StoreIcons.jsx'
 
 import styles from './StoreHeader.module.scss'
 
@@ -26,10 +26,24 @@ function BrandStrip() {
   )
 }
 
-function StoreHeader() {
+function StoreHeader({ onWishlistClick, onCartClick } = {}) {
   const { closeMenu, isOpen, toggleMenu } = useStoreMenu()
   const menuButtonRef = useRef(null)
   const wasMenuOpenRef = useRef(isOpen)
+
+  function handleWishlistClick(event) {
+    closeMenu()
+    if (!onWishlistClick) return
+    event.preventDefault()
+    onWishlistClick()
+  }
+
+  function handleCartClick(event) {
+    closeMenu()
+    if (!onCartClick) return
+    event.preventDefault()
+    onCartClick()
+  }
 
   useEffect(() => {
     if (wasMenuOpenRef.current && !isOpen) {
@@ -67,11 +81,16 @@ function StoreHeader() {
               className={styles.iconLink}
               to="/wishlist"
               aria-label="위시리스트"
-              onClick={closeMenu}
+              onClick={handleWishlistClick}
             >
               <HeartIcon className={`${styles.icon} ${styles.heartIcon}`} />
             </Link>
-            <Link className={styles.iconLink} to="/cart" aria-label="쇼핑백" onClick={closeMenu}>
+            <Link
+              className={styles.iconLink}
+              to="/cart"
+              aria-label="쇼핑백"
+              onClick={handleCartClick}
+            >
               <CartIcon className={styles.icon} />
             </Link>
           </div>

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import { PASS_STORAGE_KEY } from '@/features/boarding-pass/boarding-ticket/passStorage.js'
+import noticeStyles from '@/features/boarding-pass/notice-toast/PassNoticeToast.module.scss'
 import SavePassToast from '@/features/boarding-pass/save-pass-toast/SavePassToast.jsx'
 import { getCurrentBoardingPass } from '@/shared/api/boardingPassApi.js'
 import stageBack from '@/shared/assets/boarding-pass/complete/stage-back.svg'
@@ -54,7 +55,7 @@ export function Component() {
       position: 'bottom',
       duration: 3000,
       closeOnOutsideClick: false,
-      className: styles.saveToastShell,
+      className: noticeStyles.shell,
     })
   }
 

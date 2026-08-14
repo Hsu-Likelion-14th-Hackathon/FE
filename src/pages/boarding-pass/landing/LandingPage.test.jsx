@@ -5,10 +5,20 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import AppProviders from '@/app/providers.jsx'
 
 const mockGetLatestBoardingPass = vi.hoisted(() => vi.fn())
+const mockGetWishlist = vi.hoisted(() => vi.fn())
+const mockGetCart = vi.hoisted(() => vi.fn())
 const activeRouters = []
 
 vi.mock('@/shared/api/boardingPassApi.js', () => ({
   getLatestBoardingPass: mockGetLatestBoardingPass,
+}))
+
+vi.mock('@/shared/api/wishlistApi.js', () => ({
+  getWishlist: mockGetWishlist,
+}))
+
+vi.mock('@/shared/api/cartApi.js', () => ({
+  getCart: mockGetCart,
 }))
 
 import { Component as LandingPage } from './LandingPage.jsx'
@@ -20,6 +30,8 @@ function renderLanding() {
       { path: '/boarding-pass/survey', element: <p>Survey</p> },
       { path: '/boarding-pass/scan', element: <p>Scan</p> },
       { path: '/boarding-pass/passport', element: <p>Passport</p> },
+      { path: '/wishlist', element: <h1>위시리스트</h1> },
+      { path: '/cart', element: <h1>쇼핑백</h1> },
     ],
     { initialEntries: ['/boarding-pass'] },
   )
@@ -38,6 +50,8 @@ describe('LandingPage', () => {
   afterEach(() => {
     activeRouters.splice(0).forEach((router) => router.dispose())
     mockGetLatestBoardingPass.mockReset()
+    mockGetWishlist.mockReset()
+    mockGetCart.mockReset()
   })
 
   it('routes guests to survey from the start flight button', async () => {
@@ -103,5 +117,35 @@ describe('LandingPage', () => {
     expect(stage.style.minHeight).toBe(
       'calc(var(--mcm-viewport-stable) - var(--mcm-header-height) - var(--mcm-safe-top))',
     )
+  })
+
+  it('위시리스트가 비면 랜딩에 머무르고 빈 가방 토스트를 보여 준다', async () => {
+    mockGetWishlist.mockResolvedValue([])
+    const router = renderLanding()
+
+    fireEvent.click(await screen.findByRole('link', { name: '위시리스트' }))
+
+    expect(await screen.findByText('위시리스트에 담긴 상품이 없습니다')).toBeInTheDocument()
+    expect(screen.getByText('상품을 담은 뒤 다시 이용해 주세요')).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/boarding-pass')
+  })
+
+  it('쇼핑백이 비면 랜딩에 머무르고 빈 가방 토스트를 보여 준다', async () => {
+    mockGetCart.mockResolvedValue([])
+    const router = renderLanding()
+
+    fireEvent.click(await screen.findByRole('link', { name: '쇼핑백' }))
+
+    expect(await screen.findByText('쇼핑백에 담긴 상품이 없습니다')).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/boarding-pass')
+  })
+
+  it('위시리스트에 상품이 있으면 위시리스트 페이지로 이동한다', async () => {
+    mockGetWishlist.mockResolvedValue([{ id: 'item-1' }])
+    const router = renderLanding()
+
+    fireEvent.click(await screen.findByRole('link', { name: '위시리스트' }))
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/wishlist'))
   })
 })

@@ -31,14 +31,6 @@ vi.mock('@/shared/api/boardingPassApi.js', () => ({
   simulateScan: (...args) => simulateScan(...args),
 }))
 
-vi.mock('@/shared/api/wishlistApi.js', () => ({
-  getWishlist: vi.fn(async () => []),
-}))
-
-vi.mock('@/shared/api/cartApi.js', () => ({
-  getCart: vi.fn(async () => []),
-}))
-
 import { Component as ScanPage } from './ScanPage.jsx'
 
 describe('ScanPage', () => {

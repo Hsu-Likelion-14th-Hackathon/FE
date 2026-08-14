@@ -17,6 +17,7 @@
 | icon-header-diamond | src/shared/assets/boarding-pass/icons/header-diamond.svg | 472:4782    | svg  | 타이틀 밴드 좌우 마름모 (#E2C5B0 @40%)                       |
 | icon-header-dot     | src/shared/assets/boarding-pass/icons/header-dot.svg     | 472:4788    | svg  | 타이틀 밴드 좌우 장식 점 (#E2C5B0 @40%)                      |
 | icon-back-arrow     | src/shared/assets/boarding-pass/icons/back-arrow.svg     | 508:5357    | svg  | (24)~(29) 설문 진행 바 좌측 뒤로가기 화살표 ((24) 기준 노드) |
+| icon-notice-error   | src/shared/assets/boarding-pass/icons/notice-error.svg   | 1155:302    | svg  | (23-1) 빈 위시리스트·쇼핑백 토스트 좌측 엑스 아이콘          |
 
 ## intro/
 
