@@ -212,7 +212,10 @@ function drawStamps(ctx, w, h, { profile, stamps, assets, side }) {
   ctx.textAlign = 'left'
 
   if (assets.stampBow) {
-    ctx.drawImage(assets.stampBow, x + 63 * sx, 116 * sy, 72 * sx, 61 * sy)
+    // Figma 71:6142 — 리본이 놓인 칸은 72x61이지만 그중 그림이 차지하는 창은
+    // 안쪽 44x33이고, 나머지는 드롭섀도 여백이다. 예전에는 72x61에 통째로
+    // 늘려 넣어 세로로 1.56배 찌그러져 있었다.
+    ctx.drawImage(assets.stampBow, x + 75 * sx, 128 * sy, 44 * sx, 33 * sy)
   }
 
   // 3열 2행, 스탬프 54px · 가로 간격 72 · 세로 간격 94
