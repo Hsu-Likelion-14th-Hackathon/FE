@@ -328,42 +328,6 @@
   }
 }
 
-@media (min-width: 744px) and (max-width: 1199px) {
-  /* 스테이지가 길어지면 top 고정값 탓에 버튼 아래가 크게 비어 결과와 CTA가
-     떨어진다. 바닥 기준으로 붙인다. */
-  .saveButton {
-    top: auto;
-    bottom: 74px;
-  }
-
-  .productCard {
-    top: auto;
-    bottom: 148px;
-  }
-
-  .credit,
-  .loadingLabel {
-    top: calc(50% - 257.5px);
-  }
-
-  .uploadContent {
-    top: calc(50% - 221.5px);
-  }
-
-  .spinner {
-    top: calc(50% - 139.5px);
-  }
-
-  .loadingMessage {
-    top: calc(50% + 37.5px);
-  }
-
-  .fittingButton,
-  .progressGroup {
-    bottom: calc(50% - 277.5px);
-  }
-}
-
 @media (hover: hover) and (pointer: fine) {
   .closeButton:hover,
   .uploadButton:hover {
@@ -598,4 +562,43 @@
   height: 100%;
   transform: translate(-50%, -50%);
   content: '';
+}
+
+/* 태블릿 보정은 파일 맨 끝에 둔다. 특이도가 같아 순서로만 이기는데, 결과 화면
+   스타일(.productCard, .saveButton)이 이 아래 선언돼 있으면 top: auto가 도로
+   덮인다. 새 규칙을 추가할 때 이 블록 뒤로 가지 않게 주의한다. */
+@media (min-width: 744px) and (max-width: 1199px) {
+  /* 스테이지가 길어지면 top 고정값 탓에 버튼 아래가 크게 비어 결과와 CTA가
+     떨어진다. 바닥 기준으로 붙인다. */
+  .saveButton {
+    top: auto;
+    bottom: 74px;
+  }
+
+  .productCard {
+    top: auto;
+    bottom: 148px;
+  }
+
+  .credit,
+  .loadingLabel {
+    top: calc(50% - 257.5px);
+  }
+
+  .uploadContent {
+    top: calc(50% - 221.5px);
+  }
+
+  .spinner {
+    top: calc(50% - 139.5px);
+  }
+
+  .loadingMessage {
+    top: calc(50% + 37.5px);
+  }
+
+  .fittingButton,
+  .progressGroup {
+    bottom: calc(50% - 277.5px);
+  }
 }
