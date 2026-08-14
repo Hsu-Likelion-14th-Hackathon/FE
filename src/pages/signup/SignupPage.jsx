@@ -7,15 +7,9 @@ import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import BirthDateField from './components/BirthDateField.jsx'
 import NationalitySelect from './components/NationalitySelect.jsx'
-import styles from './SignupPage.module.scss'
+import { PASSPORT_NAME_MAX_LENGTH, toPassportName } from '@/shared/lib/passportName.js'
 
-/**
- * 여권 표기와 맞추기 위해 영문 대문자만 남긴다.
- * 한글은 조합 중에 잠시 입력창에 보였다가 조합이 확정되는 시점에 제거된다.
- */
-function toPassportName(value) {
-  return value.replace(/[^A-Za-z\s'-]/g, '').toUpperCase()
-}
+import styles from './SignupPage.module.scss'
 
 export function Component() {
   const [openPicker, setOpenPicker] = useState(null)
@@ -94,6 +88,8 @@ export function Component() {
                   type="text"
                   autoComplete="name"
                   autoCapitalize="characters"
+                  // 여권 표기 한도. 없으면 넘긴 글자가 말없이 잘려 나간다.
+                  maxLength={PASSPORT_NAME_MAX_LENGTH}
                   lang="en"
                   placeholder="영문 이름을 입력해 주세요"
                   aria-describedby="signup-name-hint"

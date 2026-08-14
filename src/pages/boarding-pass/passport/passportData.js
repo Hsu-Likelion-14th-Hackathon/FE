@@ -3,6 +3,7 @@ export const passportProfile = {
   surname: 'LIM',
   givenName: 'YEONJU',
   nationality: 'REPUBLIC OF KOREA',
+  birthDate: '2000 01 01',
   issueDate: '2026 08 25',
   credit: 100,
   visits: 6,

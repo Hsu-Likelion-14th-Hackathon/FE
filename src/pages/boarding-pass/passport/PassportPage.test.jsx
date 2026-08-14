@@ -1,8 +1,9 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import AppProviders from '@/app/providers.jsx'
+import { triggerResize } from '@/test/setup.js'
 import { Component as PassportPage } from './PassportPage.jsx'
 import { passportTicket } from './passportData.js'
 
@@ -263,7 +264,8 @@ describe('PassportPage', () => {
     expect(openImageStyle.height).toBe('122.36%')
     expect(openImageStyle.left).toBe('-10.21%')
     expect(openImageStyle.top).toBe('-11.8%')
-    expect(window.getComputedStyle(profile).gap).toBe('1rem')
+    // 캔버스가 28px 간격으로 그린다(줄 높이 16 + 사이 12). 어긋나면 클릭 영역이 밀린다.
+    expect(window.getComputedStyle(profile).gap).toBe('0.75rem')
   })
 
   it('프로필 제품 CTA와 현재 여권 단계 정보를 제공한다', async () => {
@@ -301,5 +303,221 @@ describe('PassportPage', () => {
     for (const card of artwork.children) {
       expect(window.getComputedStyle(card).backgroundColor).toBe('rgb(29, 12, 0)')
     }
+  })
+
+  it('이름 수정 시트는 입력칸부터 잡고 조합 중인 한글은 저장하지 않는다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+
+    fireEvent.click(screen.getByRole('button', { name: /이름 .* 수정/ }))
+    const input = screen.getByLabelText('여권에 표기할 영문 이름')
+    expect(input).toHaveFocus()
+
+    // 조합이 끝나기 전에 제출해도 허용되지 않는 글자는 걸러진다.
+    fireEvent.change(input, { target: { value: '홍길동' } })
+    fireEvent.submit(input.closest('form'))
+    expect(screen.getByRole('dialog', { name: '여권 이름 수정' })).toBeInTheDocument()
+
+    fireEvent.change(input, { target: { value: "o'brien kim" } })
+    fireEvent.submit(input.closest('form'))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent("O'BRIEN KIM")
+  })
+
+  it('조합이 끝나기 전에 제출하면 저장하지 않고 시트를 열어 둔다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    fireEvent.click(screen.getByRole('button', { name: /이름 .* 수정/ }))
+    const input = screen.getByLabelText('여권에 표기할 영문 이름')
+
+    // 영문을 친 뒤 한글 조합을 시작한 상태. 여기서 제출하면 영문만 남기고
+    // 닫혀 버려, 지운 적 없는 글자가 사라진 것처럼 보인다.
+    fireEvent.change(input, { target: { value: 'GIL' } })
+    fireEvent.compositionStart(input, { data: 'ㅎ' })
+    fireEvent.change(input, { target: { value: 'GIL홍' } })
+    fireEvent.submit(input.closest('form'))
+
+    expect(screen.getByRole('dialog', { name: '여권 이름 수정' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '여권 프로필', hidden: true })).not.toHaveTextContent(
+      'GIL',
+    )
+
+    // 조합이 끝나면 평소대로 저장된다.
+    fireEvent.compositionEnd(input, { target: { value: 'GIL홍' } })
+    fireEvent.submit(input.closest('form'))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent('GIL')
+  })
+
+  it('이름을 여권 표기 한도로 자르고 넘치면 말줄임으로 가린다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    fireEvent.click(screen.getByRole('button', { name: /이름 .* 수정/ }))
+    const input = screen.getByLabelText('여권에 표기할 영문 이름')
+
+    // ICAO 9303 MRZ 이름 칸이 39자다. 길이를 열어 두면 지면 밖으로 넘친다.
+    expect(input).toHaveAttribute('maxLength', '39')
+    fireEvent.change(input, { target: { value: 'A'.repeat(60) } })
+    expect(input).toHaveValue('A'.repeat(39))
+
+    fireEvent.submit(input.closest('form'))
+    const value = screen.getByRole('region', { name: '여권 프로필' }).querySelector('button strong')
+    expect(value).toHaveTextContent('A'.repeat(39))
+    // 39자도 197px 행보다 길다. 잘라서 보여 줘야 라벨을 덮지 않는다.
+    const style = window.getComputedStyle(value)
+    expect(style.textOverflow).toBe('ellipsis')
+    expect(style.whiteSpace).toBe('nowrap')
+    expect(style.minWidth).toBe('0px')
+    // 열이 내용 크기면 글자가 제 폭을 그대로 차지해 말줄임이 걸리지 않는다.
+    expect(window.getComputedStyle(value.closest('button')).gridTemplateColumns).toBe(
+      'minmax(0, 1fr)',
+    )
+  })
+
+  it('짧은 이름도 캔버스처럼 행 오른쪽 끝에 붙인다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const value = screen.getByRole('button', { name: /이름 .* 수정/ }).querySelector('strong')
+
+    // 캔버스는 값을 행 오른쪽 끝에 그린다. 이름이 짧으면 버튼이 44px까지
+    // 넓어지는데, 글자가 왼쪽에 붙으면 그림과 37px 어긋난다.
+    const style = window.getComputedStyle(value)
+    expect(style.justifySelf).toBe('end')
+    // end는 글자를 내용 크기로 잡는다. 열에 묶어 둬야 긴 이름 말줄임이 남는다.
+    expect(style.maxWidth).toBe('100%')
+  })
+
+  it('이름 버튼의 44px 클릭 영역을 행이 잘라내지 않는다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+
+    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+    // 행 높이는 16px인데 버튼은 44px이다. 행에 overflow: hidden이 걸리면
+    // 위아래로 튀어나온 클릭 영역이 통째로 잘려 16px만 남는다.
+    // jsdom은 실제 hit-test를 하지 않아 잘림 여부는 스타일로만 확인한다.
+    // jsdom은 선언하지 않은 속성을 ''로 준다. 값이 hidden이 아니어야 한다는 게 요점이다.
+    expect(window.getComputedStyle(button.closest('p')).overflow).not.toBe('hidden')
+    expect(window.getComputedStyle(button).minHeight).toBe(
+      'calc(2.75rem / var(--passport-scale, 1))',
+    )
+  })
+
+  it('신분면 행 글꼴을 캔버스와 같게 둔다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const row = screen.getByRole('button', { name: /이름 .* 수정/ }).closest('p')
+
+    // 캔버스 drawRow가 600 10px으로 그린다. DOM이 더 크면 글자 상자가 그림보다
+    // 넓어져, 클릭 영역과 호버 밑줄이 실제 글자 밖까지 뻗는다.
+    expect(window.getComputedStyle(row).fontSize).toBe('0.625rem')
+    expect(window.getComputedStyle(row).fontWeight).toBe('600')
+    // strong의 기본값 bolder는 부모 600을 900으로 올린다.
+    expect(window.getComputedStyle(row.querySelector('strong')).fontWeight).toBe('600')
+  })
+
+  it('이름에 호버하면 캔버스 위에 수정 가능 표시를 얹는다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+
+    // 내용 DOM은 캔버스와 겹치지 않게 opacity 0이라, 버튼 안에 그리면 보이지
+    // 않는다. 표시는 투명 레이어 밖에 있어야 한다.
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+
+    fireEvent.pointerEnter(button)
+    const cue = screen.getByTestId('passport-name-cue')
+    expect(cue.closest('[class*=contentLayer]')).toBeNull()
+    // 무엇을 하는 버튼인지도 알려야 밑줄만 보고 헤매지 않는다.
+    expect(cue).toHaveTextContent('이름 수정')
+
+    fireEvent.pointerLeave(button)
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+
+    // 키보드 사용자도 같은 표시를 받아야 한다.
+    act(() => button.focus())
+    expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
+    act(() => button.blur())
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+  })
+
+  it('호버와 포커스를 따로 세어 둘 다 풀렸을 때만 표시를 지운다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+
+    // 키보드로 이름에 머문 채 마우스가 스쳐 지나간 상황.
+    act(() => button.focus())
+    fireEvent.pointerEnter(button)
+    fireEvent.pointerLeave(button)
+    expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
+
+    // 반대로 마우스를 올려 둔 채 포커스만 다른 곳으로 간 상황.
+    fireEvent.pointerEnter(button)
+    act(() => button.blur())
+    expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
+
+    fireEvent.pointerLeave(button)
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+  })
+
+  it('지면을 넘겼다 돌아오면 남은 호버 상태를 들고 있지 않는다', () => {
+    renderPassport()
+    const next = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(next)
+
+    fireEvent.pointerEnter(screen.getByRole('button', { name: /이름 .* 수정/ }))
+    expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
+
+    // 손을 올린 채 키보드로 넘기면 버튼이 사라져 pointerleave가 오지 않는다.
+    fireEvent.click(next)
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '이전 단계' }))
+
+    // 돌아온 뒤 포커스만 스쳤을 뿐인데 지난 호버가 남아 표시가 붙어 있었다.
+    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+    act(() => button.focus())
+    act(() => button.blur())
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+  })
+
+  it('이름 수정 시트를 닫으면 남은 호버 표시를 거둔다', async () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+
+    // 손을 올린 채로 누르면 시트가 열리고 지면은 inert가 된다. 포인터
+    // 이벤트가 끊겨 pointerleave가 오지 않는다.
+    fireEvent.pointerEnter(button)
+    fireEvent.click(button)
+    expect(screen.getByRole('dialog', { name: '여권 이름 수정' })).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    // 닫히면 초점이 이름 버튼으로 돌아온다. 그래도 손이 없으면 표시는 없다.
+    await waitFor(() => expect(button).toHaveFocus())
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+  })
+
+  it('창 크기가 바뀌면 밑줄 좌표를 다시 잰다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+    const strong = button.querySelector('strong')
+
+    act(() => button.focus())
+    expect(screen.getByTestId('passport-name-cue')).toHaveStyle({ left: '0px' })
+
+    // 지면이 줄면 이름도 움직인다. 좌표를 그대로 두면 밑줄만 남는다.
+    vi.spyOn(strong, 'getBoundingClientRect').mockReturnValue({
+      left: 40,
+      top: 12,
+      right: 96,
+      bottom: 28,
+      width: 56,
+      height: 16,
+    })
+    act(() => triggerResize())
+
+    expect(screen.getByTestId('passport-name-cue')).toHaveStyle({ left: '40px', width: '56px' })
   })
 })

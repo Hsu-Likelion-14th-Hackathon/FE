@@ -82,6 +82,56 @@
 
 /* 모바일에는 넘김 화살표가 없어 슬라이드가 유일한 방법이다. 처음 온 사람에게만
    한 번 알린다. 마우스가 있는 환경에는 화살표가 보이므로 띄우지 않는다. */
+/* 이름을 눌러 고칠 수 있다는 표시.
+   내용 DOM은 캔버스와 겹치지 않게 opacity 0이라 버튼 안에는 아무것도 그릴 수
+   없다. 그래서 버튼 위치를 재서 캔버스 위 별도 층에 얹는다. 좌표는 이미 화면
+   픽셀이라 --passport-scale을 다시 곱하지 않는다. */
+.nameCue {
+  position: absolute;
+  z-index: 3;
+  /* 좌표는 글자 폭에 맞춰 재 온 값이라 좌우로 늘리지 않는다. 밑줄이 글자에
+     붙지 않게 아래만 띄운다. 채운 판을 쓰면 회색 하이라이트처럼 보여 여권
+     톤에서 겉돈다. */
+  box-sizing: content-box;
+  padding-bottom: 0.1875rem;
+  border-bottom: 1px solid rgb(255 247 213 / 70%);
+  pointer-events: none;
+}
+
+/* 이름 바로 위에 뜨는 작은 안내. 행 간격이 12px뿐이라 더 띄우면 윗줄
+   (NATIONALITY)에 붙는다. 글자에 닿지 않을 만큼만 올리고 중앙을 맞춘다. */
+.nameCueLabel {
+  position: absolute;
+  bottom: calc(100% - 0.0625rem);
+  left: 50%;
+  padding: 0.1875rem 0.375rem;
+  border-radius: 0.25rem;
+  background: rgb(26 12 4 / 92%);
+  color: #ffdba0;
+  font-size: 0.5rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nameCue {
+    animation: nameCueIn 120ms ease-out;
+  }
+}
+
+@keyframes nameCueIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .swipeHint {
   display: none;
 }

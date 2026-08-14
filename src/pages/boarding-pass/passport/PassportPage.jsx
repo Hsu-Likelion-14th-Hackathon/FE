@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
+import { PASSPORT_NAME_MAX_LENGTH, toPassportName } from '@/shared/lib/passportName.js'
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import stageBack from '@/shared/assets/boarding-pass/landing/stage-back.svg'
@@ -20,22 +21,70 @@ import passportStamp from '@/shared/assets/boarding-pass/passport/passport-stamp
 import passportStampBow from '@/shared/assets/boarding-pass/passport/passport-stamp-bow.png'
 import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
 
-import { journeyRecords, passportProfile, passportStamps, passportTicket } from './passportData.js'
+import { journeyRecords, passportTicket } from './passportData.js'
 import styles from './PassportPage.module.scss'
 import PassportPageTurn from './PassportPageTurn.jsx'
 
 const sheetLabels = {
+  name: '여권 이름 수정',
   history: '여행 기록',
   'history-detail': '1F JOURNEY 상세',
   ticket: '탑승권',
+}
+
+/**
+ * 표기명 한 줄.
+ *
+ * 백엔드는 name 한 필드로 주고, 연동 전 고정 데이터는 givenName/surname으로
+ * 나뉘어 있다. 캔버스(drawProfile)와 같은 규칙을 써야 두 화면이 안 어긋난다.
+ */
+function toDisplayName(profile) {
+  return profile?.name ?? `${profile?.givenName ?? ''} ${profile?.surname ?? ''}`.trim()
 }
 
 export function Component() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [sheet, setSheet] = useState(null)
+  // 여권 이름은 사용자가 직접 고칠 수 있다. 캔버스도 이 값으로 다시 굽는다.
+  const [nameOverride, setNameOverride] = useState(null)
+  const [nameDraft, setNameDraft] = useState('')
+  // 매 렌더 새 객체를 넘기면 텍스처를 통째로 다시 굽는다. 이름이 바뀔 때만 바꾼다.
+  const profileOverride = useMemo(
+    () => (nameOverride ? { name: nameOverride } : null),
+    [nameOverride],
+  )
+  // 한글은 ㅇ→아→안 처럼 조합을 거친다. 조합 중에 값을 바꾸면 IME가 되돌리므로
+  // (모바일 키보드에서 특히) 조합이 끝난 뒤에 걸러낸다.
+  const composingName = useRef(false)
+  // 걸러낸 글자가 있을 때만 안내를 띄운다. 처음부터 보여주면 잔소리가 된다.
+  const [nameRejected, setNameRejected] = useState(false)
+  // 조합 중인 글자가 받을 수 없는 문자면 흐리게 보여 유효하지 않음을 드러낸다.
+  const [nameBlocked, setNameBlocked] = useState(false)
+
+  // 입력 경로가 onChange와 onCompositionEnd 둘이라 필터는 여기 하나로 모은다.
+  const handleNameInput = (raw) => {
+    if (composingName.current) {
+      setNameDraft(raw)
+      return
+    }
+    const next = toPassportName(raw)
+    setNameRejected(next !== raw.toUpperCase())
+    setNameDraft(next)
+  }
+
+  // 조합이 확정되기 전에도 받을 수 없는 글자면 바로 알린다.
+  const handleNameComposing = (data) => {
+    const blocked = Boolean(data) && toPassportName(data) !== data.toUpperCase()
+    setNameBlocked(blocked)
+    if (blocked) setNameRejected(true)
+  }
   const dialogRef = useRef(null)
   const sheetTriggerRef = useRef(null)
+  // 시트를 닫으며 초점을 트리거로 되돌리는 중인지. 그때 들어온 초점은 사용자가
+  // 이름으로 옮겨 온 것이 아니라 우리가 돌려놓은 것이라, 수정 표시를 켜면
+  // 손을 뗀 뒤에도 밑줄이 남는다.
+  const restoringFocus = useRef(false)
 
   const openSheet = (nextSheet, trigger) => {
     if (!sheet) sheetTriggerRef.current = trigger
@@ -43,13 +92,23 @@ export function Component() {
   }
   const closeSheet = () => {
     setSheet(null)
-    requestAnimationFrame(() => sheetTriggerRef.current?.focus())
+    // 다시 열었을 때 지난 안내와 흐림이 남아 있으면 안 된다.
+    setNameRejected(false)
+    setNameBlocked(false)
+    composingName.current = false
+    restoringFocus.current = true
+    requestAnimationFrame(() => {
+      sheetTriggerRef.current?.focus()
+      restoringFocus.current = false
+    })
   }
   useEffect(() => {
     if (!sheet) return undefined
     const dialog = dialogRef.current
     dialog.scrollTop = 0
-    const initialFocus = dialog?.querySelector('button') ?? dialog
+    // 이름 수정처럼 입력이 있는 시트는 입력칸부터 잡아야 한다. 버튼을 먼저
+    // 찾으면 저장 버튼에 초점이 가서 바로 칠 수가 없다.
+    const initialFocus = dialog?.querySelector('input, button') ?? dialog
     initialFocus?.focus()
     const onKeyDown = (event) => {
       if (event.key === 'Escape') closeSheet()
@@ -96,12 +155,25 @@ export function Component() {
           <PassportPageTurn
             step={step}
             disabled={Boolean(sheet)}
+            profileOverride={profileOverride}
             onCommit={(direction) =>
               setStep((current) => Math.min(3, Math.max(0, current + direction)))
             }
-            renderStep={(visibleStep) => (
+            renderStep={(visibleStep, visibleProfile, visibleStamps, helpers) => (
               <PassportSpread
                 step={visibleStep}
+                sheetOpen={Boolean(sheet)}
+                isRestoringFocus={() => restoringFocus.current}
+                profile={visibleProfile}
+                stamps={visibleStamps}
+                onNameHover={helpers?.onNameHover}
+                onEditName={(event, current) => {
+                  setNameDraft(current)
+                  setNameRejected(false)
+                  setNameBlocked(false)
+                  composingName.current = false
+                  openSheet('name', event.currentTarget)
+                }}
                 onHistory={(event) => openSheet('history', event.currentTarget)}
                 onTicket={(event) => openSheet('ticket', event.currentTarget)}
                 onProducts={() => navigate('/products')}
@@ -130,6 +202,72 @@ export function Component() {
                   onSelectJourney={(event) => openSheet('history-detail', event.currentTarget)}
                 />
               ) : null}
+              {sheet === 'name' ? (
+                <form
+                  className={styles.nameForm}
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    // 조합 중이면 아직 확정되지 않은 글자다. "홍GIL" 상태로 제출하면
+                    // 영문만 남기고 시트가 닫혀, 사용자는 지운 적 없는 글자가
+                    // 사라진 걸 보게 된다. 조합이 끝날 때까지 기다린다.
+                    if (composingName.current) {
+                      setNameRejected(true)
+                      return
+                    }
+                    // 조합 중에는 원본을 그대로 담아 두므로 제출 시점에 한 번 더
+                    // 거른다. 조합이 끝나기 전에 제출하면 한글이 그대로 들어간다.
+                    const next = toPassportName(nameDraft).trim()
+                    if (!next) {
+                      setNameRejected(true)
+                      return
+                    }
+                    setNameOverride(next)
+                    closeSheet()
+                  }}
+                >
+                  <h3 className={styles.sheetTitle}>NAME</h3>
+                  <label className={styles.nameLabel} htmlFor="passport-name">
+                    여권에 표기할 영문 이름
+                  </label>
+                  <input
+                    className={`${styles.nameInput} ${nameBlocked ? styles.nameInputBlocked : ''}`}
+                    id="passport-name"
+                    aria-describedby="passport-name-hint"
+                    value={nameDraft}
+                    // 치는 즉시 여권 표기로 바꾼다. 영문·공백·하이픈·아포스트로피만
+                    // 남고 소문자는 대문자로 올라간다.
+                    onChange={(event) => handleNameInput(event.target.value)}
+                    onCompositionStart={(event) => {
+                      composingName.current = true
+                      handleNameComposing(event.data)
+                    }}
+                    onCompositionUpdate={(event) => handleNameComposing(event.data)}
+                    onCompositionEnd={(event) => {
+                      composingName.current = false
+                      setNameBlocked(false)
+                      // compositionend 뒤에 input이 오지 않는 브라우저가 있어 여기서도 확정한다.
+                      handleNameInput(event.target.value)
+                    }}
+                    // 여권 표기 한도. 이보다 길면 지면 밖으로 넘친다.
+                    maxLength={PASSPORT_NAME_MAX_LENGTH}
+                    autoCapitalize="characters"
+                    autoComplete="off"
+                    lang="en"
+                  />
+                  {nameRejected ? (
+                    <p className={styles.nameNotice} id="passport-name-hint" role="status">
+                      여권 표기에 맞춰 영문만 입력할 수 있습니다
+                    </p>
+                  ) : (
+                    <p className={styles.srOnly} id="passport-name-hint">
+                      여권 표기에 맞춰 영문 대문자로만 입력됩니다. 한글은 입력할 수 없습니다.
+                    </p>
+                  )}
+                  <button className={styles.nameSubmit} type="submit">
+                    저장
+                  </button>
+                </form>
+              ) : null}
               {sheet === 'history-detail' ? <JourneyDetail /> : null}
               {sheet === 'ticket' ? (
                 <>
@@ -145,7 +283,46 @@ export function Component() {
   )
 }
 
-function PassportSpread({ step, onHistory, onTicket, onProducts }) {
+/**
+ * 여권 지면의 투명 오버레이.
+ *
+ * 여권 데이터는 PassportPageTurn이 이미 불러왔다. 여기서 다시 부르면 단계를
+ * 넘길 때마다 같은 API를 또 치게 된다.
+ *
+ * 모든 값은 캔버스와 같은 profile/stamps에서 꺼낸다. 여기서 고정 데이터를 쓰면
+ * WebGL을 못 쓰는 기기와 스크린리더만 다른 값을 보게 된다.
+ */
+function PassportSpread({
+  step,
+  sheetOpen,
+  isRestoringFocus,
+  profile,
+  stamps = [],
+  onNameHover,
+  onEditName,
+  onHistory,
+  onTicket,
+  onProducts,
+}) {
+  const displayName = toDisplayName(profile)
+  // 호버와 포커스는 서로 독립이다. 하나로 합치면 키보드로 이름에 머문 채
+  // 마우스가 스치기만 해도(pointerleave) 표시가 사라진다. 둘 다 풀렸을 때만
+  // 지운다. 표시할 자리는 44px 클릭 영역이 아니라 실제 글자 상자다.
+  const nameActive = useRef({ hover: false, focus: false })
+  const syncNameCue = (event) => {
+    const { hover, focus } = nameActive.current
+    onNameHover?.(hover || focus ? event.currentTarget.querySelector('strong') : null)
+  }
+
+  // 버튼이 손 밑에서 사라지는 두 경우가 있다. 지면을 넘기면 통째로 없어지고,
+  // 시트가 열리면 inert가 되어 포인터 이벤트가 끊긴다. 둘 다 pointerleave가
+  // 오지 않아 hover가 켜진 채 남고, 돌아왔을 때 만진 적 없는 표시가 뜬다.
+  // 상태를 털고 표시도 함께 내린다.
+  useEffect(() => {
+    nameActive.current = { hover: false, focus: false }
+    onNameHover?.(null)
+  }, [onNameHover, sheetOpen, step])
+
   if (step === 0) {
     return (
       <section
@@ -180,22 +357,53 @@ function PassportSpread({ step, onHistory, onTicket, onProducts }) {
           <h3>PASSPORT</h3>
           <img src={mcmHaus} alt="MCM HAUS 매장 사진" className={styles.haus} />
           <p>
-            NUMBER <strong>{passportProfile.passportNumber}</strong>
+            NUMBER <strong>{profile.passportNumber}</strong>
           </p>
           <p>
-            NATIONALITY <strong>{passportProfile.nationality}</strong>
+            NATIONALITY <strong>{profile.nationality}</strong>
           </p>
+          {/* 캔버스가 글자를 그리고 이 DOM은 투명하다. 누르면 이름을 고칠 수
+              있다는 표시는 시트를 열어 보여준다. */}
           <p>
             NAME{' '}
-            <strong>
-              {passportProfile.givenName} {passportProfile.surname}
-            </strong>
+            <button
+              className={styles.nameButton}
+              type="button"
+              aria-label={`이름 ${displayName} 수정`}
+              // 캔버스가 글자를 그려 버튼은 보이지 않는다. 눌러서 고칠 수 있다는
+              // 걸 알 방법이 없으므로 호버·포커스 때 글자 위에 표시를 얹는다.
+              onPointerEnter={(event) => {
+                nameActive.current.hover = true
+                syncNameCue(event)
+              }}
+              onPointerLeave={(event) => {
+                nameActive.current.hover = false
+                syncNameCue(event)
+              }}
+              onFocus={(event) => {
+                // 시트를 닫으면 초점이 여기로 돌아온다. 그건 사용자가 이름으로
+                // 온 것이 아니므로 표시를 켜지 않는다.
+                if (isRestoringFocus?.()) return
+                nameActive.current.focus = true
+                syncNameCue(event)
+              }}
+              onBlur={(event) => {
+                nameActive.current.focus = false
+                syncNameCue(event)
+              }}
+              onClick={(event) => onEditName(event, displayName)}
+            >
+              <strong>{displayName}</strong>
+            </button>
           </p>
           <p>
-            DATE OF ISSUE <strong>{passportProfile.issueDate}</strong>
+            DATE OF BIRTH <strong>{profile?.birthDate}</strong>
           </p>
           <p>
-            CREDIT <strong>{passportProfile.credit}</strong>
+            DATE OF ISSUE <strong>{profile.issueDate}</strong>
+          </p>
+          <p>
+            CREDIT <strong>{profile.credit}</strong>
           </p>
           <small className={styles.profileFooter}>
             <span>크레딧으로 AI 가상 피팅 가능</span>
@@ -222,11 +430,12 @@ function PassportSpread({ step, onHistory, onTicket, onProducts }) {
         />
         <div className={styles.stamps}>
           <h3>PASSPORT</h3>
-          <p>총 방문 횟수 | {passportProfile.visits}회</p>
+          <p>총 방문 횟수 | {profile.visits}회</p>
           <img src={passportStampBow} alt="" className={styles.stampBow} />
           <ul>
-            {passportStamps.map((stamp) => (
-              <li key={stamp.id}>
+            {/* 캔버스도 여섯 칸(3열 2행)만 그린다. 더 읽어 주면 화면과 어긋난다. */}
+            {stamps.slice(0, 6).map((stamp) => (
+              <li key={stamp.id ?? stamp.date}>
                 <img src={passportStamp} alt="" />
                 <time>{stamp.date}</time>
               </li>

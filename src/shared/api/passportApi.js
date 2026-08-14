@@ -28,6 +28,8 @@ export async function getPassport() {
     // 백엔드는 이름을 한 필드로 준다. 화면도 한 줄로 표시한다.
     name: result.name ?? '',
     nationality: (result.nationality ?? '').toUpperCase(),
+    // 생년월일도 발급일과 같은 표기로 맞춘다. 빠뜨리면 성공 응답에서 칸이 빈다.
+    birthDate: formatIssueDate(result.birthDate),
     issueDate: formatIssueDate(result.issuedOn),
     credit: result.creditBalance ?? 0,
     visits: result.totalVisitCount ?? 0,
