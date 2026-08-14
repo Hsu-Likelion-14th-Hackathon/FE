@@ -3,14 +3,22 @@
 .page {
   position: relative;
   display: flex;
+  height: var(--mcm-viewport-stable);
   min-height: var(--mcm-viewport-stable);
+  max-height: var(--mcm-viewport-stable);
   flex-direction: column;
+  overflow: hidden;
   background: var(--mcm-color-canvas);
 }
 
 .pageLoading {
   min-height: var(--mcm-viewport-stable);
   isolation: isolate;
+}
+
+.page > :global(header),
+.divider {
+  flex-shrink: 0;
 }
 
 .divider {
@@ -21,10 +29,9 @@
 }
 
 .progressRow {
-  position: sticky;
-  top: calc(var(--mcm-header-height) + var(--mcm-safe-top));
   z-index: 15;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: clamp(1.25rem, 10.4vw, 2.53125rem); /* Figma ~40.5px @390 */
   padding: 1.25rem 1.25rem 0.75rem; /* 20px — Line→back top */
@@ -69,17 +76,28 @@
 .body {
   position: relative;
   display: flex;
-  flex: 1 0 auto;
+  flex: 1;
+  min-height: 0;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .scroll {
   position: relative;
   z-index: 0;
   display: flex;
-  flex: 1 0 auto;
+  flex: 1;
+  min-height: 0;
   flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 2.75rem 1.25rem 0; /* 44px — progress bottom→Q (219−175) */
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.scroll::-webkit-scrollbar {
+  display: none;
 }
 
 .qLabel {
@@ -192,8 +210,7 @@
 }
 
 .footer {
-  position: sticky;
-  bottom: 0;
+  position: relative;
   z-index: 2;
   flex-shrink: 0;
   padding: 0.75rem 1.25rem max(1.25rem, var(--mcm-safe-bottom));
