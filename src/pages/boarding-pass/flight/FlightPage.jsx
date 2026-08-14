@@ -11,14 +11,14 @@ import controlSoundImg from '@/shared/assets/boarding-pass/flight/control-sound.
 import decoRightImg from '@/shared/assets/boarding-pass/flight/deco-right.png'
 import hingeImg from '@/shared/assets/boarding-pass/flight/hinge.svg'
 import mapImg from '@/shared/assets/boarding-pass/flight/map.png'
-import navNextImg from '@/shared/assets/boarding-pass/flight/nav-next.svg'
-import navPrevImg from '@/shared/assets/boarding-pass/flight/nav-prev.svg'
 import planeMarkerImg from '@/shared/assets/boarding-pass/flight/plane-marker.svg'
 import routePathImg from '@/shared/assets/boarding-pass/flight/route-path.svg'
 import tabletLogoImg from '@/shared/assets/boarding-pass/flight/tablet-logo.png'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import BoardingPassStageBackdrop from '@/shared/layout/BoardingPassStageBackdrop.jsx'
 import BoardingPassStageHeader from '@/shared/layout/BoardingPassStageHeader.jsx'
+import BoardingPassStepNav from '@/shared/layout/BoardingPassStepNav.jsx'
+import { boardingPassStepProgress, FLIGHT_STEP } from '@/shared/layout/boardingPassSteps.js'
 
 import styles from './FlightPage.module.scss'
 
@@ -48,6 +48,7 @@ export function Component() {
 
   function onSheetPointerDown(event) {
     if (!ticketOpen || !event.isPrimary || event.button !== 0) return
+    event.preventDefault()
     dragRef.current = {
       pointerId: event.pointerId,
       startY: event.clientY,
@@ -197,24 +198,15 @@ export function Component() {
             비행 종료 후 여행의 기록이 담긴 Passport가 발급됩니다
           </p>
         </div>
-
-        <div className={styles.playback} role="group" aria-label="비행 진행">
-          <button type="button" aria-label="이전" className={styles.navBtn}>
-            <img src={navPrevImg} alt="" className={styles.navIcon} />
-          </button>
-          <div className={styles.progressTrack}>
-            <div className={styles.progressFill} />
-          </div>
-          <button
-            type="button"
-            aria-label="다음"
-            className={styles.navBtn}
-            onClick={() => navigate('/boarding-pass/guide')}
-          >
-            <img src={navNextImg} alt="" className={styles.navIcon} />
-          </button>
-        </div>
       </main>
+
+        <BoardingPassStepNav
+          progress={boardingPassStepProgress(FLIGHT_STEP)}
+          onPrev={() => navigate('/boarding-pass/scan')}
+          onNext={() => navigate('/boarding-pass/guide')}
+          prevDisabled
+          groupLabel="여행 진행"
+        />
       </div>
 
       <div
@@ -235,24 +227,21 @@ export function Component() {
           aria-modal={ticketOpen}
           aria-label="티켓 정보"
           className={styles.sheet}
+          onPointerDown={onSheetPointerDown}
+          onPointerMove={onSheetPointerMove}
+          onPointerUp={onSheetPointerEnd}
+          onPointerCancel={onSheetPointerEnd}
         >
-          <div
-            className={styles.sheetGrab}
-            aria-label="아래로 밀어 닫기"
-            onPointerDown={onSheetPointerDown}
-            onPointerMove={onSheetPointerMove}
-            onPointerUp={onSheetPointerEnd}
-            onPointerCancel={onSheetPointerEnd}
-          >
+          <div className={styles.sheetGrab} aria-hidden="true">
             <div className={styles.handle} />
             <p className={styles.sheetTitle}>TICKET</p>
           </div>
-            {pass ? (
-              <BoardingTicketCard pass={pass} size="md" className={styles.ticketSlot} />
-            ) : (
-              <p className={styles.ticketLoading}>티켓을 불러오는 중…</p>
-            )}
-          </div>
+          {pass ? (
+            <BoardingTicketCard pass={pass} size="md" className={styles.ticketSlot} />
+          ) : (
+            <p className={styles.ticketLoading}>티켓을 불러오는 중…</p>
+          )}
+        </div>
         </div>
     </div>
   )

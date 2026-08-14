@@ -3,7 +3,8 @@
 .page {
   position: relative;
   display: flex;
-  min-height: var(--mcm-viewport-dynamic); /* 안드로이드 하단 바가 접히면 갈색 화면이 따라 늘어남 */
+  height: var(--mcm-viewport-dynamic);
+  min-height: var(--mcm-viewport-dynamic);
   flex-direction: column;
   overflow: hidden;
   background: #41210b;
@@ -25,7 +26,7 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding: 1rem 1.25rem 1.25rem;
+  padding: 1rem 1.25rem 0;
 }
 
 .monitorWrap {
@@ -342,43 +343,6 @@
   color: #ab9e97;
 }
 
-.playback {
-  display: flex;
-  width: 100%;
-  max-width: 21.875rem;
-  margin: auto auto 0;
-  padding-top: 1.5rem;
-  align-items: center;
-  gap: 1rem;
-}
-
-.navBtn {
-  flex-shrink: 0;
-  width: 2.125rem;
-  height: 2.125rem;
-}
-
-.navIcon {
-  display: block;
-  width: 2.125rem;
-  height: 2.125rem;
-}
-
-.progressTrack {
-  flex: 1;
-  height: 0.625rem;
-  overflow: hidden;
-  border-radius: 6.25rem;
-  background: #e0e0e0;
-}
-
-.progressFill {
-  height: 100%;
-  width: 20%;
-  border-radius: 6.25rem;
-  background: #c07346;
-}
-
 /* (42) ticket bottom sheet */
 .sheetRoot {
   position: fixed;
@@ -425,6 +389,15 @@
   transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
   overscroll-behavior: contain;
   will-change: transform;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.sheet:active {
+  cursor: grabbing;
 }
 
 .sheet[data-dragging='true'] {
@@ -441,15 +414,6 @@
   align-items: center;
   margin: -0.75rem -1.25rem 0;
   padding: 0.75rem 1.25rem 0.25rem;
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
-
-.sheetGrab:active {
-  cursor: grabbing;
 }
 
 .handle {

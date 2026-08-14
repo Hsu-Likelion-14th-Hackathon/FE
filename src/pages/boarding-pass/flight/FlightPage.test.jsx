@@ -17,6 +17,7 @@ function renderFlight() {
       { path: '/boarding-pass/flight', Component: FlightPage },
       { path: '/boarding-pass', element: <p>Boarding</p> },
       { path: '/boarding-pass/guide', element: <p>Guide</p> },
+      { path: '/boarding-pass/scan', element: <p>Scan</p> },
     ],
     { initialEntries: ['/boarding-pass/flight'] },
   )
@@ -38,6 +39,12 @@ describe('FlightPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: '\uB2E4\uC74C' }))
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/guide'))
+  })
+
+  it('disables previous on the first travel step', async () => {
+    renderFlight()
+
+    expect(await screen.findByRole('button', { name: '\uC774\uC804' })).toBeDisabled()
   })
 
   it('returns to boarding-pass landing when the flight ends', async () => {
