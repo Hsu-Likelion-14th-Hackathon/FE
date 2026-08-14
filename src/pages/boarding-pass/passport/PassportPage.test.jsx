@@ -223,9 +223,18 @@ describe('PassportPage', () => {
   it('모든 단계에 여권 안내 카피와 상세 여행 콘텐츠를 제공한다', () => {
     renderPassport()
 
+    // 브랜드 문구만 남긴다. 안내 두 줄은 랜딩에서 이미 읽었고, 걷어낸 자리는
+    // 지면 크기로 돌아간다. (같은 문구가 브랜드 스트립 sr-only에도 있어
+    // 화면 전체에서 찾으면 둘이 잡힌다.)
+    const intro = document.querySelector('[class*=introCopy]')
+    expect(intro).toHaveTextContent('MCM BOARDING PASS')
+    expect(intro.children).toHaveLength(1)
     expect(
-      screen.getByText('당신의 MCM 비행에 완벽한 맞춤형 동선을 추천합니다'),
-    ).toBeInTheDocument()
+      screen.queryByText('당신의 MCM 비행에 완벽한 맞춤형 동선을 추천합니다'),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('이 행사는 MCM HAUS 매장 기반으로 진행됩니다'),
+    ).not.toBeInTheDocument()
     const next = screen.getByRole('button', { name: '다음 단계' })
     fireEvent.click(next)
     fireEvent.click(next)
