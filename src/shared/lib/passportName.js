@@ -8,5 +8,6 @@
  * 회원가입과 여권 이름 수정이 같은 규칙을 써야 해서 한곳에 둔다.
  */
 export function toPassportName(value) {
-  return value.replace(/[^A-Za-z\s'-]/g, '').toUpperCase()
+  // \s는 탭과 줄바꿈, 비분리 공백까지 통과시킨다. 이름에 쓰이는 건 보통 공백뿐이다.
+  return value.replace(/[^A-Za-z '-]/g, '').toUpperCase()
 }
