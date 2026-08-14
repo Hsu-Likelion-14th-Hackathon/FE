@@ -480,3 +480,19 @@
   font-size: 0.875rem;
   color: #fafafa;
 }
+
+@media (min-width: 1200px) {
+  .page {
+    height: 100%;
+    min-height: 100%;
+  }
+
+  /* 데스크톱 휴대폰 틀: 브라우저 바닥이 아니라 화면 안에서만 시트가 올라온다 */
+  .sheetRoot {
+    position: absolute;
+  }
+
+  .sheet {
+    max-width: none;
+  }
+}
