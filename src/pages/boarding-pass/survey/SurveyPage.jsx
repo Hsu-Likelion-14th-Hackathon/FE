@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { PASS_STORAGE_KEY } from '@/features/boarding-pass/boarding-ticket/passStorage.js'
@@ -6,16 +6,11 @@ import IssueLoadingOverlay from '@/features/boarding-pass/issue-loading/IssueLoa
 import { getSurveyQuestions, issueBoardingPass } from '@/shared/api/boardingPassApi.js'
 import backArrow from '@/shared/assets/boarding-pass/icons/back-arrow.svg'
 import qPlane from '@/shared/assets/boarding-pass/survey/q-plane.svg'
+import revealBelowBrowserChrome from '@/shared/layout/revealBelowBrowserChrome.js'
+import scrollDocumentToTop from '@/shared/layout/scrollDocumentToTop.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './SurveyPage.module.scss'
-
-function scrollDocumentToTop() {
-  window.scrollTo(0, 0)
-  document.documentElement.scrollTop = 0
-  document.body.scrollTop = 0
-  document.querySelector('[data-device-screen]')?.firstElementChild?.scrollTo?.(0, 0)
-}
 
 /**
  * 설문 Q1~Q3 (24)~(29).
@@ -28,9 +23,12 @@ export function Component() {
   const [answers, setAnswers] = useState({})
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState(null)
+  const scrollRef = useRef(null)
+  const ctaRef = useRef(null)
 
   useLayoutEffect(() => {
     scrollDocumentToTop()
+    scrollRef.current?.scrollTo?.(0, 0)
   }, [step, loading])
 
   useEffect(() => {
@@ -63,6 +61,7 @@ export function Component() {
   const handleSelect = (optionId) => {
     if (!question) return
     setAnswers((prev) => ({ ...prev, [question.id]: optionId }))
+    revealBelowBrowserChrome(ctaRef.current)
   }
 
   const handleNext = async () => {
@@ -104,7 +103,7 @@ export function Component() {
       </div>
 
       <div className={styles.body}>
-        <div className={styles.scroll}>
+        <div ref={scrollRef} className={styles.scroll}>
           {loadError && !question ? (
             <p className={styles.status}>{loadError}</p>
           ) : question ? (
@@ -155,6 +154,7 @@ export function Component() {
           <div className={styles.footer}>
             <div className={styles.footerBlur} aria-hidden="true" />
             <button
+              ref={ctaRef}
               type="button"
               disabled={selectedOptionId == null || loading}
               onClick={handleNext}
