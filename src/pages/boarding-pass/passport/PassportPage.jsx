@@ -78,6 +78,10 @@ export function Component() {
   }
   const closeSheet = () => {
     setSheet(null)
+    // 다시 열었을 때 지난 안내와 흐림이 남아 있으면 안 된다.
+    setNameRejected(false)
+    setNameBlocked(false)
+    composingName.current = false
     requestAnimationFrame(() => sheetTriggerRef.current?.focus())
   }
   useEffect(() => {
@@ -143,6 +147,9 @@ export function Component() {
                 profile={visibleProfile}
                 onEditName={(event, current) => {
                   setNameDraft(current)
+                  setNameRejected(false)
+                  setNameBlocked(false)
+                  composingName.current = false
                   openSheet('name', event.currentTarget)
                 }}
                 onHistory={(event) => openSheet('history', event.currentTarget)}
