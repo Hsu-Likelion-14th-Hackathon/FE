@@ -766,6 +766,17 @@ button.historyCard {
   text-align: left;
 }
 
+/* 캔버스는 값을 행 오른쪽 끝에 맞춰 그린다. 이름이 짧으면 버튼이 44px 최소
+   폭까지 넓어지는데, 안쪽 글자가 왼쪽에 붙으면 그림과 40px 가까이 어긋난다.
+   클릭 영역과 호버 밑줄이 실제 글자를 벗어나고, WebGL을 못 쓰는 화면에서는
+   글자 자체가 다른 자리에 보인다.
+   end는 글자를 내용 크기로 잡으므로 긴 이름이 열을 넘는다. max-width로 열에
+   묶어야 말줄임이 함께 유지된다. */
+.nameButton strong {
+  justify-self: end;
+  max-width: 100%;
+}
+
 .nameForm {
   display: flex;
   flex-direction: column;

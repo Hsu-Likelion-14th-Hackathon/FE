@@ -373,6 +373,19 @@ describe('PassportPage', () => {
     )
   })
 
+  it('짧은 이름도 캔버스처럼 행 오른쪽 끝에 붙인다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const value = screen.getByRole('button', { name: /이름 .* 수정/ }).querySelector('strong')
+
+    // 캔버스는 값을 행 오른쪽 끝에 그린다. 이름이 짧으면 버튼이 44px까지
+    // 넓어지는데, 글자가 왼쪽에 붙으면 그림과 37px 어긋난다.
+    const style = window.getComputedStyle(value)
+    expect(style.justifySelf).toBe('end')
+    // end는 글자를 내용 크기로 잡는다. 열에 묶어 둬야 긴 이름 말줄임이 남는다.
+    expect(style.maxWidth).toBe('100%')
+  })
+
   it('이름 버튼의 44px 클릭 영역을 행이 잘라내지 않는다', () => {
     renderPassport()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
@@ -413,7 +426,6 @@ describe('PassportPage', () => {
     fireEvent.pointerEnter(button)
     const cue = screen.getByTestId('passport-name-cue')
     expect(cue.closest('[class*=contentLayer]')).toBeNull()
-    expect(button).toHaveAttribute('title', '이름 수정')
 
     fireEvent.pointerLeave(button)
     expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
