@@ -14,11 +14,12 @@ import mapImg from '@/shared/assets/boarding-pass/flight/map.png'
 import planeMarkerImg from '@/shared/assets/boarding-pass/flight/plane-marker.svg'
 import routePathImg from '@/shared/assets/boarding-pass/flight/route-path.svg'
 import tabletLogoImg from '@/shared/assets/boarding-pass/flight/tablet-logo.png'
+import ticketSheetBack from '@/shared/assets/boarding-pass/flight/ticket-sheet-back.png'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import BoardingPassStageBackdrop from '@/shared/layout/BoardingPassStageBackdrop.jsx'
 import BoardingPassStageHeader from '@/shared/layout/BoardingPassStageHeader.jsx'
 import BoardingPassStepNav from '@/shared/layout/BoardingPassStepNav.jsx'
-import { boardingPassStepProgress, FLIGHT_STEP } from '@/shared/layout/boardingPassSteps.js'
+import { FLIGHT_STEP, guideFloorFromStep } from '@/shared/layout/boardingPassSteps.js'
 
 import styles from './FlightPage.module.scss'
 
@@ -95,6 +96,12 @@ export function Component() {
       cancelled = true
     }
   }, [])
+
+  function goToStep(step) {
+    const floor = guideFloorFromStep(step)
+    if (!floor) return
+    navigate('/boarding-pass/guide', { state: { floor } })
+  }
 
   const mapDate = formatMapDate()
 
@@ -201,9 +208,10 @@ export function Component() {
       </main>
 
         <BoardingPassStepNav
-          progress={boardingPassStepProgress(FLIGHT_STEP)}
+          step={FLIGHT_STEP}
           onPrev={() => navigate('/boarding-pass/scan')}
           onNext={() => navigate('/boarding-pass/guide')}
+          onSelectStep={goToStep}
           prevDisabled
           groupLabel="여행 진행"
         />
@@ -232,6 +240,7 @@ export function Component() {
           onPointerUp={onSheetPointerEnd}
           onPointerCancel={onSheetPointerEnd}
         >
+          <img src={ticketSheetBack} alt="" aria-hidden="true" className={styles.sheetBack} />
           <div className={styles.sheetGrab} aria-hidden="true">
             <div className={styles.handle} />
             <p className={styles.sheetTitle}>TICKET</p>

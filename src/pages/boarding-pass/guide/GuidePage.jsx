@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 
 import {
   guideFloorContent,
@@ -14,8 +14,9 @@ import BoardingPassStageBackdrop from '@/shared/layout/BoardingPassStageBackdrop
 import BoardingPassStageHeader from '@/shared/layout/BoardingPassStageHeader.jsx'
 import BoardingPassStepNav from '@/shared/layout/BoardingPassStepNav.jsx'
 import {
-  boardingPassStepProgress,
+  FLIGHT_STEP,
   GUIDE_FLOOR_ORDER,
+  guideFloorFromStep,
   guideFloorStep,
 } from '@/shared/layout/boardingPassSteps.js'
 
@@ -33,11 +34,16 @@ function scrollDocumentToTop() {
  * 개요 → 1F → 2F → 3F → 5F. 상태바 미구현. 도슨트는 BoardingPassDocent(M-01).
  * 하단 슬라이더는 MAPS(1) 다음 2~6단계.
  */
+function initialGuideFloor(location) {
+  const requested = location.state?.floor
+  return GUIDE_FLOOR_ORDER.includes(requested) ? requested : 'overview'
+}
+
 export function Component() {
   const navigate = useNavigate()
-  const [floor, setFloor] = useState('overview')
+  const location = useLocation()
+  const [floor, setFloor] = useState(() => initialGuideFloor(location))
   const floorIndex = GUIDE_FLOOR_ORDER.indexOf(floor)
-  const progress = boardingPassStepProgress(guideFloorStep(floor))
   const atStart = floorIndex <= 0
   const atEnd = floorIndex >= GUIDE_FLOOR_ORDER.length - 1
 
@@ -65,6 +71,15 @@ export function Component() {
     setFloor(id)
   }
 
+  function goToStep(step) {
+    if (step <= FLIGHT_STEP) {
+      navigate('/boarding-pass/flight')
+      return
+    }
+    const nextFloor = guideFloorFromStep(step)
+    if (nextFloor) setFloor(nextFloor)
+  }
+
   return (
     <div className={styles.page}>
       <StoreHeader />
@@ -89,9 +104,10 @@ export function Component() {
       </main>
 
         <BoardingPassStepNav
-          progress={progress}
+          step={guideFloorStep(floor)}
           onPrev={() => goRelative(-1)}
           onNext={() => goRelative(1)}
+          onSelectStep={goToStep}
           nextDisabled={atEnd}
           groupLabel="여행 진행"
           note={

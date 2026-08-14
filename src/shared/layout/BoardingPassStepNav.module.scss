@@ -38,6 +38,7 @@
 }
 
 .progressTrack {
+  position: relative;
   flex: 1;
   height: 0.625rem;
   overflow: hidden;
@@ -46,10 +47,25 @@
 }
 
 .progressFill {
+  pointer-events: none;
   height: 100%;
   border-radius: 6.25rem;
   background: var(--mcm-color-brand-brown);
   transition: width 0.3s ease;
+}
+
+.progressHits {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.progressHit {
+  flex: 1;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
 
 .footerNote {

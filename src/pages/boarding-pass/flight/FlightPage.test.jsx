@@ -33,6 +33,15 @@ describe('FlightPage', () => {
     activeRouters.splice(0).forEach((router) => router.dispose())
   })
 
+  it('jumps to the travel guide overview when the second slider segment is pressed', async () => {
+    const router = renderFlight()
+
+    fireEvent.click(await screen.findByRole('button', { name: '가이드 개요로 이동' }))
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/guide'))
+    expect(router.state.location.state).toEqual({ floor: 'overview' })
+  })
+
   it('goes to the travel guide when next is pressed', async () => {
     const router = renderFlight()
 

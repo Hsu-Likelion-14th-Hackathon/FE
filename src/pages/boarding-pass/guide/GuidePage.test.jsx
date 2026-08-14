@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
 
@@ -30,6 +30,23 @@ function renderGuide() {
 describe('GuidePage', { timeout: 15_000 }, () => {
   afterEach(() => {
     activeRouters.splice(0).forEach((router) => router.dispose())
+  })
+
+  it('jumps to 5F when the last slider segment is pressed', () => {
+    renderGuide()
+
+    fireEvent.click(screen.getByRole('button', { name: '5F로 이동' }))
+
+    expect(screen.getByText('1976년, München')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '다음' })).toBeDisabled()
+  })
+
+  it('returns to MAPS when the first slider segment is pressed', async () => {
+    const router = renderGuide()
+
+    fireEvent.click(screen.getByRole('button', { name: 'MAPS로 이동' }))
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/flight'))
   })
 
   it('opens 5F ARRIVE from the overview chip', { timeout: 15_000 }, () => {
