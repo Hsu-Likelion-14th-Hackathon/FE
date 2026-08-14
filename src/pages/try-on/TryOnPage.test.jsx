@@ -99,4 +99,23 @@ describe('TryOnPage', () => {
       getProductVariant(product, product.cardVariantId).image,
     )
   })
+
+  it('처리 중 화면에서도 모노그램이 어둠막 위에 남는다', () => {
+    render(
+      <MemoryRouter initialEntries={['/products/mcm-002/try-on']}>
+        <Routes>
+          <Route path="/products/:productId/try-on" element={<Component />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+    fireEvent.click(screen.getByRole('button', { name: /Fitting/ }))
+
+    const stage = screen.getByRole('region', { name: 'AI Fitting 처리 중' })
+    const monogram = stage.querySelector('[class*=monogram]')
+    // 어둠막(::before)과 같은 층에 있어야 트리 순서로 그 위에 얹힌다. 0으로
+    // 내려가면 60% 어둠막 아래로 깔려 로딩 화면에서 무늬가 사라진다.
+    expect(window.getComputedStyle(monogram).zIndex).toBe('1')
+    // 무늬는 어둠막보다 뒤에 와야 한다. 앞에 두면 다시 묻힌다.
+    expect(monogram).toBe(stage.firstElementChild)
+  })
 })

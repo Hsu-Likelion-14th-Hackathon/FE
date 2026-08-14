@@ -14,10 +14,13 @@
   background: var(--mcm-gradient-hero);
 }
 
+/* 바탕 세 겹은 ::before(어둠막·글로우) → .monogram → ::after(햇살) 순으로
+   쌓인다. 셋 다 z-index 1이라 순서는 트리 순서가 정한다. ::before는 첫 자식,
+   ::after는 마지막 자식으로 생기므로 무늬가 그 사이에 놓인다.
+   어둠막을 무늬 위로 올리면 로딩 화면(어둠막 60%)에서 무늬가 묻혀 사라진다. */
 .stage::before,
 .stage::after {
   position: absolute;
-  /* 모노그램(z-index 0)보다 위에 와야 어둠막이 무늬를 덮는다. */
   z-index: 1;
   content: '';
   pointer-events: none;
@@ -25,7 +28,7 @@
 
 .stage::before {
   inset: 0;
-  /* 아래에서 위로 어둠막 → 글로우 → 하단 페이드. 모노그램보다 위에 온다. */
+  /* 아래에서 위로 어둠막 → 글로우 → 하단 페이드. 무늬는 이 위에 얹힌다. */
   background:
     linear-gradient(to bottom, rgb(25 25 25 / 0%) 61.5%, rgb(25 25 25 / 60%)),
     radial-gradient(ellipse 180px 150px at -18% 47%, rgb(255 219 160 / 16%), transparent 72%),
@@ -406,7 +409,9 @@
    여권 시트와 같은 간격이 된다. */
 .monogram {
   position: absolute;
-  z-index: 0;
+  /* ::before와 같은 층에 두고 트리 순서로 그 위에 얹는다. 0으로 낮추면
+     어둠막 아래로 깔려, 로딩 화면에서는 아예 보이지 않는다. */
+  z-index: 1;
   inset: 0;
   background-image: url('@/shared/assets/boarding-pass/passport/bisepok.svg');
   background-repeat: repeat-y;
