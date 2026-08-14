@@ -195,6 +195,20 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(router.state.location.pathname).toBe('/boarding-pass')
   })
 
+  it('닫기 버튼을 본문보다 위에 둬 44px이 가려지지 않게 한다', () => {
+    renderPassport()
+
+    const close = screen.getByRole('button', { name: '닫기' })
+    const content = close.parentElement.querySelector('[class*=content]')
+
+    // 둘 다 z-index 1이면 DOM에서 뒤에 오는 .content가 이겨 버튼 오른쪽을
+    // 덮었다. 보이는 X가 통째로 가려져 왼쪽 15px만 눌렸다.
+    // jsdom은 hit-test를 하지 않아 쌓임 순서로만 확인한다.
+    const closeZ = Number(window.getComputedStyle(close).zIndex)
+    const contentZ = Number(window.getComputedStyle(content).zIndex)
+    expect(closeZ).toBeGreaterThan(contentZ)
+  })
+
   it('네이티브 키보드 클릭으로 한 단계만 이동하고 닫기 버튼에 44px 터치 영역을 준다', () => {
     renderPassport()
 
