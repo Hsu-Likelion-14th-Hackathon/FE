@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { toPassportName } from '@/shared/lib/passportName.js'
@@ -39,6 +39,11 @@ export function Component() {
   // 여권 이름은 사용자가 직접 고칠 수 있다. 캔버스도 이 값으로 다시 굽는다.
   const [nameOverride, setNameOverride] = useState(null)
   const [nameDraft, setNameDraft] = useState('')
+  // 매 렌더 새 객체를 넘기면 텍스처를 통째로 다시 굽는다. 이름이 바뀔 때만 바꾼다.
+  const profileOverride = useMemo(
+    () => (nameOverride ? { name: nameOverride } : null),
+    [nameOverride],
+  )
   // 한글은 ㅇ→아→안 처럼 조합을 거친다. 조합 중에 값을 바꾸면 IME가 되돌리므로
   // (모바일 키보드에서 특히) 조합이 끝난 뒤에 걸러낸다.
   const composingName = useRef(false)
@@ -79,7 +84,9 @@ export function Component() {
     if (!sheet) return undefined
     const dialog = dialogRef.current
     dialog.scrollTop = 0
-    const initialFocus = dialog?.querySelector('button') ?? dialog
+    // 이름 수정처럼 입력이 있는 시트는 입력칸부터 잡아야 한다. 버튼을 먼저
+    // 찾으면 저장 버튼에 초점이 가서 바로 칠 수가 없다.
+    const initialFocus = dialog?.querySelector('input, button') ?? dialog
     initialFocus?.focus()
     const onKeyDown = (event) => {
       if (event.key === 'Escape') closeSheet()
@@ -126,7 +133,7 @@ export function Component() {
           <PassportPageTurn
             step={step}
             disabled={Boolean(sheet)}
-            profileOverride={nameOverride ? { name: nameOverride } : null}
+            profileOverride={profileOverride}
             onCommit={(direction) =>
               setStep((current) => Math.min(3, Math.max(0, current + direction)))
             }
@@ -171,8 +178,14 @@ export function Component() {
                   className={styles.nameForm}
                   onSubmit={(event) => {
                     event.preventDefault()
-                    const next = nameDraft.trim()
-                    if (next) setNameOverride(next)
+                    // 조합 중에는 원본을 그대로 담아 두므로 제출 시점에 한 번 더
+                    // 거른다. 조합이 끝나기 전에 제출하면 한글이 그대로 들어간다.
+                    const next = toPassportName(nameDraft).trim()
+                    if (!next) {
+                      setNameRejected(true)
+                      return
+                    }
+                    setNameOverride(next)
                     closeSheet()
                   }}
                 >
@@ -294,7 +307,7 @@ function PassportSpread({ step, profile, onEditName, onHistory, onTicket, onProd
             </button>
           </p>
           <p>
-            DATE OF BIRTH <strong>{profile?.birthDate ?? passportProfile.birthDate}</strong>
+            DATE OF BIRTH <strong>{profile?.birthDate}</strong>
           </p>
           <p>
             DATE OF ISSUE <strong>{passportProfile.issueDate}</strong>

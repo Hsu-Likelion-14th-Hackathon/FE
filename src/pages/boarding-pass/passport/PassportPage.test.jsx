@@ -263,7 +263,8 @@ describe('PassportPage', () => {
     expect(openImageStyle.height).toBe('122.36%')
     expect(openImageStyle.left).toBe('-10.21%')
     expect(openImageStyle.top).toBe('-11.8%')
-    expect(window.getComputedStyle(profile).gap).toBe('1rem')
+    // 캔버스가 28px 간격으로 그린다(줄 높이 16 + 사이 12). 어긋나면 클릭 영역이 밀린다.
+    expect(window.getComputedStyle(profile).gap).toBe('0.75rem')
   })
 
   it('프로필 제품 CTA와 현재 여권 단계 정보를 제공한다', async () => {
@@ -301,5 +302,24 @@ describe('PassportPage', () => {
     for (const card of artwork.children) {
       expect(window.getComputedStyle(card).backgroundColor).toBe('rgb(29, 12, 0)')
     }
+  })
+
+  it('이름 수정 시트는 입력칸부터 잡고 조합 중인 한글은 저장하지 않는다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+
+    fireEvent.click(screen.getByRole('button', { name: /이름 .* 수정/ }))
+    const input = screen.getByLabelText('여권에 표기할 영문 이름')
+    expect(input).toHaveFocus()
+
+    // 조합이 끝나기 전에 제출해도 허용되지 않는 글자는 걸러진다.
+    fireEvent.change(input, { target: { value: '홍길동' } })
+    fireEvent.submit(input.closest('form'))
+    expect(screen.getByRole('dialog', { name: '여권 이름 수정' })).toBeInTheDocument()
+
+    fireEvent.change(input, { target: { value: "o'brien kim" } })
+    fireEvent.submit(input.closest('form'))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent("O'BRIEN KIM")
   })
 })
