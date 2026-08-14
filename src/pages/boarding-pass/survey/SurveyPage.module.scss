@@ -9,8 +9,8 @@
 }
 
 .pageLoading {
-  background: #646464;
-  background: color-mix(in srgb, #000 60%, var(--mcm-color-canvas));
+  min-height: var(--mcm-viewport-dynamic);
+  isolation: isolate;
 }
 
 .divider {
@@ -71,6 +71,8 @@
 }
 
 .scroll {
+  position: relative;
+  z-index: 0;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -193,17 +195,6 @@
   z-index: 2;
   flex-shrink: 0;
   padding: 0 1.25rem max(1.25rem, var(--mcm-safe-bottom));
-}
-
-/* Q2 (26)(27) — CTA 위 페이드 · Figma 508:5509 h187 bottom74 */
-.fade {
-  position: absolute;
-  right: 0;
-  bottom: 100%;
-  left: 0;
-  height: 11.6875rem; /* 187 */
-  pointer-events: none;
-  background: linear-gradient(to bottom, rgba(250, 250, 250, 0), var(--mcm-color-canvas));
 }
 
 .cta {

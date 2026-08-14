@@ -40,7 +40,6 @@ export function Component() {
   const selectedOptionId = question ? answers[question.id] : null
   const progress = questions.length ? ((step + 1) / questions.length) * 100 : 0
   const isLast = step >= questions.length - 1
-  const showFade = Boolean(question && question.options.length >= 4)
 
   const handleBack = () => {
     if (step > 0) {
@@ -143,7 +142,6 @@ export function Component() {
 
         {question ? (
           <div className={styles.footer}>
-            {showFade ? <div className={styles.fade} aria-hidden="true" /> : null}
             <button
               type="button"
               disabled={selectedOptionId == null || loading}
