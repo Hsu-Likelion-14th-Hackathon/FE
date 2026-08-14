@@ -5,10 +5,12 @@
  * 화면이 API와 연결되지 않아, 개발 중에는 .env의 VITE_BEARER_TOKEN을 초기값으로
  * 쓴다.
  *
- * VITE_ 접두사가 붙은 값은 빌드 결과물에 그대로 박힌다. 즉 이 토큰은 브라우저에서
- * 읽을 수 있다. 개발용 테스트 토큰에만 쓰고 배포 환경에는 절대 넣지 않는다.
+ * VITE_ 접두사가 붙은 값은 빌드 결과물에 그대로 박힌다. 그래서 개발 빌드에서만
+ * 읽는다. 운영 빌드에서는 로그인으로 받은 토큰만 쓴다.
  */
-let token = import.meta.env.VITE_BEARER_TOKEN ?? null
+// 개발 빌드에서만 읽는다. 조건 없이 두면 VITE_ 값이 운영 번들에 그대로 박혀
+// 누구나 토큰을 꺼내 쓸 수 있다.
+let token = import.meta.env.DEV ? (import.meta.env.VITE_BEARER_TOKEN ?? null) : null
 
 export function getAccessToken() {
   return token
