@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { PASS_STORAGE_KEY } from '@/features/boarding-pass/boarding-ticket/passStorage.js'
@@ -9,6 +9,13 @@ import qPlane from '@/shared/assets/boarding-pass/survey/q-plane.svg'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './SurveyPage.module.scss'
+
+function scrollDocumentToTop() {
+  window.scrollTo(0, 0)
+  document.documentElement.scrollTop = 0
+  document.body.scrollTop = 0
+  document.querySelector('[data-device-screen]')?.firstElementChild?.scrollTo?.(0, 0)
+}
 
 /**
  * 설문 Q1~Q3 (24)~(29).
@@ -21,6 +28,10 @@ export function Component() {
   const [answers, setAnswers] = useState({})
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState(null)
+
+  useLayoutEffect(() => {
+    scrollDocumentToTop()
+  }, [step, loading])
 
   useEffect(() => {
     let cancelled = false

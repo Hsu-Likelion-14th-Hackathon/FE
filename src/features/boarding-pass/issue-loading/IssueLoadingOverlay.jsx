@@ -11,7 +11,7 @@ const PROGRESS_STAGES = [0, 37.037, 100]
 /**
  * 설문 최종 제출 후 발급 API 대기 중 풀스크린 오버레이 (30)~(32).
  * 로딩 링은 LoadingRingSpinner로 공용한다.
- * 모바일에서는 동적 뷰포트(100dvh)를 채워 안드로이드 하단 바가 접혀도 흰 여백이 보이지 않게 한다.
+ * 모바일에서는 큰 뷰포트(100lvh)를 채워 안드로이드 하단 바가 접혀도 흰 여백이 보이지 않게 한다.
  * 전환 타이밍은 SurveyPage의 API 완료 네비게이션을 그대로 유지한다.
  */
 function IssueLoadingOverlay() {

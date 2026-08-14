@@ -3,8 +3,9 @@
 .stage {
   position: relative;
   display: flex;
-  flex: 1;
+  flex: 1 0 auto;
   flex-direction: column;
+  min-height: calc(var(--mcm-viewport-stable) - var(--mcm-header-height) - var(--mcm-safe-top));
   overflow: hidden;
   /* Figma 492:4942 Rectangle 125 */
   background-color: #41210b;
