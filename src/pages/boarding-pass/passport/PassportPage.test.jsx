@@ -434,9 +434,9 @@ describe('PassportPage', () => {
     expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
 
     // 키보드 사용자도 같은 표시를 받아야 한다.
-    fireEvent.focus(button)
+    act(() => button.focus())
     expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
-    fireEvent.blur(button)
+    act(() => button.blur())
     expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
   })
 
@@ -446,17 +446,55 @@ describe('PassportPage', () => {
     const button = screen.getByRole('button', { name: /이름 .* 수정/ })
 
     // 키보드로 이름에 머문 채 마우스가 스쳐 지나간 상황.
-    fireEvent.focus(button)
+    act(() => button.focus())
     fireEvent.pointerEnter(button)
     fireEvent.pointerLeave(button)
     expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
 
     // 반대로 마우스를 올려 둔 채 포커스만 다른 곳으로 간 상황.
     fireEvent.pointerEnter(button)
-    fireEvent.blur(button)
+    act(() => button.blur())
     expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
 
     fireEvent.pointerLeave(button)
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+  })
+
+  it('지면을 넘겼다 돌아오면 남은 호버 상태를 들고 있지 않는다', () => {
+    renderPassport()
+    const next = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(next)
+
+    fireEvent.pointerEnter(screen.getByRole('button', { name: /이름 .* 수정/ }))
+    expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
+
+    // 손을 올린 채 키보드로 넘기면 버튼이 사라져 pointerleave가 오지 않는다.
+    fireEvent.click(next)
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '이전 단계' }))
+
+    // 돌아온 뒤 포커스만 스쳤을 뿐인데 지난 호버가 남아 표시가 붙어 있었다.
+    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+    act(() => button.focus())
+    act(() => button.blur())
+    expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
+  })
+
+  it('이름 수정 시트를 닫으면 남은 호버 표시를 거둔다', async () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+
+    // 손을 올린 채로 누르면 시트가 열리고 지면은 inert가 된다. 포인터
+    // 이벤트가 끊겨 pointerleave가 오지 않는다.
+    fireEvent.pointerEnter(button)
+    fireEvent.click(button)
+    expect(screen.getByRole('dialog', { name: '여권 이름 수정' })).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    // 닫히면 초점이 이름 버튼으로 돌아온다. 그래도 손이 없으면 표시는 없다.
+    await waitFor(() => expect(button).toHaveFocus())
     expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
   })
 
@@ -466,7 +504,7 @@ describe('PassportPage', () => {
     const button = screen.getByRole('button', { name: /이름 .* 수정/ })
     const strong = button.querySelector('strong')
 
-    fireEvent.focus(button)
+    act(() => button.focus())
     expect(screen.getByTestId('passport-name-cue')).toHaveStyle({ left: '0px' })
 
     // 지면이 줄면 이름도 움직인다. 좌표를 그대로 두면 밑줄만 남는다.

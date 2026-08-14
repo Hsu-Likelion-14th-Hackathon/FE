@@ -81,6 +81,10 @@ export function Component() {
   }
   const dialogRef = useRef(null)
   const sheetTriggerRef = useRef(null)
+  // 시트를 닫으며 초점을 트리거로 되돌리는 중인지. 그때 들어온 초점은 사용자가
+  // 이름으로 옮겨 온 것이 아니라 우리가 돌려놓은 것이라, 수정 표시를 켜면
+  // 손을 뗀 뒤에도 밑줄이 남는다.
+  const restoringFocus = useRef(false)
 
   const openSheet = (nextSheet, trigger) => {
     if (!sheet) sheetTriggerRef.current = trigger
@@ -92,7 +96,11 @@ export function Component() {
     setNameRejected(false)
     setNameBlocked(false)
     composingName.current = false
-    requestAnimationFrame(() => sheetTriggerRef.current?.focus())
+    restoringFocus.current = true
+    requestAnimationFrame(() => {
+      sheetTriggerRef.current?.focus()
+      restoringFocus.current = false
+    })
   }
   useEffect(() => {
     if (!sheet) return undefined
@@ -154,6 +162,8 @@ export function Component() {
             renderStep={(visibleStep, visibleProfile, visibleStamps, helpers) => (
               <PassportSpread
                 step={visibleStep}
+                sheetOpen={Boolean(sheet)}
+                isRestoringFocus={() => restoringFocus.current}
                 profile={visibleProfile}
                 stamps={visibleStamps}
                 onNameHover={helpers?.onNameHover}
@@ -284,6 +294,8 @@ export function Component() {
  */
 function PassportSpread({
   step,
+  sheetOpen,
+  isRestoringFocus,
   profile,
   stamps = [],
   onNameHover,
@@ -301,6 +313,15 @@ function PassportSpread({
     const { hover, focus } = nameActive.current
     onNameHover?.(hover || focus ? event.currentTarget.querySelector('strong') : null)
   }
+
+  // 버튼이 손 밑에서 사라지는 두 경우가 있다. 지면을 넘기면 통째로 없어지고,
+  // 시트가 열리면 inert가 되어 포인터 이벤트가 끊긴다. 둘 다 pointerleave가
+  // 오지 않아 hover가 켜진 채 남고, 돌아왔을 때 만진 적 없는 표시가 뜬다.
+  // 상태를 털고 표시도 함께 내린다.
+  useEffect(() => {
+    nameActive.current = { hover: false, focus: false }
+    onNameHover?.(null)
+  }, [onNameHover, sheetOpen, step])
 
   if (step === 0) {
     return (
@@ -360,6 +381,9 @@ function PassportSpread({
                 syncNameCue(event)
               }}
               onFocus={(event) => {
+                // 시트를 닫으면 초점이 여기로 돌아온다. 그건 사용자가 이름으로
+                // 온 것이 아니므로 표시를 켜지 않는다.
+                if (isRestoringFocus?.()) return
                 nameActive.current.focus = true
                 syncNameCue(event)
               }}
