@@ -7,7 +7,7 @@ import closeIcon from '@/assets/icons/state/close.svg'
 import creditDiamondIcon from '@/assets/icons/state/credit-diamond.svg'
 import uploadArrowIcon from '@/assets/icons/state/upload-arrow.svg'
 import pinkBagImage from '@/assets/images/products/diamant-soft-pink.webp'
-import { getProduct } from '@/shared/data/products.js'
+import { getProduct, getProductVariant } from '@/shared/data/products.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './TryOnPage.module.scss'
@@ -104,6 +104,8 @@ function UploadStage({ fileInputRef, fileName, onClose, onFileChange, onStartFit
 
 /** Figma (17-1) — 피팅이 끝난 뒤 결과와 상품 정보를 보여준다. */
 function ResultStage({ product, onClose, onDetail, onBag }) {
+  // 상품 그림은 대표 색상 안에 있다. product.image는 없는 필드다.
+  const productImage = product ? getProductVariant(product, product.cardVariantId)?.image : null
   return (
     <section className={`${styles.stage} ${styles.resultStage}`} aria-label="AI Fitting 결과">
       <span className={styles.monogram} aria-hidden="true" />
@@ -116,10 +118,7 @@ function ResultStage({ product, onClose, onDetail, onBag }) {
         <img src={closeIcon} alt="" />
       </button>
 
-      {/* 로딩 화면이 먼저 사라져 완료 안내가 전달되지 않는다. 여기서 알린다. */}
-      <p className={styles.resultTitle} role="status">
-        지금, 당신에게 맞는 형태
-      </p>
+      <p className={styles.resultTitle}>지금, 당신에게 맞는 형태</p>
 
       {/* 실제 피팅 이미지는 AI 연동 뒤에 들어온다. 지금은 자리만 잡아 둔다. */}
       <div className={styles.resultCard} role="img" aria-label="AI Fitting 결과 이미지 자리">
@@ -128,11 +127,11 @@ function ResultStage({ product, onClose, onDetail, onBag }) {
 
       <div className={styles.productCard}>
         <div className={styles.productThumb}>
-          <img src={product?.image ?? pinkBagImage} alt="" />
+          <img src={productImage ?? pinkBagImage} alt="" />
         </div>
         <div className={styles.productInfo}>
           <p className={styles.productName}>{product?.name ?? 'Diamant 비세토스 3D 참'}</p>
-          <p className={styles.productPrice}>{product?.price ?? '₩490,000'}</p>
+          <p className={styles.productPrice}>{product?.priceLabel ?? '₩490,000'}</p>
         </div>
         <div className={styles.productActions}>
           <button type="button" onClick={onDetail}>
@@ -215,9 +214,18 @@ export function Component() {
   const [fileName, setFileName] = useState('')
   // 결과 카드는 지금 보고 있는 상품을 보여줘야 한다. URL이 기준이다.
   const product = productId ? getProduct(productId) : null
-  // 설정이 도중에 켜져도 즉시 끝으로 간다. 상태로 두면 효과 안에서 값을 바꾸게 되고,
-  // 그러면 렌더가 연쇄로 돈다.
-  const shownProgress = prefersReducedMotion ? 100 : progress
+
+  // 진행 중에 설정이 켜지면 진행률을 끝으로 확정한다. 표시값만 바꾸면 설정을
+  // 다시 끄는 순간 남아 있던 진행률로 되돌아간다.
+  useEffect(() => {
+    const query = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+    if (!query) return undefined
+    const onChange = ({ matches }) => {
+      if (matches) setProgress(100)
+    }
+    query.addEventListener?.('change', onChange)
+    return () => query.removeEventListener?.('change', onChange)
+  }, [])
 
   useEffect(() => {
     if (phase !== 'loading' || prefersReducedMotion) return undefined
@@ -257,6 +265,11 @@ export function Component() {
     <div className={styles.page}>
       <StoreHeader />
       <h1 className="sr-only">상품 착용</h1>
+      {/* 내용이 채워진 채로 새로 붙는 live region은 읽히지 않는 경우가 있다.
+          처음부터 비워 두고 완료 시점에 문구만 채운다. */}
+      <span className="sr-only" role="status">
+        {phase === 'loading' && progress >= 100 ? 'AI Fitting 결과가 준비되었습니다.' : ''}
+      </span>
 
       {phase === 'upload' ? (
         <UploadStage
@@ -267,10 +280,10 @@ export function Component() {
           onStartFitting={startFitting}
         />
       ) : null}
-      {phase === 'loading' && shownProgress < 100 ? (
-        <LoadingStage progress={shownProgress} onClose={resetFitting} />
+      {phase === 'loading' && progress < 100 ? (
+        <LoadingStage progress={progress} onClose={resetFitting} />
       ) : null}
-      {phase === 'loading' && shownProgress >= 100 ? (
+      {phase === 'loading' && progress >= 100 ? (
         <ResultStage
           product={product}
           onClose={resetFitting}

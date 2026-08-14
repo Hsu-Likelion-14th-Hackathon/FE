@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { getProduct, getProductVariant } from '@/shared/data/products.js'
 import { Component } from './TryOnPage.jsx'
 
 function renderTryOn() {
@@ -87,7 +88,15 @@ describe('TryOnPage', () => {
       vi.advanceTimersByTime(80 * 25)
     })
 
+    // 이전 상품명이 없는지만 보면 가격과 그림이 틀린 것을 놓친다.
     const result = screen.getByRole('region', { name: 'AI Fitting 결과' })
-    expect(result).not.toHaveTextContent('Diamant 비세토스 3D 참')
+    const product = getProduct('mcm-002')
+    expect(result).toHaveTextContent(product.name)
+    expect(result).toHaveTextContent(product.priceLabel)
+    // 첫 img는 닫기 아이콘이라 상품 썸네일을 집어야 한다.
+    expect(result.querySelector('[class*=productThumb] img')).toHaveAttribute(
+      'src',
+      getProductVariant(product, product.cardVariantId).image,
+    )
   })
 })
