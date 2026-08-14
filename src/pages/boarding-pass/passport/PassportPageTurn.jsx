@@ -13,8 +13,10 @@ import bowRightSrc from '@/shared/assets/boarding-pass/passport/passport-bow-rig
 import coverSrc from '@/shared/assets/boarding-pass/passport/passport-cover.png'
 import emblemSrc from '@/shared/assets/boarding-pass/passport/passport-emblem.png'
 import stampBowSrc from '@/shared/assets/boarding-pass/passport/passport-stamp-bow.png'
-import pageLeftSrc from '@/shared/assets/boarding-pass/passport/passport-page-left.png'
-import pageRightSrc from '@/shared/assets/boarding-pass/passport/passport-page-right.png'
+// 내지는 알파가 필요해 새로 잘라 받았고, 설계(253.5x394)의 2배로 굽는 텍스처에
+// 맞춰 507x788로 넣었다. 같은 크기의 PNG는 한 장에 620KB라 WebP로 둔다.
+import pageLeftSrc from '@/shared/assets/boarding-pass/passport/passport-page-left.webp'
+import pageRightSrc from '@/shared/assets/boarding-pass/passport/passport-page-right.webp'
 import stampSrc from '@/shared/assets/boarding-pass/passport/passport-stamp.png'
 
 import observeResize from '@/shared/layout/observe-resize.js'
