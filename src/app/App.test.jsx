@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
 
@@ -271,10 +271,23 @@ describe('App', () => {
     renderRoute('/boarding-pass')
     const menuButton = await screen.findByRole('button', { name: '메뉴 열기' })
     const header = menuButton.closest('header')
-    // 조작 요소는 메뉴·로고·위시리스트·쇼핑백 4개뿐이어야 한다(검색이 생기면 5개가 된다).
-    // 타이틀 밴드의 점·마름모는 aria-hidden 장식이라 개수 검증 대상이 아니다.
-    expect(header.querySelectorAll('a, button')).toHaveLength(4)
+    // 조작 요소는 타이틀 밴드·메뉴·로고·위시리스트·쇼핑백 5개뿐이어야 한다
+    // (검색이 생기면 6개가 된다). 타이틀 밴드는 보딩패스로 들어가는 링크다.
+    // 밴드 안의 점·마름모는 aria-hidden 장식이라 개수 검증 대상이 아니다.
+    expect(header.querySelectorAll('a, button')).toHaveLength(5)
     expect(header.querySelector('[aria-label*="검색"]')).toBeNull()
+  })
+
+  it('타이틀 밴드를 누르면 보딩패스로 간다', async () => {
+    const router = renderRoute('/products')
+
+    // 흐르는 문구는 aria-hidden이라 링크 이름은 sr-only 텍스트가 맡는다.
+    const band = await screen.findByRole('link', { name: 'MCM BOARDING PASS' })
+    expect(band).toHaveAttribute('href', '/boarding-pass')
+
+    fireEvent.click(band)
+    // 라우터 이동은 비동기라 상태가 바로 바뀌지 않는다.
+    await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass'))
   })
 
   it('열린 메뉴 안에서 Tab 포커스를 순환한다', async () => {
