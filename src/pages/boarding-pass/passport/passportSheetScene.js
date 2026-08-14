@@ -17,6 +17,8 @@ import {
 
 import { createBendUniforms, createPaperMaterial } from './paperMaterial.js'
 
+/** 원근의 세기를 정하는 기준 화각. 지면 높이를 이 각으로 담는 거리에 카메라를 둔다. */
+const REFERENCE_FOV = 20
 /** 장 사이 z 간격. 장 폭에 대한 비율이라 화면 크기가 바뀌어도 두께감이 유지된다. */
 const LAYER_RATIO = 0.008
 /** 넘어가는 장이 아래 장을 스치지 않도록 들어 올리는 높이. */
@@ -50,7 +52,7 @@ export function createPassportSheets() {
 
   const scene = new Scene()
   // 원근을 얕게 둬야 정면 가독성이 유지되면서 넘어갈 때만 입체가 드러난다.
-  const camera = new PerspectiveCamera(20, 1, 0.1, 5000)
+  const camera = new PerspectiveCamera(REFERENCE_FOV, 1, 0.1, 5000)
 
   const key = new DirectionalLight(0xfff2e2, 2.1)
   key.position.set(-0.4, 1.0, 1.3)
@@ -128,10 +130,13 @@ export function createPassportSheets() {
       layout = { leafW, leafH }
 
       camera.aspect = w / h
-      // 보이는 세계 높이를 캔버스 픽셀 높이와 같게 둔다. 그래야 leafH가 곧
-      // 화면에 그려지는 픽셀 높이가 되어 DOM과 같은 값을 공유할 수 있다.
-      // 이전처럼 leafH/0.92로 두면 leafH가 약분되어 항상 캔버스의 92%가 그려졌다.
-      camera.position.set(0, 0, h / (2 * Math.tan((camera.fov * Math.PI) / 360)))
+      // 카메라 거리는 지면 높이로 정한다. 캔버스에 준 여유(넘어가는 종이가
+      // 나갈 공간)까지 거리에 반영하면 카메라가 멀어져 원근이 납작해진다.
+      const distance = leafH / (2 * Math.tan((REFERENCE_FOV * Math.PI) / 360))
+      // 화각은 캔버스 전체가 담기도록 넓힌다. 이러면 보이는 세계 높이가 캔버스
+      // 픽셀 높이와 같아져, leafH가 곧 그려지는 픽셀 높이가 된다.
+      camera.fov = (2 * Math.atan(h / (2 * distance)) * 180) / Math.PI
+      camera.position.set(0, 0, distance)
       camera.updateProjectionMatrix()
       place()
     },
