@@ -195,6 +195,31 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(router.state.location.pathname).toBe('/boarding-pass')
   })
 
+  it('티켓 시트는 막대 없이 스크롤하고 짧은 화면에서 티켓을 줄인다', () => {
+    renderPassport()
+    const next = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(next)
+    fireEvent.click(next)
+    fireEvent.click(next)
+    fireEvent.click(screen.getByRole('button', { name: '티켓 보기' }))
+
+    const sheet = screen.getByRole('dialog', { name: '탑승권' })
+    const style = window.getComputedStyle(sheet)
+
+    // 시트가 화면을 덮는 형태라 막대가 뜨면 둥근 모서리 위로 회색 띠가 지나간다.
+    expect(style.scrollbarWidth).toBe('none')
+    expect(style.overflowY).toBe('auto')
+
+    // 티켓은 접히지 않는 한 장이라 짧은 화면에서 넘친다. 배율과 시트 위치를
+    // 뷰포트에 묶어 둔다. 기준이 100svh라 주소창·툴바가 이미 반영된다.
+    expect(style.getPropertyValue('--ticket-scale')).toContain('--mcm-viewport-stable')
+    expect(style.getPropertyValue('--ticket-sheet-top')).toContain('--mcm-viewport-stable')
+    // 길이를 숫자로 나누면 clamp가 무효가 되어 transform이 통째로 버려진다.
+    expect(style.getPropertyValue('--ticket-scale')).toContain('423px')
+    // 비세토스 바탕은 jsdom이 다층 url() 배경을 풀지 않아 여기서 못 본다.
+    // 브라우저에서 확인했다.
+  })
+
   it('닫기 버튼을 본문보다 위에 둬 44px이 가려지지 않게 한다', () => {
     renderPassport()
 

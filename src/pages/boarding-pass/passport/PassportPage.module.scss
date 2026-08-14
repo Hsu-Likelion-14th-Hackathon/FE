@@ -530,11 +530,19 @@
   max-height: none;
   margin: 0 auto;
   overflow-y: auto;
+  /* 스크롤은 살리되 막대는 감춘다. 시트가 화면을 덮는 형태라 막대가 뜨면
+     둥근 모서리 위로 회색 띠가 지나간다. */
+  scrollbar-width: none;
   padding: 2rem max(1.25rem, calc((100% - 19.375rem) / 2)) max(2rem, var(--mcm-safe-bottom));
   border-radius: 1.875rem 1.875rem 0 0;
   background: #894a26;
   box-shadow: 0 -0.625rem 1.875rem rgba(0, 0, 0, 0.2);
 }
+/* 사파리·크롬은 scrollbar-width를 아직 안 받는 버전이 있어 함께 둔다. */
+.sheet::-webkit-scrollbar {
+  display: none;
+}
+
 .sheetTitle {
   margin: 0;
   color: #fff7d5;
@@ -553,7 +561,8 @@
    시트 색을 반투명으로 한 겹 덮는다. 덮개 0.7이면 문양이 #945830으로 앉아
    Figma와 같은 진하기가 된다(바탕 #894a26, 원본 문양 rgb(174,119,71) 역산). */
 .sheet-history,
-.sheet-name {
+.sheet-name,
+.sheet-ticket {
   background-image:
     linear-gradient(rgba(137, 74, 38, 0.7), rgba(137, 74, 38, 0.7)),
     url('@/shared/assets/boarding-pass/passport/bisepok.svg');
@@ -579,8 +588,43 @@
 .sheet-history-detail .historyCard {
   margin-top: 1.875rem;
 }
+/* 티켓은 접히지 않는 한 장이라 화면이 짧으면 시트를 넘친다. 390x844에서
+   카드(423px)가 딱 맞았으므로, 그보다 줄어든 만큼을 그대로 배율로 옮긴다.
+   기준은 --mcm-viewport-stable(100svh)이라 주소창·툴바가 떠 있는 상태를
+   이미 반영한다. 홈 인디케이터가 2rem 패딩보다 두꺼우면 그만큼 더 뺀다.
+   0.72 아래로는 글씨가 읽기 어려워, 그때부터는 스크롤에 맡긴다. */
+.sheet-ticket {
+  /* 화면이 짧으면 티켓을 더 줄이기 전에 시트를 위로 끌어올려 자리를 먼저
+     만든다. 글씨를 살리는 쪽이 낫다. 844에서는 원래 위치(8.875rem) 그대로다. */
+  --ticket-sheet-top: clamp(
+    3rem,
+    calc(8.875rem - (52.75rem - var(--mcm-viewport-stable)) * 0.9),
+    8.875rem
+  );
+  top: var(--ticket-sheet-top);
+
+  /* 시트 안쪽 여백과 제목까지 138px을 쓰고 남는 자리에 카드(423px)를 넣는다.
+     423px으로 나눠 무단위 비율을 만든다. 423으로 나누면 결과가 길이로 남아
+     clamp(0.72, <length>, 1)이 무효가 되고 transform 선언이 통째로 버려진다. */
+  --ticket-scale: clamp(
+    0.72,
+    calc(
+      (
+          var(--mcm-viewport-stable) - 141px - var(--ticket-sheet-top) -
+            138px - max(0px, calc(var(--mcm-safe-bottom) - 2rem))
+        ) /
+        423px
+    ),
+    1
+  );
+}
+
 .sheet-ticket > :last-child {
   margin-top: 0.375rem;
+  transform: scale(var(--ticket-scale));
+  transform-origin: top center;
+  /* 줄인 만큼 아래에 빈 자리가 남는다. 카드 설계 높이(423px)에 비례해 걷어낸다. */
+  margin-bottom: calc((var(--ticket-scale) - 1) * 26.4375rem);
 }
 .dimmed {
   filter: brightness(0.4);
