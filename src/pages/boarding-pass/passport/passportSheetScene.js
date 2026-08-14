@@ -20,7 +20,7 @@ import { createBendUniforms, createPaperMaterial } from './paperMaterial.js'
 /** 원근의 세기를 정하는 기준 화각. 지면 높이를 이 각으로 담는 거리에 카메라를 둔다. */
 const REFERENCE_FOV = 20
 /** 장 사이 z 간격. 장 폭에 대한 비율이라 화면 크기가 바뀌어도 두께감이 유지된다. */
-const LAYER_RATIO = 0.008
+const LAYER_RATIO = 0.012
 /** 넘어가는 장이 아래 장을 스치지 않도록 들어 올리는 높이. */
 const LIFT_RATIO = 0.043
 
@@ -136,6 +136,11 @@ export function createPassportSheets() {
       // 화각은 캔버스 전체가 담기도록 넓힌다. 이러면 보이는 세계 높이가 캔버스
       // 픽셀 높이와 같아져, leafH가 곧 그려지는 픽셀 높이가 된다.
       camera.fov = (2 * Math.atan(h / (2 * distance)) * 180) / Math.PI
+      // near를 0.1로 두면 카메라가 1000 남짓 떨어진 이 장면에서 깊이 정밀도가
+      // 바닥나, 2단위 간격으로 쌓인 장들의 앞뒤가 뒤집힌다. 화면 크기에 따라
+      // 거리와 간격이 달라져 어떤 장이 이길지도 달라졌다.
+      camera.near = distance * 0.5
+      camera.far = distance * 2
       camera.position.set(0, 0, distance)
       camera.updateProjectionMatrix()
       place()
