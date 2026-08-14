@@ -164,13 +164,15 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     const surface = viewport?.querySelector('[data-passport-surface]')
     if (!viewport || !host || !surface) return null
     // 캔버스는 stage 패딩 밖까지 넓어져 있으므로 그 크기를 기준으로 삼는다.
-    const viewportRect = host.getBoundingClientRect()
-    // surface는 이미 배율이 걸려 있어 그 크기를 다시 재면 값이 순환한다.
-    // 캔버스 높이가 곧 지면이 차지할 높이이므로 그것 하나만 기준으로 삼는다.
+    const hostRect = host.getBoundingClientRect()
+    const viewportRect = viewport.getBoundingClientRect()
+    // 캔버스는 넘어가는 종이가 나갈 여유까지 포함해 지면보다 크다. 지면 높이는
+    // viewport에서 온다. surface는 이미 배율이 걸려 있어 다시 재면 순환한다.
     const leafH = Math.max(viewportRect.height, 1)
     return {
-      width: Math.max(viewportRect.width, 1),
-      height: leafH,
+      // 캔버스 버퍼 크기
+      width: Math.max(hostRect.width, 1),
+      height: Math.max(hostRect.height, 1),
       leafH,
       // 장은 설계 비율을 지킨다. 높이가 정해지면 폭도 따라온다.
       leafW: (leafH * SHEET_W) / SHEET_H,
@@ -184,15 +186,17 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
    * 버퍼를 다시 잡으므로 넘김 도중 매 프레임 재할당이 일어난다.
    */
   const fitToBox = useCallback(() => {
-    const sheets = bookRef.current
     const host = canvasHostRef.current
     const box = measure()
-    if (!sheets || !box || !host) return
+    if (!box || !host) return
 
-    sheets.setSize(box.width, box.height, { leafW: box.leafW, leafH: box.leafH })
     // 내지 좌표는 설계 394 기준 rem이라 화면이 짧아 지면이 줄면 그림과 어긋난다.
-    // 오버레이 전체를 같은 배율로 줄이도록 값을 넘긴다.
+    // 이 계산은 WebGL 성공 여부와 무관하다. 줄이지 않으면 reduced-motion이나
+    // WebGL 실패로 정적 화면을 쓸 때 394px 지면이 그대로 남아 아래 내비게이션과
+    // 겹친다.
     host.parentElement?.style.setProperty('--passport-scale', String(box.leafH / SHEET_H))
+
+    bookRef.current?.setSize(box.width, box.height, { leafW: box.leafW, leafH: box.leafH })
   }, [measure])
 
   const drawFrame = useCallback((turned) => {
@@ -358,12 +362,14 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
   // 기존 버퍼가 CSS로 늘어나 흐려진다.
   useEffect(() => {
     const host = canvasHostRef.current
-    if (rendererMode !== 'ready' || !host) return undefined
+    if (!host) return undefined
+    // 배율은 렌더러가 없어도 맞춰야 한다. 그림 다시 그리기만 렌더러 몫이다.
+    fitToBox()
     return observeResize(host, () => {
       fitToBox()
-      drawFrame(turnRef.current)
+      if (bookRef.current) drawFrame(turnRef.current)
     })
-  }, [drawFrame, fitToBox, rendererMode])
+  }, [drawFrame, fitToBox])
 
   const resetPointer = (event) => {
     pointerRef.current = { ...IDLE_POINTER }

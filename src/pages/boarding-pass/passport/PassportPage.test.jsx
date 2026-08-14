@@ -275,8 +275,14 @@ describe('PassportPage', () => {
     expect(progress).toHaveAttribute('aria-valuetext', '2단계 / 4단계')
 
     const products = screen.getByRole('button', { name: '제품 보러가기' })
-    expect(window.getComputedStyle(products).minHeight).toBe('2.75rem')
-    expect(window.getComputedStyle(products).minWidth).toBe('2.75rem')
+    // 지면이 줄면 안쪽 버튼도 같이 줄어든다. 배율의 역수를 곱해 화면에서
+    // 차지하는 크기를 44px로 유지한다.
+    expect(window.getComputedStyle(products).minHeight).toBe(
+      'calc(2.75rem / var(--passport-scale, 1))',
+    )
+    expect(window.getComputedStyle(products).minWidth).toBe(
+      'calc(2.75rem / var(--passport-scale, 1))',
+    )
     fireEvent.click(products)
     await waitFor(() => expect(router.state.location.pathname).toBe('/products'))
   })

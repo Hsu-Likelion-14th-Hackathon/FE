@@ -9,7 +9,8 @@
   /* 캔버스 높이가 곧 지면 높이다. 여백을 안에 섞으면 DOM과 WebGL이 서로 다른
      값을 쓰게 되므로 margin으로 밖에 둔다. */
   height: min(calc(79.5vw * 394 / 310), 24.625rem, var(--passport-h));
-  margin-top: 2.25rem;
+  /* 지면 위 간격은 전부 여기서 준다. 캔버스 높이에 섞으면 DOM만 밀린다. */
+  margin-top: calc(2.25rem + var(--passport-gap-mid));
   flex: 0 0 auto;
   overflow: visible;
   touch-action: pan-y;
@@ -25,7 +26,9 @@
 .bookLayer {
   position: absolute;
   z-index: 1;
-  inset: 0 -1.25rem;
+  /* 넘어가는 종이는 들리고 휘면서 지면 밖으로 나간다. 캔버스를 지면에 딱
+     맞추면 그 부분이 잘리므로 위아래로도 여유를 준다. */
+  inset: -2.5rem -1.25rem;
   pointer-events: none;
 }
 
@@ -67,7 +70,7 @@
 @media (max-width: 22rem) {
   .viewport {
     height: min(calc(79.5vw * 394 / 310), 24.625rem, var(--passport-h));
-    margin-top: 1.25rem;
+    margin-top: calc(1.25rem + var(--passport-gap-mid));
   }
 
   .viewport[data-open='true'] {

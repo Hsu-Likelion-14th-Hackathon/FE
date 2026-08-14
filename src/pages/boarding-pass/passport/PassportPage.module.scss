@@ -128,20 +128,24 @@
   line-height: 1.25rem;
 }
 
+/* 이 클래스는 캔버스 위에 겹치는 지면에 붙는다. 여기에 세로 여백을 주면
+   캔버스에는 없는 간격이 DOM에만 생겨 그림과 클릭 영역이 어긋난다.
+   카피와의 간격은 바깥(.viewport)이 맡는다. */
 .passport {
   position: relative;
   flex: 0 0 auto;
-  margin-top: var(--passport-gap-mid);
   overflow: hidden;
   background: transparent;
 }
 
-/* Figma 52:18570 — 표지 310×394가 390px 화면 기준 x=40, 즉 좌우 40px 균등. */
+/* 낱장은 한 책등에 묶여 폭이 같다. 표지만 310으로 두면 WebGL(253.5)과
+   갈라져, WebGL 성공 여부에 따라 첫 화면 크기가 55px씩 달라진다. */
 .coverPassport {
-  /* 세로가 모자라면 비율을 지킨 채 폭도 함께 줄인다. */
-  width: min(79.5vw, 19.375rem, calc(var(--passport-h) * 310 / 394));
+  width: 15.84375rem;
   margin-inline: auto;
-  aspect-ratio: 310 / 394;
+  aspect-ratio: 253.5 / 394;
+  transform: scale(var(--passport-scale, 1));
+  transform-origin: top center;
 }
 
 .openPassport {
@@ -152,6 +156,9 @@
   width: 15.84375rem;
   aspect-ratio: 253.5 / 394;
   transform: scale(var(--passport-scale, 1));
+  /* 캔버스는 지면을 화면 위쪽부터 채운다. 가운데를 기준으로 줄이면 DOM만
+     아래로 밀려 내려간다. */
+  transform-origin: top center;
   margin-inline: auto;
   align-self: center;
   isolation: isolate;
@@ -284,8 +291,8 @@
 }
 
 .profileFooter button {
-  min-width: 2.75rem;
-  min-height: 2.75rem;
+  /* 최소 크기는 위 역배율 규칙이 정한다. 여기서 다시 쓰면 그게 덮여
+     배율이 걸린 만큼 작아진다(320/394에서 35.7px). */
   margin-block: -0.75rem;
   color: #fff7d5;
   font-size: 0.5rem;
