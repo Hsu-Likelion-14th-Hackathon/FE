@@ -17,15 +17,9 @@ import {
   guideFloorFromStep,
   guideFloorStep,
 } from '@/shared/layout/boardingPassSteps.js'
+import scrollDocumentToTop from '@/shared/layout/scrollDocumentToTop.js'
 
 import styles from './GuidePage.module.scss'
-
-function scrollDocumentToTop() {
-  window.scrollTo(0, 0)
-  document.documentElement.scrollTop = 0
-  document.body.scrollTop = 0
-  document.querySelector('[data-device-screen]')?.firstElementChild?.scrollTo?.(0, 0)
-}
 
 /**
  * 여행 가이드 (44)(45)(46)(47)(47-1).
