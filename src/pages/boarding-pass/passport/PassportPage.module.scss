@@ -717,12 +717,14 @@ button.historyCard {
 /* 이름은 눌러서 고칠 수 있다. 캔버스가 글자를 그리고 이 DOM은 투명하므로,
    버튼 자체는 보이지 않고 클릭만 받는다. 보이는 편집칸은 시트로 꺼낸다. */
 .nameButton {
-  /* 글자 줄 높이가 16px이라 그대로 두면 손가락으로 누르기 어렵다. 판을 44px로
-     넓히고 그만큼 음수 여백으로 당겨, 보이는 배치는 그대로 둔다. */
+  /* 지면이 줄면 안쪽 요소도 같이 줄어 44px이 무너진다. 다른 여권 버튼처럼
+     배율의 역수를 곱해 화면에서 차지하는 크기를 지킨다. */
   display: inline-grid;
-  min-height: 2.75rem;
+  min-width: calc(2.75rem / var(--passport-scale, 1));
+  min-height: calc(2.75rem / var(--passport-scale, 1));
   align-items: center;
-  margin-block: -0.875rem;
+  justify-items: start;
+  margin-block: calc(-0.875rem / var(--passport-scale, 1));
   padding: 0;
   border: 0;
   background: transparent;
