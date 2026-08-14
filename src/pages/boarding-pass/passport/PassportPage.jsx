@@ -147,10 +147,10 @@ export function Component() {
           <h2 id="passport-title" className={styles.srOnly}>
             MCM PASSPORT
           </h2>
+          {/* 안내 두 줄은 랜딩에서 이미 읽은 문구다. 여기서는 여권 자체가
+              주인공이라, 걷어낸 자리를 지면 크기로 돌려 글자를 키운다. */}
           <div className={styles.introCopy}>
             <p>MCM BOARDING PASS</p>
-            <strong>당신의 MCM 비행에 완벽한 맞춤형 동선을 추천합니다</strong>
-            <span>이 행사는 MCM HAUS 매장 기반으로 진행됩니다</span>
           </div>
           <PassportPageTurn
             step={step}

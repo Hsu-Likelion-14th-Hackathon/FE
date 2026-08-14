@@ -6,39 +6,40 @@
      화면 안에 얌전히 들어와 그 의도가 깨진다. 그래서 여권은 마지막에 건드리고,
      부족분은 주변 여백이 먼저 흡수한다.
 
-     746px 아래부터 모자라기 시작한다. 설계에는 그만큼 여유가 있다. */
-  --height-deficit: max(0px, calc(46.625rem - var(--mcm-viewport-stable)));
+     안내 두 줄을 걷어내 카피가 세 줄에서 한 줄이 되면서, 모자라기 시작하는
+     지점도 746에서 682px로 내려갔다. */
+  --height-deficit: max(0px, calc(42.625rem - var(--mcm-viewport-stable)));
 
-  /* 줄일 수 있는 여백은 모두 83px다. 각자 제 몫만큼 나눠 부담한다. */
-  --passport-gap-top: max(1.25rem, calc(4.0625rem - var(--height-deficit) * 0.542));
-  --passport-gap-mid: max(0.75rem, calc(2.25rem - var(--height-deficit) * 0.289));
-  --intro-gap: max(0.25rem, calc(0.5rem - var(--height-deficit) * 0.048));
-  --intro-note-gap: max(0.375rem, calc(1rem - var(--height-deficit) * 0.12));
+  /* 여백은 세 줄짜리 카피를 전제로 잡혀 있었다. 한 줄만 남은 지금은 과해서,
+     회수한 만큼을 지면 크기로 돌린다.
+     줄일 수 있는 여백은 모두 20px다. 각자 제 몫만큼 나눠 부담한다. */
+  --passport-gap-top: max(1.25rem, calc(2rem - var(--height-deficit) * 0.6));
+  --passport-gap-mid: max(0.75rem, calc(1.25rem - var(--height-deficit) * 0.4));
   /* 지면 바로 위 여백. 캔버스 밖에 있으므로 예산에도 따로 넣어야 한다. */
-  --passport-lead: 2.25rem;
+  --passport-lead: 1.25rem;
   /* 넘김 버튼 줄 위 여백. 산식과 실제 CSS가 같은 값을 쓰도록 변수로 묶는다. */
   --passport-nav-gap: 1.5rem;
 
-  /* 13.4375rem은 줄일 수 없는 몫 — 헤더 97, 카피 세 줄 74, 아래 넘김 버튼 44.
+  /* 10.9375rem은 줄일 수 없는 몫 — 헤더 97, 카피 한 줄 34, 아래 넘김 버튼 44.
      여기에 지면 위 여백과 넘김 줄 위 여백, 그리고 헤더가 쓰는 safe-top까지
      빼야 한다. 캔버스 높이 안에 섞여 있거나 산식에서 누락돼 있던 값들이라
      화면이 짧으면 넘김 버튼이 잘려 나갔다.
      여백을 다 걷어내고도 모자라면 그제야 여권이 줄어든다. 하한은 16rem이다.
      20rem으로 두면 320×568 같은 화면에서 넘김 버튼이 잘렸다. 작아도 보이는
-     편이 잘려 못 누르는 것보다 낫다. 하한에 닿으면 다시 잘리지만 그런 화면은
-     가로 모드처럼 극단적인 경우뿐이다. */
+     편이 잘려 못 누르는 것보다 낫다.
+
+     상한 33.25rem은 설계 높이(394)가 아니라 폭에서 나온 값이다. 지면 폭은
+     253.5 * (높이/394)라 88vw를 넘지 않는 선이 390 화면에서 533px이다.
+     설계 크기에 묶어 두면 남는 세로 공간을 못 쓰고 글자가 작은 채로 남는다. */
   --passport-h: max(
     16rem,
     min(
-      24.625rem,
+      33.25rem,
       calc(
         var(--mcm-viewport-stable) -
-          13.4375rem - var(--mcm-safe-top) - var(--passport-lead) - var(--passport-nav-gap) - var(
+          10.9375rem - var(--mcm-safe-top) - var(--passport-lead) - var(--passport-nav-gap) - var(
             --passport-gap-top
-          ) - var(--passport-gap-mid) - var(--intro-gap) - var(--intro-note-gap) - max(
-            0.75rem,
-            var(--mcm-safe-bottom)
-          )
+          ) - var(--passport-gap-mid) - max(0.75rem, var(--mcm-safe-bottom))
       )
     )
   );
@@ -122,21 +123,6 @@
   font-family: var(--mcm-font-brand);
   font-size: 1.75rem;
   line-height: 2.125rem;
-}
-
-.introCopy strong {
-  margin-top: var(--intro-gap);
-  /* Figma 52:18555 — Pretendard SemiBold. 700을 쓰면 폰트에 없어 합성 볼드가 된다. */
-  font-weight: 600;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-}
-
-.introCopy span {
-  margin-top: var(--intro-note-gap);
-  color: #807066;
-  font-size: 0.75rem;
-  line-height: 1.25rem;
 }
 
 /* 이 클래스는 캔버스 위에 겹치는 지면에 붙는다. 여기에 세로 여백을 주면

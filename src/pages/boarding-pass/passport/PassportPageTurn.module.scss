@@ -8,7 +8,10 @@
   width: 100%;
   /* 캔버스 높이가 곧 지면 높이다. 여백을 안에 섞으면 DOM과 WebGL이 서로 다른
      값을 쓰게 되므로 margin으로 밖에 둔다. */
-  height: min(calc(79.5vw * 394 / 310), 24.625rem, var(--passport-h));
+  /* 지면 폭은 253.5 * (높이/394)다. 식에 310을 쓰던 건 표지 폭을 253.5로
+     통일하기 전 값이라, 실제로는 화면의 65%만 쓰고 있었다. 88vw를 상한으로
+     잡아 남는 폭까지 쓴다. */
+  height: min(calc(88vw * 394 / 253.5), 33.25rem, var(--passport-h));
   /* 지면 위 간격은 전부 여기서 준다. 캔버스 높이에 섞으면 DOM만 밀린다. */
   margin-top: calc(var(--passport-lead, 2.25rem) + var(--passport-gap-mid));
   flex: 0 0 auto;
@@ -71,7 +74,7 @@
 
 @media (max-width: 22rem) {
   .viewport {
-    height: min(calc(79.5vw * 394 / 310), 24.625rem, var(--passport-h));
+    height: min(calc(88vw * 394 / 253.5), 33.25rem, var(--passport-h));
     margin-top: calc(var(--passport-lead, 1.25rem) + var(--passport-gap-mid));
   }
 
