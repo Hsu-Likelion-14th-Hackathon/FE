@@ -40,13 +40,19 @@ function paintBase(ctx, w, h, seed = 0) {
  * 펼침 한 장을 코드로 잘라 쓰면 좌우가 뒤바뀌거나 여백이 어긋나므로 분할본을 쓴다.
  */
 function paintSpread(ctx, w, h, assets, side) {
-  const image = side === 'left' ? assets.pageLeft : assets.pageRight
+  // 낱장은 오른쪽 지면만 보여준다. 내용이 있는 면은 오른쪽 지면 그림 위에
+  // 그리고, 빈 뒷면만 왼쪽 지면 그림을 쓴다.
+  const image = side === 'left' || side === 'sheetBack' ? assets.pageLeft : assets.pageRight
   if (!image) return
   ctx.drawImage(image, 0, 0, w, h)
 }
 
-/** 접지선(안쪽) 그림자. side가 'left'면 오른쪽 가장자리가 어두워진다. */
+/**
+ * 접지선(안쪽) 그림자. side가 'left'면 오른쪽 가장자리가 어두워진다.
+ * 낱장('sheet')은 제본이 없으므로 그림자도 없다.
+ */
 function paintGutter(ctx, w, h, side) {
+  if (side === 'sheet' || side === 'sheetBack') return
   const from = side === 'left' ? w : 0
   const to = side === 'left' ? w - 46 : 46
   const gradient = ctx.createLinearGradient(from, 0, to, 0)
@@ -278,6 +284,8 @@ const PAINTERS = {
   journey: drawJourney,
   blankLeft: (ctx, w, h, data) => drawBlank(ctx, w, h, 'left', data.assets),
   blankRight: (ctx, w, h, data) => drawBlank(ctx, w, h, 'right', data.assets),
+  // 낱장의 뒷면. 제본 그림자 없이 종이결만 남는다.
+  blankSheet: (ctx, w, h, data) => drawBlank(ctx, w, h, 'sheetBack', data.assets),
 }
 
 /**
@@ -287,8 +295,9 @@ const PAINTERS = {
  */
 // 페이지는 화면에서 약 253px로 그려진다. dpr 2 기준 506px면 충분해 2배로 굽는다.
 export function paintFace(face, data, side = 'left', pixelRatio = 2) {
-  const isCover = face === 'cover'
-  const width = isCover ? COVER_W : PAGE_W
+  // 낱장은 한 책등에 묶여 폭이 같다. 펼침에서만 표지가 따로 넓다.
+  const isSheet = side === 'sheet' || side === 'sheetBack'
+  const width = isSheet ? PAGE_W : face === 'cover' ? COVER_W : PAGE_W
   const height = PAGE_H
   const canvas = document.createElement('canvas')
   canvas.width = Math.round(width * pixelRatio)
@@ -310,6 +319,25 @@ export function paintFace(face, data, side = 'left', pixelRatio = 2) {
   paint(ctx, width, height, { ...data, side })
   return canvas
 }
+
+/**
+ * 한 장 모드에서 단계마다 세울 면.
+ *
+ * 표지는 310, 내지는 253.5로 폭이 다르다. 내지 좌표가 펼침 507의 절반을
+ * 기준으로 잡혀 있어서다. 실제 여권도 표지가 내지를 감싸므로 그대로 둔다.
+ */
+export const SHEET_FACES = ['cover', 'profile', 'stamps', 'journey']
+/** 각 장의 뒷면. 실제 여권처럼 내용 없이 종이결만 보인다. */
+export const SHEET_BACK = 'blankSheet'
+
+/**
+ * 낱장 한 면의 설계 크기.
+ *
+ * 한 책등에 묶인 장들이라 폭을 통일한다. 표지 페인터가 폭에 비례해 그리므로
+ * 내지 폭(253.5)에 맞춰도 표지 배치가 흐트러지지 않는다.
+ */
+export const SHEET_W = PAGE_W
+export const SHEET_H = PAGE_H
 
 /** step(펼침 장면) → 좌·우 면 구성. 표지는 왼쪽 없이 단독으로 선다. */
 export function facesForStep(step) {

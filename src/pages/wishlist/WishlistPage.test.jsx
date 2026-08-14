@@ -23,7 +23,8 @@ describe('WishlistPage', () => {
     expect(tabs.map((tab) => tab.textContent)).toEqual(['위시리스트', '쇼핑백'])
   })
 
-  it('선택된 위시리스트 탭만 주황 배경으로 표시한다', () => {
+  it('보고 있는 탭은 배경색 그대로 두고 반대쪽을 회색 박스로 눌러 둔다', () => {
+    // Figma 71:1842 — 활성이 도려낸 것처럼 남고 비활성이 회색 박스다.
     renderWishlist()
 
     const tabs = within(screen.getByRole('navigation', { name: '쇼핑백과 위시리스트' }))
@@ -31,12 +32,11 @@ describe('WishlistPage', () => {
     const cartTab = tabs.getByRole('link', { name: '쇼핑백' })
 
     expect(wishlistTab).toHaveAttribute('aria-current', 'page')
-    expect(window.getComputedStyle(wishlistTab).color).toBe('var(--mcm-color-canvas)')
-    expect(window.getComputedStyle(wishlistTab).backgroundColor).toBe(
-      'var(--mcm-color-brand-brown)',
-    )
-    expect(window.getComputedStyle(cartTab).color).toBe('var(--mcm-color-ink)')
-    expect(window.getComputedStyle(cartTab).backgroundColor).toBe('var(--mcm-color-canvas)')
+    expect(window.getComputedStyle(wishlistTab).color).toBe('var(--mcm-color-brand-brown)')
+    expect(window.getComputedStyle(wishlistTab).backgroundColor).toBe('var(--mcm-color-canvas)')
+    expect(window.getComputedStyle(cartTab).color).toBe('var(--mcm-color-muted)')
+    // jsdom이 hex를 rgb로 정규화한다.
+    expect(window.getComputedStyle(cartTab).backgroundColor).toBe('rgb(230, 230, 230)')
   })
 
   it('세 상품을 제거하면 빈 위시리스트 상태로 전환한다', () => {

@@ -252,7 +252,10 @@ describe('PassportPage', () => {
     const profile = openPassport.querySelector('h3').parentElement
     const openImageStyle = window.getComputedStyle(openImage)
 
-    expect(window.getComputedStyle(openPassport).width).toBe('31.6875rem')
+    // 낱장 설계 크기를 그대로 두고 --passport-scale로 통째로 줄인다.
+    // 내지 좌표가 394 기준 rem이라 폭만 줄이면 안쪽 버튼이 그림과 어긋난다.
+    expect(window.getComputedStyle(openPassport).width).toBe('15.84375rem')
+    expect(window.getComputedStyle(openPassport).transform).toBe('scale(var(--passport-scale, 1))')
     expect(window.getComputedStyle(openPassport).isolation).toBe('isolate')
     expect(openImageStyle.position).toBe('absolute')
     expect(openImageStyle.maxWidth).toBe('none')
@@ -272,8 +275,14 @@ describe('PassportPage', () => {
     expect(progress).toHaveAttribute('aria-valuetext', '2단계 / 4단계')
 
     const products = screen.getByRole('button', { name: '제품 보러가기' })
-    expect(window.getComputedStyle(products).minHeight).toBe('2.75rem')
-    expect(window.getComputedStyle(products).minWidth).toBe('2.75rem')
+    // 지면이 줄면 안쪽 버튼도 같이 줄어든다. 배율의 역수를 곱해 화면에서
+    // 차지하는 크기를 44px로 유지한다.
+    expect(window.getComputedStyle(products).minHeight).toBe(
+      'calc(2.75rem / var(--passport-scale, 1))',
+    )
+    expect(window.getComputedStyle(products).minWidth).toBe(
+      'calc(2.75rem / var(--passport-scale, 1))',
+    )
     fireEvent.click(products)
     await waitFor(() => expect(router.state.location.pathname).toBe('/products'))
   })

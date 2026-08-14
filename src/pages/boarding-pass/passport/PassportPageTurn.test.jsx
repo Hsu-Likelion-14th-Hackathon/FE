@@ -11,19 +11,21 @@ const rendererControl = vi.hoisted(() => ({
   setFaces: vi.fn(),
   dispose: vi.fn(),
   cancelFrame: vi.fn(),
+  // ResizeObserver 대역이 쓴다. 없으면 정리 단계에서 undefined를 부른다.
+  disconnect: vi.fn(),
   canvas: null,
 }))
 
 // WebGL은 jsdom에 없으므로 종이 렌더러를 통째로 대역으로 바꾼다.
-vi.mock('./passportBookScene.js', () => ({
-  createPassportBook: () => {
+vi.mock('./passportSheetScene.js', () => ({
+  createPassportSheets: () => {
     if (rendererControl.fail) throw new Error('renderer failed')
     const canvas = document.createElement('canvas')
     rendererControl.canvas = canvas
     return {
       canvas,
       setSize: rendererControl.setSize,
-      setPages: rendererControl.setFaces,
+      setSheets: rendererControl.setFaces,
       setTurn: rendererControl.render,
       render: rendererControl.render,
       dispose: rendererControl.dispose,
@@ -77,6 +79,7 @@ beforeEach(() => {
   rendererControl.setFaces.mockReset()
   rendererControl.dispose.mockReset()
   rendererControl.cancelFrame.mockReset()
+  rendererControl.disconnect.mockReset()
   rendererControl.canvas = null
   // rAF는 아래에서 직접 stub 하므로 fake timer가 가로채지 않게 제외한다.
   vi.useFakeTimers({
@@ -449,8 +452,8 @@ describe('PassportPageTurn', () => {
     // 넘어가는 종이는 캔버스가 그리므로 다음 단계 DOM이 미리 생기지 않는다.
     expect(screen.getByRole('region', { name: '여권 1단계' })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: '여권 2단계' })).not.toBeInTheDocument()
-    // 초기 정지 화면 1회 + 넘김 시작 1회
-    expect(rendererControl.setFaces).toHaveBeenCalledTimes(2)
+    // 낱장 네 장을 한 번만 굽는다. 넘길 때는 각도만 바뀌므로 다시 굽지 않는다.
+    expect(rendererControl.setFaces).toHaveBeenCalledTimes(1)
     await finishAnimation(900)
 
     expect(screen.getByRole('region', { name: '여권 2단계' })).toBeInTheDocument()
@@ -515,12 +518,15 @@ describe('PassportPageTurn', () => {
   it.each([
     ['CSS 전역이 없을 때', undefined],
     ['CSS.supports가 없을 때', {}],
-  ])('%s fallback으로 전환한다', async (_, css) => {
+  ])('%s에도 WebGL 렌더러를 그대로 쓴다', async (_, css) => {
+    // WebGL은 CSS 기능 지원과 무관하다. 예전 CSS 3D 렌더러 시절에는 여기서
+    // fallback으로 내려갔는데, 초기값이 fallback이라 그 검사가 항상 통과했다.
+    // 렌더러가 실제로 준비되는지까지 봐야 의미가 있다.
     vi.stubGlobal('CSS', css)
     render(<TurnHarness />)
 
     await waitFor(() =>
-      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
     )
   })
 

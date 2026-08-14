@@ -44,7 +44,7 @@ describe('ProductDetailPage', () => {
       'aria-pressed',
       'true',
     )
-    expect(screen.getByRole('link', { name: '착용하기' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Fitting with Ai' })).toHaveAttribute(
       'href',
       '/products/mcm-001/try-on',
     )

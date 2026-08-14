@@ -14,20 +14,31 @@
   --passport-gap-mid: max(0.75rem, calc(2.25rem - var(--height-deficit) * 0.289));
   --intro-gap: max(0.25rem, calc(0.5rem - var(--height-deficit) * 0.048));
   --intro-note-gap: max(0.375rem, calc(1rem - var(--height-deficit) * 0.12));
+  /* 지면 바로 위 여백. 캔버스 밖에 있으므로 예산에도 따로 넣어야 한다. */
+  --passport-lead: 2.25rem;
+  /* 넘김 버튼 줄 위 여백. 산식과 실제 CSS가 같은 값을 쓰도록 변수로 묶는다. */
+  --passport-nav-gap: 1.5rem;
 
   /* 13.4375rem은 줄일 수 없는 몫 — 헤더 97, 카피 세 줄 74, 아래 넘김 버튼 44.
-     여백을 다 걷어내고도 모자라면 그제야 여권이 줄어들되, 내지 글씨가 뭉개지지
-     않도록 20rem을 하한으로 둔다. 하한에 닿으면 다시 잘리지만 그런 화면은
+     여기에 지면 위 여백과 넘김 줄 위 여백, 그리고 헤더가 쓰는 safe-top까지
+     빼야 한다. 캔버스 높이 안에 섞여 있거나 산식에서 누락돼 있던 값들이라
+     화면이 짧으면 넘김 버튼이 잘려 나갔다.
+     여백을 다 걷어내고도 모자라면 그제야 여권이 줄어든다. 하한은 16rem이다.
+     20rem으로 두면 320×568 같은 화면에서 넘김 버튼이 잘렸다. 작아도 보이는
+     편이 잘려 못 누르는 것보다 낫다. 하한에 닿으면 다시 잘리지만 그런 화면은
      가로 모드처럼 극단적인 경우뿐이다. */
   --passport-h: max(
-    20rem,
+    16rem,
     min(
       24.625rem,
       calc(
         var(--mcm-viewport-stable) -
-          13.4375rem - var(--passport-gap-top) - var(--passport-gap-mid) - var(--intro-gap) - var(
-            --intro-note-gap
-          ) - max(0.75rem, var(--mcm-safe-bottom))
+          13.4375rem - var(--mcm-safe-top) - var(--passport-lead) - var(--passport-nav-gap) - var(
+            --passport-gap-top
+          ) - var(--passport-gap-mid) - var(--intro-gap) - var(--intro-note-gap) - max(
+            0.75rem,
+            var(--mcm-safe-bottom)
+          )
       )
     )
   );
@@ -128,46 +139,40 @@
   line-height: 1.25rem;
 }
 
+/* 이 클래스는 캔버스 위에 겹치는 지면에 붙는다. 여기에 세로 여백을 주면
+   캔버스에는 없는 간격이 DOM에만 생겨 그림과 클릭 영역이 어긋난다.
+   카피와의 간격은 바깥(.viewport)이 맡는다. */
 .passport {
   position: relative;
   flex: 0 0 auto;
-  margin-top: var(--passport-gap-mid);
   overflow: hidden;
   background: transparent;
 }
 
-/* Figma 52:18570 — 표지 310×394가 390px 화면 기준 x=40, 즉 좌우 40px 균등. */
+/* 낱장은 한 책등에 묶여 폭이 같다. 표지만 310으로 두면 WebGL(253.5)과
+   갈라져, WebGL 성공 여부에 따라 첫 화면 크기가 55px씩 달라진다. */
 .coverPassport {
-  /* 세로가 모자라면 비율을 지킨 채 폭도 함께 줄인다. */
-  width: min(79.5vw, 19.375rem, calc(var(--passport-h) * 310 / 394));
+  width: 15.84375rem;
   margin-inline: auto;
-  aspect-ratio: 310 / 394;
+  aspect-ratio: 253.5 / 394;
+  transform: scale(var(--passport-scale, 1));
+  transform-origin: top center;
 }
 
 .openPassport {
-  /* Figma 원래 크기. 좌측 페이지가 화면 중앙에 오고 우측은 화면 밖으로 잘린다.
-     내지의 클릭 영역(.profile, .journeyTile 등)이 이 크기를 전제로 rem 좌표에
-     박혀 있어, 여기를 줄이면 캔버스가 그리는 그림과 터치 영역이 어긋난다.
-     그래서 펼침은 줄이지 않고, 부족한 세로는 위 여백에서만 걷어낸다. */
-  width: 31.6875rem;
-  aspect-ratio: 507 / 394;
+  /* 낱장 한 장의 설계 크기(253.5×394)를 그대로 두고 통째로 축소한다.
+     내지 좌표(.profile, .journeyTile 등)가 394 기준 rem이라, 폭만 줄이면
+     안쪽 버튼들은 그대로 남아 그림과 어긋난다. 배율은 PassportPageTurn이
+     캔버스와 같은 값으로 --passport-scale에 넣어 준다. */
+  width: 15.84375rem;
+  aspect-ratio: 253.5 / 394;
+  transform: scale(var(--passport-scale, 1));
+  /* 캔버스는 지면을 화면 위쪽부터 채운다. 가운데를 기준으로 줄이면 DOM만
+     아래로 밀려 내려간다. */
+  transform-origin: top center;
   margin-inline: auto;
   align-self: center;
   isolation: isolate;
-}
-
-@media (min-width: 744px) and (max-width: 1199px) {
-  .openPassport {
-    margin-right: auto;
-    margin-left: auto;
-  }
-}
-
-@media (min-width: 1200px) {
-  .openPassport {
-    margin-right: 0;
-    margin-left: 2.925rem;
-  }
 }
 
 .passportImage {
@@ -287,9 +292,18 @@
   font-size: 0.5rem;
 }
 
+/* 지면이 줄면 안쪽 버튼도 같이 줄어 44px이 무너진다. 배율의 역수를 곱해
+   화면에서 차지하는 크기는 유지한다. */
+.profileFooter button,
+.journeyTile,
+.journeyActions button {
+  min-width: calc(2.75rem / var(--passport-scale, 1));
+  min-height: calc(2.75rem / var(--passport-scale, 1));
+}
+
 .profileFooter button {
-  min-width: 2.75rem;
-  min-height: 2.75rem;
+  /* 최소 크기는 위 역배율 규칙이 정한다. 여기서 다시 쓰면 그게 덮여
+     배율이 걸린 만큼 작아진다(320/394에서 35.7px). */
   margin-block: -0.75rem;
   color: #fff7d5;
   font-size: 0.5rem;
@@ -610,7 +624,7 @@ button.historyCard {
   display: flex;
   width: min(100%, 20rem);
   align-items: center;
-  margin: 1.5rem auto 0;
+  margin: var(--passport-nav-gap) auto 0;
   justify-content: space-between;
 }
 .navigation button {
@@ -636,17 +650,12 @@ button.historyCard {
   .stage {
     padding-inline: 0.75rem;
   }
-  .introCopy {
-    margin-top: 3.75rem;
+  .page {
+    --passport-lead: 1.25rem;
+    --passport-nav-gap: 0.75rem;
   }
   .introCopy p {
     font-size: 1.4rem;
-  }
-  .passport {
-    margin-top: 1.25rem;
-  }
-  .navigation {
-    margin-top: 0.75rem;
   }
 }
 

@@ -33,6 +33,14 @@ describe('CartPage', () => {
 
     expect(screen.getByText('나의 쇼핑백 (0개 품목)')).toBeInTheDocument()
     expect(screen.getByText('쇼핑백이 비어 있습니다')).toBeInTheDocument()
+  })
+
+  it('결제하기 버튼은 담긴 상품이 있어도 보이지 않는다', () => {
+    // 결제는 이번 범위가 아니라 화면에서 뺐다. 상품이 있는 상태에서 확인해야
+    // 의미가 있다. 비어 있을 때만 보면 늘 통과하는 검사가 된다.
+    renderCart()
+
+    expect(screen.getByText('나의 쇼핑백 (2개 품목)')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '결제하기' })).not.toBeInTheDocument()
   })
 })

@@ -144,7 +144,7 @@ describe('App', () => {
       await screen.findByRole('heading', { name: 'New Liz 비세토스 쇼퍼' }),
     ).toBeInTheDocument()
 
-    const tryOnLink = screen.getByRole('link', { name: '착용하기' })
+    const tryOnLink = screen.getByRole('link', { name: 'Fitting with Ai' })
     expect(tryOnLink).toHaveAttribute('href', '/products/mcm-002/try-on')
     fireEvent.click(tryOnLink)
 

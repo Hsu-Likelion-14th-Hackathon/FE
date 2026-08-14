@@ -1,7 +1,8 @@
 .tabs {
   display: grid;
   width: 100%;
-  height: 95px;
+  /* Figma 71:1842 — 390 기준 y=141에서 높이 64. */
+  height: 64px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -11,38 +12,41 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 3px;
-  border-top: 0.5px solid var(--mcm-color-muted);
-  font-size: 12px;
+  gap: 4px;
+  border-top: 0.5px solid #c8c8c8;
+  font-size: 10px;
   font-weight: 600;
-  line-height: 18px;
+  line-height: 16px;
   text-decoration: none;
   transition:
     color 160ms ease,
     background-color 160ms ease;
 }
 
+/* 보고 있는 탭이 배경에서 도려낸 것처럼 남고, 반대쪽이 회색 박스로 눌린다. */
 .active {
-  color: var(--mcm-color-canvas);
-  background-color: var(--mcm-color-brand-brown);
-}
-
-.inactive {
-  color: var(--mcm-color-ink);
+  color: var(--mcm-color-brand-brown);
   background-color: var(--mcm-color-canvas);
 }
 
-.cart.active {
-  border-bottom-left-radius: 8px;
+.inactive {
+  color: var(--mcm-color-muted);
+  background-color: #e6e6e6;
 }
 
-.wishlist.active {
-  border-bottom-right-radius: 8px;
+/* 회색 박스는 보고 있는 탭 쪽 아래 모서리만 둥글다. 반대쪽과 위쪽은 각지다.
+   Figma 71:1745에서 잰 반경이 약 10px. */
+.wishlist.inactive {
+  border-bottom-right-radius: 10px;
+}
+
+.cart.inactive {
+  border-bottom-left-radius: 10px;
 }
 
 .icon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   color: currentColor;
 }
 

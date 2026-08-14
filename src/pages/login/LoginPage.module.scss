@@ -89,7 +89,6 @@
   display: grid;
   width: 100%;
   height: 50px;
-  margin-top: 30px;
   place-items: center;
   padding: 0 52px;
   border: 0;
@@ -111,13 +110,113 @@
   height: 24px;
 }
 
+/* 밑줄만 있는 입력 — 라벨이 줄 위에 앉는 형태다. */
+.form {
+  display: flex;
+  flex-direction: column;
+  margin-top: 28px;
+}
+
+.requiredNotice {
+  margin: 0 0 22px;
+  color: var(--mcm-color-muted);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 22px;
+}
+
+.fieldHeader {
+  display: flex;
+  /* 표시 버튼이 44px 높이를 온전히 쓰도록 줄 높이를 확보한다. */
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.fieldInput {
+  width: 100%;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--mcm-color-ink);
+  border-radius: 0;
+  appearance: none;
+  background: transparent;
+  /* iOS 사파리는 16px 미만 입력에 포커스가 가면 화면을 자동으로 확대한다.
+     확대되면 레이아웃이 밀려 사용자가 직접 되돌려야 한다. */
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.fieldInput:focus {
+  outline: none;
+  border-bottom-width: 2px;
+}
+
+.revealButton {
+  /* 글자는 작지만 손가락으로 누를 수 있어야 한다. 44px 판을 만들고 그만큼
+     음수 여백으로 당겨, 보이는 위치는 그대로 두고 누를 면적만 넓힌다. */
+  display: inline-grid;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  /* 세로로 당기면 위쪽 입력과 겹쳐 그만큼을 입력이 가져간다. 가로만 당긴다. */
+  margin-inline: -0.5rem;
+  background: transparent;
+  color: var(--mcm-color-muted);
+  font-size: 11px;
+  line-height: 16px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.submitButton {
+  width: 100%;
+  height: 50px;
+  margin-top: 26px;
+  border: 0;
+  border-radius: 8px;
+  appearance: none;
+  color: var(--mcm-color-canvas);
+  background: var(--mcm-color-ink);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.divider {
+  width: 100%;
+  height: 0;
+  margin: 30px 0;
+  border: 0;
+  border-top: 1px solid #e6e6e6;
+}
+
 .backLink:focus-visible,
 .textLink:focus-visible,
+.revealButton:focus-visible,
+.submitButton:focus-visible,
 .kakaoButton:focus-visible {
   outline: 2px solid var(--mcm-color-brand-brown);
   outline-offset: 2px;
 }
 
+.submitButton:active,
 .kakaoButton:active {
   transform: translateY(1px);
 }

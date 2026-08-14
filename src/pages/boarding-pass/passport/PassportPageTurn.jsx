@@ -17,11 +17,13 @@ import pageLeftSrc from '@/shared/assets/boarding-pass/passport/passport-page-le
 import pageRightSrc from '@/shared/assets/boarding-pass/passport/passport-page-right.png'
 import stampSrc from '@/shared/assets/boarding-pass/passport/passport-stamp.png'
 
+import observeResize from '@/shared/layout/observe-resize.js'
+
 import { usePassport } from '@/entities/passport/usePassport.js'
 
-import { createPassportBook } from './passportBookScene.js'
+import { createPassportSheets } from './passportSheetScene.js'
 import pageStyles from './PassportPage.module.scss'
-import { facesForStep, paintFace } from './passportPageTexture.js'
+import { SHEET_BACK, SHEET_FACES, SHEET_H, SHEET_W, paintFace } from './passportPageTexture.js'
 import styles from './PassportPageTurn.module.scss'
 
 const LAST_STEP = 3
@@ -113,6 +115,8 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
   }, [])
 
   const [rendererMode, setRendererMode] = useState('fallback')
+  // 이미지 14장을 다 받았는지. 받고 나서 한 번 다시 구워야 빈 면이 남지 않는다.
+  const [assetsReady, setAssetsReady] = useState(false)
   const [turnState, setTurnState] = useState('idle')
 
   const viewportRef = useRef(null)
@@ -120,6 +124,8 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
   const bookRef = useRef(null)
   const assetsRef = useRef({})
   const frameRef = useRef(null)
+  // 지금 화면에 그려진 넘김 정도. 정수면 정지, 소수면 넘어가는 중이다.
+  const turnRef = useRef(0)
   const pointerRef = useRef({ ...IDLE_POINTER })
   // 같은 면을 반복해서 굽지 않도록 캔버스를 보관한다. 데이터가 바뀌면 비운다.
   const faceCacheRef = useRef(new Map())
@@ -134,49 +140,23 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     [profile, stamps],
   )
 
-  /** 현재 step과 넘어갈 방향에 맞춰 네 면을 굽고 책에 올린다. */
-  const paintBook = useCallback(
-    (direction = 0) => {
-      const book = bookRef.current
-      if (!book) return
-      const data = pageData()
-      const here = facesForStep(step)
-      const there = facesForStep(step + direction)
+  /** 네 장을 한 번에 굽고 장면에 올린다. 낱장은 step마다 다시 구울 일이 없다. */
+  const paintSheets = useCallback(() => {
+    const sheets = bookRef.current
+    if (!sheets) return
+    const data = pageData()
 
-      // 같은 면이라도 좌·우 어디에 놓이느냐에 따라 가죽 테두리 방향이 달라진다.
-      const face = (name, side) => {
-        if (!name) return null
-        const key = `${name}:${side}`
-        const cached = faceCacheRef.current.get(key)
-        if (cached) return cached
-        const painted = paintFace(name, data, side)
-        faceCacheRef.current.set(key, painted)
-        return painted
-      }
+    const face = (name) => {
+      const cached = faceCacheRef.current.get(name)
+      if (cached) return cached
+      const painted = paintFace(name, data, 'sheet')
+      faceCacheRef.current.set(name, painted)
+      return painted
+    }
 
-      if (direction === 0) {
-        book.setPages({ left: face(here.left, 'left'), right: face(here.right, 'right') })
-        return
-      }
-      // 다음으로 넘길 땐 지금 오른쪽 장이 넘어가 다음의 왼쪽이 된다.
-      book.setPages(
-        direction > 0
-          ? {
-              left: face(here.left, 'left'),
-              right: face(there.right, 'right'),
-              turningFront: face(here.right, 'right'),
-              turningBack: face(there.left, 'left'),
-            }
-          : {
-              left: face(there.left, 'left'),
-              right: face(here.right, 'right'),
-              turningFront: face(there.right, 'right'),
-              turningBack: face(here.left, 'left'),
-            },
-      )
-    },
-    [pageData, step],
-  )
+    // 앞면은 각 단계의 내용, 뒷면은 실제 여권처럼 빈 종이결이다.
+    sheets.setSheets(SHEET_FACES.map((name) => ({ front: face(name), back: face(SHEET_BACK) })))
+  }, [pageData])
 
   const measure = useCallback(() => {
     const viewport = viewportRef.current
@@ -184,49 +164,49 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     const surface = viewport?.querySelector('[data-passport-surface]')
     if (!viewport || !host || !surface) return null
     // 캔버스는 stage 패딩 밖까지 넓어져 있으므로 그 크기를 기준으로 삼는다.
-    const viewportRect = host.getBoundingClientRect()
-    const surfaceRect = surface.getBoundingClientRect()
-    const pageH = Math.max(surfaceRect.height, 1)
-    const spread = step > 0
-    // 표지는 화면 폭에 맞춘 한 장, 펼침은 그 절반이 한 면이다.
-    const coverW = Math.max(surfaceRect.width, 1) * (spread ? 0.611 : 1)
-    const spreadPageW = Math.max(surfaceRect.width, 1) * (spread ? 0.5 : 0.818)
+    const hostRect = host.getBoundingClientRect()
+    const viewportRect = viewport.getBoundingClientRect()
+    // 캔버스는 넘어가는 종이가 나갈 여유까지 포함해 지면보다 크다. 지면 높이는
+    // viewport에서 온다. surface는 이미 배율이 걸려 있어 다시 재면 순환한다.
+    const leafH = Math.max(viewportRect.height, 1)
     return {
-      width: Math.max(viewportRect.width, 1),
-      height: Math.max(viewportRect.height, 1),
-      pageH,
-      spread,
-      // 현재 step의 배치와, 넘김이 끝났을 때의 배치
-      cover: { pageW: coverW, shift: 0, spread: false },
-      open: { pageW: spreadPageW, shift: spreadPageW / 2, spread: true },
+      // 캔버스 버퍼 크기
+      width: Math.max(hostRect.width, 1),
+      height: Math.max(hostRect.height, 1),
+      leafH,
+      // 장은 설계 비율을 지킨다. 높이가 정해지면 폭도 따라온다.
+      leafW: (leafH * SHEET_W) / SHEET_H,
     }
-  }, [step])
+  }, [])
 
-  const drawFrame = useCallback(
-    (direction, value) => {
-      const book = bookRef.current
-      const box = measure()
-      if (!book || !box) return
+  /**
+   * 캔버스 버퍼 크기를 맞추고, DOM 오버레이가 쓸 배율을 알린다.
+   *
+   * 프레임마다 부르면 안 된다. setSize는 내부에서 setPixelRatio까지 거쳐
+   * 버퍼를 다시 잡으므로 넘김 도중 매 프레임 재할당이 일어난다.
+   */
+  const fitToBox = useCallback(() => {
+    const host = canvasHostRef.current
+    const box = measure()
+    if (!box || !host) return
 
-      // 표지↔펼침은 폭도 위치도 달라서, 전환 중에는 두 배치를 섞어 그린다.
-      // 그러지 않으면 애니메이션이 끝나는 순간 책이 순간이동한다.
-      const nextStep = step + direction
-      const from = step > 0 ? box.open : box.cover
-      const to = direction === 0 ? from : nextStep > 0 ? box.open : box.cover
-      const t = direction === 0 ? 0 : value
-      const mix = (a, b) => a + (b - a) * t
+    // 내지 좌표는 설계 394 기준 rem이라 화면이 짧아 지면이 줄면 그림과 어긋난다.
+    // 이 계산은 WebGL 성공 여부와 무관하다. 줄이지 않으면 reduced-motion이나
+    // WebGL 실패로 정적 화면을 쓸 때 394px 지면이 그대로 남아 아래 내비게이션과
+    // 겹친다.
+    host.parentElement?.style.setProperty('--passport-scale', String(box.leafH / SHEET_H))
 
-      book.setSize(box.width, box.height, {
-        pageW: mix(from.pageW, to.pageW),
-        pageH: box.pageH,
-        shift: mix(from.shift, to.shift),
-        spread: from.spread || to.spread,
-      })
-      book.setTurn(value, direction)
-      book.render()
-    },
-    [measure, step],
-  )
+    bookRef.current?.setSize(box.width, box.height, { leafW: box.leafW, leafH: box.leafH })
+  }, [measure])
+
+  const drawFrame = useCallback((turned) => {
+    const sheets = bookRef.current
+    if (!sheets) return
+    // 넘김 중에 다시 굽는 일이 생겨도 손이 놓인 지점으로 돌아올 수 있게 남긴다.
+    turnRef.current = turned
+    sheets.setTurn(turned)
+    sheets.render()
+  }, [])
 
   const stopFrame = useCallback(() => {
     if (frameRef.current !== null) {
@@ -251,7 +231,7 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
         const ratio = duration === 0 ? 1 : Math.min((timestamp - startedAt) / duration, 1)
         // easeInOutCubic — 손을 뗀 직후 갑자기 튀지 않고 끝에서 사뿐히 내려앉는다.
         const eased = ratio < 0.5 ? 4 * ratio * ratio * ratio : 1 - Math.pow(-2 * ratio + 2, 3) / 2
-        drawFrame(direction, from + (to - from) * eased)
+        drawFrame(from + (to - from) * eased)
 
         if (ratio < 1) {
           frameRef.current = requestAnimationFrame(tick)
@@ -296,11 +276,18 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
         return
       }
 
-      if (!isActiveDrag) paintBook(direction)
       setTurnState('settling')
-      animateTo({ direction, from: fromProgress, to: commit ? 1 : 0, duration, commit })
+      // drawFrame은 넘어간 장 수를 받는다. 드래그 중이면 손이 놓인 지점에서
+      // 이어받아, 확정이면 다음 장으로 취소면 제자리로 미끄러진다.
+      animateTo({
+        direction,
+        from: step + direction * fromProgress,
+        to: step + direction * (commit ? 1 : 0),
+        duration,
+        commit,
+      })
     },
-    [animateTo, disabled, dismissHint, onCommit, paintBook, rendererMode, step, turnState],
+    [animateTo, disabled, dismissHint, onCommit, rendererMode, step, turnState],
   )
 
   // 여권 데이터가 바뀌면 구워둔 면을 버린다.
@@ -308,7 +295,8 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     faceCacheRef.current.clear()
   }, [profile, stamps])
 
-  // 페이지에 그릴 이미지들을 미리 받아둔다.
+  // 페이지에 그릴 이미지들을 미리 받아둔다. 14장이라 단계마다 다시 받으면
+  // 모바일에서 눈에 띄게 끊긴다. 한 번만 받고 준비됐다는 사실만 알린다.
   useEffect(() => {
     let alive = true
     const names = Object.keys(ASSET_SOURCES)
@@ -316,15 +304,12 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
       if (!alive) return
       assetsRef.current = Object.fromEntries(names.map((name, index) => [name, loaded[index]]))
       faceCacheRef.current.clear()
-      if (bookRef.current) {
-        paintBook(0)
-        drawFrame(0, 0)
-      }
+      setAssetsReady(true)
     })
     return () => {
       alive = false
     }
-  }, [drawFrame, paintBook])
+  }, [])
 
   useEffect(() => {
     const host = canvasHostRef.current
@@ -332,9 +317,9 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
 
     let book
     try {
-      book = createPassportBook()
+      book = createPassportSheets()
     } catch (error) {
-      console.warn('여권 3D 책을 초기화할 수 없어 정적 화면으로 대체합니다.', error)
+      console.warn('여권 3D 낱장을 초기화할 수 없어 정적 화면으로 대체합니다.', error)
       return undefined
     }
 
@@ -355,12 +340,36 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     }
   }, [stopFrame])
 
-  // step이 확정되면 정지 화면을 다시 굽는다.
+  // 장은 내용이 바뀔 때만 다시 굽는다. setSheets는 네 장과 텍스처 여덟 장을
+  // 통째로 새로 만들므로 단계마다 부르면 낭비고, 드래그 중에 끼어들면 장면이
+  // 원래 단계로 되돌아간다.
   useEffect(() => {
     if (rendererMode !== 'ready') return
-    paintBook(0)
-    drawFrame(0, 0)
-  }, [drawFrame, paintBook, rendererMode, step])
+    paintSheets()
+    fitToBox()
+    // 넘김 도중에 이미지나 여권 데이터가 도착할 수 있다. step으로 되돌리면
+    // 손이 놓인 장이 원위치로 튄다. 그려져 있던 값을 그대로 이어 그린다.
+    drawFrame(turnRef.current)
+  }, [assetsReady, drawFrame, fitToBox, paintSheets, rendererMode])
+
+  // 단계가 확정되면 각도만 바꿔 다시 그린다.
+  useEffect(() => {
+    if (rendererMode !== 'ready') return
+    drawFrame(step)
+  }, [drawFrame, rendererMode, step])
+
+  // 화면이 돌아가거나 창이 바뀔 때만 캔버스 버퍼를 다시 잡는다. 이걸 안 하면
+  // 기존 버퍼가 CSS로 늘어나 흐려진다.
+  useEffect(() => {
+    const host = canvasHostRef.current
+    if (!host) return undefined
+    // 배율은 렌더러가 없어도 맞춰야 한다. 그림 다시 그리기만 렌더러 몫이다.
+    fitToBox()
+    return observeResize(host, () => {
+      fitToBox()
+      if (bookRef.current) drawFrame(turnRef.current)
+    })
+  }, [drawFrame, fitToBox])
 
   const resetPointer = (event) => {
     pointerRef.current = { ...IDLE_POINTER }
@@ -402,15 +411,12 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
         return
       }
       pointer.direction = direction
-      if (rendererMode === 'ready' && bookRef.current) {
-        paintBook(direction)
-        setTurnState('dragging')
-      }
+      if (rendererMode === 'ready' && bookRef.current) setTurnState('dragging')
     }
 
     const width = Math.max(event.currentTarget.getBoundingClientRect().width, 1)
     pointer.progress = Math.min(Math.abs(dx) / width, 1)
-    if (rendererMode === 'ready') drawFrame(pointer.direction, pointer.progress)
+    if (rendererMode === 'ready') drawFrame(step + pointer.direction * pointer.progress)
     event.preventDefault()
   }
 
