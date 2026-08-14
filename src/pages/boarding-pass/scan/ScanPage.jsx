@@ -105,6 +105,10 @@ export function Component() {
 
   function handleDepart() {
     if (phase !== 'success') return
+    window.scrollTo(0, 0)
+    document.documentElement.scrollTop = 0
+    document.body.scrollTop = 0
+    document.querySelector('[data-device-screen]')?.firstElementChild?.scrollTo?.(0, 0)
     setPhase('departing')
   }
 

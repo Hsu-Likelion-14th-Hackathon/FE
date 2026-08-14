@@ -9,8 +9,8 @@
 }
 
 .pageLoading {
-  background: #646464;
-  background: color-mix(in srgb, #000 60%, var(--mcm-color-canvas));
+  min-height: var(--mcm-viewport-stable);
+  isolation: isolate;
 }
 
 .main {

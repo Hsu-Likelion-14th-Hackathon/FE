@@ -3,13 +3,26 @@
 .overlay {
   position: absolute;
   inset: 0;
-  z-index: 40;
+  z-index: 50;
   display: flex;
   flex-direction: column;
   align-items: center;
   background: rgba(0, 0, 0, 0.6);
   box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.6);
   padding-inline: 1.25rem;
+  pointer-events: auto;
+}
+
+/* 하단 바가 접혀 드러난 여백만 같은 어두운 색으로 채운다.
+   오버레이는 absolute로 두어 티켓·버튼이 위로 새지 않게 한다. */
+
+@media (max-width: 1199px) {
+  :global(html.mcm-scan-loading),
+  :global(html.mcm-scan-loading body),
+  :global(html.mcm-scan-loading #root) {
+    min-height: var(--mcm-viewport-stable);
+    background: color-mix(in srgb, #000 60%, var(--mcm-color-canvas));
+  }
 }
 
 .loadingLabel {
