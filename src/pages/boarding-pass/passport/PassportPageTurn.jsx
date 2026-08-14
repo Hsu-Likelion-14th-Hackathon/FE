@@ -480,7 +480,7 @@ export default function PassportPageTurn({
             스크린리더 읽기와 버튼 클릭을 그대로 담당한다. */}
         <div ref={canvasHostRef} aria-hidden="true" className={styles.bookLayer} />
         <div className={styles.contentLayer} data-transparent={rendererMode === 'ready'}>
-          {renderStep(step, { ...profile, ...profileOverride })}
+          {renderStep(step, { ...profile, ...profileOverride }, stamps)}
         </div>
         {/* 모바일에는 넘김 화살표가 없어 슬라이드가 유일한 방법이다.
             처음 한 번만 알려주고, 한 장이라도 넘기면 다시 띄우지 않는다. */}

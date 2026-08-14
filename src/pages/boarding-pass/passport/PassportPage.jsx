@@ -21,7 +21,7 @@ import passportStamp from '@/shared/assets/boarding-pass/passport/passport-stamp
 import passportStampBow from '@/shared/assets/boarding-pass/passport/passport-stamp-bow.png'
 import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
 
-import { journeyRecords, passportProfile, passportStamps, passportTicket } from './passportData.js'
+import { journeyRecords, passportTicket } from './passportData.js'
 import styles from './PassportPage.module.scss'
 import PassportPageTurn from './PassportPageTurn.jsx'
 
@@ -30,6 +30,16 @@ const sheetLabels = {
   history: '여행 기록',
   'history-detail': '1F JOURNEY 상세',
   ticket: '탑승권',
+}
+
+/**
+ * 표기명 한 줄.
+ *
+ * 백엔드는 name 한 필드로 주고, 연동 전 고정 데이터는 givenName/surname으로
+ * 나뉘어 있다. 캔버스(drawProfile)와 같은 규칙을 써야 두 화면이 안 어긋난다.
+ */
+function toDisplayName(profile) {
+  return profile?.name ?? `${profile?.givenName ?? ''} ${profile?.surname ?? ''}`.trim()
 }
 
 export function Component() {
@@ -141,10 +151,11 @@ export function Component() {
             onCommit={(direction) =>
               setStep((current) => Math.min(3, Math.max(0, current + direction)))
             }
-            renderStep={(visibleStep, visibleProfile) => (
+            renderStep={(visibleStep, visibleProfile, visibleStamps) => (
               <PassportSpread
                 step={visibleStep}
                 profile={visibleProfile}
+                stamps={visibleStamps}
                 onEditName={(event, current) => {
                   setNameDraft(current)
                   setNameRejected(false)
@@ -257,9 +268,20 @@ export function Component() {
  *
  * 여권 데이터는 PassportPageTurn이 이미 불러왔다. 여기서 다시 부르면 단계를
  * 넘길 때마다 같은 API를 또 치게 된다.
+ *
+ * 모든 값은 캔버스와 같은 profile/stamps에서 꺼낸다. 여기서 고정 데이터를 쓰면
+ * WebGL을 못 쓰는 기기와 스크린리더만 다른 값을 보게 된다.
  */
-function PassportSpread({ step, profile, onEditName, onHistory, onTicket, onProducts }) {
-  const displayName = profile?.name ?? `${passportProfile.givenName} ${passportProfile.surname}`
+function PassportSpread({
+  step,
+  profile,
+  stamps = [],
+  onEditName,
+  onHistory,
+  onTicket,
+  onProducts,
+}) {
+  const displayName = toDisplayName(profile)
 
   if (step === 0) {
     return (
@@ -295,10 +317,10 @@ function PassportSpread({ step, profile, onEditName, onHistory, onTicket, onProd
           <h3>PASSPORT</h3>
           <img src={mcmHaus} alt="MCM HAUS 매장 사진" className={styles.haus} />
           <p>
-            NUMBER <strong>{passportProfile.passportNumber}</strong>
+            NUMBER <strong>{profile.passportNumber}</strong>
           </p>
           <p>
-            NATIONALITY <strong>{passportProfile.nationality}</strong>
+            NATIONALITY <strong>{profile.nationality}</strong>
           </p>
           {/* 캔버스가 글자를 그리고 이 DOM은 투명하다. 누르면 이름을 고칠 수
               있다는 표시는 시트를 열어 보여준다. */}
@@ -317,10 +339,10 @@ function PassportSpread({ step, profile, onEditName, onHistory, onTicket, onProd
             DATE OF BIRTH <strong>{profile?.birthDate}</strong>
           </p>
           <p>
-            DATE OF ISSUE <strong>{passportProfile.issueDate}</strong>
+            DATE OF ISSUE <strong>{profile.issueDate}</strong>
           </p>
           <p>
-            CREDIT <strong>{passportProfile.credit}</strong>
+            CREDIT <strong>{profile.credit}</strong>
           </p>
           <small className={styles.profileFooter}>
             <span>크레딧으로 AI 가상 피팅 가능</span>
@@ -347,11 +369,12 @@ function PassportSpread({ step, profile, onEditName, onHistory, onTicket, onProd
         />
         <div className={styles.stamps}>
           <h3>PASSPORT</h3>
-          <p>총 방문 횟수 | {passportProfile.visits}회</p>
+          <p>총 방문 횟수 | {profile.visits}회</p>
           <img src={passportStampBow} alt="" className={styles.stampBow} />
           <ul>
-            {passportStamps.map((stamp) => (
-              <li key={stamp.id}>
+            {/* 캔버스도 여섯 칸(3열 2행)만 그린다. 더 읽어 주면 화면과 어긋난다. */}
+            {stamps.slice(0, 6).map((stamp) => (
+              <li key={stamp.id ?? stamp.date}>
                 <img src={passportStamp} alt="" />
                 <time>{stamp.date}</time>
               </li>
