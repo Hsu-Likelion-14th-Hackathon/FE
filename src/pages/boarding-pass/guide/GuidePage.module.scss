@@ -36,17 +36,16 @@
   flex: 1 1 0;
   min-height: 0;
   margin-top: 1rem;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .scroll::-webkit-scrollbar {
   display: none;
-}
-
-.scroll[data-overflow='visible'] {
-  overflow: hidden;
 }
 
 .nav {
