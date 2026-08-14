@@ -47,7 +47,10 @@ export function Component() {
 
           <div className={styles.field}>
             <label className={styles.fieldLabel} htmlFor="login-email">
-              이메일 주소<span aria-hidden="true">*</span>
+              이메일 주소
+              <span className={styles.requiredMark} aria-hidden="true">
+                *
+              </span>
             </label>
             <input
               className={styles.fieldInput}
@@ -62,7 +65,10 @@ export function Component() {
           <div className={styles.field}>
             <div className={styles.fieldHeader}>
               <label className={styles.fieldLabel} htmlFor="login-password">
-                비밀번호<span aria-hidden="true">*</span>
+                비밀번호
+                <span className={styles.requiredMark} aria-hidden="true">
+                  *
+                </span>
               </label>
               <button
                 className={styles.revealButton}
@@ -88,11 +94,9 @@ export function Component() {
           </button>
         </form>
 
-        <hr className={styles.divider} />
-
         <button className={styles.kakaoButton} type="button">
           <img className={styles.kakaoIcon} src={kakaoIcon} alt="" aria-hidden="true" />
-          <span>카카오 로그인</span>
+          <span>카카오로 로그인</span>
         </button>
       </section>
     </div>

@@ -153,19 +153,25 @@
   padding: 0 20px calc(44px + var(--mcm-safe-bottom));
 }
 
+/* Figma 93:489 — 살구빛 판이 지면 폭을 채우고 한 단계 도드라졌다.
+   테두리가 브랜드 브라운으로 돌아왔고, 바깥 그림자와 안쪽 음영이 더해져
+   눌러 볼 수 있는 판처럼 보인다. 채움은 위에서 아래로 조금 짙어진다. */
 .tryOnLink {
-  display: inline-flex;
-  height: 34px;
+  display: flex;
+  height: 40px;
   padding-inline: 25px;
   align-items: center;
   justify-content: center;
-  /* Figma 71:564 — 테두리만 있던 버튼이 살구색으로 채워졌다.
-     테두리도 브랜드 브라운에서 옅은 살구색으로 내려왔고, 채움은 위에서
-     아래로 조금 짙어진다. 글자만 브랜드 브라운 그대로다. */
-  border: 1px solid #e0bba4;
+  border: 1px solid var(--mcm-color-brand-brown);
   border-radius: 8px;
   color: var(--mcm-color-brand-brown);
-  background: linear-gradient(to bottom, #f8ede7, #f1dbcf);
+  /* 반투명이라 바탕이 비친다. 디자인이 #fafafa 위에서 잰 값이므로 불투명으로
+     굳히면 다른 바탕에서 어긋난다. */
+  background: linear-gradient(to bottom, rgb(246 230 221 / 60%), rgb(236 196 173 / 60%));
+  box-shadow:
+    2px 2px 4px rgb(0 0 0 / 8%),
+    inset -2px -2px 4px rgb(230 198 180 / 60%),
+    inset 2px 2px 4px rgb(255 255 255 / 20%);
   font-size: 14px;
   font-weight: 600;
   line-height: 18px;
@@ -180,7 +186,8 @@
 
 .variantSummary {
   display: flex;
-  margin: 30px 0 0;
+  /* 버튼이 34에서 40px로 커진 만큼 아래 간격을 줄여 색상 줄 위치를 지킨다. */
+  margin: 24px 0 0;
   align-items: center;
   gap: 10px;
   color: var(--mcm-color-ink);

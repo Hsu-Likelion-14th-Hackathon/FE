@@ -7,16 +7,20 @@
 .main {
   position: relative;
   min-height: calc(var(--mcm-viewport-stable) - 97px - var(--mcm-safe-top));
-  padding: 39px 20px max(32px, var(--mcm-safe-bottom));
+  /* 로그인과 같은 리듬이다. 구분선이 생기면서 뒤로가기가 선에 붙지 않게
+     20px을 띄운다. */
+  padding: 59px 20px max(32px, var(--mcm-safe-bottom));
+  /* 헤더와 본문을 가르는 실선. 로그인(Figma 93:81)과 같은 0.5px 선이다. */
+  border-top: 0.5px solid var(--mcm-color-muted);
 }
 
 .backLink {
   position: absolute;
-  top: 0;
+  top: 20px;
   left: 8px;
   display: flex;
   width: 44px;
-  height: 39px;
+  height: 44px;
   align-items: flex-start;
   padding-left: 12px;
   color: inherit;

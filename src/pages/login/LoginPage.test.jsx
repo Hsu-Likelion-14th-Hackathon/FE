@@ -36,4 +36,23 @@ describe('LoginPage', () => {
     expect(password).toHaveAttribute('type', 'text')
     expect(screen.getByRole('button', { name: '숨김' })).toHaveAttribute('aria-pressed', 'true')
   })
+
+  it('입력을 테두리 있는 상자로 두고 헤더 아래에 구분선을 긋는다', () => {
+    renderLogin()
+
+    // Figma 93:81 — 밑줄만 있던 28px 입력이 모서리 둥근 50px 상자로 바뀌었다.
+    // jsdom은 var()가 든 border 단축 속성을 전개하지 못해 색은 여기서 못 본다.
+    const email = window.getComputedStyle(screen.getByLabelText(/이메일 주소/))
+    expect(email.height).toBe('50px')
+    expect(email.borderRadius).toBe('8px')
+
+    // 구분선은 로그인·카카오 버튼 사이가 아니라 헤더 바로 아래에 있다.
+    expect(screen.queryByRole('separator')).not.toBeInTheDocument()
+  })
+
+  it('카카오 버튼 문구를 디자인대로 쓴다', () => {
+    renderLogin()
+
+    expect(screen.getByRole('button', { name: '카카오로 로그인' })).toBeInTheDocument()
+  })
 })
