@@ -16,9 +16,7 @@ export function Component() {
   const navigate = useNavigate()
 
   function handleClose() {
-    if (window.history.state?.idx > 0) {
-      navigate(-1)
-    }
+    navigate('/boarding-pass')
   }
 
   return (
