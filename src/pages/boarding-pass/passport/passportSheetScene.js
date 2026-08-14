@@ -17,8 +17,6 @@ import {
 
 import { createBendUniforms, createPaperMaterial } from './paperMaterial.js'
 
-/** 지면 높이가 화면에서 차지할 비율. 위아래 여백을 남겨 잘려 보이지 않게 한다. */
-const FILL_TARGET = 0.92
 /** 장 사이 z 간격. 장 폭에 대한 비율이라 화면 크기가 바뀌어도 두께감이 유지된다. */
 const LAYER_RATIO = 0.008
 /** 넘어가는 장이 아래 장을 스치지 않도록 들어 올리는 높이. */
@@ -130,8 +128,10 @@ export function createPassportSheets() {
       layout = { leafW, leafH }
 
       camera.aspect = w / h
-      const fitH = leafH / FILL_TARGET
-      camera.position.set(0, 0, fitH / (2 * Math.tan((camera.fov * Math.PI) / 360)))
+      // 보이는 세계 높이를 캔버스 픽셀 높이와 같게 둔다. 그래야 leafH가 곧
+      // 화면에 그려지는 픽셀 높이가 되어 DOM과 같은 값을 공유할 수 있다.
+      // 이전처럼 leafH/0.92로 두면 leafH가 약분되어 항상 캔버스의 92%가 그려졌다.
+      camera.position.set(0, 0, h / (2 * Math.tan((camera.fov * Math.PI) / 360)))
       camera.updateProjectionMatrix()
       place()
     },

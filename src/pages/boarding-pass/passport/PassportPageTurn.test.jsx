@@ -518,12 +518,15 @@ describe('PassportPageTurn', () => {
   it.each([
     ['CSS 전역이 없을 때', undefined],
     ['CSS.supports가 없을 때', {}],
-  ])('%s fallback으로 전환한다', async (_, css) => {
+  ])('%s에도 WebGL 렌더러를 그대로 쓴다', async (_, css) => {
+    // WebGL은 CSS 기능 지원과 무관하다. 예전 CSS 3D 렌더러 시절에는 여기서
+    // fallback으로 내려갔는데, 초기값이 fallback이라 그 검사가 항상 통과했다.
+    // 렌더러가 실제로 준비되는지까지 봐야 의미가 있다.
     vi.stubGlobal('CSS', css)
     render(<TurnHarness />)
 
     await waitFor(() =>
-      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'fallback'),
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
     )
   })
 

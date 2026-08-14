@@ -6,8 +6,10 @@
   position: relative;
   box-sizing: border-box;
   width: 100%;
-  /* 표지 높이는 폭에서 나오지만, 세로가 모자라면 --passport-h가 먼저 걸린다. */
-  height: calc(2.25rem + min(calc(79.5vw * 394 / 310), 24.625rem, var(--passport-h)));
+  /* 캔버스 높이가 곧 지면 높이다. 여백을 안에 섞으면 DOM과 WebGL이 서로 다른
+     값을 쓰게 되므로 margin으로 밖에 둔다. */
+  height: min(calc(79.5vw * 394 / 310), 24.625rem, var(--passport-h));
+  margin-top: 2.25rem;
   flex: 0 0 auto;
   overflow: visible;
   touch-action: pan-y;
@@ -15,9 +17,7 @@
 }
 
 .viewport[data-open='true'] {
-  /* 캔버스 높이도 지면과 같은 값에서 나와야 한다. 여기만 394로 고정하면
-     화면이 짧아 지면이 줄어든 만큼 캔버스가 남아, 그림과 클릭 영역이 어긋난다. */
-  height: calc(2.25rem + var(--passport-h));
+  height: var(--passport-h);
 }
 
 /* WebGL이 책을 그리는 레이어. 화면에 보이는 것은 전부 이 캔버스다.
@@ -55,13 +55,23 @@
   opacity: 1;
 }
 
+/* :has()가 없는 브라우저에서는 키보드 포커스가 가도 투명한 채로 남아 어디에
+   있는지 알 수 없다. 클릭했을 때 겹쳐 보이는 것보다 그게 더 나쁘므로
+   :focus-within으로 되돌린다. */
+@supports not selector(:has(*)) {
+  .contentLayer[data-transparent='true']:focus-within {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 22rem) {
   .viewport {
-    height: calc(1.25rem + min(calc(79.5vw * 394 / 310), 24.625rem, var(--passport-h)));
+    height: min(calc(79.5vw * 394 / 310), 24.625rem, var(--passport-h));
+    margin-top: 1.25rem;
   }
 
   .viewport[data-open='true'] {
-    height: calc(1.25rem + var(--passport-h));
+    height: var(--passport-h);
   }
 }
 

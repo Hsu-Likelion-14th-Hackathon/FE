@@ -274,6 +274,15 @@
   font-size: 0.5rem;
 }
 
+/* 지면이 줄면 안쪽 버튼도 같이 줄어 44px이 무너진다. 배율의 역수를 곱해
+   화면에서 차지하는 크기는 유지한다. */
+.profileFooter button,
+.journeyTile,
+.journeyActions button {
+  min-width: calc(2.75rem / var(--passport-scale, 1));
+  min-height: calc(2.75rem / var(--passport-scale, 1));
+}
+
 .profileFooter button {
   min-width: 2.75rem;
   min-height: 2.75rem;

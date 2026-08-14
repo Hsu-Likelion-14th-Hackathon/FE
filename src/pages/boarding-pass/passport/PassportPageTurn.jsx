@@ -165,11 +165,12 @@ export default function PassportPageTurn({ step, disabled, onCommit, renderStep 
     if (!viewport || !host || !surface) return null
     // 캔버스는 stage 패딩 밖까지 넓어져 있으므로 그 크기를 기준으로 삼는다.
     const viewportRect = host.getBoundingClientRect()
-    const surfaceRect = surface.getBoundingClientRect()
-    const leafH = Math.max(surfaceRect.height, 1)
+    // surface는 이미 배율이 걸려 있어 그 크기를 다시 재면 값이 순환한다.
+    // 캔버스 높이가 곧 지면이 차지할 높이이므로 그것 하나만 기준으로 삼는다.
+    const leafH = Math.max(viewportRect.height, 1)
     return {
       width: Math.max(viewportRect.width, 1),
-      height: Math.max(viewportRect.height, 1),
+      height: leafH,
       leafH,
       // 장은 설계 비율을 지킨다. 높이가 정해지면 폭도 따라온다.
       leafW: (leafH * SHEET_W) / SHEET_H,
