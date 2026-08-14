@@ -18,7 +18,7 @@ import styles from './LandingPage.module.scss'
 
 /**
  * (23) 보딩패스 랜딩 — Figma 492:4896.
- * - 비행 시작하기: /boarding-pass/survey
+ * - 비행 시작하기: /boarding-pass/intro
  * - 기존 BP 스캔: latest 200 → /boarding-pass/scan, 404 → T-01
  * - 헤더 위시/쇼핑백이 비면 (23-1) 토스트
  * - 상태바·홈 인디케이터는 DOM 미구현
@@ -29,7 +29,7 @@ export function Component() {
   const [scanning, setScanning] = useState(false)
 
   function handleStartFlight() {
-    navigate('/boarding-pass/survey')
+    navigate('/boarding-pass/intro')
   }
 
   async function openBag(bag) {
@@ -90,7 +90,7 @@ export function Component() {
           type="button"
           className={styles.close}
           aria-label="닫기"
-          onClick={() => navigate('/boarding-pass/intro')}
+          onClick={() => navigate('/')}
         >
           <img src={closeIcon} alt="" className={styles.closeImg} />
         </button>

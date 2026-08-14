@@ -302,21 +302,23 @@ describe('App', () => {
     expect(document.body).not.toHaveClass('store-menu-open')
   })
 
-  it('메인 Boarding에서 인트로를 거쳐 보딩패스 랜딩에 진입한다', async () => {
+  it('메인 Boarding에서 보딩패스 랜딩에 진입한다', async () => {
     const router = renderRoute('/')
 
     fireEvent.click(await screen.findByRole('link', { name: 'Boarding' }))
-
-    fireEvent.click(await screen.findByRole('button', { name: 'Next' }))
 
     expect(await screen.findByRole('button', { name: '비행 시작하기' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/boarding-pass')
   })
 
-  it('보딩패스 랜딩에서 로그인 없이 비행 설문에 진입한다', async () => {
+  it('보딩패스 랜딩에서 비행 시작하기를 누르면 인트로를 거쳐 설문에 진입한다', async () => {
     const router = renderRoute('/boarding-pass')
 
     fireEvent.click(await screen.findByRole('button', { name: '비행 시작하기' }))
+    expect(await screen.findByRole('button', { name: 'Next' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/boarding-pass/intro')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }))
 
     expect(await screen.findByRole('button', { name: '이전' }, { timeout: 10_000 })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/boarding-pass/survey')
@@ -333,14 +335,14 @@ describe('App', () => {
     expect(router.state.location.pathname).toBe('/boarding-pass/passport')
   })
 
-  it('메뉴 Boarding으로 인트로에 진입하고 메뉴를 닫는다', async () => {
+  it('메뉴 Boarding으로 랜딩에 진입하고 메뉴를 닫는다', async () => {
     const router = renderRoute('/')
 
     fireEvent.click(await screen.findByRole('button', { name: '메뉴 열기' }))
     fireEvent.click(screen.getByRole('link', { name: 'MCM Boarding Pass 둘러보기' }))
 
-    expect(await screen.findByRole('button', { name: 'Next' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/boarding-pass/intro')
+    expect(await screen.findByRole('button', { name: '비행 시작하기' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/boarding-pass')
     expect(screen.queryByRole('dialog', { name: '전체 메뉴' })).not.toBeInTheDocument()
     expect(document.documentElement).not.toHaveClass('store-menu-open')
     expect(document.body).not.toHaveClass('store-menu-open')

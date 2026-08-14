@@ -10,7 +10,7 @@ import styles from './IntroPage.module.scss'
 /**
  * (22) 보딩패스 인트로.
  * 패스 카드는 Figma 정적 이미지(보우·리본·카피 포함). Next만 기존 버튼 스타일 유지.
- * Next → (23) 랜딩. 상태바·홈 인디케이터는 구현하지 않는다.
+ * Next → (24) 설문. 상태바·홈 인디케이터는 구현하지 않는다.
  */
 export function Component() {
   const navigate = useNavigate()
@@ -39,7 +39,7 @@ export function Component() {
             />
           </div>
 
-          <button type="button" className={styles.next} onClick={() => navigate('/boarding-pass')}>
+          <button type="button" className={styles.next} onClick={() => navigate('/boarding-pass/survey')}>
             <span className={styles.nextLabel}>Next</span>
             <img src={nextArrow} alt="" aria-hidden="true" className={styles.nextArrow} />
           </button>

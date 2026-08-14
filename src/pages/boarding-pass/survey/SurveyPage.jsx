@@ -57,7 +57,7 @@ export function Component() {
       setStep((s) => s - 1)
       return
     }
-    navigate('/boarding-pass')
+    navigate('/boarding-pass/intro')
   }
 
   const handleSelect = (optionId) => {
@@ -153,6 +153,7 @@ export function Component() {
 
         {question ? (
           <div className={styles.footer}>
+            <div className={styles.footerBlur} aria-hidden="true" />
             <button
               type="button"
               disabled={selectedOptionId == null || loading}

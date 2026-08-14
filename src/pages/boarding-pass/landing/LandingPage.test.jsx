@@ -27,6 +27,7 @@ function renderLanding() {
   const router = createMemoryRouter(
     [
       { path: '/boarding-pass', Component: LandingPage },
+      { path: '/boarding-pass/intro', element: <p>Intro</p> },
       { path: '/boarding-pass/survey', element: <p>Survey</p> },
       { path: '/boarding-pass/scan', element: <p>Scan</p> },
       { path: '/boarding-pass/passport', element: <p>Passport</p> },
@@ -54,12 +55,12 @@ describe('LandingPage', () => {
     mockGetCart.mockReset()
   })
 
-  it('routes guests to survey from the start flight button', async () => {
+  it('routes guests to intro from the start flight button', async () => {
     const router = renderLanding()
 
     fireEvent.click(await screen.findByRole('button', { name: '비행 시작하기' }))
 
-    await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/survey'))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/intro'))
   })
 
   it('routes guests with an existing pass to scan', async () => {
