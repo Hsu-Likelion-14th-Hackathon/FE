@@ -6,7 +6,7 @@ import { PASS_STORAGE_KEY } from '@/features/boarding-pass/boarding-ticket/passS
 import noticeStyles from '@/features/boarding-pass/notice-toast/PassNoticeToast.module.scss'
 import SavePassToast from '@/features/boarding-pass/save-pass-toast/SavePassToast.jsx'
 import { getCurrentBoardingPass } from '@/shared/api/boardingPassApi.js'
-import stageBack from '@/shared/assets/boarding-pass/complete/stage-back.svg'
+import stageBack from '@/shared/assets/boarding-pass/complete/stage-back.png'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import { useToast } from '@/shared/ui/toastContext.js'
@@ -61,13 +61,11 @@ export function Component() {
 
   return (
     <main className={styles.stage}>
-      <img src={stageBack} alt="" aria-hidden="true" className={styles.stageBack} />
-      <div className={styles.fade} aria-hidden="true" />
-
       <div className={styles.content}>
         <StoreHeader />
 
         <section className={styles.body}>
+          <img src={stageBack} alt="" aria-hidden="true" className={styles.stageBack} />
           <button
             type="button"
             aria-label="닫기"
