@@ -262,8 +262,15 @@
   /* 라벨과 값이 붙지 않게 최소 여백을 둔다. 캔버스도 행 폭의 4%를 띄운다. */
   gap: 0.5rem;
   justify-content: space-between;
-  overflow: hidden;
   color: #c07346;
+  /* 캔버스 drawRow와 같은 글꼴이어야 한다. 12px/bold로 두면 글자가 캔버스보다
+     11px 넓어져, 이름 클릭 영역과 호버 밑줄이 실제 글자 밖까지 뻗는다.
+     보이는 글자는 캔버스가 그리므로 여기 크기는 오직 상자를 맞추는 값이다. */
+  font-size: 0.625rem;
+  font-weight: 600;
+  /* 여기에 overflow: hidden을 걸면 안 된다. 행 높이는 16px인데 이름 버튼은
+     44px이라, 위아래로 튀어나온 클릭 영역이 통째로 잘려 나간다.
+     넘치는 글자는 아래 .profile strong이 자기 폭 안에서 자른다. */
 }
 
 .profile strong {
@@ -273,6 +280,9 @@
   min-width: 0;
   overflow: hidden;
   color: #fff7d5;
+  /* strong의 기본값은 bolder다. 부모가 600이면 900으로 올라가 캔버스(600)보다
+     넓어질 수 있다. 상자를 캔버스에 맞추려면 여기서 못 박아야 한다. */
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -730,18 +740,28 @@ button.historyCard {
   /* 지면이 줄면 안쪽 요소도 같이 줄어 44px이 무너진다. 다른 여권 버튼처럼
      배율의 역수를 곱해 화면에서 차지하는 크기를 지킨다. */
   display: inline-grid;
+  /* 열을 내용 크기(auto)로 두면 안쪽 글자가 제 폭을 그대로 차지해, 버튼이
+     flex로 줄어도 글자는 325px인 채 버튼 밖으로 삐져나간다. 그러면 말줄임이
+     걸리지 않고 잘리기만 한다. 열을 버튼 폭에 묶어야 글자가 줄어든다. */
+  grid-template-columns: minmax(0, 1fr);
   min-width: calc(2.75rem / var(--passport-scale, 1));
   min-height: calc(2.75rem / var(--passport-scale, 1));
   /* 44px은 최소값이라 긴 이름은 그만큼 넓어진다. 행을 넘지 않게 위를 막는다. */
   max-width: 100%;
   align-items: center;
-  justify-items: start;
-  overflow: hidden;
+  /* justify-items를 start로 두면 안쪽 글자가 열 대신 제 내용 크기로 잡혀
+     열을 넘어간다. 기본값 stretch로 둬야 열 폭에 맞춰지고 말줄임이 걸린다.
+     글자는 아래 text-align: left가 왼쪽에 붙인다. */
+  /* 44px 판이 위아래 행과 14px씩 겹친다. 뒤에 오는 행이 나중에 그려져 아래
+     끝 클릭을 가로채므로, 버튼을 한 층 올려 제 영역을 지킨다. */
+  position: relative;
+  z-index: 1;
   margin-block: calc(-0.875rem / var(--passport-scale, 1));
   padding: 0;
   border: 0;
   background: transparent;
   color: inherit;
+  cursor: pointer;
   font: inherit;
   text-align: left;
 }

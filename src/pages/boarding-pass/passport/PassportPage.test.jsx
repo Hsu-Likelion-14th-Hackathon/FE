@@ -367,5 +367,38 @@ describe('PassportPage', () => {
     expect(style.textOverflow).toBe('ellipsis')
     expect(style.whiteSpace).toBe('nowrap')
     expect(style.minWidth).toBe('0px')
+    // 열이 내용 크기면 글자가 제 폭을 그대로 차지해 말줄임이 걸리지 않는다.
+    expect(window.getComputedStyle(value.closest('button')).gridTemplateColumns).toBe(
+      'minmax(0, 1fr)',
+    )
   })
+
+  it('이름 버튼의 44px 클릭 영역을 행이 잘라내지 않는다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+
+    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+    // 행 높이는 16px인데 버튼은 44px이다. 행에 overflow: hidden이 걸리면
+    // 위아래로 튀어나온 클릭 영역이 통째로 잘려 16px만 남는다.
+    // jsdom은 실제 hit-test를 하지 않아 잘림 여부는 스타일로만 확인한다.
+    // jsdom은 선언하지 않은 속성을 ''로 준다. 값이 hidden이 아니어야 한다는 게 요점이다.
+    expect(window.getComputedStyle(button.closest('p')).overflow).not.toBe('hidden')
+    expect(window.getComputedStyle(button).minHeight).toBe(
+      'calc(2.75rem / var(--passport-scale, 1))',
+    )
+  })
+
+  it('신분면 행 글꼴을 캔버스와 같게 둔다', () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    const row = screen.getByRole('button', { name: /이름 .* 수정/ }).closest('p')
+
+    // 캔버스 drawRow가 600 10px으로 그린다. DOM이 더 크면 글자 상자가 그림보다
+    // 넓어져, 클릭 영역과 호버 밑줄이 실제 글자 밖까지 뻗는다.
+    expect(window.getComputedStyle(row).fontSize).toBe('0.625rem')
+    expect(window.getComputedStyle(row).fontWeight).toBe('600')
+    // strong의 기본값 bolder는 부모 600을 900으로 올린다.
+    expect(window.getComputedStyle(row.querySelector('strong')).fontWeight).toBe('600')
+  })
+
 })
