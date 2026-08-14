@@ -8,6 +8,11 @@
   background: var(--mcm-color-canvas);
 }
 
+.pageLoading {
+  background: #646464;
+  background: color-mix(in srgb, #000 60%, var(--mcm-color-canvas));
+}
+
 .divider {
   width: 100%;
   height: 0;
