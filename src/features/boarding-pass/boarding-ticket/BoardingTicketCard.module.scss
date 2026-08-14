@@ -4,8 +4,12 @@
   position: relative;
   width: 100%;
   max-width: 19.375rem; /* 310 */
+  margin-inline: auto;
   overflow: visible;
-  /* 마스크 노치 실루엣을 따라가도록 카드가 아닌 래퍼에 섀도 */
+}
+
+/* 섀도를 카드에만 적용해 우상단 스탬프가 레이아웃 너비에 포함되지 않게 한다 */
+.shadow {
   filter: drop-shadow(0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.2));
 }
 
