@@ -14,8 +14,13 @@
   --passport-gap-mid: max(0.75rem, calc(2.25rem - var(--height-deficit) * 0.289));
   --intro-gap: max(0.25rem, calc(0.5rem - var(--height-deficit) * 0.048));
   --intro-note-gap: max(0.375rem, calc(1rem - var(--height-deficit) * 0.12));
+  /* 지면 바로 위 여백. 캔버스 밖에 있으므로 예산에도 따로 넣어야 한다. */
+  --passport-lead: 2.25rem;
 
   /* 13.4375rem은 줄일 수 없는 몫 — 헤더 97, 카피 세 줄 74, 아래 넘김 버튼 44.
+     여기에 지면 위 여백(--passport-lead)까지 빼야 한다. 예전에는 이 값이
+     캔버스 높이 안에 섞여 있어 예산에서 빠져 있었고, 그만큼 화면이 짧으면
+     넘김 버튼이 잘려 나갔다.
      여백을 다 걷어내고도 모자라면 그제야 여권이 줄어들되, 내지 글씨가 뭉개지지
      않도록 20rem을 하한으로 둔다. 하한에 닿으면 다시 잘리지만 그런 화면은
      가로 모드처럼 극단적인 경우뿐이다. */
@@ -25,9 +30,9 @@
       24.625rem,
       calc(
         var(--mcm-viewport-stable) -
-          13.4375rem - var(--passport-gap-top) - var(--passport-gap-mid) - var(--intro-gap) - var(
-            --intro-note-gap
-          ) - max(0.75rem, var(--mcm-safe-bottom))
+          13.4375rem - var(--passport-lead) - var(--passport-gap-top) - var(
+            --passport-gap-mid
+          ) - var(--intro-gap) - var(--intro-note-gap) - max(0.75rem, var(--mcm-safe-bottom))
       )
     )
   );
@@ -639,14 +644,14 @@ button.historyCard {
   .stage {
     padding-inline: 0.75rem;
   }
+  .page {
+    --passport-lead: 1.25rem;
+  }
   .introCopy {
     margin-top: 3.75rem;
   }
   .introCopy p {
     font-size: 1.4rem;
-  }
-  .passport {
-    margin-top: 1.25rem;
   }
   .navigation {
     margin-top: 0.75rem;
