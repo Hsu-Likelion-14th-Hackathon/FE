@@ -1,0 +1,62 @@
+.nav {
+  position: sticky;
+  bottom: 0;
+  z-index: 11;
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: auto;
+  padding: 0.25rem 1.25rem max(0.25rem, var(--mcm-safe-bottom));
+}
+
+.navRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navBtn {
+  display: grid;
+  flex-shrink: 0;
+  width: 2.125rem;
+  height: 2.125rem;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.navBtn:disabled {
+  opacity: 0.3;
+}
+
+.navBtnImg {
+  display: block;
+  width: 2.125rem;
+  height: 2.125rem;
+}
+
+.progressTrack {
+  flex: 1;
+  height: 0.625rem;
+  overflow: hidden;
+  border-radius: 6.25rem;
+  background: #e0e0e0;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 6.25rem;
+  background: var(--mcm-color-brand-brown);
+  transition: width 0.3s ease;
+}
+
+.footerNote {
+  margin: 0;
+  min-height: 1rem;
+  text-align: center;
+  font-size: 0.625rem;
+  line-height: 1rem;
+  color: #ab9e97;
+}

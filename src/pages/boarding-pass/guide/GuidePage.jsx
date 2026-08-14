@@ -7,34 +7,47 @@ import {
 import guideDecoTopImg from '@/shared/assets/boarding-pass/guide/deco-top.png'
 import emblemCrestImg from '@/shared/assets/boarding-pass/guide/emblem-crest.png'
 import emblemLaurelImg from '@/shared/assets/boarding-pass/guide/emblem-laurel.png'
-import navNextImg from '@/shared/assets/boarding-pass/guide/nav-next.svg'
-import navPrevImg from '@/shared/assets/boarding-pass/guide/nav-prev.svg'
 import overviewFigureImg from '@/shared/assets/boarding-pass/guide/overview-figure.png'
 import overviewMainImg from '@/shared/assets/boarding-pass/guide/overview-main.png'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import BoardingPassStageBackdrop from '@/shared/layout/BoardingPassStageBackdrop.jsx'
 import BoardingPassStageHeader from '@/shared/layout/BoardingPassStageHeader.jsx'
+import BoardingPassStepNav from '@/shared/layout/BoardingPassStepNav.jsx'
+import {
+  boardingPassStepProgress,
+  GUIDE_FLOOR_ORDER,
+  guideFloorStep,
+} from '@/shared/layout/boardingPassSteps.js'
 
 import styles from './GuidePage.module.scss'
 
-/** 층 전환 축 */
-const FLOOR_ORDER = ['overview', '1f', '2f', '3f', '5f']
+function scrollDocumentToTop() {
+  window.scrollTo(0, 0)
+  document.documentElement.scrollTop = 0
+  document.body.scrollTop = 0
+  document.querySelector('[data-device-screen]')?.firstElementChild?.scrollTo?.(0, 0)
+}
 
 /**
  * 여행 가이드 (44)(45)(46)(47)(47-1).
  * 개요 → 1F → 2F → 3F → 5F. 상태바 미구현. 도슨트는 BoardingPassDocent(M-01).
+ * 하단 슬라이더는 MAPS(1) 다음 2~6단계.
  */
 export function Component() {
   const navigate = useNavigate()
   const [floor, setFloor] = useState('overview')
-  const floorIndex = FLOOR_ORDER.indexOf(floor)
-  const progress = ((floorIndex + 1) / FLOOR_ORDER.length) * 100
+  const floorIndex = GUIDE_FLOOR_ORDER.indexOf(floor)
+  const progress = boardingPassStepProgress(guideFloorStep(floor))
   const atStart = floorIndex <= 0
-  const atEnd = floorIndex >= FLOOR_ORDER.length - 1
+  const atEnd = floorIndex >= GUIDE_FLOOR_ORDER.length - 1
+
+  useLayoutEffect(() => {
+    scrollDocumentToTop()
+  }, [floor])
 
   function goRelative(delta) {
     if (delta > 0) {
-      const next = FLOOR_ORDER[floorIndex + 1]
+      const next = GUIDE_FLOOR_ORDER[floorIndex + 1]
       if (next) setFloor(next)
       return
     }
@@ -44,7 +57,7 @@ export function Component() {
       return
     }
 
-    const prev = FLOOR_ORDER[floorIndex - 1]
+    const prev = GUIDE_FLOOR_ORDER[floorIndex - 1]
     if (prev) setFloor(prev)
   }
 
@@ -73,33 +86,18 @@ export function Component() {
             <FloorView floor={floor} />
           )}
         </div>
-
-        <div className={styles.nav}>
-          <div className={styles.navRow} role="group" aria-label="층 전환">
-            <button
-              type="button"
-              aria-label="이전"
-              onClick={() => goRelative(-1)}
-              className={styles.navBtn}
-            >
-              <img src={navPrevImg} alt="" className={styles.navBtnImg} />
-            </button>
-            <div className={styles.progressTrack}>
-              <div className={styles.progressFill} style={{ width: `${progress}%` }} />
-            </div>
-            <button
-              type="button"
-              aria-label="다음"
-              disabled={atEnd}
-              onClick={() => goRelative(1)}
-              className={styles.navBtn}
-            >
-              <img src={navNextImg} alt="" className={styles.navBtnImg} />
-            </button>
-          </div>
-          <p className={styles.footerNote}>AI가 고객님만의 MCM 비행 가이드를 준비했습니다</p>
-        </div>
       </main>
+
+        <BoardingPassStepNav
+          progress={progress}
+          onPrev={() => goRelative(-1)}
+          onNext={() => goRelative(1)}
+          nextDisabled={atEnd}
+          groupLabel="여행 진행"
+          note={
+            floor === 'overview' ? 'AI가 고객님만의 MCM 비행 가이드를 준비했습니다' : undefined
+          }
+        />
       </div>
     </div>
   )

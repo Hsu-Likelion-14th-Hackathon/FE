@@ -58,5 +58,22 @@ describe('GuidePage', { timeout: 15_000 }, () => {
     fireEvent.click(next)
     expect(screen.getByText('1976년, München')).toBeInTheDocument()
     expect(next).toBeDisabled()
+    expect(
+      screen.queryByText('AI가 고객님만의 MCM 비행 가이드를 준비했습니다'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('shows the AI note only on the travel guide overview', () => {
+    renderGuide()
+
+    expect(
+      screen.getByText('AI가 고객님만의 MCM 비행 가이드를 준비했습니다'),
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '다음' }))
+
+    expect(
+      screen.queryByText('AI가 고객님만의 MCM 비행 가이드를 준비했습니다'),
+    ).not.toBeInTheDocument()
   })
 })

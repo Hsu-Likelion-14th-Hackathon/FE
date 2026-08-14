@@ -3,22 +3,17 @@
 .page {
   position: relative;
   display: flex;
-  flex: 1;
+  flex: 1 0 auto;
   flex-direction: column;
-  overflow: hidden;
-  height: var(--mcm-viewport-dynamic);
-  max-height: var(--mcm-viewport-dynamic);
-  min-height: 0;
+  min-height: var(--mcm-viewport-stable);
   background: #41210b;
 }
 
 .stage {
   position: relative;
   display: flex;
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
   flex-direction: column;
-  overflow: hidden;
   background: #41210b;
 }
 
@@ -26,84 +21,21 @@
   position: relative;
   z-index: 10;
   display: flex;
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
   flex-direction: column;
-  padding: 1rem 1.25rem 0.25rem;
+  padding: 1rem 1.25rem 0;
 }
 
 .scroll {
-  flex: 1 1 0;
-  min-height: 0;
+  flex: 1 1 auto;
   margin-top: 1rem;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow-x: clip;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
 }
 
 .scroll::-webkit-scrollbar {
   display: none;
-}
-
-.nav {
-  display: flex;
-  flex-shrink: 0;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding-top: 0.25rem;
-}
-
-.navRow {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.navBtn {
-  display: grid;
-  flex-shrink: 0;
-  width: 2.125rem;
-  height: 2.125rem;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.navBtn:disabled {
-  opacity: 0.3;
-}
-
-.navBtnImg {
-  display: block;
-  width: 2.125rem;
-  height: 2.125rem;
-}
-
-.progressTrack {
-  flex: 1;
-  height: 0.625rem;
-  overflow: hidden;
-  border-radius: 6.25rem;
-  background: #e0e0e0;
-}
-
-.progressFill {
-  height: 100%;
-  border-radius: 6.25rem;
-  background: var(--mcm-color-brand-brown);
-  transition: width 0.3s ease;
-}
-
-.footerNote {
-  margin: 0;
-  text-align: center;
-  font-size: 0.625rem;
-  line-height: 1rem;
-  color: #ab9e97;
 }
 
 /* —— Overview —— */
