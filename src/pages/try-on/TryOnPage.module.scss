@@ -17,7 +17,8 @@
 .stage::before,
 .stage::after {
   position: absolute;
-  z-index: 0;
+  /* 모노그램(z-index 0)보다 위에 와야 어둠막이 무늬를 덮는다. */
+  z-index: 1;
   content: '';
   pointer-events: none;
 }
@@ -461,7 +462,9 @@
   top: 451px;
   left: 50%;
   display: grid;
-  width: 345px;
+  /* 320px 화면에서 고정 폭이면 좌우가 잘린다. */
+  width: calc(100% - 40px);
+  max-width: 345px;
   height: 108px;
   padding: 10px;
   align-items: start;
@@ -513,8 +516,14 @@
 }
 
 .productActions button {
+  /* 보이는 크기는 60x20이지만 손가락으로 누를 수 있어야 한다. 판을 44px로
+     넓히고 그만큼 음수 여백으로 당겨 배치는 그대로 둔다. */
+  display: grid;
   width: 60px;
   height: 20px;
+  min-height: 2.75rem;
+  place-items: center;
+  margin-block: -0.75rem;
   border: 0;
   border-radius: 4px;
   background: #e6e6e6;
@@ -528,7 +537,8 @@
   z-index: 2;
   top: 579px;
   left: 50%;
-  width: 350px;
+  width: calc(100% - 40px);
+  max-width: 350px;
   height: 50px;
   border: 0;
   border-radius: 8px;
@@ -550,8 +560,13 @@
   }
 }
 
-.productActions button:focus-visible,
 .saveButton:focus-visible {
   outline: 2px solid var(--mcm-color-canvas);
   outline-offset: 3px;
+}
+
+/* 흰 카드 위에서는 흰 테두리가 보이지 않는다. */
+.productActions button:focus-visible {
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: 2px;
 }

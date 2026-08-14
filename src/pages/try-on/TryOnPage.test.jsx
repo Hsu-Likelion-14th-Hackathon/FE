@@ -70,4 +70,24 @@ describe('TryOnPage', () => {
     expect(screen.getByRole('button', { name: '이미지 저장' })).toBeInTheDocument()
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
+
+  it('결과 카드는 주소의 상품을 보여준다', () => {
+    // 어떤 상품에서 들어와도 같은 상품을 보여주고 있었다.
+    vi.useFakeTimers()
+    render(
+      <MemoryRouter initialEntries={['/products/mcm-002/try-on']}>
+        <Routes>
+          <Route path="/products/:productId/try-on" element={<Component />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /Fitting/ }))
+    act(() => {
+      vi.advanceTimersByTime(80 * 25)
+    })
+
+    const result = screen.getByRole('region', { name: 'AI Fitting 결과' })
+    expect(result).not.toHaveTextContent('Diamant 비세토스 3D 참')
+  })
 })
