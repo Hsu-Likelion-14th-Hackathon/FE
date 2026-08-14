@@ -11,6 +11,7 @@ import checkCircleIcon from '@/shared/assets/boarding-pass/scan/check-circle.svg
 import pointScanIcon from '@/shared/assets/boarding-pass/scan/point-scan.svg'
 import scanButtonIcon from '@/shared/assets/boarding-pass/scan/scan-button-icon.svg'
 import scanFrameIcon from '@/shared/assets/boarding-pass/scan/scan-frame.svg'
+import stageBack from '@/shared/assets/boarding-pass/scan/stage-back.png'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './ScanPage.module.scss'
@@ -121,6 +122,7 @@ export function Component() {
       <StoreHeader />
 
       <main className={styles.main}>
+        <img src={stageBack} alt="" aria-hidden="true" className={styles.stageBack} />
         <button
           type="button"
           aria-label="뒤로"
