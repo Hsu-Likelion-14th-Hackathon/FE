@@ -3,17 +3,21 @@
 .page {
   position: relative;
   display: flex;
-  flex: 1 0 auto;
-  flex-direction: column;
+  height: var(--mcm-viewport-stable);
   min-height: var(--mcm-viewport-stable);
+  max-height: var(--mcm-viewport-stable);
+  flex-direction: column;
+  overflow: hidden;
   background: #41210b;
 }
 
 .stage {
   position: relative;
   display: flex;
-  flex: 1 0 auto;
+  flex: 1;
+  min-height: 0;
   flex-direction: column;
+  overflow: hidden;
   background: #41210b;
 }
 
@@ -21,15 +25,19 @@
   position: relative;
   z-index: 10;
   display: flex;
-  flex: 1 0 auto;
+  flex: 1;
+  min-height: 0;
   flex-direction: column;
+  overflow: hidden;
   padding: 1rem 1.25rem 0;
 }
 
 .scroll {
   flex: 1 1 auto;
+  min-height: 0;
   margin-top: 1rem;
   overflow-x: clip;
+  overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
