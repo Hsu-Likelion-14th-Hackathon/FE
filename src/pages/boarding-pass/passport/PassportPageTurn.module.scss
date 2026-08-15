@@ -16,7 +16,15 @@
   margin-top: calc(var(--passport-lead, 2.25rem) + var(--passport-gap-mid));
   flex: 0 0 auto;
   overflow: visible;
-  touch-action: pan-y;
+  /* 지면 위 손짓은 전부 넘김이다.
+     pan-y로 두면 세로 성분을 브라우저가 가져가, 비스듬히 쓸어 넘길 때마다
+     주소창이 여닫히고 화면이 위아래로 튄다. 그 사이 넘김은 끊겨 보인다.
+     여권 화면은 높이가 뷰포트에 고정돼(.page) 스크롤할 것이 없으므로
+     세로를 넘겨줘서 얻는 것도 없다. */
+  touch-action: none;
+  /* 지면 끝에서 더 끌었을 때 뒤 화면이 딸려 움직이지 않게 막는다.
+     iOS의 고무줄 스크롤이 여기로 번지면 같은 증상이 난다. */
+  overscroll-behavior: contain;
   user-select: none;
 }
 
