@@ -19,7 +19,7 @@ const HERO_MAX_SCALE = 2.4
 
 function BoardingButton() {
   return (
-    <Link className={styles.boardingButton} to="/boarding-pass">
+    <Link className={styles.boardingButton} to="/boarding-pass/intro">
       <span>Boarding</span>
       <span className={styles.boardingArrow} aria-hidden="true">
         <img src={boardingArrow} alt="" />

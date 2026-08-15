@@ -1,25 +1,26 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
-import { getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
+import { getCurrentBoardingPass } from '@/shared/api/boardingPassApi.js'
 import cameraDotImg from '@/shared/assets/boarding-pass/flight/camera-dot.svg'
-import controlArrowImg from '@/shared/assets/boarding-pass/flight/control-arrow.svg'
+import cloudLargeImg from '@/shared/assets/boarding-pass/flight/cloud-large.png'
 import controlBrightnessImg from '@/shared/assets/boarding-pass/flight/control-brightness.svg'
 import controlPowerImg from '@/shared/assets/boarding-pass/flight/control-power.svg'
 import controlSoundImg from '@/shared/assets/boarding-pass/flight/control-sound.svg'
 import decoRightImg from '@/shared/assets/boarding-pass/flight/deco-right.png'
-import hingeImg from '@/shared/assets/boarding-pass/flight/hinge.svg'
+import docentPlayImg from '@/shared/assets/boarding-pass/flight/docent-play.svg'
+import docentStopImg from '@/shared/assets/boarding-pass/flight/docent-stop.svg'
+import hingeScrewImg from '@/shared/assets/boarding-pass/flight/hinge-screw.svg'
 import mapImg from '@/shared/assets/boarding-pass/flight/map.png'
+import navNextImg from '@/shared/assets/boarding-pass/flight/nav-next.svg'
+import navPrevImg from '@/shared/assets/boarding-pass/flight/nav-prev.svg'
+import planeDecoImg from '@/shared/assets/boarding-pass/flight/plane-deco.png'
 import planeMarkerImg from '@/shared/assets/boarding-pass/flight/plane-marker.svg'
 import routePathImg from '@/shared/assets/boarding-pass/flight/route-path.svg'
 import tabletLogoImg from '@/shared/assets/boarding-pass/flight/tablet-logo.png'
-import ticketSheetBack from '@/shared/assets/boarding-pass/flight/ticket-sheet-back.png'
-import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
-import BoardingPassStageBackdrop from '@/shared/layout/BoardingPassStageBackdrop.jsx'
-import BoardingPassStageHeader from '@/shared/layout/BoardingPassStageHeader.jsx'
-import BoardingPassStepNav from '@/shared/layout/BoardingPassStepNav.jsx'
-import { FLIGHT_STEP, guideFloorFromStep } from '@/shared/layout/boardingPassSteps.js'
+import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
+import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
 
 import styles from './FlightPage.module.scss'
 
@@ -31,255 +32,196 @@ import styles from './FlightPage.module.scss'
 export function Component() {
   const navigate = useNavigate()
   const [pass, setPass] = useState(null)
-  const [passStatus, setPassStatus] = useState('loading')
   const [ticketOpen, setTicketOpen] = useState(false)
-  const sheetRef = useRef(null)
-  const dragRef = useRef({ pointerId: null, startY: 0, startAt: 0, dy: 0 })
-
-  function setSheetDrag(dy, dragging) {
-    const sheet = sheetRef.current
-    if (!sheet) return
-    sheet.style.setProperty('--sheet-drag', `${Math.max(0, dy)}px`)
-    sheet.dataset.dragging = dragging ? 'true' : 'false'
-  }
-
-  function openTicketSheet() {
-    setSheetDrag(0, false)
-    setTicketOpen(true)
-  }
-
-  function onSheetPointerDown(event) {
-    if (!ticketOpen || !event.isPrimary || event.button !== 0) return
-    event.preventDefault()
-    dragRef.current = {
-      pointerId: event.pointerId,
-      startY: event.clientY,
-      startAt: performance.now(),
-      dy: 0,
-    }
-    event.currentTarget.setPointerCapture(event.pointerId)
-    setSheetDrag(0, true)
-  }
-
-  function onSheetPointerMove(event) {
-    const drag = dragRef.current
-    if (drag.pointerId !== event.pointerId) return
-    const dy = Math.max(0, event.clientY - drag.startY)
-    drag.dy = dy
-    setSheetDrag(dy, true)
-  }
-
-  function onSheetPointerEnd(event) {
-    const drag = dragRef.current
-    if (drag.pointerId !== event.pointerId) return
-    const dy = drag.dy
-    const elapsed = Math.max(performance.now() - drag.startAt, 1)
-    const velocity = dy / elapsed
-    const height = sheetRef.current?.offsetHeight ?? 1
-    drag.pointerId = null
-    event.currentTarget.releasePointerCapture?.(event.pointerId)
-
-    const shouldClose = dy > 72 || dy > height * 0.22 || velocity > 0.55
-    setSheetDrag(shouldClose ? dy : 0, false)
-    if (shouldClose) setTicketOpen(false)
-  }
+  const [docentPlaying, setDocentPlaying] = useState(false)
 
   useEffect(() => {
     let cancelled = false
-    getLatestBoardingPass()
+    getCurrentBoardingPass()
       .then((data) => {
-        if (cancelled) return
-        setPass(data)
-        setPassStatus(data ? 'ready' : 'empty')
+        if (!cancelled) setPass(data)
       })
       .catch(() => {
-        if (cancelled) return
-        setPass(null)
-        setPassStatus('error')
+        if (!cancelled) setPass(null)
       })
     return () => {
       cancelled = true
     }
   }, [])
 
-  function goToStep(step) {
-    const floor = guideFloorFromStep(step)
-    if (!floor) return
-    navigate('/boarding-pass/guide', { state: { floor } })
-  }
-
-  const mapDate = formatMapDate()
+  const mapDate = formatMapDate(pass)
 
   return (
     <div className={styles.page}>
-      <StoreHeader />
+      <BoardingPassChrome />
 
-      <div className={styles.stage}>
-        <BoardingPassStageBackdrop />
+      <div aria-hidden="true" className={styles.ambiance}>
+        <img src={cloudLargeImg} alt="" className={styles.cloudTop} />
+        <img src={cloudLargeImg} alt="" className={styles.cloudBottom} />
+        <img src={planeDecoImg} alt="" className={styles.planeDeco} />
+        <img src={decoRightImg} alt="" className={styles.chestAmbientA} />
+        <img src={decoRightImg} alt="" className={styles.chestAmbientB} />
+        <img src={decoRightImg} alt="" className={styles.chestAmbientC} />
+        <div className={styles.footerFade} />
+      </div>
 
-        <main className={styles.main}>
-          <BoardingPassStageHeader
-            title="MAPS"
-            closeLabel="닫기"
-            onClose={() => navigate('/boarding-pass/scan')}
-          />
+      <main className={styles.main}>
+        <div className={styles.topRow}>
+          <button
+            type="button"
+            aria-label="닫기"
+            onClick={() => navigate('/boarding-pass/scan')}
+            className={styles.close}
+          >
+            <img src={closeIcon} alt="" className={styles.closeImg} />
+          </button>
 
-          <div className={styles.monitorWrap}>
-            <div className={styles.monitor}>
-              <img src={cameraDotImg} alt="" aria-hidden="true" className={styles.camera} />
+          <div className={styles.docentBlock}>
+            <p className={styles.docentHint}>음성 AI 도슨트가 고객님의 여정을 안내합니다</p>
+            <div className={styles.docentControls} data-deferred-id="M-01">
+              <button
+                type="button"
+                aria-label="도슨트 재생"
+                aria-pressed={docentPlaying}
+                className={styles.playBtn}
+                onClick={() => setDocentPlaying(true)}
+              >
+                <span aria-hidden="true" className={styles.playFill} />
+                <img src={docentPlayImg} alt="" className={styles.playIcon} />
+              </button>
+              <button
+                type="button"
+                aria-label="도슨트 정지"
+                aria-pressed={!docentPlaying}
+                className={styles.stopBtn}
+                onClick={() => setDocentPlaying(false)}
+              >
+                <img src={docentStopImg} alt="" className={styles.stopIcon} />
+              </button>
+            </div>
+          </div>
+        </div>
 
-              <div className={styles.bezel}>
-                <div className={styles.screen}>
-                  <img
-                    src={mapImg}
-                    alt="서울에서 뮌헨으로 가는 항로 지도"
-                    className={styles.mapImg}
-                  />
-                  <div className={styles.overlay}>
-                    <p className={styles.date}>{mapDate}</p>
-                    <div className={styles.routeRow}>
-                      <span className={styles.city}>SEOUL</span>
-                      <div className={styles.routeTrack}>
-                        <img src={routePathImg} alt="" className={styles.routePath} />
-                        <img
-                          src={planeMarkerImg}
-                          alt=""
-                          className={styles.planeMarker}
-                          data-testid="plane-marker"
-                        />
-                      </div>
-                      <span className={styles.city}>MUNICH</span>
+        <h2 className={styles.title}>MAPS</h2>
+
+        <div className={styles.monitorWrap}>
+          <div className={styles.monitor}>
+            <img src={cameraDotImg} alt="" aria-hidden="true" className={styles.camera} />
+
+            <div className={styles.bezel}>
+              <div className={styles.screen}>
+                <img
+                  src={mapImg}
+                  alt="서울에서 뮌헨으로 가는 항로 지도"
+                  className={styles.mapImg}
+                />
+                <div className={styles.overlay}>
+                  <p className={styles.date}>{mapDate}</p>
+                  <div className={styles.routeRow}>
+                    <span className={styles.city}>SEOUL</span>
+                    <div className={styles.routeTrack}>
+                      <img src={routePathImg} alt="" className={styles.routePath} />
+                      <img src={planeMarkerImg} alt="" className={styles.planeMarker} />
                     </div>
-                  </div>
-                </div>
-
-                <div className={styles.controlBar} aria-hidden="true">
-                  <div className={styles.controlSlot}>
-                    <img
-                      src={controlArrowImg}
-                      alt=""
-                      className={`${styles.controlArrow} ${styles.controlArrowDown}`}
-                    />
-                    <img src={controlBrightnessImg} alt="" className={styles.controlIcon} />
-                    <img src={controlArrowImg} alt="" className={styles.controlArrow} />
-                  </div>
-                  <div className={styles.controlSlot}>
-                    <img src={controlPowerImg} alt="" className={styles.controlIcon} />
-                  </div>
-                  <div className={styles.controlSlot}>
-                    <img
-                      src={controlArrowImg}
-                      alt=""
-                      className={`${styles.controlArrow} ${styles.controlArrowDown}`}
-                    />
-                    <img src={controlSoundImg} alt="" className={styles.controlIcon} />
-                    <img src={controlArrowImg} alt="" className={styles.controlArrow} />
+                    <span className={styles.city}>MUNICH</span>
                   </div>
                 </div>
               </div>
 
-              <img src={tabletLogoImg} alt="" aria-hidden="true" className={styles.tabletLogo} />
-
-              <img src={hingeImg} alt="" aria-hidden="true" className={styles.hinge} />
+              <div className={styles.controlBar} aria-hidden="true">
+                <div className={styles.controlSlot}>
+                  <img src={controlBrightnessImg} alt="" className={styles.controlIcon} />
+                </div>
+                <div className={styles.controlSlot}>
+                  <img src={controlPowerImg} alt="" className={styles.controlIcon} />
+                </div>
+                <div className={styles.controlSlot}>
+                  <img src={controlSoundImg} alt="" className={styles.controlIcon} />
+                </div>
+              </div>
             </div>
 
-            <img src={decoRightImg} alt="" aria-hidden="true" className={styles.trunk} />
-          </div>
+            <img src={tabletLogoImg} alt="" aria-hidden="true" className={styles.tabletLogo} />
 
-          <div className={styles.actions}>
-            <div className={styles.actionRow}>
-              <button type="button" onClick={openTicketSheet} className={styles.actionBtn}>
-                <span className={styles.actionBtnLabel}>티켓 정보</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/boarding-pass/guide')}
-                className={styles.actionBtn}
-              >
-                <span className={styles.actionBtnLabel}>여행 가이드</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/boarding-pass')}
-                className={styles.actionBtn}
-              >
-                <span className={styles.actionBtnLabel}>비행 종료</span>
-              </button>
+            <div className={styles.hinge} aria-hidden="true">
+              <div className={styles.hingeBar} />
+              <img src={hingeScrewImg} alt="" className={styles.hingeScrew} />
+              <img
+                src={hingeScrewImg}
+                alt=""
+                className={`${styles.hingeScrew} ${styles.hingeScrewFlip}`}
+              />
             </div>
-            <p className={styles.passportHint}>
-              비행 종료 후 여행의 기록이 담긴 Passport가 발급됩니다
-            </p>
           </div>
-        </main>
 
-        <BoardingPassStepNav
-          step={FLIGHT_STEP}
-          onPrev={() => navigate('/boarding-pass/scan')}
-          onNext={() => navigate('/boarding-pass/guide')}
-          onSelectStep={goToStep}
-          prevDisabled
-          groupLabel="여행 진행"
-        />
-      </div>
+          <img src={decoRightImg} alt="" aria-hidden="true" className={styles.trunk} />
+        </div>
 
-      <div
-        className={styles.sheetRoot}
-        data-state={ticketOpen ? 'open' : 'closed'}
-        aria-hidden={!ticketOpen}
-      >
-        <button
-          type="button"
-          aria-label="티켓 시트 닫기"
-          className={styles.sheetScrim}
-          onClick={() => setTicketOpen(false)}
-          tabIndex={ticketOpen ? 0 : -1}
-        />
-        <div
-          ref={sheetRef}
-          role="dialog"
-          aria-modal={ticketOpen}
-          aria-label="티켓 정보"
-          className={styles.sheet}
-          onPointerDown={onSheetPointerDown}
-          onPointerMove={onSheetPointerMove}
-          onPointerUp={onSheetPointerEnd}
-          onPointerCancel={onSheetPointerEnd}
-        >
-          <img src={ticketSheetBack} alt="" aria-hidden="true" className={styles.sheetBack} />
-          <div className={styles.sheetGrab} aria-hidden="true">
+        <div className={styles.actions}>
+          <div className={styles.actionRow}>
+            <button type="button" onClick={() => setTicketOpen(true)} className={styles.actionBtn}>
+              티켓 정보
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/boarding-pass/guide')}
+              className={styles.actionBtn}
+            >
+              여행 가이드
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/boarding-pass')}
+              className={styles.actionBtn}
+            >
+              비행 종료
+            </button>
+          </div>
+          <p className={styles.passportHint}>
+            비행 종료 후 여행의 기록이 담긴 Passport가 발급됩니다
+          </p>
+        </div>
+
+        <div className={styles.playback} role="group" aria-label="비행 진행">
+          <button type="button" aria-label="이전" className={styles.navBtn}>
+            <img src={navPrevImg} alt="" className={styles.navIcon} />
+          </button>
+          <div className={styles.progressTrack}>
+            <div className={styles.progressFill} />
+          </div>
+          <button type="button" aria-label="다음" className={styles.navBtn}>
+            <img src={navNextImg} alt="" className={styles.navIcon} />
+          </button>
+        </div>
+      </main>
+
+      {ticketOpen ? (
+        <div className={styles.sheetRoot}>
+          <button
+            type="button"
+            aria-label="티켓 시트 닫기"
+            className={styles.sheetScrim}
+            onClick={() => setTicketOpen(false)}
+          />
+          <div role="dialog" aria-label="티켓 정보" className={styles.sheet}>
             <div className={styles.handle} />
             <p className={styles.sheetTitle}>TICKET</p>
+            {pass ? (
+              <BoardingTicketCard pass={pass} size="md" className={styles.ticketSlot} />
+            ) : (
+              <p className={styles.ticketLoading}>티켓을 불러오는 중…</p>
+            )}
           </div>
-          {pass ? (
-            <BoardingTicketCard pass={pass} size="md" className={styles.ticketSlot} />
-          ) : (
-            <div className={styles.ticketLoading}>
-              <p>
-                {passStatus === 'error'
-                  ? '티켓을 불러오지 못했습니다.'
-                  : passStatus === 'empty'
-                    ? '발급된 보딩패스를 찾을 수 없습니다.'
-                    : '티켓을 불러오는 중…'}
-              </p>
-              {passStatus === 'empty' || passStatus === 'error' ? (
-                <button
-                  type="button"
-                  className={styles.ticketEmptyCta}
-                  onClick={() => navigate('/boarding-pass')}
-                >
-                  발급 페이지로 이동
-                </button>
-              ) : null}
-            </div>
-          )}
         </div>
-      </div>
+      ) : null}
     </div>
   )
 }
 
-function formatMapDate(now = new Date()) {
-  const day = String(now.getDate()).padStart(2, '0')
-  const month = now.toLocaleString('en-US', { month: 'short' }).toUpperCase()
-  return `${day} ${month} ${now.getFullYear()}`
+function formatMapDate(pass) {
+  if (pass?.boardingLabel) {
+    const match = String(pass.boardingLabel).match(/\d{1,2}\s+[A-Z]{3}\s+\d{4}/i)
+    if (match) return match[0].toUpperCase()
+  }
+  return '25 AUG 2026'
 }

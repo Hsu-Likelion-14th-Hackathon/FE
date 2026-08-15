@@ -1,15 +1,11 @@
-/* Figma 532:6224 보딩패스 티켓 — 본문 여유를 위해 310×480 */
+/* Figma 532:6224 보딩패스 티켓 — 310×450 기준 rem */
 
 .wrap {
   position: relative;
   width: 100%;
   max-width: 19.375rem; /* 310 */
-  margin-inline: auto;
   overflow: visible;
-}
-
-/* 섀도를 카드에만 적용해 우상단 스탬프가 레이아웃 너비에 포함되지 않게 한다 */
-.shadow {
+  /* 마스크 노치 실루엣을 따라가도록 카드가 아닌 래퍼에 섀도 */
   filter: drop-shadow(0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.2));
 }
 
@@ -25,7 +21,7 @@
   position: relative;
   display: flex;
   width: 100%;
-  aspect-ratio: 310 / 480;
+  aspect-ratio: 310 / 450;
   flex-direction: column;
   overflow: hidden;
   border-radius: var(--ticket-radius);
@@ -56,13 +52,12 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  /* 점선 위 여백 — 늘어난 분의 40%를 줄인 값 */
-  padding: 1.25rem 1.25rem calc(var(--ticket-stub-h) + 1.05rem);
+  padding: 1.25rem 1.25rem calc(var(--ticket-stub-h) + 0.75rem);
   min-height: 0;
 }
 
 .wrapSm .main {
-  padding: 0.875rem 1rem calc(var(--ticket-stub-h) + 0.65rem);
+  padding: 0.875rem 1rem calc(var(--ticket-stub-h) + 0.5rem);
 }
 
 .routeHeader {
@@ -210,22 +205,12 @@
   line-height: 1rem;
 }
 
-.logoRow {
-  display: flex;
-  flex-shrink: 0;
-  justify-content: center;
-  margin-top: auto;
-  padding-top: 0.6rem; /* 필드와 최소 간격 — 늘어난 분의 40% 축소 */
-}
-
-.wrapSm .logoRow {
-  padding-top: 0.45rem;
-}
-
+/* Figma: 로고는 절취선 위(겹치지 않음) */
 .mainLogo {
   display: block;
   width: 1.75rem; /* 28 */
   height: 1.75rem;
+  margin: auto auto 0;
   object-fit: contain;
 }
 

@@ -41,8 +41,8 @@ function renderPassport() {
   return router
 }
 
-describe('PassportPage', { timeout: 15_000 }, () => {
-  it('여행 기록에서 1F 상세와 티켓을 열고 Escape로 닫는다', { timeout: 15_000 }, async () => {
+describe('PassportPage', () => {
+  it('여행 기록에서 1F 상세와 티켓을 열고 Escape로 닫는다', async () => {
     renderPassport()
     const nextButton = screen.getByRole('button', { name: '다음 단계' })
     fireEvent.click(nextButton)
@@ -65,38 +65,28 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it(
-    '시트가 열린 동안 헤더와 콘텐츠를 inert로 만들고 상단 닫기는 시트만 닫는다',
-    { timeout: 15_000 },
-    async () => {
-      const router = renderPassport()
-      const nextButton = screen.getByRole('button', { name: '다음 단계' })
-      fireEvent.click(nextButton)
-      fireEvent.click(nextButton)
-      fireEvent.click(nextButton)
+  it('시트가 열린 동안 Chrome과 콘텐츠를 inert로 만들고 상단 닫기는 시트만 닫는다', async () => {
+    const router = renderPassport()
+    const nextButton = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(nextButton)
+    fireEvent.click(nextButton)
+    fireEvent.click(nextButton)
 
-      const historyTrigger = screen.getByRole('button', { name: 'TRAVEL HISTORY' })
-      fireEvent.click(historyTrigger)
-      expect(screen.getByRole('progressbar').closest('[inert]')).toBeInTheDocument()
-      expect(
-        screen.getByRole('button', { name: '메뉴 열기' }).closest('[inert]'),
-      ).toBeInTheDocument()
-      expect(
-        screen.getByRole('button', { name: '닫기' }).closest('[inert]'),
-      ).not.toBeInTheDocument()
-      fireEvent.keyDown(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' }), {
-        key: 'Tab',
-      })
-      expect(
-        screen.getByRole('button', { name: '메뉴 열기' }).closest('[inert]'),
-      ).toBeInTheDocument()
+    const historyTrigger = screen.getByRole('button', { name: 'TRAVEL HISTORY' })
+    fireEvent.click(historyTrigger)
+    expect(screen.getByRole('progressbar').closest('[inert]')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '메뉴 열기' }).closest('[inert]')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '닫기' }).closest('[inert]')).not.toBeInTheDocument()
+    fireEvent.keyDown(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' }), {
+      key: 'Tab',
+    })
+    expect(screen.getByRole('button', { name: '메뉴 열기' }).closest('[inert]')).toBeInTheDocument()
 
-      fireEvent.click(screen.getByRole('button', { name: '닫기' }))
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-      expect(router.state.location.pathname).toBe('/boarding-pass/passport')
-      await waitFor(() => expect(historyTrigger).toHaveFocus())
-    },
-  )
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/boarding-pass/passport')
+    await waitFor(() => expect(historyTrigger).toHaveFocus())
+  })
 
   it('시트가 열린 동안 pointer 제스처로 여권 단계를 바꾸지 않는다', () => {
     renderPassport()

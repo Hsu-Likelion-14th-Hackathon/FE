@@ -13,11 +13,6 @@ function ScanDepartLoadingOverlay({ onComplete, durationMs = 2200 }) {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
-    document.documentElement.classList.add('mcm-scan-loading')
-    return () => document.documentElement.classList.remove('mcm-scan-loading')
-  }, [])
-
-  useEffect(() => {
     let frame = 0
     const started = performance.now()
 

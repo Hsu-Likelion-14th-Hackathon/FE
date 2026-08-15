@@ -19,7 +19,7 @@ import passportEmblem from '@/shared/assets/boarding-pass/passport/passport-embl
 import passportSpread from '@/shared/assets/boarding-pass/passport/passport-spread.png'
 import passportStamp from '@/shared/assets/boarding-pass/passport/passport-stamp.png'
 import passportStampBow from '@/shared/assets/boarding-pass/passport/passport-stamp-bow.png'
-import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
 
 import { journeyRecords, passportTicket } from './passportData.js'
 import styles from './PassportPage.module.scss'
@@ -120,7 +120,7 @@ export function Component() {
   return (
     <div className={styles.page}>
       <div inert={sheet || undefined} className={sheet ? styles.dimmed : undefined}>
-        <StoreHeader />
+        <BoardingPassChrome />
       </div>
       <section
         className={styles.stage}

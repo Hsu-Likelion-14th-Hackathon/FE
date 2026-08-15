@@ -3,25 +3,27 @@ import { useNavigate } from 'react-router'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import passCard from '@/shared/assets/boarding-pass/intro/pass-card.png'
 import nextArrow from '@/shared/assets/boarding-pass/intro/next-arrow.svg'
-import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
 
 import styles from './IntroPage.module.scss'
 
 /**
  * (22) 보딩패스 인트로.
  * 패스 카드는 Figma 정적 이미지(보우·리본·카피 포함). Next만 기존 버튼 스타일 유지.
- * Next → (24) 설문. 상태바·홈 인디케이터는 구현하지 않는다.
+ * Next → (23) 랜딩. 상태바·홈 인디케이터는 구현하지 않는다.
  */
 export function Component() {
   const navigate = useNavigate()
 
   function handleClose() {
-    navigate('/boarding-pass', { replace: true })
+    if (window.history.state?.idx > 0) {
+      navigate(-1)
+    }
   }
 
   return (
     <main className={styles.page}>
-      <StoreHeader />
+      <BoardingPassChrome />
       <section className={styles.stage}>
         <button type="button" className={styles.close} aria-label="닫기" onClick={handleClose}>
           <img src={closeIcon} alt="" className={styles.closeImg} />
@@ -37,11 +39,7 @@ export function Component() {
             />
           </div>
 
-          <button
-            type="button"
-            className={styles.next}
-            onClick={() => navigate('/boarding-pass/survey')}
-          >
+          <button type="button" className={styles.next} onClick={() => navigate('/boarding-pass')}>
             <span className={styles.nextLabel}>Next</span>
             <img src={nextArrow} alt="" aria-hidden="true" className={styles.nextArrow} />
           </button>

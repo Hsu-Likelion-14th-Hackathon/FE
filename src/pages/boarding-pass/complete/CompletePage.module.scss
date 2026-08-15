@@ -6,43 +6,45 @@
   min-height: var(--mcm-viewport-stable);
   flex-direction: column;
   overflow: hidden;
-  background-color: #4b2c1d;
+  background-color: #41210b;
+}
+
+.stageBack {
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+  top: -32%;
+  left: -50%;
+  width: 207%;
+  max-width: none;
+  height: auto;
+  object-fit: cover;
+}
+
+.fade {
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 1;
+  height: 16.9375rem; /* 271 */
+  background: linear-gradient(to bottom, rgba(90, 54, 33, 0), rgba(25, 25, 25, 0.6));
 }
 
 .content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex: 1;
   flex-direction: column;
 }
 
 .body {
-  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
   align-items: center;
   padding: 2.375rem 1.25rem max(1.5rem, var(--mcm-safe-bottom)); /* top 38 */
-}
-
-.stageBack {
-  position: absolute;
-  /* 844 프레임 중 상단 141은 상태바+헤더. 헤더 아래 703만 .body에 깐다. */
-  top: calc(100% * -141 / 703);
-  left: 0;
-  z-index: 0;
-  display: block;
-  width: 100%;
-  height: calc(100% * 844 / 703);
-  object-fit: cover;
-  object-position: top center;
-  pointer-events: none;
-}
-
-.body > :not(.stageBack) {
-  position: relative;
-  z-index: 1;
 }
 
 .close {
@@ -113,8 +115,6 @@
   border: none;
   border-radius: 6.25rem;
   background: rgba(255, 247, 213, 0.2);
-  -webkit-backdrop-filter: blur(1.25rem);
-  backdrop-filter: blur(1.25rem);
   font-size: 0.625rem; /* 10 */
   font-weight: 600;
   line-height: 1;
@@ -172,6 +172,7 @@
   margin-top: 2.25rem; /* ≈36 — Figma 342−(206+글+버튼) */
   overflow: visible;
   padding-top: 1.5rem; /* 스탬프 overhang */
+  padding-right: 1.25rem;
 }
 
 .ticketCard {
@@ -184,4 +185,13 @@
   font-size: 0.875rem;
   line-height: 1.25rem;
   color: rgba(250, 250, 250, 0.8);
+}
+
+/* 저장 완료 토스트 셸 — 이미지: 진한 검정 · 약한 라운드 */
+.saveToastShell {
+  min-width: min(21.875rem, calc(100vw - 2.5rem));
+  padding: 0.75rem 1.25rem !important;
+  border-radius: 1.125rem !important; /* 18px — pill(999) 대신 */
+  background: rgba(26, 26, 26, 0.94) !important;
+  box-shadow: none !important;
 }

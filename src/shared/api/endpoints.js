@@ -16,6 +16,7 @@ export const API = {
   },
   boardingPass: {
     issue: apiUrl('/boarding-passes'),
+    current: apiUrl('/boarding-passes/latest'),
     latest: apiUrl('/boarding-passes/latest'),
     // 명세는 /boarding-passes/{id}/scan 이다. 호출부와 목까지 함께 바꿔야 해서
     // 접두사 정리와 분리한다.
