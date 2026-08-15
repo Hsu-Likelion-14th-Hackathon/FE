@@ -62,6 +62,8 @@ export async function getVisitDetail(visitLogId) {
     stayMinutes: result.stayMinutes ?? 0,
     passengerName: result.boardingPass?.passengerName ?? '',
     passCode: result.boardingPass?.passCode ?? '',
+    // 그 방문의 보딩패스. 동선(route)의 AI 추천 표시를 이어 붙일 때 쓴다.
+    boardingPassId: result.boardingPass?.boardingPassId ?? null,
     travelHistory: (result.travelHistory ?? []).map((floor) => ({
       id: `floor-${floor.floorNo}`,
       floorId: floor.floorId ?? null,

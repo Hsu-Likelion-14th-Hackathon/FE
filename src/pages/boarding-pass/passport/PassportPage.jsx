@@ -23,6 +23,7 @@ import { usePassport } from '@/entities/passport/usePassport.js'
 import { updateMe } from '@/shared/api/authApi.js'
 import { getAccessToken } from '@/shared/api/authToken.js'
 import { getFloor } from '@/shared/api/floorApi.js'
+import { getBoardingPassRoute } from '@/shared/api/boardingPassApi.js'
 import { getVisitDetail } from '@/shared/api/passportApi.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import {
@@ -161,6 +162,32 @@ function EditableRow({
   )
 }
 
+/**
+ * 방문 동선에 AI 추천 표시를 얹는다.
+ *
+ * 방문 상세(travelHistory)에는 추천 여부가 없다. 그 방문의 보딩패스 동선
+ * (GET /boarding-passes/{id}/route)에 층별 isRecommended·reason이 남아 있어
+ * floorId로 맞춰 합친다. 동선 조회가 실패해도 기록 자체는 보여야 하므로
+ * 그때는 표시 없이 그대로 돌려준다.
+ */
+async function withRouteBadges(detail) {
+  if (!detail.boardingPassId) return detail
+  try {
+    const steps = await getBoardingPassRoute(detail.boardingPassId)
+    const byFloor = new Map(steps.map((step) => [step.floorId, step]))
+    return {
+      ...detail,
+      travelHistory: detail.travelHistory.map((floor) => {
+        const step = byFloor.get(floor.floorId)
+        if (!step?.isRecommended) return floor
+        return { ...floor, isRecommended: true, reason: step.reason }
+      }),
+    }
+  } catch {
+    return detail
+  }
+}
+
 export function Component() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
@@ -179,6 +206,7 @@ export function Component() {
       return
     }
     getVisitDetail(stamp.visitLogId)
+      .then(withRouteBadges)
       .then((detail) => {
         setVisit(detail)
         setStep(3)
@@ -789,6 +817,7 @@ function HistoryList({ visit }) {
               </button>
               {isOpen ? (
                 <div className={styles.detailCopy}>
+                  {record.reason ? <p className={styles.aiReason}>✦ {record.reason}</p> : null}
                   {story?.status === 'ready' ? (
                     <FloorStory contents={story.contents} />
                   ) : story?.status === 'error' ? (
@@ -849,7 +878,14 @@ function FloorStory({ contents }) {
 function JourneyCard({ record }) {
   return (
     <span className={styles.journeyCardContent}>
-      <span>{`${record.floorNo}F ${record.code} | ${record.title}`}</span>
+      <span>
+        {`${record.floorNo}F ${record.code} | ${record.title}`}
+        {record.isRecommended ? (
+          <span className={styles.aiPick} aria-label="AI 추천 층">
+            ✦ AI
+          </span>
+        ) : null}
+      </span>
       <strong>{record.tagline}</strong>
     </span>
   )

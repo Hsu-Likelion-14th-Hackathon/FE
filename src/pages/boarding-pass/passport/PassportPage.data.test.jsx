@@ -38,25 +38,63 @@ const FETCHED_VISIT = {
   stayMinutes: 12,
   passengerName: 'ADA LOVELACE',
   passCode: 'MCM-TEST-0505',
+  boardingPassId: 77,
   travelHistory: [
     {
       id: 'floor-1',
+      floorId: 11,
       floorNo: 1,
       code: 'JOURNEY',
       title: '여정',
       tagline: '뮌헨의 밤이 낳은 대담함',
     },
-    { id: 'floor-2', floorNo: 2, code: 'EMBLEM', title: '상징', tagline: '태도를 담은 로고' },
+    {
+      id: 'floor-2',
+      floorId: 12,
+      floorNo: 2,
+      code: 'EMBLEM',
+      title: '상징',
+      tagline: '태도를 담은 로고',
+    },
   ],
 }
 
+/** 그 방문의 보딩패스 동선 — 1층만 AI 추천이다. */
+const FETCHED_ROUTE = [
+  {
+    sequence: 1,
+    id: '1f',
+    floorId: 11,
+    floorNo: 1,
+    code: 'JOURNEY',
+    title: '여정',
+    isRecommended: true,
+    reason: '첫 여정으로 알맞습니다.',
+  },
+  {
+    sequence: 2,
+    id: '2f',
+    floorId: 12,
+    floorNo: 2,
+    code: 'EMBLEM',
+    title: '상징',
+    isRecommended: false,
+    reason: null,
+  },
+]
+
 const getVisitDetail = vi.hoisted(() => vi.fn())
 const getPassportStamps = vi.hoisted(() => vi.fn())
+const getBoardingPassRoute = vi.hoisted(() => vi.fn())
 
 vi.mock('@/shared/api/passportApi.js', () => ({
   getPassport: vi.fn(async () => FETCHED_PROFILE),
   getPassportStamps: (...args) => getPassportStamps(...args),
   getVisitDetail: (...args) => getVisitDetail(...args),
+}))
+
+vi.mock('@/shared/api/boardingPassApi.js', () => ({
+  getBoardingPassRoute: (...args) => getBoardingPassRoute(...args),
 }))
 
 beforeEach(() => {
@@ -65,6 +103,7 @@ beforeEach(() => {
     .mockReset()
     .mockResolvedValue({ visits: FETCHED_PROFILE.visits, stamps: FETCHED_STAMPS })
   getVisitDetail.mockReset().mockResolvedValue(FETCHED_VISIT)
+  getBoardingPassRoute.mockReset().mockResolvedValue(FETCHED_ROUTE)
 })
 afterEach(() => vi.restoreAllMocks())
 
@@ -144,6 +183,30 @@ describe('여권 DOM 데이터', () => {
     expect(sheet).toHaveTextContent('1F JOURNEY | 여정')
     expect(sheet).toHaveTextContent('뮌헨의 밤이 낳은 대담함')
     expect(sheet).not.toHaveTextContent('삶은 여행이다')
+
+    // 동선의 AI 추천이 층 카드에 얹힌다 — 추천 층에만.
+    expect(getBoardingPassRoute).toHaveBeenCalledWith(77)
+    const badges = await screen.findAllByLabelText('AI 추천 층')
+    expect(badges).toHaveLength(1)
+    expect(badges[0].closest('button')).toHaveAccessibleName('1F JOURNEY 상세 보기')
+  })
+
+  it('동선 조회가 실패해도 여행 기록은 추천 표시 없이 열린다', async () => {
+    getBoardingPassRoute.mockRejectedValue(new Error('boom'))
+    renderPassport()
+    const next = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(next)
+    fireEvent.click(next)
+
+    fireEvent.click(await screen.findByRole('button', { name: '2026 04 04 방문 기록 보기' }))
+
+    const journey = await screen.findByRole('region', { name: '여권 여행 기록' })
+    await waitFor(() => expect(journey).toHaveTextContent('MCM MUNICH'))
+
+    fireEvent.click(screen.getByRole('button', { name: 'TRAVEL HISTORY' }))
+    const sheet = await screen.findByRole('dialog', { name: '여행 기록' })
+    expect(sheet).toHaveTextContent('1F JOURNEY | 여정')
+    expect(screen.queryByLabelText('AI 추천 층')).not.toBeInTheDocument()
   })
 
   it('방문이 없으면 스탬프 면을 채움 데이터로 메우지 않는다', async () => {

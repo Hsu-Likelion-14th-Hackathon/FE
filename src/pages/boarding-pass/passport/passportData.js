@@ -43,6 +43,8 @@ export const passportVisit = {
       code: 'JOURNEY',
       title: '여정',
       tagline: '삶은 여행이다, 그러니 잘 떠나야 한다',
+      isRecommended: true,
+      reason: '여정의 시작을 여는 층입니다.',
     },
     {
       id: 'floor-2',
@@ -51,6 +53,8 @@ export const passportVisit = {
       code: 'EMBLEM',
       title: '상징',
       tagline: '로고는 브랜드의 태도를 담는다',
+      isRecommended: true,
+      reason: '브랜드의 상징을 가까이서 볼 수 있습니다.',
     },
     {
       id: 'floor-3',
