@@ -705,7 +705,9 @@ function PassportSpread({
           <span>{visit?.address}</span>
         </p>
         <p>
-          <strong>{visit ? `입장 번호 ${visit.entryNo} | 비행 시간 ${visit.stayMinutes}M` : ''}</strong>
+          <strong>
+            {visit ? `입장 번호 ${visit.entryNo} | 비행 시간 ${visit.stayMinutes}M` : ''}
+          </strong>
         </p>
         <div className={styles.journeyActions}>
           <button type="button" onClick={onHistory} className={styles.history}>

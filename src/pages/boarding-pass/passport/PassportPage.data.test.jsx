@@ -39,7 +39,13 @@ const FETCHED_VISIT = {
   passengerName: 'ADA LOVELACE',
   passCode: 'MCM-TEST-0505',
   travelHistory: [
-    { id: 'floor-1', floorNo: 1, code: 'JOURNEY', title: '여정', tagline: '뮌헨의 밤이 낳은 대담함' },
+    {
+      id: 'floor-1',
+      floorNo: 1,
+      code: 'JOURNEY',
+      title: '여정',
+      tagline: '뮌헨의 밤이 낳은 대담함',
+    },
     { id: 'floor-2', floorNo: 2, code: 'EMBLEM', title: '상징', tagline: '태도를 담은 로고' },
   ],
 }

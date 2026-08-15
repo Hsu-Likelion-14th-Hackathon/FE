@@ -50,7 +50,13 @@ export const passportVisit = {
       title: '상징',
       tagline: '로고는 브랜드의 태도를 담는다',
     },
-    { id: 'floor-3', floorNo: 3, code: 'TRY', title: '시도', tagline: '다음 50년을 향한 새로운 시작' },
+    {
+      id: 'floor-3',
+      floorNo: 3,
+      code: 'TRY',
+      title: '시도',
+      tagline: '다음 50년을 향한 새로운 시작',
+    },
   ],
 }
 

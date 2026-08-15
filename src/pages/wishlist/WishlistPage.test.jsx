@@ -92,12 +92,16 @@ describe('WishlistPage', () => {
   it('하트를 누르면 productColorId로 삭제를 요청하고, 모두 지우면 빈 상태가 된다', async () => {
     await renderLoadedWishlist()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Diamant 비세토스 3D 참 위시리스트에서 삭제' }))
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Diamant 비세토스 3D 참 위시리스트에서 삭제' }),
+    )
 
     expect(removeFromWishlist).toHaveBeenCalledWith(1)
     expect(screen.queryByText('Diamant 비세토스 3D 참')).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'New Liz 비세토스 쇼퍼 위시리스트에서 삭제' }))
+    fireEvent.click(
+      screen.getByRole('button', { name: 'New Liz 비세토스 쇼퍼 위시리스트에서 삭제' }),
+    )
 
     expect(screen.getByText('비어 있습니다')).toBeInTheDocument()
     expect(screen.queryByRole('list', { name: '위시리스트 상품' })).not.toBeInTheDocument()
@@ -107,7 +111,9 @@ describe('WishlistPage', () => {
     removeFromWishlist.mockRejectedValue(new Error('네트워크 오류'))
     await renderLoadedWishlist()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Diamant 비세토스 3D 참 위시리스트에서 삭제' }))
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Diamant 비세토스 3D 참 위시리스트에서 삭제' }),
+    )
     expect(screen.queryByText('Diamant 비세토스 3D 참')).not.toBeInTheDocument()
 
     await waitFor(() => expect(screen.getByText('Diamant 비세토스 3D 참')).toBeInTheDocument())
@@ -120,7 +126,9 @@ describe('WishlistPage', () => {
     getWishlist.mockRejectedValue(Object.assign(new Error('인증이 필요합니다.'), { status: 401 }))
     renderWishlist()
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('위시리스트를 보려면 로그인이 필요합니다.')
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '위시리스트를 보려면 로그인이 필요합니다.',
+    )
     expect(screen.getByRole('link', { name: '로그인하기' })).toHaveAttribute('href', '/login')
   })
 })

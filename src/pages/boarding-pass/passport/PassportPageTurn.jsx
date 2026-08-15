@@ -444,7 +444,17 @@ export default function PassportPageTurn({
         commit,
       })
     },
-    [animateTo, clearNameCue, disabled, dismissHint, lastStep, onCommit, rendererMode, step, turnState],
+    [
+      animateTo,
+      clearNameCue,
+      disabled,
+      dismissHint,
+      lastStep,
+      onCommit,
+      rendererMode,
+      step,
+      turnState,
+    ],
   )
 
   // 여권 데이터가 바뀌면 구워둔 면을 버린다.

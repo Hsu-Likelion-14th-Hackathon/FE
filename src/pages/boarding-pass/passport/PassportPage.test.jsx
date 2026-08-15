@@ -521,9 +521,9 @@ describe('PassportPage', { timeout: 15_000 }, () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('인증이 필요합니다.')
     expect(screen.getByRole('dialog', { name: '여권 신분 정보 수정' })).toBeInTheDocument()
-    expect(
-      screen.getByRole('region', { name: '여권 프로필', hidden: true }),
-    ).not.toHaveTextContent('ADA KIM')
+    expect(screen.getByRole('region', { name: '여권 프로필', hidden: true })).not.toHaveTextContent(
+      'ADA KIM',
+    )
   })
 
   it('토큰이 없으면 서버 없이 지면 표기만 바꾼다', async () => {

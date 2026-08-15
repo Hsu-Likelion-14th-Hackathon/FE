@@ -86,9 +86,11 @@ function renderTryOn(path = '/products/1/try-on') {
 beforeEach(() => {
   getProduct.mockReset().mockResolvedValue(product)
   getPassport.mockReset().mockResolvedValue({ credit: 150 })
-  createUploadUrl
-    .mockReset()
-    .mockResolvedValue({ uploadUrl: 'https://blob/up?sas=1', fileKey: 'uploads/me.jpg', expiresIn: 300 })
+  createUploadUrl.mockReset().mockResolvedValue({
+    uploadUrl: 'https://blob/up?sas=1',
+    fileKey: 'uploads/me.jpg',
+    expiresIn: 300,
+  })
   uploadToAzure.mockReset().mockResolvedValue(undefined)
   createFittingSession.mockReset().mockResolvedValue(pendingSession)
   getFittingSession.mockReset().mockResolvedValue(doneSession)

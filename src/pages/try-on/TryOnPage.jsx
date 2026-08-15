@@ -282,9 +282,10 @@ export function Component() {
     colors.find((color) => color.isDefault) ??
     colors[0] ??
     null
-  const productColorId = Number.isInteger(colorParam) && colorParam > 0
-    ? colorParam
-    : (selectedColor?.productColorId ?? null)
+  const productColorId =
+    Number.isInteger(colorParam) && colorParam > 0
+      ? colorParam
+      : (selectedColor?.productColorId ?? null)
 
   // 진행률 눈금. 서버가 끝냈다고 하기 전에는 천장 아래에서 긴다.
   useEffect(() => {

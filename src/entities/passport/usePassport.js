@@ -2,10 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { getMe } from '@/shared/api/authApi.js'
 import { getPassport, getPassportStamps } from '@/shared/api/passportApi.js'
-import {
-  passportProfile,
-  passportStamps,
-} from '@/pages/boarding-pass/passport/passportData.js'
+import { passportProfile, passportStamps } from '@/pages/boarding-pass/passport/passportData.js'
 
 /**
  * 여권 신분면과 방문 스탬프를 불러온다.

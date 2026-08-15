@@ -126,10 +126,14 @@ describe('CartPage', () => {
   })
 
   it('로그인이 없어 401이 오면 로그인 링크를 보여 준다', async () => {
-    getShoppingBag.mockRejectedValue(Object.assign(new Error('인증이 필요합니다.'), { status: 401 }))
+    getShoppingBag.mockRejectedValue(
+      Object.assign(new Error('인증이 필요합니다.'), { status: 401 }),
+    )
     renderCart()
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('쇼핑백을 보려면 로그인이 필요합니다.')
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '쇼핑백을 보려면 로그인이 필요합니다.',
+    )
     expect(screen.getByRole('link', { name: '로그인하기' })).toHaveAttribute('href', '/login')
   })
 })
