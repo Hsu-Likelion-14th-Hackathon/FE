@@ -25,7 +25,7 @@ import styles from './LandingPage.module.scss'
  */
 export function Component() {
   const navigate = useNavigate()
-  const { showToast } = useToast()
+  const { showToast, hideToast } = useToast()
   const [scanning, setScanning] = useState(false)
 
   function handleStartFlight() {
@@ -38,12 +38,22 @@ export function Component() {
     try {
       const items = await fetchItems()
       if (!items?.length) {
-        showToast(<EmptyBagToast bag={bag} />, {
-          position: 'bottom',
-          duration: 3000,
-          closeOnOutsideClick: false,
-          className: noticeStyles.shell,
-        })
+        showToast(
+          <EmptyBagToast
+            bag={bag}
+            // 빈 화면은 초대다 — 토스트를 누르면 상품 목록으로 간다.
+            onGoProducts={() => {
+              hideToast()
+              navigate('/products')
+            }}
+          />,
+          {
+            position: 'bottom',
+            duration: 3000,
+            closeOnOutsideClick: false,
+            className: noticeStyles.shell,
+          },
+        )
         return
       }
     } catch {

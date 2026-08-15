@@ -33,6 +33,7 @@ function renderLanding() {
       { path: '/boarding-pass/passport', element: <p>Passport</p> },
       { path: '/wishlist', element: <h1>위시리스트</h1> },
       { path: '/cart', element: <h1>쇼핑백</h1> },
+      { path: '/products', element: <h1>상품 목록</h1> },
     ],
     { initialEntries: ['/boarding-pass'] },
   )
@@ -127,8 +128,12 @@ describe('LandingPage', () => {
     fireEvent.click(await screen.findByRole('link', { name: '위시리스트' }))
 
     expect(await screen.findByText('위시리스트에 담긴 상품이 없습니다')).toBeInTheDocument()
-    expect(screen.getByText('상품을 담은 뒤 다시 이용해 주세요')).toBeInTheDocument()
+    expect(screen.getByText('눌러서 상품을 담으러 가기')).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/boarding-pass')
+
+    // 빈 화면은 초대다 — 토스트를 누르면 상품 목록으로 간다.
+    fireEvent.click(screen.getByRole('button', { name: '상품 목록 보러가기' }))
+    expect(router.state.location.pathname).toBe('/products')
   })
 
   it('쇼핑백이 비면 랜딩에 머무르고 빈 가방 토스트를 보여 준다', async () => {

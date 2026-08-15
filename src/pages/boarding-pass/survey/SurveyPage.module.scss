@@ -127,14 +127,17 @@
   align-items: flex-start;
   gap: 1rem; /* 16 — title↔description */
   margin-top: 1.25rem; /* 20 — Q→title (259−239) */
-  max-width: 16.0625rem; /* 257 */
+  /* 문항이 한 줄로 나가야 한다. 두 줄 시절의 257px 제한을 푼다. */
+  max-width: 100%;
 }
 
 .title {
   margin: 0;
-  font-size: 1.25rem; /* 20 */
+  /* 가장 긴 선택형 문항(약 18자)이 어느 폭에서도 한 줄에 들어가는 크기.
+     390px에서 18px, 320px에서 15px 근처로 내려간다. */
+  font-size: clamp(0.875rem, 4.6vw, 1.125rem);
   font-weight: 600;
-  line-height: 1.25rem;
+  line-height: 1.5rem;
   color: var(--mcm-color-ink);
 }
 
@@ -201,6 +204,49 @@
   font-size: 0.75rem;
   line-height: 1.25rem;
   color: var(--mcm-color-brand-brown);
+}
+
+/* Q6 자유 입력. 선택 카드와 같은 틀(테두리·모서리·여백)을 쓴다. */
+.freeText {
+  width: 100%;
+  margin-top: 1.875rem;
+  padding: 1.25rem;
+  border: 0.1rem solid #e0e0e0;
+  border-radius: 0.875rem;
+  background: var(--mcm-color-canvas);
+  color: var(--mcm-color-ink);
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  resize: none;
+}
+
+.freeText:focus-visible {
+  border-color: var(--mcm-color-brand-brown);
+  outline: none;
+}
+
+.freeText::placeholder {
+  color: var(--mcm-color-muted);
+}
+
+/* 발급 직전 데이터 활용 동의 한 줄. CTA 바로 위에 붙는다. */
+.consent {
+  display: flex;
+  margin-bottom: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--mcm-color-muted);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+}
+
+.consent input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--mcm-color-brand-brown);
 }
 
 .status {
