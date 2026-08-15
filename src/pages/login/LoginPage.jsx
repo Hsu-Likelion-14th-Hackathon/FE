@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 
 import backIcon from '@/assets/icons/auth/back.svg'
 import kakaoIcon from '@/assets/icons/auth/kakao.svg'
+import { login } from '@/shared/api/authApi.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './LoginPage.module.scss'
@@ -10,6 +11,33 @@ import styles from './LoginPage.module.scss'
 export function Component() {
   // 입력한 비밀번호를 눈으로 확인할 수 있게 한다. 오타로 막히는 일이 잦다.
   const [passwordVisible, setPasswordVisible] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  // 백엔드가 준 message를 그대로 보여 준다. 우리가 지어내면 실제 이유와
+  // 어긋난다(잘못된 비밀번호인지, 없는 계정인지).
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  async function handleSubmit(event) {
+    // 막지 않으면 브라우저가 기본 GET 제출을 해서 비밀번호가 주소창과 방문
+    // 기록에 평문으로 남는다.
+    event.preventDefault()
+    if (submitting) return
+
+    const form = new FormData(event.currentTarget)
+    setSubmitting(true)
+    setError('')
+
+    try {
+      await login({ email: form.get('email'), password: form.get('password') })
+      // 보호 화면에서 밀려왔다면 원래 가려던 곳으로 돌려보낸다.
+      navigate(location.state?.from ?? '/', { replace: true })
+    } catch (loginError) {
+      setError(loginError.message || '로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -34,15 +62,7 @@ export function Component() {
           </div>
         </header>
 
-        <form
-          className={styles.form}
-          onSubmit={(event) => {
-            // 아직 붙일 API가 없다. 막지 않으면 브라우저가 기본 동작으로 GET
-            // 제출을 해서 페이지가 새로고침되고 비밀번호가 주소창과 방문 기록에
-            // 평문으로 남는다. POST /auth/login을 붙일 때 이 자리를 채운다.
-            event.preventDefault()
-          }}
-        >
+        <form className={styles.form} onSubmit={handleSubmit}>
           <p className={styles.requiredNotice}>* 표시가 있는 모든 입력 항목은 필수입니다.</p>
 
           <div className={styles.field}>
@@ -89,8 +109,14 @@ export function Component() {
             />
           </div>
 
-          <button className={styles.submitButton} type="submit">
-            로그인
+          {error ? (
+            <p className={styles.errorNotice} role="alert">
+              {error}
+            </p>
+          ) : null}
+
+          <button className={styles.submitButton} type="submit" disabled={submitting}>
+            {submitting ? '로그인 중…' : '로그인'}
           </button>
         </form>
 

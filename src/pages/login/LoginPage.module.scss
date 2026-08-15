@@ -244,3 +244,11 @@
     padding-left: 0;
   }
 }
+
+/* 로그인 실패 사유. 백엔드 message를 그대로 싣는다. */
+.errorNotice {
+  margin: 0;
+  color: #d14343;
+  font-size: 14px;
+  line-height: 20px;
+}
