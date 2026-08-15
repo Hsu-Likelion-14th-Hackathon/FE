@@ -248,3 +248,92 @@
   line-height: 20px;
   text-decoration: underline;
 }
+
+/* 비밀번호 조건표.
+   치는 동안 하나씩 채워지는 것이 보여야, 다 치고 나서 되돌아오지 않는다. */
+.passwordRules {
+  padding: 12px 14px;
+  border: 1px solid var(--mcm-color-border);
+  border-radius: 10px;
+  background: var(--mcm-color-product-surface);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+/* 다 채우면 표 전체가 한 번 바뀌어 끝났다는 것을 알린다. */
+.passwordRulesMet {
+  border-color: #2f8f5b;
+  background: #f1f8f3;
+}
+
+.passwordRulesTitle {
+  display: flex;
+  margin: 0 0 8px;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--mcm-color-ink);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.passwordRulesCount {
+  color: var(--mcm-color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.passwordRuleList {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 6px 12px;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  list-style: none;
+}
+
+.passwordRule {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mcm-color-muted);
+  font-size: 12px;
+  line-height: 18px;
+  transition: color 160ms ease;
+}
+
+/* 빈 동그라미가 체크로 바뀐다. 글자색만 바꾸면 색약인 사용자가 구분하기 어렵다. */
+.ruleMark {
+  display: grid;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  place-items: center;
+  border: 1px solid var(--mcm-color-border);
+  border-radius: 50%;
+  background: var(--mcm-color-canvas);
+  font-size: 10px;
+  line-height: 1;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.ruleMet {
+  color: #2f8f5b;
+}
+
+.ruleMet .ruleMark {
+  border-color: #2f8f5b;
+  color: #fff;
+  background: #2f8f5b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .passwordRules,
+  .passwordRule,
+  .ruleMark {
+    transition: none;
+  }
+}

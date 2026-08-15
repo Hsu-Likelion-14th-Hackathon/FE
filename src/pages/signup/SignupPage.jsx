@@ -10,8 +10,56 @@ import BirthDateField from '@/shared/ui/profile-fields/BirthDateField.jsx'
 import NationalitySelect from '@/shared/ui/profile-fields/NationalitySelect.jsx'
 import { getCountryOption } from '@/shared/ui/profile-fields/country-options.js'
 import { PASSPORT_NAME_MAX_LENGTH, toPassportName } from '@/shared/lib/passportName.js'
+import { PASSWORD_RULES, isValidPassword } from '@/shared/lib/password.js'
 
 import styles from './SignupPage.module.scss'
+
+/**
+ * 비밀번호 조건표.
+ *
+ * 다 치고 제출한 뒤에 "형식이 올바르지 않습니다"를 만나면 무엇이 모자란지
+ * 몰라 찍어서 고치게 된다. 조건을 처음부터 펼쳐 두고 치는 동안 하나씩
+ * 채워지는 것을 보여 준다.
+ *
+ * 통과 표시는 한 글자라도 친 뒤에 켠다. 빈 칸에 미충족 표시가 다섯 개 떠
+ * 있으면 아직 아무것도 안 했는데 혼나는 화면처럼 보인다.
+ */
+function PasswordRules({ password, touched }) {
+  const metCount = PASSWORD_RULES.filter((rule) => rule.test(password)).length
+  const allMet = metCount === PASSWORD_RULES.length
+
+  return (
+    <div
+      className={`${styles.passwordRules} ${touched && allMet ? styles.passwordRulesMet : ''}`}
+      id="signup-password-rules"
+    >
+      <p className={styles.passwordRulesTitle}>
+        <span>비밀번호 조건</span>
+        {touched ? (
+          <span className={styles.passwordRulesCount}>
+            {metCount}/{PASSWORD_RULES.length}
+          </span>
+        ) : null}
+      </p>
+      <ul className={styles.passwordRuleList}>
+        {PASSWORD_RULES.map((rule) => {
+          const met = touched && rule.test(password)
+          return (
+            <li className={`${styles.passwordRule} ${met ? styles.ruleMet : ''}`} key={rule.id}>
+              <span className={styles.ruleMark} aria-hidden="true">
+                {met ? '✓' : ''}
+              </span>
+              <span>{rule.label}</span>
+              {touched ? (
+                <span className="sr-only">{met ? ' 충족함' : ' 아직 충족하지 않음'}</span>
+              ) : null}
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
 
 /**
  * 가입 실패 사유.
@@ -60,6 +108,10 @@ export function Component() {
   // 로그인해야 하는지까지 담겨 온다.
   const [error, setError] = useState(null)
   const [openPicker, setOpenPicker] = useState(null)
+  const [password, setPassword] = useState('')
+  // 규칙은 처음부터 보여 주되, 통과 여부 표시는 한 글자라도 친 뒤에 켠다.
+  // 빈 칸에 빨간 표시가 다섯 개 떠 있으면 혼내는 화면처럼 보인다.
+  const [passwordTouched, setPasswordTouched] = useState(false)
   const [name, setName] = useState('')
   // 걸러낸 글자가 있을 때만 안내를 띄운다. 처음부터 보여주면 잔소리가 된다.
   const [nameRejected, setNameRejected] = useState(false)
@@ -98,6 +150,12 @@ export function Component() {
     // 기록에 평문으로 남는다.
     event.preventDefault()
     if (submitting) return
+
+    if (!isValidPassword(password)) {
+      // 서버까지 갈 필요가 없다. 무엇이 모자란지는 아래 목록이 이미 보여 준다.
+      setPasswordTouched(true)
+      return
+    }
 
     const form = new FormData(event.currentTarget)
     setSubmitting(true)
@@ -202,9 +260,16 @@ export function Component() {
                     type="password"
                     autoComplete="new-password"
                     placeholder="비밀번호를 입력해 주세요"
+                    aria-describedby="signup-password-rules"
+                    value={password}
+                    onChange={(event) => {
+                      setPassword(event.target.value)
+                      setPasswordTouched(true)
+                    }}
                     required
                   />
                 </div>
+                <PasswordRules password={password} touched={passwordTouched} />
               </div>
             </div>
 

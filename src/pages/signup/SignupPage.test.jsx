@@ -27,7 +27,8 @@ async function renderProfileStep() {
   )
 
   fireEvent.change(screen.getByLabelText(/이메일 주소/), { target: { value: 'a@b.c' } })
-  fireEvent.change(screen.getByLabelText(/비밀번호/), { target: { value: 'password' } })
+  // 규칙을 만족하는 값이어야 다음 단계로 넘어간다.
+  fireEvent.change(screen.getByLabelText(/비밀번호/), { target: { value: 'Passw0rd!' } })
   fireEvent.click(screen.getByRole('button', { name: '다음' }))
 
   await screen.findByRole('button', { name: '가입하기' })
@@ -157,11 +158,12 @@ describe('SignupPage', () => {
     expect(screen.queryByLabelText(/이름/)).not.toBeInTheDocument()
 
     fireEvent.change(screen.getByLabelText(/이메일 주소/), { target: { value: 'a@b.c' } })
-    fireEvent.change(screen.getByLabelText(/비밀번호/), { target: { value: 'password' } })
+    // 규칙을 만족하는 값이어야 다음 단계로 넘어간다.
+    fireEvent.change(screen.getByLabelText(/비밀번호/), { target: { value: 'Passw0rd!' } })
     fireEvent.click(screen.getByRole('button', { name: '다음' }))
 
     await waitFor(() =>
-      expect(signup).toHaveBeenCalledWith({ email: 'a@b.c', password: 'password' }),
+      expect(signup).toHaveBeenCalledWith({ email: 'a@b.c', password: 'Passw0rd!' }),
     )
     expect(await screen.findByLabelText(/이름/)).toBeInTheDocument()
   })
@@ -187,7 +189,8 @@ describe('SignupPage', () => {
     )
 
     fireEvent.change(screen.getByLabelText(/이메일 주소/), { target: { value: 'a@b.c' } })
-    fireEvent.change(screen.getByLabelText(/비밀번호/), { target: { value: 'password' } })
+    // 규칙을 만족하는 값이어야 다음 단계로 넘어간다.
+    fireEvent.change(screen.getByLabelText(/비밀번호/), { target: { value: 'Passw0rd!' } })
     fireEvent.click(screen.getByRole('button', { name: '다음' }))
 
     const alert = await screen.findByRole('alert')
@@ -219,5 +222,25 @@ describe('SignupPage', () => {
         nationality: 'KR',
       }),
     )
+  })
+
+  it('규칙에 못 미치는 비밀번호는 서버까지 보내지 않고 무엇이 모자란지 보여 준다', async () => {
+    render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>,
+    )
+
+    // 아무것도 치기 전에는 미충족 표시를 켜지 않는다. 혼내는 화면처럼 보인다.
+    expect(screen.queryByText(/아직 충족하지 않음/)).not.toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText(/이메일 주소/), { target: { value: 'a@b.c' } })
+    fireEvent.change(screen.getByLabelText(/비밀번호/), { target: { value: 'password' } })
+    fireEvent.click(screen.getByRole('button', { name: '다음' }))
+
+    expect(signup).not.toHaveBeenCalled()
+    // 대문자·숫자·특수문자 세 가지가 빠졌다.
+    expect(screen.getAllByText(/아직 충족하지 않음/)).toHaveLength(3)
+    expect(screen.queryByLabelText(/이름/)).not.toBeInTheDocument()
   })
 })
