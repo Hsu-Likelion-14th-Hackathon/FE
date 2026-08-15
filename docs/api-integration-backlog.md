@@ -24,6 +24,7 @@
 - 방문 스탬프는 받은 그대로 보여 준다 — 0회면 0개. 채움 데이터는 조회가 실패했을 때(비로그인)만 쓴다.
 - 여행 기록 면(마지막 면)은 넘겨서 못 가고 **스탬프를 눌러야** 그 방문의 상세(`GET /passport/visits/{id}`)로 열린다. TRAVEL HISTORY·티켓 탑승자/패스코드도 그 방문 값이다.
 - TRAVEL HISTORY의 층 카드는 아코디언 — 누르면 그 층 이야기(`GET /floors/{floorId}`)가 카드 아래로 펼쳐지고, 다시 누르면 접힌다.
+- TRAVEL HISTORY에 **AI 추천 층 표시**(✦ AI 배지 + 펼침 시 추천 사유 한 줄). 방문 상세에는 추천 여부가 없지만 응답의 `boardingPass.boardingPassId`로 그 방문의 동선(`GET /boarding-passes/{id}/route`)을 조회하면 층별 `isRecommended`·`reason`이 남아 있다 — `floorId`로 합친다. 동선은 패스별 저장이라 과거 방문에도 유효하며, 조회가 실패하면 배지 없이 기록만 보여 준다.
 
 ## 백로그 (프론트 작업)
 
