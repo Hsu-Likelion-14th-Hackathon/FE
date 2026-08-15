@@ -50,6 +50,7 @@ export function Component() {
 
   function onSheetPointerDown(event) {
     if (!ticketOpen || !event.isPrimary || event.button !== 0) return
+    if (event.target.closest?.('button, a, input, select, textarea')) return
     event.preventDefault()
     dragRef.current = {
       pointerId: event.pointerId,

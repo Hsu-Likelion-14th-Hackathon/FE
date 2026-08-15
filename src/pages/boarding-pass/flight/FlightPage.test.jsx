@@ -83,12 +83,18 @@ describe('FlightPage', () => {
   })
 
   it('shows a recoverable empty ticket instead of endless loading', async () => {
-    renderFlight()
+    const router = renderFlight()
 
     fireEvent.click(await screen.findByRole('button', { name: '티켓 정보' }))
 
     expect(await screen.findByText('발급된 보딩패스를 찾을 수 없습니다.')).toBeInTheDocument()
     expect(screen.queryByText('티켓을 불러오는 중…')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '발급 페이지로 이동' })).toBeEnabled()
+
+    const recover = screen.getByRole('button', { name: '발급 페이지로 이동' })
+    fireEvent.pointerDown(recover, { pointerId: 1, isPrimary: true, button: 0 })
+    expect(screen.getByRole('dialog', { name: '티켓 정보' }).dataset.dragging).not.toBe('true')
+    fireEvent.click(recover)
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass'))
   })
 })
