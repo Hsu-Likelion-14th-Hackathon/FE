@@ -145,21 +145,23 @@
 
 .productCrop {
   position: absolute;
-  top: 108px;
+  top: 78px;
   left: 50%;
-  width: 140px;
-  height: 92px;
+  width: 150px;
+  height: 150px;
   overflow: hidden;
   transform: translateX(-50%);
+
+  /* 백엔드 사진은 흰 배경의 카탈로그 컷이다. multiply로 흰 배경을 카드색에
+     가라앉힌다. img가 아니라 여기 거는 이유: transform이 이 요소에 스태킹
+     컨텍스트를 만들어, img에 걸면 블렌드가 카드 배경까지 닿지 못한다. */
+  mix-blend-mode: multiply;
 }
 
 .productCrop img {
-  position: absolute;
-  top: -242.19%;
-  left: -61.45%;
-  width: 226.76%;
-  max-width: none;
-  height: 375.69%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .uploadMessage,
@@ -182,6 +184,20 @@
 
 .fileInput {
   display: none;
+}
+
+/* 요청 실패 사유. 어두운 무대 위라 밝은 경고색을 쓴다. */
+.errorMessage {
+  margin: 16px 0 0;
+  color: #ffb4a9;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.errorMessage a {
+  color: inherit;
+  text-decoration: underline;
 }
 
 .uploadButton {
@@ -350,7 +366,9 @@
   }
 
   .productCrop {
-    top: 98px;
+    top: 60px;
+    width: 130px;
+    height: 130px;
   }
 
   .loadingMessage {
@@ -427,7 +445,18 @@
   transform: translateX(-50%);
 }
 
+/* AI 결과 사진. 카드를 꽉 채우고 모서리는 카드를 따른다. */
+.resultImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
 .resultPin {
+  z-index: 1;
   position: absolute;
   top: 11.5px;
   left: 11.5px;

@@ -281,7 +281,14 @@ export function Component() {
           </div>
 
           <div className={styles.actions}>
-            <Link className={styles.tryOnLink} to={`/products/${product.id}/try-on`}>
+            <Link
+              className={styles.tryOnLink}
+              // 피팅은 색 단위다(productColorId). 지금 보고 있는 색을 실어
+              // 보내야 결과가 고른 색으로 나온다.
+              to={`/products/${product.id}/try-on${
+                selectedColor ? `?color=${selectedColor.productColorId}` : ''
+              }`}
+            >
               Fitting with Ai
             </Link>
 

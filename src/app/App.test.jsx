@@ -169,7 +169,7 @@ describe('App', () => {
     ).toBeInTheDocument()
 
     const tryOnLink = screen.getByRole('link', { name: 'Fitting with Ai' })
-    expect(tryOnLink).toHaveAttribute('href', '/products/2/try-on')
+    expect(tryOnLink).toHaveAttribute('href', '/products/2/try-on?color=3')
     fireEvent.click(tryOnLink)
 
     expect(await screen.findByRole('heading', { name: '상품 착용' })).toBeInTheDocument()

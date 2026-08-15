@@ -228,13 +228,16 @@ describe('ProductDetailPage', () => {
     expect(screen.queryByText(/개 남음/)).not.toBeInTheDocument()
   })
 
-  it('AI 피팅 링크에 백엔드 productId를 쓴다', async () => {
+  it('AI 피팅 링크에 백엔드 productId와 보고 있는 색을 쓴다', async () => {
     renderPage()
 
-    expect(await screen.findByRole('link', { name: 'Fitting with Ai' })).toHaveAttribute(
-      'href',
-      '/products/1/try-on',
-    )
+    // 피팅은 색 단위(productColorId)다. 초기에는 대표색이 실린다.
+    const link = await screen.findByRole('link', { name: 'Fitting with Ai' })
+    expect(link).toHaveAttribute('href', '/products/1/try-on?color=1')
+
+    // 색을 바꾸면 링크도 그 색을 따라간다.
+    fireEvent.click(screen.getByRole('button', { name: 'Cinnamon 색상 선택' }))
+    expect(link).toHaveAttribute('href', '/products/1/try-on?color=2')
   })
 
   it('없는 상품이면 목록으로 돌아갈 길을 준다', async () => {
