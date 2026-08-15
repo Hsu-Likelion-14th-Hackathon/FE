@@ -1,4 +1,5 @@
-import styles from './SavePassToast.module.scss'
+import PassNoticeToast from '@/features/boarding-pass/notice-toast/PassNoticeToast.jsx'
+import checkIcon from '@/shared/assets/boarding-pass/scan/credit-icon.svg'
 
 /**
  * Boarding Pass 저장 완료 토스트 본문.
@@ -6,13 +7,11 @@ import styles from './SavePassToast.module.scss'
  */
 function SavePassToast() {
   return (
-    <div className={styles.root}>
-      <span className={styles.icon} aria-hidden="true" />
-      <div className={styles.copy}>
-        <p className={styles.title}>Boarding Pass 저장이 완료 되었습니다.</p>
-        <p className={styles.note}>발급페이지에서 발급받았던 Boarding Pass를 확인할 수 있습니다.</p>
-      </div>
-    </div>
+    <PassNoticeToast
+      icon={checkIcon}
+      title="Boarding Pass 저장이 완료 되었습니다."
+      note="발급페이지에서 발급받았던 Boarding Pass를 확인할 수 있습니다."
+    />
   )
 }
 

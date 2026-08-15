@@ -28,3 +28,10 @@
   transform: translateY(0.5rem);
   pointer-events: none;
 }
+
+/* 데스크톱 기기 프레임: viewport fixed면 틀 아래로 빠진다. shell 기준. */
+@media (min-width: 1200px) {
+  .host {
+    position: absolute;
+  }
+}

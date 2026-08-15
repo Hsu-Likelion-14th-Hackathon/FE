@@ -24,7 +24,7 @@ export const boardingPassHandlers = [
     }
     return HttpResponse.json(currentPass)
   }),
-  // latest / current 동일 경로. ?pass=none 또는 localStorage mcm-dev-pass=none → 404
+  // GET /boarding-passes/latest. ?pass=none 또는 localStorage mcm-dev-pass=none → 404
   http.get(API.boardingPass.latest, () => {
     if (getPassFixture() === 'none') {
       return new HttpResponse(null, { status: 404 })
