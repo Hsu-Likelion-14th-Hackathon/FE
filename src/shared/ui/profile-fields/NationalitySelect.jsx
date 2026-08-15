@@ -205,6 +205,12 @@ export default function NationalitySelect({ value, onChange, isOpen, onOpenChang
     } else if (event.key === 'ArrowUp') {
       event.preventDefault()
       focusOption(filteredCountries.length - 1)
+    } else if (event.key === 'Enter') {
+      // 검색창은 form 안에 있다. 그대로 두면 Enter가 제출로 새어 나가
+      // 고르려던 나라 대신 이전 국적이 저장된 채 시트가 닫힌다.
+      event.preventDefault()
+      const country = filteredCountries[activeIndex]
+      if (country) handleCountrySelect(country)
     }
   }
 

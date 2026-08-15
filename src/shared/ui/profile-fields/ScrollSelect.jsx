@@ -118,6 +118,11 @@ export default function ScrollSelect({
     const handlePointerDown = (event) => {
       if (!rootRef.current?.contains(event.target)) close()
     }
+    // Tab으로 목록 밖에 나가면 닫아야 한다. 열어 둔 채 다음 칸으로 넘어가면
+    // 목록이 그 칸을 덮은 채 남는다.
+    const handleFocusOut = (event) => {
+      if (!rootRef.current?.contains(event.relatedTarget)) close()
+    }
     const handleEscape = (event) => {
       if (event.key !== 'Escape') return
       event.preventDefault()
@@ -127,10 +132,13 @@ export default function ScrollSelect({
 
     document.addEventListener('pointerdown', handlePointerDown, true)
     document.addEventListener('keydown', handleEscape)
+    rootRef.current?.addEventListener('focusout', handleFocusOut)
+    const root = rootRef.current
 
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown, true)
       document.removeEventListener('keydown', handleEscape)
+      root?.removeEventListener('focusout', handleFocusOut)
     }
     // selectedIndex는 열리는 순간의 값만 쓰면 된다. 고를 때마다 다시 굴리면
     // 목록이 손 밑에서 튄다.
