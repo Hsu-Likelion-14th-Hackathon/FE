@@ -36,8 +36,8 @@ function toColor(color) {
 }
 
 /** GET /products — 목록(색 단위) */
-export async function getProducts() {
-  const result = await apiFetch(API.product.list, { unwrap: true })
+export async function getProducts({ signal } = {}) {
+  const result = await apiFetch(API.product.list, { unwrap: true, signal })
   return (result ?? []).map((item) => ({
     id: item.productId,
     productColorId: item.productColorId,
@@ -51,15 +51,45 @@ export async function getProducts() {
 }
 
 /**
+ * 상품마다 한 줄만 남긴다. 목록 화면이 쓴다.
+ *
+ * 백엔드 목록은 색 단위라 같은 가방이 색 수만큼 늘어선다. 여섯 상품이 열여덟
+ * 칸이 되어 같은 이름이 반복된다. 대표색 하나만 세우고 나머지 색은 상세에서
+ * 보여 준다.
+ *
+ * 대표는 `isDefault`가 붙은 색이다. 어느 색에도 없으면 먼저 온 줄을 쓴다 —
+ * 백엔드가 대표를 정해 주지 않았을 뿐이지 목록에서 상품이 사라질 이유는 없다.
+ */
+export function toRepresentativeList(products) {
+  const byProduct = new Map()
+
+  for (const product of products) {
+    const previous = byProduct.get(product.id)
+    if (!previous) {
+      byProduct.set(product.id, product)
+      continue
+    }
+
+    const isDefaultColor = product.colors?.find(
+      (color) => color.productColorId === product.productColorId,
+    )?.isDefault
+    if (isDefaultColor) byProduct.set(product.id, product)
+  }
+
+  return [...byProduct.values()]
+}
+
+/**
  * GET /products/{productId} — 상세
  *
  * 없는 상품이면 404에 `PRODUCT_NOT_FOUND`가 온다. 화면이 "없음"과 "실패"를
  * 구분해 다루도록 null로 돌려준다.
  */
-export async function getProduct(productId) {
+export async function getProduct(productId, { signal } = {}) {
   const result = await apiFetch(API.product.detail(productId), {
     unwrap: true,
     notFoundAsNull: true,
+    signal,
   })
   if (!result) return null
 
@@ -77,7 +107,9 @@ export async function getProduct(productId) {
         label: size.sizeLabel ?? '',
         note: size.sizeNote ?? null,
         sku: size.sku ?? '',
-        stock: size.stock ?? 0,
+        // null은 "0개"가 아니라 "수량 미상"이다. 0으로 접으면 재고를 아직
+        // 넣지 않은 상품이 품절로 잠긴다(실제로 18개 중 6개가 null이다).
+        stock: typeof size.stock === 'number' ? size.stock : null,
       })),
       isWished: Boolean(color.isWished),
     })),

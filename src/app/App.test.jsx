@@ -1,6 +1,30 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+
+// 상품 상세는 서버에서 받아 온다. 통합 테스트는 라우팅을 보는 자리라
+// 네트워크까지 실어 나르지 않는다.
+vi.mock('@/shared/api/productApi.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  getProduct: async (productId) => ({
+    id: Number(productId),
+    name: 'New Liz 비세토스 쇼퍼',
+    price: 1050000,
+    priceLabel: '₩1,050,000',
+    description: '',
+    colors: [
+      {
+        productColorId: 3,
+        label: 'Beige + Black',
+        hex: '#E0CEBB',
+        isDefault: true,
+        images: ['https://cdn/beige.jpg'],
+        sizes: [{ productSizeId: 3, label: 'S', note: null, sku: 'A', stock: null }],
+        isWished: false,
+      },
+    ],
+  }),
+}))
 
 import { createAppRoutes } from './router.jsx'
 
@@ -138,25 +162,25 @@ describe('App', () => {
   })
 
   it('동적 상품 경로에서 착용 화면을 열고 같은 상품 상세로 돌아간다', async () => {
-    const router = renderRoute('/products/mcm-002')
+    const router = renderRoute('/products/2')
 
     expect(
       await screen.findByRole('heading', { name: 'New Liz 비세토스 쇼퍼' }),
     ).toBeInTheDocument()
 
     const tryOnLink = screen.getByRole('link', { name: 'Fitting with Ai' })
-    expect(tryOnLink).toHaveAttribute('href', '/products/mcm-002/try-on')
+    expect(tryOnLink).toHaveAttribute('href', '/products/2/try-on')
     fireEvent.click(tryOnLink)
 
     expect(await screen.findByRole('heading', { name: '상품 착용' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/products/mcm-002/try-on')
+    expect(router.state.location.pathname).toBe('/products/2/try-on')
 
     fireEvent.click(screen.getByRole('button', { name: '상품 상세로 돌아가기' }))
 
     expect(
       await screen.findByRole('heading', { name: 'New Liz 비세토스 쇼퍼' }),
     ).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/products/mcm-002')
+    expect(router.state.location.pathname).toBe('/products/2')
   })
 
   it('찾을 수 없는 경로에서 메인으로 돌아간다', async () => {

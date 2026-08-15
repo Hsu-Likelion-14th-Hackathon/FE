@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { formatPrice, getProduct, getProducts } from './productApi.js'
+import { formatPrice, getProduct, getProducts, toRepresentativeList } from './productApi.js'
 
 /**
  * 백엔드는 목록을 색 단위로 펼쳐 준다. 같은 productId가 여러 번 나오는 것이
@@ -82,6 +82,41 @@ describe('상품 목록', () => {
   })
 })
 
+describe('대표색 추리기', () => {
+  const row = (id, colorId, isDefault) => ({
+    id,
+    productColorId: colorId,
+    colors: [{ productColorId: colorId, isDefault }],
+  })
+
+  it('상품마다 한 줄만 남긴다', () => {
+    // 색 단위로 오는 목록을 그대로 그리면 같은 가방이 색 수만큼 늘어선다.
+    const list = toRepresentativeList([row(1, 1, true), row(1, 2, false), row(2, 3, true)])
+
+    expect(list).toHaveLength(2)
+    expect(list.map((item) => item.id)).toEqual([1, 2])
+  })
+
+  it('isDefault가 붙은 색을 대표로 세운다', () => {
+    const list = toRepresentativeList([row(1, 1, false), row(1, 2, true), row(1, 3, false)])
+
+    expect(list).toHaveLength(1)
+    expect(list[0].productColorId).toBe(2)
+  })
+
+  it('어느 색에도 isDefault가 없으면 먼저 온 줄을 쓴다', () => {
+    // 대표가 정해지지 않았다고 상품이 목록에서 사라지면 안 된다.
+    const list = toRepresentativeList([row(9, 7, false), row(9, 8, false)])
+
+    expect(list).toHaveLength(1)
+    expect(list[0].productColorId).toBe(7)
+  })
+
+  it('빈 목록도 견딘다', () => {
+    expect(toRepresentativeList([])).toEqual([])
+  })
+})
+
 describe('상품 상세', () => {
   it('색마다 이미지와 사이즈를 중첩해 돌려준다', async () => {
     globalThis.fetch = respondWith({
@@ -118,6 +153,28 @@ describe('상품 상세', () => {
     expect(product.colors[0].sizes[0].productSizeId).toBe(1)
     expect(product.colors[0].sizes[0].stock).toBe(5)
     expect(product.colors[0].hex).toBe('#F5C6D0')
+  })
+
+  it('재고 null을 0으로 접지 않는다', async () => {
+    // 실서버에서 18개 사이즈 중 6개가 null이다. 0으로 접으면 재고를 아직
+    // 넣지 않은 상품이 전부 품절로 잠긴다.
+    globalThis.fetch = respondWith({
+      productId: 2,
+      colors: [
+        {
+          productColorId: 3,
+          sizes: [
+            { productSizeId: 3, sizeLabel: 'S', stock: null },
+            { productSizeId: 4, sizeLabel: 'M', stock: 0 },
+          ],
+        },
+      ],
+    })
+
+    const product = await getProduct(2)
+
+    expect(product.colors[0].sizes[0].stock).toBeNull()
+    expect(product.colors[0].sizes[1].stock).toBe(0)
   })
 
   it('없는 상품이면 오류가 아니라 null이다', async () => {
