@@ -6,13 +6,13 @@ import StoreMenuProvider from '@/shared/layout/store-menu/StoreMenuProvider.jsx'
 
 function App() {
   return (
-    <AppProviders>
-      <MobileShell>
+    <MobileShell>
+      <AppProviders>
         <StoreMenuProvider>
           <Outlet />
         </StoreMenuProvider>
-      </MobileShell>
-    </AppProviders>
+      </AppProviders>
+    </MobileShell>
   )
 }
 

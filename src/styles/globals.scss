@@ -34,7 +34,7 @@ html {
   /* rem 기준점 — 필수 고정 px (constraints) */
   font-size: 16px;
   min-width: var(--mcm-shell-min);
-  min-height: 100%;
+  min-height: var(--mcm-viewport-stable);
   background: var(--mcm-color-canvas);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;

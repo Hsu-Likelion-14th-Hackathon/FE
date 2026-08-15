@@ -7,7 +7,8 @@
 - 기술 스택: React, JavaScript, Tailwind CSS, SCSS Modules
 - 배포 환경: Vercel
 - 백엔드 연동: API 명세 확정 전까지 Mock API를 사용하고, 이후 실제 API로 교체
-- 디자인 원본: [Figma 디자인](https://www.figma.com/design/aklj7UjNcG6PDFJVRU9JXv/%EC%A0%9C%EB%AA%A9-%EC%97%86%EC%9D%8C?node-id=0-1&m=dev)
+- 와프: [Figma 와프](https://www.figma.com/design/nPoHrwxi0e0738SWNzN7rN/%EB%A9%8B%EC%82%AC-14%EA%B8%B0-%EC%A4%91%EC%95%99%ED%86%A4--%EB%B3%B5%EC%82%AC-?node-id=0-1)
+- 디자인 원본: [Figma 디자인](https://www.figma.com/design/nPoHrwxi0e0738SWNzN7rN/%EB%A9%8B%EC%82%AC-14%EA%B8%B0-%EC%A4%91%EC%95%99%ED%86%A4--%EB%B3%B5%EC%82%AC-?node-id=1-2)
 - 관련 문서:
   - [PRD](./prd.md)
   - [기능 명세](./Specification.md)
