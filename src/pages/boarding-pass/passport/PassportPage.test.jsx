@@ -361,6 +361,26 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/products'))
   })
 
+  it('날짜 목록이 열려 있으면 Escape가 목록만 닫는다', async () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    fireEvent.click(await findEditableRow(/생년월일 .* 수정/))
+    await screen.findByRole('button', { name: '연도' }, { timeout: 5000 })
+
+    fireEvent.click(screen.getByRole('button', { name: '연도' }))
+    expect(screen.getByRole('listbox', { name: '연도' })).toBeInTheDocument()
+
+    // 목록과 시트가 같은 document에서 Escape를 듣는다. 시트가 열린 목록을
+    // 모르면 한 번의 Escape로 둘 다 닫혀 입력하던 값이 사라진다.
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    expect(screen.queryByRole('listbox', { name: '연도' })).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: '여권 신분 정보 수정' })).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
   it('최종 단계 장식을 투명 비행기와 티켓 레이어를 담은 두 카드로 구성한다', () => {
     renderPassport()
     const next = screen.getByRole('button', { name: '다음 단계' })

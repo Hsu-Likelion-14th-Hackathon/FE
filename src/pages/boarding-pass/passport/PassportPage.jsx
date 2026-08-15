@@ -169,7 +169,8 @@ export function Component() {
   const [birthDraft, setBirthDraft] = useState('')
   // NationalitySelect는 국가 코드를 다룬다. 저장할 때 API 표기로 옮긴다.
   const [countryDraft, setCountryDraft] = useState('')
-  // 달력과 국가 목록은 한 번에 하나만 열린다. 겹치면 서로를 가린다.
+  // 연·월·일·국적 목록은 한 번에 하나만 열린다. 겹치면 서로를 가리고,
+  // 무엇이 열렸는지 시트가 알아야 Escape가 목록만 닫는다.
   const [openPicker, setOpenPicker] = useState(null)
   // 매 렌더 새 객체를 넘기면 텍스처를 통째로 다시 굽는다. 값이 바뀔 때만 바꾼다.
   const profileOverride = useMemo(() => {
@@ -415,7 +416,12 @@ export function Component() {
                   {/* 달력은 여섯 주짜리 격자라 아래에서 올라오는 시트에 넣으면
                       자리를 다 먹는다. 태어난 해는 목록에서 바로 고르는 편이 빠르다. */}
                   <Suspense fallback={<p className={styles.fieldsLoading}>불러오는 중…</p>}>
-                    <BirthDateSpinner value={birthDraft} onChange={setBirthDraft} />
+                    <BirthDateSpinner
+                      value={birthDraft}
+                      onChange={setBirthDraft}
+                      openField={openPicker?.startsWith('birth-') ? openPicker.slice(6) : null}
+                      onOpenFieldChange={(field) => setOpenPicker(field ? `birth-${field}` : null)}
+                    />
                     <NationalitySelect
                       value={countryDraft}
                       onChange={setCountryDraft}

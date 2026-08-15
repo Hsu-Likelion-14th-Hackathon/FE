@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from 'react'
+import { useId, useMemo } from 'react'
 
 import styles from './BirthDateSpinner.module.scss'
 import ScrollSelect from './ScrollSelect.jsx'
@@ -45,15 +45,22 @@ function range(count, start = 1) {
  * 아래에서 올라오는 시트에서는 여섯 주짜리 격자가 자리를 다 먹고, 스무 해 전을
  * 찾으려면 달을 수백 번 넘겨야 한다. 태어난 해는 목록에서 바로 고르는 편이 빠르다.
  *
- * @param {{ value: string, onChange: (value: string) => void }} props ISO(`2000-01-01`)
+ * 어느 칸이 열렸는지는 밖에서 쥔다. 여권 시트는 Escape로 닫히는데, 목록이
+ * 떠 있는 동안에는 목록만 닫혀야 한다. 시트가 그 사실을 모르면 한 번의
+ * Escape로 시트까지 닫혀 입력하던 값이 사라진다.
+ *
+ * @param {{
+ *   value: string,
+ *   onChange: (value: string) => void,
+ *   openField: string | null,
+ *   onOpenFieldChange: (field: string | null) => void,
+ * }} props value는 ISO(`2000-01-01`)
  */
-export default function BirthDateSpinner({ value, onChange }) {
+export default function BirthDateSpinner({ value, onChange, openField, onOpenFieldChange }) {
   const today = useMemo(() => getToday(), [])
   const selected = parseIsoDate(value)
   const reactId = useId()
   const labelId = `birth-spinner-${reactId.replaceAll(':', '')}-label`
-  // 세 칸이 나란히 있어 하나가 열리면 나머지는 닫혀야 한다.
-  const [openField, setOpenField] = useState(null)
 
   const yearOptions = useMemo(
     () =>
@@ -85,7 +92,7 @@ export default function BirthDateSpinner({ value, onChange }) {
 
   const fieldProps = (name) => ({
     isOpen: openField === name,
-    onOpenChange: (isOpen) => setOpenField(isOpen ? name : null),
+    onOpenChange: (isOpen) => onOpenFieldChange(isOpen ? name : null),
   })
 
   return (
