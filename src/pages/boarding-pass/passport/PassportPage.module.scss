@@ -26,13 +26,15 @@
      화면이 짧으면 넘김 버튼이 잘려 나갔다.
      여백을 다 걷어내고도 모자라면 그제야 여권이 줄어든다. 하한은 16rem이다.
      20rem으로 두면 320×568 같은 화면에서 넘김 버튼이 잘렸다. 작아도 보이는
-     편이 잘려 못 누르는 것보다 낫다.
+     편이 잘려 못 누르는 것보다 낫다. 그 하한마저 안 들어가는 화면(가로 모드
+     등)은 아래 media query가 하한을 더 낮춘다.
 
      상한 33.25rem은 설계 높이(394)가 아니라 폭에서 나온 값이다. 지면 폭은
      253.5 * (높이/394)라 88vw를 넘지 않는 선이 390 화면에서 533px이다.
      설계 크기에 묶어 두면 남는 세로 공간을 못 쓰고 글자가 작은 채로 남는다. */
+  --passport-min-h: 16rem;
   --passport-h: max(
-    16rem,
+    var(--passport-min-h),
     min(
       33.25rem,
       calc(
@@ -774,6 +776,15 @@ button.historyCard {
   white-space: nowrap;
 }
 
+/* 지면 하한(16rem)까지 줄여도 넘김 줄이 화면 밖으로 나가는 높이가 있다.
+   32.5rem 아래면 하한 자체를 낮춰 줄을 화면 안에 남긴다. 지면이 더 작아지는 건
+   아쉽지만, 지금 몇 번째 장인지 모르고 넘길 방법도 안 보이는 것보다 낫다. */
+@media (max-height: 32.5rem) {
+  .page {
+    --passport-min-h: 11rem;
+  }
+}
+
 @media (max-width: 22rem) {
   .stage {
     padding-inline: 0.75rem;
@@ -787,25 +798,11 @@ button.historyCard {
   }
 }
 
-/* 모바일은 좌우 슬라이드로 넘긴다. 화살표 줄이 68px을 차지하는데, 이걸 걷어내야
-   펼침 여권이 설계 크기(394px) 그대로 한 화면에 들어간다.
-   다만 키보드로 넘길 길은 남겨야 하므로 지우지 않고 접어 두었다가,
-   포커스가 들어오면 다시 펼친다. */
-@media (hover: none) and (pointer: coarse) {
-  .navigation {
-    height: 0;
-    margin: 0;
-    overflow: hidden;
-    opacity: 0;
-  }
-
-  .navigation:focus-within {
-    height: auto;
-    margin: 1.5rem auto 0;
-    overflow: visible;
-    opacity: 1;
-  }
-}
+/* 모바일에서도 화살표와 진행 바를 그대로 둔다.
+   예전에는 이 줄을 접어 펼침 여권을 키웠지만, 슬라이드는 해 봐야 아는 동작이라
+   지금 몇 번째 장인지, 더 넘길 곳이 있는지 알 방법이 사라졌다.
+   높이 예산(--passport-h)은 이미 이 줄(넘김 버튼 44 + --passport-nav-gap)을
+   빼고 지면 크기를 정하므로, 드러내도 지면이 잘리지 않는다. */
 
 /* 이름은 눌러서 고칠 수 있다. 캔버스가 글자를 그리고 이 DOM은 투명하므로,
    버튼 자체는 보이지 않고 클릭만 받는다. 보이는 편집칸은 시트로 꺼낸다. */
