@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import EmptyBagToast from '@/features/boarding-pass/empty-bag-toast/EmptyBagToast.jsx'
 import NoPassToast from '@/features/boarding-pass/no-pass-toast/NoPassToast.jsx'
 import noticeStyles from '@/features/boarding-pass/notice-toast/PassNoticeToast.module.scss'
 import { getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
-import { getShoppingBag } from '@/shared/api/shoppingBagApi.js'
 import { getWishlist } from '@/shared/api/wishlistApi.js'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import ctaPlaneIcon from '@/shared/assets/boarding-pass/landing/cta-plane.svg'
@@ -20,7 +19,7 @@ import styles from './LandingPage.module.scss'
  * (23) 보딩패스 랜딩 — Figma 492:4896.
  * - 비행 시작하기: /boarding-pass/intro
  * - 기존 BP 스캔: latest 200 → /boarding-pass/scan, 404 → T-01
- * - 헤더 위시/쇼핑백이 비면 (23-1) 토스트
+ * - 진입 시 위시리스트가 비어 있으면 (23-1) 토스트 — 누르면 상품 목록으로
  * - 상태바·홈 인디케이터는 DOM 미구현
  */
 export function Component() {
@@ -28,19 +27,17 @@ export function Component() {
   const { showToast, hideToast } = useToast()
   const [scanning, setScanning] = useState(false)
 
-  function handleStartFlight() {
-    navigate('/boarding-pass/intro')
-  }
+  // 랜딩에 들어온 순간 위시리스트를 확인한다. 아이콘을 눌러야 알려 주는
+  // 안내는 이미 담으러 갈 사람에게만 보인다 — 초대는 먼저 건네야 한다.
+  useEffect(() => {
+    const controller = new AbortController()
 
-  async function openBag(bag) {
-    const fetchItems = bag === 'cart' ? getShoppingBag : getWishlist
-    const path = bag === 'cart' ? '/cart' : '/wishlist'
-    try {
-      const items = await fetchItems()
-      if (!items?.length) {
+    getWishlist({ signal: controller.signal })
+      .then((items) => {
+        if (controller.signal.aborted || items?.length) return
         showToast(
           <EmptyBagToast
-            bag={bag}
+            bag="wishlist"
             // 빈 화면은 초대다 — 토스트를 누르면 상품 목록으로 간다.
             onGoProducts={() => {
               hideToast()
@@ -49,17 +46,21 @@ export function Component() {
           />,
           {
             position: 'bottom',
-            duration: 3000,
+            duration: 4000,
             closeOnOutsideClick: false,
             className: noticeStyles.shell,
           },
         )
-        return
-      }
-    } catch {
-      // 조회 실패 시에는 목적 페이지에서 상태를 보여 준다
-    }
-    navigate(path)
+      })
+      .catch(() => {
+        // 비로그인(401)·네트워크 실패에는 초대를 건네지 않는다.
+      })
+
+    return () => controller.abort()
+  }, [showToast, hideToast, navigate])
+
+  function handleStartFlight() {
+    navigate('/boarding-pass/intro')
   }
 
   async function handleScanExisting() {
@@ -82,10 +83,7 @@ export function Component() {
 
   return (
     <main className="flex min-h-[var(--mcm-viewport-stable)] flex-col bg-[#fafafa]">
-      <StoreHeader
-        onWishlistClick={() => openBag('wishlist')}
-        onCartClick={() => openBag('cart')}
-      />
+      <StoreHeader />
       <section
         className={styles.stage}
         style={{
