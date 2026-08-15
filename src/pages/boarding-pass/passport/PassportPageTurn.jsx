@@ -211,6 +211,9 @@ export default function PassportPageTurn({
   const pointerRef = useRef({ ...IDLE_POINTER })
   // 같은 면을 반복해서 굽지 않도록 캔버스를 보관한다. 데이터가 바뀌면 비운다.
   const faceCacheRef = useRef(new Map())
+  // 마지막으로 구울 때 쓴 텍스처 배수. 화면이 커지면 필요한 배수도 커지는데,
+  // 그때 다시 굽지 않으면 넓어진 지면이 낮은 해상도 텍스처를 늘려 쓴다.
+  const ratioRef = useRef(0)
   // 폰트를 기다린 뒤 구웠는지. 상한에 걸려 먼저 구웠다면 늦게 온 폰트로 한 번 더 굽는다.
   const fontBakedRef = useRef(false)
 
@@ -279,6 +282,7 @@ export default function PassportPageTurn({
     // 고정 2배로 두면 고밀도 화면에서 WebGL이 텍스처를 늘려 쓰게 되고 글자
     // 획이 뭉개진다. 아직 못 쟀으면 지금까지 쓰던 2배로 간다.
     const ratio = texturePixelRatio(measure()?.leafW ?? SHEET_W)
+    ratioRef.current = ratio
 
     const face = (name) => {
       // 배수가 바뀌면 다시 구워야 한다. 같은 이름으로 두면 흐린 판이 남는다.
@@ -568,12 +572,19 @@ export default function PassportPageTurn({
     fitToBox()
     return observeResize(host, () => {
       fitToBox()
+      // 화면이 커지면 필요한 배수가 올라간다(320x568 → 390x844에서 2.5 → 4).
+      // 굽지 않으면 넓어진 지면이 예전 해상도를 늘려 써 다시 흐려진다.
+      const nextRatio = texturePixelRatio(measure()?.leafW ?? SHEET_W)
+      if (nextRatio !== ratioRef.current) {
+        faceCacheRef.current.clear()
+        setRepaintKey((key) => key + 1)
+      }
       if (bookRef.current) drawFrame(turnRef.current)
       // 지면이 줄면 이름도 움직인다. 재 둔 좌표를 그대로 두면 밑줄만 남는다.
       // 갱신 함수로 이전 상태에서 대상을 꺼내면 이 효과가 표시에 매이지 않는다.
       setNameCue((current) => (current ? measureNameCue(current.target) : null))
     })
-  }, [drawFrame, fitToBox])
+  }, [drawFrame, fitToBox, measure])
 
   const resetPointer = (event) => {
     pointerRef.current = { ...IDLE_POINTER }
