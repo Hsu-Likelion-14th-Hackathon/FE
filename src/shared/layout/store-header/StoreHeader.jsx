@@ -2,15 +2,29 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 
 import BrandStrip from '@/shared/layout/brand-strip/BrandStrip.jsx'
-import { CartIcon, HeartIcon, McmLogoIcon, MenuIcon } from '@/shared/ui/icons/StoreIcons.jsx'
 import useStoreMenu from '@/shared/layout/store-menu/useStoreMenu.js'
+import { CartIcon, HeartIcon, McmLogoIcon, MenuIcon } from '@/shared/ui/icons/StoreIcons.jsx'
 
 import styles from './StoreHeader.module.scss'
 
-function StoreHeader() {
+function StoreHeader({ onWishlistClick, onCartClick } = {}) {
   const { closeMenu, isOpen, toggleMenu } = useStoreMenu()
   const menuButtonRef = useRef(null)
   const wasMenuOpenRef = useRef(isOpen)
+
+  function handleWishlistClick(event) {
+    closeMenu()
+    if (!onWishlistClick) return
+    event.preventDefault()
+    onWishlistClick()
+  }
+
+  function handleCartClick(event) {
+    closeMenu()
+    if (!onCartClick) return
+    event.preventDefault()
+    onCartClick()
+  }
 
   useEffect(() => {
     if (wasMenuOpenRef.current && !isOpen) {
@@ -48,7 +62,7 @@ function StoreHeader() {
               className={`${styles.iconLink} ${styles.swapLink}`}
               to="/wishlist"
               aria-label="위시리스트"
-              onClick={closeMenu}
+              onClick={handleWishlistClick}
             >
               <HeartIcon className={`${styles.icon} ${styles.heartIcon} ${styles.swapIcon}`} />
               <span aria-hidden="true" className={styles.swapLabel}>
@@ -59,7 +73,7 @@ function StoreHeader() {
               className={`${styles.iconLink} ${styles.swapLink}`}
               to="/cart"
               aria-label="쇼핑백"
-              onClick={closeMenu}
+              onClick={handleCartClick}
             >
               <CartIcon className={`${styles.icon} ${styles.swapIcon}`} />
               <span aria-hidden="true" className={styles.swapLabel}>

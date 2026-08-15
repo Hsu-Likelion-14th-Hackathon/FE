@@ -7,7 +7,9 @@ import '@/styles/tailwind.css'
 import '@/styles/globals.scss'
 
 async function enableMocking() {
-  if (!import.meta.env.DEV || import.meta.env.VITE_ENABLE_MSW !== 'true') {
+  // 백엔드 미완성 구간: 로컬 개발은 mock API를 기본 사용한다.
+  // 실서버를 치려면 .env.local 에 VITE_ENABLE_MSW=false
+  if (!import.meta.env.DEV || import.meta.env.VITE_ENABLE_MSW === 'false') {
     return
   }
 

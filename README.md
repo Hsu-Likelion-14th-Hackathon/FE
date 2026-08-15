@@ -32,4 +32,9 @@ npm run verify
 - SCSS Modules는 복잡한 비주얼과 컴포넌트 전용 스타일에 사용합니다.
 - Tailwind와 Sass를 같은 파일의 전처리 과정에 섞지 않습니다.
 
+## Figma
+
+- [와프](https://www.figma.com/design/nPoHrwxi0e0738SWNzN7rN/%EB%A9%8B%EC%82%AC-14%EA%B8%B0-%EC%A4%91%EC%95%99%ED%86%A4--%EB%B3%B5%EC%82%AC-?node-id=0-1)
+- [디자인](https://www.figma.com/design/nPoHrwxi0e0738SWNzN7rN/%EB%A9%8B%EC%82%AC-14%EA%B8%B0-%EC%A4%91%EC%95%99%ED%86%A4--%EB%B3%B5%EC%82%AC-?node-id=1-2)
+
 상세 개발 계획은 [프론트엔드 개발 계획](./docs/frontend-development-plan.md)을 참고합니다.

@@ -3,11 +3,12 @@ import { useLocation, useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import { PASS_STORAGE_KEY } from '@/features/boarding-pass/boarding-ticket/passStorage.js'
+import noticeStyles from '@/features/boarding-pass/notice-toast/PassNoticeToast.module.scss'
 import SavePassToast from '@/features/boarding-pass/save-pass-toast/SavePassToast.jsx'
-import { getCurrentBoardingPass } from '@/shared/api/boardingPassApi.js'
-import stageBack from '@/shared/assets/boarding-pass/complete/stage-back.svg'
+import { getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
+import stageBack from '@/shared/assets/boarding-pass/complete/stage-back.png'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
-import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
+import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import { useToast } from '@/shared/ui/toastContext.js'
 
 import styles from './CompletePage.module.scss'
@@ -35,9 +36,13 @@ export function Component() {
   useEffect(() => {
     if (pass) return undefined
     let cancelled = false
-    getCurrentBoardingPass()
+    getLatestBoardingPass()
       .then((data) => {
         if (cancelled) return
+        if (!data) {
+          setError('발급된 보딩패스를 찾을 수 없습니다.')
+          return
+        }
         setPass(data)
         sessionStorage.setItem(PASS_STORAGE_KEY, JSON.stringify(data))
       })
@@ -54,19 +59,17 @@ export function Component() {
       position: 'bottom',
       duration: 3000,
       closeOnOutsideClick: false,
-      className: styles.saveToastShell,
+      className: noticeStyles.shell,
     })
   }
 
   return (
     <main className={styles.stage}>
-      <img src={stageBack} alt="" aria-hidden="true" className={styles.stageBack} />
-      <div className={styles.fade} aria-hidden="true" />
-
       <div className={styles.content}>
-        <BoardingPassChrome />
+        <StoreHeader />
 
         <section className={styles.body}>
+          <img src={stageBack} alt="" aria-hidden="true" className={styles.stageBack} />
           <button
             type="button"
             aria-label="닫기"

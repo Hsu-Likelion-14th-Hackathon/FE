@@ -3,81 +3,21 @@
 .page {
   position: relative;
   display: flex;
-  min-height: var(--mcm-viewport-stable);
+  height: var(--mcm-viewport-dynamic);
+  min-height: var(--mcm-viewport-dynamic);
   flex-direction: column;
   overflow: hidden;
-  background: #2a1810;
+  background: #41210b;
 }
 
-.ambiance {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+.stage {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
   overflow: hidden;
-  pointer-events: none;
-}
-
-.cloudTop {
-  position: absolute;
-  top: 6.25rem;
-  right: 0;
-  width: 12.625rem;
-  opacity: 0.1;
-}
-
-.cloudBottom {
-  position: absolute;
-  bottom: 5rem;
-  left: 0;
-  width: 22.125rem;
-  opacity: 0.1;
-}
-
-.planeDeco {
-  position: absolute;
-  bottom: 11.25rem;
-  left: -4.6875rem;
-  width: 10.96875rem;
-  opacity: 0.1;
-}
-
-.chestAmbientA {
-  position: absolute;
-  top: 11.25rem;
-  left: 5rem;
-  width: 4.375rem;
-  height: 2.8125rem;
-  object-fit: cover;
-  opacity: 0.1;
-}
-
-.chestAmbientB {
-  position: absolute;
-  top: 13.5rem;
-  left: 9.125rem;
-  width: 2.125rem;
-  height: 1.375rem;
-  object-fit: cover;
-  opacity: 0.1;
-}
-
-.chestAmbientC {
-  position: absolute;
-  bottom: 6.4375rem;
-  right: -1.375rem;
-  width: 3.75rem;
-  height: 2.4375rem;
-  object-fit: cover;
-  opacity: 0.1;
-}
-
-.footerFade {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 16.9375rem;
-  background: linear-gradient(to bottom, rgba(90, 54, 33, 0), rgba(25, 25, 25, 0.6));
+  background: #41210b;
 }
 
 .main {
@@ -86,92 +26,7 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding: 1rem 1.25rem 1.25rem;
-}
-
-.topRow {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.close {
-  display: grid;
-  width: 0.875rem;
-  height: 0.875rem;
-  place-items: center;
-  margin-top: 0.125rem;
-}
-
-.closeImg {
-  display: block;
-  width: 0.875rem;
-  height: 0.875rem;
-}
-
-.docentBlock {
-  display: flex;
-  width: 11.125rem;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.125rem;
-}
-
-.docentHint {
-  width: 100%;
-  text-align: center;
-  font-size: 0.625rem;
-  line-height: 1.25rem;
-  color: #ab9e97;
-}
-
-.docentControls {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.playBtn {
-  position: relative;
-  display: grid;
-  width: 1.5rem;
-  height: 1.5rem;
-  place-items: center;
-  overflow: hidden;
-}
-
-.playFill {
-  position: absolute;
-  inset: 25%;
-  background: #c07346;
-}
-
-.playIcon {
-  position: relative;
-  z-index: 1;
-  width: 1.375rem;
-  height: 1.375rem;
-}
-
-.stopBtn {
-  display: grid;
-  width: 1.375rem;
-  height: 1.375rem;
-  place-items: center;
-}
-
-.stopIcon {
-  width: 1.375rem;
-  height: 1.375rem;
-}
-
-.title {
-  margin-top: 0.75rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-  line-height: 1.5rem;
-  color: #fafafa;
+  padding: 1rem 1.25rem 0;
 }
 
 .monitorWrap {
@@ -226,15 +81,19 @@
   transform: translateX(-50%);
   border: 0.0625rem solid #5f4c41;
   border-radius: 1rem;
+  background: #1d0c00;
   box-shadow: 0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.2);
 }
 
 .mapImg {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 30% center;
+  object-position: center;
+  transform: scale(1.1);
 }
 
 .overlay {
@@ -292,22 +151,47 @@
 .planeMarker {
   position: absolute;
   top: 50%;
-  left: 62%;
+  left: 0;
   width: 0.4375rem;
   height: 0.4375rem;
   transform: translate(-50%, -50%);
+  animation: seoulToMunich 8s linear infinite;
+}
+
+/* SEOUL → MUNICH만 비행. 화살표 팁에서 멈추고 SEOUL로 순간이동해 반복. */
+@keyframes seoulToMunich {
+  0% {
+    left: 0%;
+  }
+
+  92% {
+    left: calc(166.5 / 168.5 * 100% - 0.21875rem);
+  }
+
+  92.01%,
+  100% {
+    left: 0%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .planeMarker {
+    animation: none;
+    left: 0%;
+  }
 }
 
 .controlBar {
   position: absolute;
-  bottom: 1.25rem;
+  bottom: -0.5rem;
   left: 50%;
   display: flex;
   width: 9.625rem;
   height: 1rem;
   align-items: center;
-  justify-content: space-around;
-  padding: 0 0.375rem;
+  justify-content: flex-start;
+  gap: 0.25rem;
+  padding: 0.1875rem 0.25rem;
   transform: translateX(-50%);
   border: 0.03125rem solid #30251f;
   border-radius: 6.25rem;
@@ -329,58 +213,48 @@
   width: 0.5rem;
   height: 0.5rem;
   object-fit: contain;
+  filter: drop-shadow(0 0 0.0625rem rgba(192, 142, 85, 0.55));
+}
+
+.controlArrow {
+  width: 0.375rem;
+  height: 0.375rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 0.0625rem rgba(192, 142, 85, 0.55));
+}
+
+.controlArrowDown {
+  transform: rotate(180deg);
 }
 
 .tabletLogo {
   position: absolute;
-  bottom: 0.375rem;
+  bottom: 0.5625rem;
   left: 50%;
   width: 1rem;
   height: 1rem;
   transform: translateX(-50%);
   object-fit: contain;
+  filter: drop-shadow(0 0 0.0625rem rgba(192, 142, 85, 0.45));
 }
 
 .hinge {
   position: absolute;
-  bottom: -0.125rem;
+  bottom: 0;
   left: 50%;
-  display: flex;
-  width: 8.125rem;
+  width: 9.125rem;
   height: 0.5625rem;
-  align-items: flex-start;
-  justify-content: space-between;
   transform: translateX(-50%);
-}
-
-.hingeBar {
-  position: absolute;
-  top: 0.1875rem;
-  left: 50%;
-  width: 8.125rem;
-  height: 0.375rem;
-  transform: translateX(-50%);
-  border-radius: 0.625rem 0.625rem 0 0;
-  background: #3c200c;
-}
-
-.hingeScrew {
-  position: relative;
-  z-index: 1;
-  width: 0.5625rem;
-  height: 0.5625rem;
-}
-
-.hingeScrewFlip {
-  transform: scaleX(-1);
+  pointer-events: none;
 }
 
 .trunk {
   position: absolute;
-  right: -0.25rem;
-  bottom: 0.125rem;
-  width: 3.25rem;
-  height: 3.375rem;
+  z-index: 2;
+  right: -1.6rem;
+  bottom: -1.6rem;
+  width: 5.2rem;
+  height: 5.4rem;
   object-fit: contain;
   object-position: bottom;
   filter: drop-shadow(0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.16));
@@ -391,7 +265,7 @@
   display: flex;
   width: 100%;
   max-width: 21.875rem;
-  margin: 1.25rem auto 0;
+  margin: 2.125rem auto 0;
   flex-direction: column;
   align-items: flex-end;
   gap: 0.625rem;
@@ -404,16 +278,60 @@
 }
 
 .actionBtn {
+  position: relative;
+  display: flex;
   height: 2.125rem;
   flex: 1;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
+  border: none;
   border-radius: 6.25rem;
   background: rgba(255, 247, 213, 0.2);
   font-size: 0.75rem;
   font-weight: 600;
-  line-height: 2.125rem;
+  line-height: 1;
   color: #fafafa;
   text-align: center;
+  cursor: pointer;
+}
+
+.actionBtn::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from 200deg at 50% 50%,
+    rgba(255, 255, 255, 0.05) 0deg,
+    rgba(255, 255, 255, 0.05) 35deg,
+    rgba(255, 247, 213, 0.55) 70deg,
+    rgba(255, 255, 255, 0.7) 95deg,
+    rgba(255, 247, 213, 0.45) 120deg,
+    rgba(255, 255, 255, 0.06) 150deg,
+    rgba(0, 0, 0, 0.22) 185deg,
+    rgba(255, 255, 255, 0.05) 220deg,
+    rgba(255, 247, 213, 0.5) 265deg,
+    rgba(255, 255, 255, 0.65) 295deg,
+    rgba(255, 247, 213, 0.35) 325deg,
+    rgba(255, 255, 255, 0.05) 360deg
+  );
+  pointer-events: none;
+  content: '';
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.actionBtnLabel {
+  position: relative;
+  z-index: 1;
 }
 
 .passportHint {
@@ -425,57 +343,39 @@
   color: #ab9e97;
 }
 
-.playback {
-  display: flex;
-  width: 100%;
-  max-width: 21.875rem;
-  margin: auto auto 0;
-  padding-top: 1.5rem;
-  align-items: center;
-  gap: 1rem;
-}
-
-.navBtn {
-  flex-shrink: 0;
-  width: 2.125rem;
-  height: 2.125rem;
-}
-
-.navIcon {
-  display: block;
-  width: 2.125rem;
-  height: 2.125rem;
-}
-
-.progressTrack {
-  flex: 1;
-  height: 0.625rem;
-  overflow: hidden;
-  border-radius: 6.25rem;
-  background: #e0e0e0;
-}
-
-.progressFill {
-  height: 100%;
-  width: 20%;
-  border-radius: 6.25rem;
-  background: #c07346;
-}
-
 /* (42) ticket bottom sheet */
 .sheetRoot {
   position: fixed;
   inset: 0;
   z-index: 40;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  overscroll-behavior: none;
+  transition: visibility 0s linear 0.32s;
+}
+
+.sheetRoot[data-state='open'] {
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
 }
 
 .sheetScrim {
   position: absolute;
   inset: 0;
+  opacity: 0;
   background: rgba(0, 0, 0, 0.6);
+  transition: opacity 0.32s ease;
+}
+
+.sheetRoot[data-state='open'] .sheetScrim {
+  opacity: 1;
 }
 
 .sheet {
+  --sheet-drag: 0px;
+
   position: absolute;
   right: 0;
   bottom: 0;
@@ -486,6 +386,53 @@
   border-radius: 1.875rem 1.875rem 0 0;
   background: #894a26;
   box-shadow: 0 -0.625rem 1.875rem rgba(0, 0, 0, 0.2);
+  transform: translate3d(0, 100%, 0);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  overscroll-behavior: contain;
+  will-change: transform;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.sheetBack {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.sheet > :not(.sheetBack) {
+  position: relative;
+  z-index: 1;
+}
+
+.sheet:active {
+  cursor: grabbing;
+}
+
+.sheet[data-dragging='true'] {
+  transition: none;
+}
+
+.sheetRoot[data-state='open'] .sheet {
+  transform: translate3d(0, var(--sheet-drag), 0);
+}
+
+.sheetGrab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: -0.75rem -1.25rem 0;
+  padding: 0.75rem 1.25rem 0.25rem;
 }
 
 .handle {
@@ -494,6 +441,7 @@
   margin: 0 auto 0.75rem;
   border-radius: 6.25rem;
   background: #fafafa;
+  pointer-events: none;
 }
 
 .sheetTitle {
@@ -510,8 +458,41 @@
 }
 
 .ticketLoading {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
   padding: 2.5rem 0;
   text-align: center;
   font-size: 0.875rem;
   color: #fafafa;
+}
+
+.ticketLoading p {
+  margin: 0;
+}
+
+.ticketEmptyCta {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (min-width: 1200px) {
+  .page {
+    height: 100%;
+    min-height: 100%;
+  }
+
+  /* 데스크톱 휴대폰 틀: 브라우저 바닥이 아니라 화면 안에서만 시트가 올라온다 */
+  .sheetRoot {
+    position: absolute;
+  }
+
+  .sheet {
+    max-width: none;
+  }
 }

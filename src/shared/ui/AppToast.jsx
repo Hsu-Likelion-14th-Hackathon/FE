@@ -5,7 +5,7 @@ import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import styles from './AppToast.module.scss'
 
 const POSITION_CLASS = {
-  bottom: 'bottom-[max(28px,var(--mcm-safe-bottom))]',
+  bottom: 'bottom-[max(5.75rem,var(--mcm-safe-bottom))]',
   center: 'top-1/2 -translate-y-1/2',
   top: 'top-[max(28px,var(--mcm-safe-top))]',
 }

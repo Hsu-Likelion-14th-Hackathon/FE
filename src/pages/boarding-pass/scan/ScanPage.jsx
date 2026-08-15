@@ -4,14 +4,16 @@ import { useNavigate } from 'react-router'
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import CreditToast from '@/features/boarding-pass/credit-toast/CreditToast.jsx'
 import ScanDepartLoadingOverlay from '@/features/boarding-pass/scan-loading/ScanDepartLoadingOverlay.jsx'
-import { getCurrentBoardingPass, simulateScan } from '@/shared/api/boardingPassApi.js'
+import { getLatestBoardingPass, simulateScan } from '@/shared/api/boardingPassApi.js'
 import backArrowIcon from '@/shared/assets/boarding-pass/icons/back-arrow.svg'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import checkCircleIcon from '@/shared/assets/boarding-pass/scan/check-circle.svg'
 import pointScanIcon from '@/shared/assets/boarding-pass/scan/point-scan.svg'
 import scanButtonIcon from '@/shared/assets/boarding-pass/scan/scan-button-icon.svg'
 import scanFrameIcon from '@/shared/assets/boarding-pass/scan/scan-frame.svg'
-import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
+import stageBack from '@/shared/assets/boarding-pass/scan/stage-back.png'
+import scrollDocumentToTop from '@/shared/layout/scrollDocumentToTop.js'
+import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './ScanPage.module.scss'
 
@@ -25,6 +27,7 @@ const TOAST_EXIT_MS = 320
 export function Component() {
   const navigate = useNavigate()
   const [pass, setPass] = useState(null)
+  const [passStatus, setPassStatus] = useState('loading')
   const [phase, setPhase] = useState('idle')
   const [scanning, setScanning] = useState(false)
   const [credit, setCredit] = useState(null)
@@ -35,12 +38,16 @@ export function Component() {
 
   useEffect(() => {
     let cancelled = false
-    getCurrentBoardingPass()
+    getLatestBoardingPass()
       .then((data) => {
-        if (!cancelled) setPass(data)
+        if (cancelled) return
+        setPass(data)
+        setPassStatus(data ? 'ready' : 'empty')
       })
       .catch(() => {
-        if (!cancelled) setPass(null)
+        if (cancelled) return
+        setPass(null)
+        setPassStatus('error')
       })
     return () => {
       cancelled = true
@@ -105,6 +112,7 @@ export function Component() {
 
   function handleDepart() {
     if (phase !== 'success') return
+    scrollDocumentToTop()
     setPhase('departing')
   }
 
@@ -113,10 +121,11 @@ export function Component() {
   const showCreditToast = toastOpen && credit
 
   return (
-    <div className={styles.page}>
-      <BoardingPassChrome />
+    <div className={`${styles.page}${isDeparting ? ` ${styles.pageLoading}` : ''}`}>
+      <StoreHeader />
 
       <main className={styles.main}>
+        <img src={stageBack} alt="" aria-hidden="true" className={styles.stageBack} />
         <button
           type="button"
           aria-label="뒤로"
@@ -131,7 +140,13 @@ export function Component() {
           {pass ? (
             <BoardingTicketCard pass={pass} size="md" />
           ) : (
-            <div className={styles.ticketSkeleton}>탑승권을 불러오는 중…</div>
+            <div className={styles.ticketSkeleton}>
+              {passStatus === 'error'
+                ? '탑승권을 불러오지 못했습니다.'
+                : passStatus === 'empty'
+                  ? '발급된 보딩패스를 찾을 수 없습니다.'
+                  : '탑승권을 불러오는 중…'}
+            </div>
           )}
         </div>
 
@@ -179,6 +194,14 @@ export function Component() {
                 className={styles.cta}
               >
                 비행 이륙하기
+              </button>
+            ) : passStatus === 'empty' || passStatus === 'error' ? (
+              <button
+                type="button"
+                onClick={() => navigate('/boarding-pass')}
+                className={styles.cta}
+              >
+                발급 페이지로 이동
               </button>
             ) : (
               <button

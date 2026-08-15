@@ -1,54 +1,24 @@
 /* (44)~(47) 여행 가이드 — Figma 390×844 · rem */
 
+.page {
+  position: relative;
+  display: flex;
+  height: var(--mcm-viewport-stable);
+  min-height: var(--mcm-viewport-stable);
+  max-height: var(--mcm-viewport-stable);
+  flex-direction: column;
+  overflow: hidden;
+  background: #41210b;
+}
+
 .stage {
   position: relative;
   display: flex;
   flex: 1;
+  min-height: 0;
   flex-direction: column;
   overflow: hidden;
-  min-height: var(--mcm-viewport-stable);
-  background: #2a1810;
-}
-
-.deco {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.cloudTop {
-  position: absolute;
-  top: 6.25rem;
-  right: 0;
-  width: 12.625rem;
-  opacity: 0.1;
-}
-
-.cloudBottom {
-  position: absolute;
-  bottom: 6.25rem;
-  left: 0;
-  width: 22.125rem;
-  opacity: 0.1;
-}
-
-.planeDeco {
-  position: absolute;
-  bottom: 12.5rem;
-  left: -2.5rem;
-  width: 10rem;
-  opacity: 0.1;
-}
-
-.footerFade {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 16.9375rem;
-  background: linear-gradient(to bottom, rgba(90, 54, 33, 0), rgba(25, 25, 25, 0.6));
+  background: #41210b;
 }
 
 .main {
@@ -56,127 +26,53 @@
   z-index: 10;
   display: flex;
   flex: 1;
+  min-height: 0;
   flex-direction: column;
-  padding: 0 1.25rem 1rem;
-}
-
-.toolbar {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.close {
-  display: grid;
-  width: 1.25rem;
-  height: 1.25rem;
-  place-items: center;
-}
-
-.closeImg {
-  display: block;
-  width: 0.875rem;
-  height: 0.875rem;
-  filter: invert(1);
-}
-
-.docent {
-  display: flex;
-  max-width: 12.5rem;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.125rem;
-}
-
-.docentHint {
-  margin: 0;
-  text-align: center;
-  font-size: 0.625rem;
-  line-height: 1.25rem;
-  color: #ab9e97;
-}
-
-.title {
-  margin: 0.75rem 0 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  line-height: 1.5rem;
-  color: #fafafa;
+  overflow: hidden;
+  padding: 1rem 1.25rem 0;
 }
 
 .scroll {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   margin-top: 1rem;
+  overflow-x: clip;
   overflow-y: auto;
-  padding-bottom: 1rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: auto;
-  padding-top: 0.5rem;
-}
-
-.navRow {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.navBtn {
-  display: grid;
-  flex-shrink: 0;
-  width: 2.125rem;
-  height: 2.125rem;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.navBtn:disabled {
-  opacity: 0.3;
-}
-
-.navBtnImg {
-  display: block;
-  width: 2.125rem;
-  height: 2.125rem;
-}
-
-.progressTrack {
-  flex: 1;
-  height: 0.625rem;
-  overflow: hidden;
-  border-radius: 6.25rem;
-  background: #e0e0e0;
-}
-
-.progressFill {
-  height: 100%;
-  border-radius: 6.25rem;
-  background: var(--mcm-color-brand-brown);
-  transition: width 0.3s ease;
-}
-
-.footerNote {
-  margin: 0;
-  text-align: center;
-  font-size: 0.625rem;
-  line-height: 1.25rem;
-  color: #ab9e97;
+.scroll::-webkit-scrollbar {
+  display: none;
 }
 
 /* —— Overview —— */
+
+.introBlock {
+  position: relative;
+  margin-top: -0.3125rem;
+  padding-top: 1.8rem;
+  overflow: visible;
+}
+
+.planeDeco {
+  position: absolute;
+  top: -1.7rem;
+  right: -1.3rem;
+  z-index: 20;
+  display: block;
+  width: 9.0625rem;
+  height: auto;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.16));
+}
 
 .introCard {
   position: relative;
   width: 100%;
   padding: 0.875rem;
+  overflow: visible;
   border-radius: 0.5rem;
   background: #894a26;
   box-shadow: 0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.16);
@@ -220,18 +116,6 @@
   color: #ffdba0;
 }
 
-.planeDecoTop {
-  position: absolute;
-  top: -2.375rem;
-  right: -0.75rem;
-  z-index: 2;
-  width: 6.125rem;
-  height: auto;
-  transform: rotate(19.46deg);
-  filter: drop-shadow(0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.16));
-  pointer-events: none;
-}
-
 .overviewStage {
   position: relative;
   margin-top: 1.5rem;
@@ -244,16 +128,17 @@
   height: 21.625rem;
   border-radius: 0.5rem;
   object-fit: cover;
+  object-position: center;
   box-shadow: 0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.16);
 }
 
 .overviewFigure {
   position: absolute;
-  top: 6.3125rem;
-  left: 15rem;
-  z-index: 3;
-  width: 5rem;
-  height: 9.0625rem;
+  top: 3.75rem;
+  left: 13.75rem;
+  z-index: 2;
+  width: 7.425rem;
+  height: 14.625rem;
   object-fit: contain;
   filter: drop-shadow(0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.16));
   pointer-events: none;
@@ -262,71 +147,158 @@
 .floorChips {
   position: absolute;
   top: 1.875rem;
-  right: 0;
-  z-index: 2;
+  right: 1.25rem;
   display: flex;
   width: 12.5rem;
   flex-direction: column;
-  gap: 4.25rem;
+  gap: 1.875rem;
 }
 
 .floorChip {
+  position: relative;
   display: flex;
   width: 12.5rem;
   height: 3.125rem;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   padding: 0.625rem 1.5625rem;
-  border: 0;
+  border: none;
   background: rgba(174, 97, 30, 0.4);
+  -webkit-backdrop-filter: blur(1.25rem);
+  backdrop-filter: blur(1.25rem);
   color: #fafafa;
   text-align: center;
-  box-shadow: 0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.16);
+  cursor: pointer;
+}
+
+.floorChip::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from 200deg at 50% 50%,
+    rgba(255, 255, 255, 0.05) 0deg,
+    rgba(255, 255, 255, 0.05) 35deg,
+    rgba(255, 247, 213, 0.55) 70deg,
+    rgba(255, 255, 255, 0.7) 95deg,
+    rgba(255, 247, 213, 0.45) 120deg,
+    rgba(255, 255, 255, 0.06) 150deg,
+    rgba(0, 0, 0, 0.22) 185deg,
+    rgba(255, 255, 255, 0.05) 220deg,
+    rgba(255, 247, 213, 0.5) 265deg,
+    rgba(255, 255, 255, 0.65) 295deg,
+    rgba(255, 247, 213, 0.35) 325deg,
+    rgba(255, 255, 255, 0.05) 360deg
+  );
+  pointer-events: none;
+  content: '';
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
 }
 
 .floorChipTop {
+  z-index: 1;
   border-radius: 1.5625rem 1.5625rem 1.5625rem 0.3125rem;
 }
 
 .floorChipMid {
+  z-index: 3;
   margin-left: 1.25rem;
   border-radius: 1.5625rem;
+  -webkit-backdrop-filter: blur(1.75rem);
+  backdrop-filter: blur(1.75rem);
 }
 
 .floorChipBottom {
+  z-index: 1;
   border-radius: 0.3125rem 1.5625rem 1.5625rem 1.5625rem;
 }
 
 .floorChipBadge {
+  position: relative;
+  z-index: 1;
   margin: 0;
+  font-family: var(--mcm-font-sans);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1rem;
+  color: #fafafa;
   white-space: pre-wrap;
 }
 
 .floorChipSub {
+  position: relative;
+  z-index: 1;
   margin: 0;
+  font-family: var(--mcm-font-sans);
   font-size: 0.625rem;
+  font-weight: 400;
   line-height: 0.875rem;
+  color: #fafafa;
 }
 
 /* —— Floor —— */
 
 .floorBadge {
+  position: relative;
   display: flex;
   width: 100%;
   height: 3.125rem;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  overflow: hidden;
   padding: 0.625rem 1.5625rem;
   border-radius: 1.5625rem 1.5625rem 0.3125rem 1.5625rem;
   background: rgba(174, 97, 30, 0.4);
-  color: #fafafa;
-  text-align: center;
+  -webkit-backdrop-filter: blur(1.25rem);
+  backdrop-filter: blur(1.25rem);
   box-shadow: 0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.16);
+  color: #fafafa;
+  text-align: left;
+}
+
+.floorBadge::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from 200deg at 50% 50%,
+    rgba(255, 255, 255, 0.05) 0deg,
+    rgba(255, 255, 255, 0.05) 35deg,
+    rgba(255, 247, 213, 0.55) 70deg,
+    rgba(255, 255, 255, 0.7) 95deg,
+    rgba(255, 247, 213, 0.45) 120deg,
+    rgba(255, 255, 255, 0.06) 150deg,
+    rgba(0, 0, 0, 0.22) 185deg,
+    rgba(255, 255, 255, 0.05) 220deg,
+    rgba(255, 247, 213, 0.5) 265deg,
+    rgba(255, 255, 255, 0.65) 295deg,
+    rgba(255, 247, 213, 0.35) 325deg,
+    rgba(255, 255, 255, 0.05) 360deg
+  );
+  pointer-events: none;
+  content: '';
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
 }
 
 .floorHeadline {
@@ -366,7 +338,7 @@
 .emblemRow {
   display: flex;
   flex-shrink: 0;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.25rem;
   padding-top: 0.5rem;
 }
@@ -378,8 +350,8 @@
 }
 
 .emblemCrest {
-  width: 2.625rem;
-  height: 2.625rem;
+  width: 2.1rem;
+  height: 2.1rem;
   object-fit: cover;
 }
 
@@ -394,15 +366,16 @@
   flex-direction: column;
   gap: 1.25rem;
   padding: 0.625rem;
-  border: 1px solid var(--mcm-color-brand-brown);
+  border: 1px solid #fafafa;
   border-radius: 0.5rem;
-  color: var(--mcm-color-brand-brown);
+  color: #fafafa;
   font-size: 0.625rem;
   line-height: 0.875rem;
 }
 
 .panelBlock p {
   margin: 0 0 0.25rem;
+  color: #fafafa;
 }
 
 .panelBlock p:last-child {
@@ -424,15 +397,16 @@
 .cognacNote {
   flex: 0 0 10.375rem;
   padding: 0.625rem;
-  border: 1px solid var(--mcm-color-brand-brown);
+  border: 1px solid #fafafa;
   border-radius: 0.5rem;
-  color: var(--mcm-color-brand-brown);
+  color: #fafafa;
   font-size: 0.625rem;
   line-height: 0.875rem;
 }
 
 .cognacNote p {
   margin: 0 0 0.25rem;
+  color: #fafafa;
 }
 
 .cognacNote p:last-child {
@@ -477,7 +451,9 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  padding: 0.25rem;
+  object-fit: contain;
+  object-position: center;
 }
 
 .productMeta {
@@ -494,6 +470,12 @@
   font-size: 0.625rem;
   line-height: 0.875rem;
   color: var(--mcm-color-ink);
+}
+
+.productNameLine {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .productNameWide {

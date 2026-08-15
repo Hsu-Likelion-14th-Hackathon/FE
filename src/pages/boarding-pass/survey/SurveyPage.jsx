@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { PASS_STORAGE_KEY } from '@/features/boarding-pass/boarding-ticket/passStorage.js'
@@ -6,7 +6,9 @@ import IssueLoadingOverlay from '@/features/boarding-pass/issue-loading/IssueLoa
 import { getSurveyQuestions, issueBoardingPass } from '@/shared/api/boardingPassApi.js'
 import backArrow from '@/shared/assets/boarding-pass/icons/back-arrow.svg'
 import qPlane from '@/shared/assets/boarding-pass/survey/q-plane.svg'
-import BoardingPassChrome from '@/shared/layout/BoardingPassChrome.jsx'
+import revealBelowBrowserChrome from '@/shared/layout/revealBelowBrowserChrome.js'
+import scrollDocumentToTop from '@/shared/layout/scrollDocumentToTop.js'
+import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './SurveyPage.module.scss'
 
@@ -21,6 +23,13 @@ export function Component() {
   const [answers, setAnswers] = useState({})
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState(null)
+  const scrollRef = useRef(null)
+  const ctaRef = useRef(null)
+
+  useLayoutEffect(() => {
+    scrollDocumentToTop()
+    scrollRef.current?.scrollTo?.(0, 0)
+  }, [step, loading])
 
   useEffect(() => {
     let cancelled = false
@@ -40,19 +49,19 @@ export function Component() {
   const selectedOptionId = question ? answers[question.id] : null
   const progress = questions.length ? ((step + 1) / questions.length) * 100 : 0
   const isLast = step >= questions.length - 1
-  const showFade = Boolean(question && question.options.length >= 4)
 
   const handleBack = () => {
     if (step > 0) {
       setStep((s) => s - 1)
       return
     }
-    navigate('/boarding-pass')
+    navigate('/boarding-pass/intro')
   }
 
   const handleSelect = (optionId) => {
     if (!question) return
     setAnswers((prev) => ({ ...prev, [question.id]: optionId }))
+    revealBelowBrowserChrome(ctaRef.current)
   }
 
   const handleNext = async () => {
@@ -80,8 +89,8 @@ export function Component() {
   }
 
   return (
-    <main className={styles.page}>
-      <BoardingPassChrome />
+    <main className={`${styles.page}${loading ? ` ${styles.pageLoading}` : ''}`}>
+      <StoreHeader />
       <hr className={styles.divider} />
 
       <div className={styles.progressRow}>
@@ -94,7 +103,7 @@ export function Component() {
       </div>
 
       <div className={styles.body}>
-        <div className={styles.scroll}>
+        <div ref={scrollRef} className={styles.scroll}>
           {loadError && !question ? (
             <p className={styles.status}>{loadError}</p>
           ) : question ? (
@@ -143,8 +152,9 @@ export function Component() {
 
         {question ? (
           <div className={styles.footer}>
-            {showFade ? <div className={styles.fade} aria-hidden="true" /> : null}
+            <div className={styles.footerBlur} aria-hidden="true" />
             <button
+              ref={ctaRef}
               type="button"
               disabled={selectedOptionId == null || loading}
               onClick={handleNext}
