@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
+import { Link } from 'react-router'
 
 import headerDiamond from '@/shared/assets/boarding-pass/icons/header-diamond.svg'
 import headerDot from '@/shared/assets/boarding-pass/icons/header-dot.svg'
@@ -78,7 +79,9 @@ function BrandStrip({ as = 'decorative' }) {
   ))
 
   return (
-    <div className={styles.strip}>
+    // 띠 전체가 보딩패스로 들어가는 입구다. 흐르는 문구는 aria-hidden이라
+    // 링크 이름은 아래 sr-only 텍스트가 맡는다.
+    <Link className={styles.strip} to="/boarding-pass">
       <Ornament side="left" />
 
       <div className={styles.viewport} ref={viewportRef}>
@@ -97,7 +100,7 @@ function BrandStrip({ as = 'decorative' }) {
       </div>
 
       <Ornament side="right" />
-    </div>
+    </Link>
   )
 }
 

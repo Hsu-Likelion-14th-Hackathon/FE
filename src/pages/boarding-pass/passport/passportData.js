@@ -2,7 +2,8 @@ export const passportProfile = {
   passportNumber: '0001',
   surname: 'LIM',
   givenName: 'YEONJU',
-  nationality: 'REPUBLIC OF KOREA',
+  // 백엔드는 alpha-2를 준다. 지면에 alpha-3으로 찍는 것은 표시 단계 변환이다.
+  nationality: 'KR',
   birthDate: '2000 01 01',
   issueDate: '2026 08 25',
   credit: 100,

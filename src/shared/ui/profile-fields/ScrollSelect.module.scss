@@ -1,0 +1,115 @@
+.field {
+  position: relative;
+  min-width: 0;
+}
+
+.trigger {
+  display: flex;
+  width: 100%;
+  /* 달력 트리거·국적 트리거와 같은 높이여야 세 칸이 나란히 선다. */
+  height: 50px;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  border: 1px solid var(--mcm-color-border);
+  border-radius: 8px;
+  appearance: none;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.triggerActive {
+  border-color: var(--mcm-color-brand-brown);
+}
+
+.value,
+.placeholder {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.value {
+  color: var(--mcm-color-ink);
+  font-weight: 600;
+}
+
+.placeholder {
+  color: var(--mcm-color-muted);
+  font-weight: 400;
+}
+
+.chevron {
+  flex: none;
+  color: var(--mcm-color-muted);
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* 목록은 트리거 위에 겹쳐 띄운다. 아래로 밀면 세 칸이 나란한 줄이 통째로
+   내려앉아 저장 버튼이 화면 밖으로 나간다. */
+.panel {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  /* 실제 높이는 남는 자리를 재서 인라인으로 들어온다. 여기 값은 그 계산이
+     닿기 전 한 프레임을 위한 기본값이다. */
+  max-height: 220px;
+  padding: 4px;
+  border: 1px solid var(--mcm-color-border);
+  border-radius: 8px;
+  background: var(--mcm-color-canvas);
+  box-shadow: 0 8px 24px rgb(25 25 25 / 24%);
+  overflow-y: auto;
+  /* 이 컴포넌트가 있는 이유다. 스크롤은 살리고 막대만 감춘다. */
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+}
+
+/* 사파리·크롬은 scrollbar-width를 아직 안 받는 버전이 있어 함께 둔다. */
+.panel::-webkit-scrollbar {
+  display: none;
+}
+
+/* 아래가 좁으면 위로 펼친다. 시트가 화면 바닥에 붙어 있어 아래로 두면
+   시트 경계에서 잘린다. */
+.panelUp {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+.option {
+  display: block;
+  width: 100%;
+  /* 손가락으로 고르는 목록이라 한 줄이 44px보다 얇으면 안 된다. */
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  appearance: none;
+  color: var(--mcm-color-ink);
+  background: transparent;
+  font-size: 14px;
+  text-align: left;
+}
+
+.optionSelected {
+  background: var(--mcm-color-product-surface);
+  font-weight: 700;
+}
+
+.option:hover {
+  background: var(--mcm-color-hover-surface);
+}
+
+.trigger:focus-visible,
+.option:focus-visible {
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: -2px;
+}

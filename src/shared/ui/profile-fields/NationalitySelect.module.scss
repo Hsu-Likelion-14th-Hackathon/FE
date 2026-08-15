@@ -1,0 +1,268 @@
+.field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  display: flex;
+  height: 18px;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.required {
+  color: var(--mcm-color-brand-brown);
+}
+
+.trigger {
+  display: flex;
+  width: 100%;
+  height: 50px;
+  align-items: center;
+  padding: 0 21px 0 19px;
+  border: 1px solid var(--mcm-color-border);
+  border-radius: 8px;
+  appearance: none;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.triggerActive {
+  border-color: var(--mcm-color-brand-brown);
+}
+
+.controlIcon {
+  width: 24px;
+  max-width: none;
+  height: 24px;
+  flex: none;
+}
+
+.flag,
+.optionFlag {
+  --CountryFlagIcon-height: 18px;
+
+  flex: none;
+  overflow: hidden;
+  border: 1px solid rgb(25 25 25 / 10%);
+  border-radius: 2px;
+  background-position: center;
+}
+
+.placeholder,
+.value {
+  min-width: 0;
+  flex: 1;
+  margin-left: 9px;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.placeholder {
+  overflow: hidden;
+  color: var(--mcm-color-border);
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.value {
+  display: grid;
+  align-items: center;
+  gap: 6px;
+  direction: ltr;
+  color: var(--mcm-color-ink);
+  font-weight: 600;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+}
+
+.chevron {
+  width: 14px;
+  max-width: none;
+  height: 14px;
+  flex: none;
+  margin-left: 8px;
+  transform: rotate(180deg);
+}
+
+.panel {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  border: 1px solid var(--mcm-color-ink);
+  border-radius: 8px;
+  background: var(--mcm-color-canvas);
+  box-shadow: 0 10px 30px rgb(25 25 25 / 12%);
+}
+
+.searchShell {
+  padding: 8px;
+  border-bottom: 1px solid var(--mcm-color-border);
+  background: var(--mcm-color-canvas);
+}
+
+.searchInput {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--mcm-color-border);
+  border-radius: 6px;
+  outline: 0;
+  appearance: none;
+  color: var(--mcm-color-ink);
+  background: var(--mcm-color-canvas);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.searchInput::-webkit-search-cancel-button {
+  opacity: 0.65;
+}
+
+.searchInput::placeholder {
+  color: var(--mcm-color-muted);
+  opacity: 1;
+}
+
+.searchInput:focus {
+  border-color: var(--mcm-color-brand-brown);
+  box-shadow: 0 0 0 1px var(--mcm-color-brand-brown);
+}
+
+.options {
+  max-height: min(300px, 42dvh);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  /* 스크롤은 살리되 막대는 감춘다. 여권 시트처럼 어두운 화면에서는 회색 막대가
+     둥근 모서리 위로 지나가 겉돈다. scrollbar-gutter로 자리를 비워 두던 것도
+     막대가 없으면 오른쪽만 빈 것처럼 보여 함께 걷어낸다. */
+  scrollbar-width: none;
+}
+
+/* 사파리·크롬은 scrollbar-width를 아직 안 받는 버전이 있어 함께 둔다. */
+.options::-webkit-scrollbar {
+  display: none;
+}
+
+.option {
+  display: flex;
+  width: 100%;
+  min-height: 50px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 1px solid rgb(25 25 25 / 10%);
+  border-radius: 0;
+  appearance: none;
+  color: var(--mcm-color-ink);
+  background: var(--mcm-color-canvas);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 18px;
+  text-align: left;
+}
+
+.option:last-child {
+  border-bottom: 0;
+}
+
+.optionSelected {
+  background: var(--mcm-color-product-surface);
+  font-weight: 600;
+}
+
+/* 손이 얹힌 줄. 흰색을 박아 두면 어두운 화면(여권 시트)에서 번쩍인다.
+   화면이 정하는 값을 쓴다. */
+.optionActive {
+  background: var(--mcm-color-hover-surface);
+}
+
+.optionName {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  direction: ltr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.nativeName,
+.englishName {
+  min-width: 0;
+  unicode-bidi: isolate;
+}
+
+.nativeName {
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+.englishName {
+  direction: ltr;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.value .nativeName,
+.value .englishName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.value .englishName {
+  max-width: 180px;
+  justify-self: end;
+}
+
+.emptyState {
+  display: grid;
+  min-height: 72px;
+  margin: 0;
+  place-items: center;
+  padding: 16px;
+  color: var(--mcm-color-muted);
+  font-size: 14px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.trigger:focus-visible,
+.option:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .option {
+    transition: background-color 120ms ease;
+  }
+}
+
+/* 고정 묶음과 전체 목록을 가르는 머리말. 목록 항목이 아니므로 위아래 이동과
+   선택에는 끼지 않는다(role="presentation"). */
+.groupLabel {
+  position: sticky;
+  top: 0;
+  margin: 0;
+  padding: 8px 12px 4px;
+  border-bottom: 1px solid var(--mcm-color-border);
+  background: var(--mcm-color-canvas);
+  color: var(--mcm-color-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}

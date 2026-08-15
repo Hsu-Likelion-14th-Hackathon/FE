@@ -1,0 +1,34 @@
+.fieldGroup {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  display: flex;
+  height: 18px;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.required {
+  color: var(--mcm-color-brand-brown);
+}
+
+/* 연·월·일 세 칸. 연도가 네 자리라 가장 넓게 잡는다. */
+.spinners {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+
+@media (max-width: 339px) {
+  .spinners {
+    gap: 4px;
+  }
+}

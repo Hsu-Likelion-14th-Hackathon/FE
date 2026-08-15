@@ -5,7 +5,7 @@ import {
   DirectionalLight,
   FrontSide,
   Group,
-  LinearMipmapLinearFilter,
+  LinearFilter,
   Mesh,
   PerspectiveCamera,
   PlaneGeometry,
@@ -24,11 +24,16 @@ const LAYER_RATIO = 0.012
 /** 넘어가는 장이 아래 장을 스치지 않도록 들어 올리는 높이. */
 const LIFT_RATIO = 0.043
 
-function makeTexture(canvas, maxAnisotropy) {
+function makeTexture(canvas) {
   const texture = new Texture(canvas)
   texture.colorSpace = SRGBColorSpace
-  texture.minFilter = LinearMipmapLinearFilter
-  texture.anisotropy = maxAnisotropy
+  // 밉맵을 쓰면 안 된다. 지면은 정면에서 거의 1:1로 보이는데, 밉맵 필터는
+  // 절반 해상도 단계를 함께 섞는다. 어두운 종이 위의 밝은 글자는 그 과정에서
+  // 획 밖으로 번져 실제보다 두껍고 무르게 보인다. 텍스처를 화면이 쓰는
+  // 픽셀에 맞춰 굽고 있으므로 줄여 그릴 일도 거의 없다.
+  texture.minFilter = LinearFilter
+  texture.magFilter = LinearFilter
+  texture.generateMipmaps = false
   texture.needsUpdate = true
   return texture
 }
@@ -48,7 +53,6 @@ export function createPassportSheets() {
   renderer.setClearColor(0x000000, 0)
   renderer.toneMapping = ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.15
-  const maxAnisotropy = renderer.capabilities.getMaxAnisotropy?.() ?? 1
 
   const scene = new Scene()
   // 원근을 얕게 둬야 정면 가독성이 유지되면서 넘어갈 때만 입체가 드러난다.
@@ -157,8 +161,8 @@ export function createPassportSheets() {
 
       for (const { front, back } of pages) {
         const bend = createBendUniforms(1)
-        const frontTexture = makeTexture(front ?? document.createElement('canvas'), maxAnisotropy)
-        const backTexture = makeTexture(back ?? document.createElement('canvas'), maxAnisotropy)
+        const frontTexture = makeTexture(front ?? document.createElement('canvas'))
+        const backTexture = makeTexture(back ?? document.createElement('canvas'))
         // 뒤에서 보는 면이라 좌우를 뒤집는다.
         backTexture.repeat.x = -1
         backTexture.offset.x = 1

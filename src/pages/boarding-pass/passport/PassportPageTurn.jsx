@@ -8,14 +8,17 @@ import coverStarSrc from '@/shared/assets/boarding-pass/passport/cover-star.png'
 import journeyDecorationSrc from '@/shared/assets/boarding-pass/passport/journey-decoration.png'
 import journeyTicketSrc from '@/shared/assets/boarding-pass/passport/journey-ticket.png'
 import hausSrc from '@/shared/assets/boarding-pass/passport/mcm-haus.png'
+import wordSrc from '@/shared/assets/boarding-pass/passport/passport-word.webp'
 import bowLeftSrc from '@/shared/assets/boarding-pass/passport/passport-bow-left.png'
 import bowRightSrc from '@/shared/assets/boarding-pass/passport/passport-bow-right.png'
 import coverSrc from '@/shared/assets/boarding-pass/passport/passport-cover.png'
 import emblemSrc from '@/shared/assets/boarding-pass/passport/passport-emblem.png'
 import stampBowSrc from '@/shared/assets/boarding-pass/passport/passport-stamp-bow.png'
-import pageLeftSrc from '@/shared/assets/boarding-pass/passport/passport-page-left.png'
-import pageRightSrc from '@/shared/assets/boarding-pass/passport/passport-page-right.png'
-import stampSrc from '@/shared/assets/boarding-pass/passport/passport-stamp.png'
+// 내지는 알파가 필요해 새로 잘라 받았고, 설계(253.5x394)의 2배로 굽는 텍스처에
+// 맞춰 507x788로 넣었다. 같은 크기의 PNG는 한 장에 620KB라 WebP로 둔다.
+import pageLeftSrc from '@/shared/assets/boarding-pass/passport/passport-page-left.webp'
+import pageRightSrc from '@/shared/assets/boarding-pass/passport/passport-page-right.webp'
+import stampSrc from '@/shared/assets/boarding-pass/passport/passport-stamp.webp'
 
 import observeResize from '@/shared/layout/observe-resize.js'
 
@@ -23,7 +26,15 @@ import { usePassport } from '@/entities/passport/usePassport.js'
 
 import { createPassportSheets } from './passportSheetScene.js'
 import pageStyles from './PassportPage.module.scss'
-import { SHEET_BACK, SHEET_FACES, SHEET_H, SHEET_W, paintFace } from './passportPageTexture.js'
+import {
+  SHEET_BACK,
+  SHEET_FACES,
+  SHEET_H,
+  SHEET_W,
+  paintFace,
+  texturePixelRatio,
+  waitForPageFont,
+} from './passportPageTexture.js'
 import styles from './PassportPageTurn.module.scss'
 
 const LAST_STEP = 3
@@ -42,6 +53,8 @@ const IDLE_POINTER = {
   startedAt: 0,
   direction: null,
   progress: 0,
+  /** 손을 댈 때 잰 지면 폭. 0으로 나누지 않도록 1에서 시작한다. */
+  width: 1,
 }
 
 const ASSET_SOURCES = {
@@ -55,6 +68,7 @@ const ASSET_SOURCES = {
   bowLeft: bowLeftSrc,
   bowRight: bowRightSrc,
   haus: hausSrc,
+  word: wordSrc,
   stamp: stampSrc,
   stampBow: stampBowSrc,
   journeyDecoration: journeyDecorationSrc,
@@ -76,13 +90,22 @@ function prefersReducedMotion() {
   return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-function loadImage(src) {
+/**
+ * @param {boolean} remote 다른 출처에서 받는 이미지인지.
+ *
+ * 구운 캔버스는 WebGL 텍스처가 된다. 다른 출처 이미지를 CORS 없이 그리면
+ * 캔버스가 오염돼 텍스처 업로드 자체가 막히고 여권 전체가 사라진다.
+ * crossOrigin을 걸면 서버가 허용 헤더를 안 줄 때 이미지만 실패하므로,
+ * 최악이라도 그 자리에 기본 스탬프가 남는다.
+ */
+function loadImage(src, remote = false) {
   return new Promise((resolve) => {
-    if (typeof Image !== 'function') {
+    if (typeof Image !== 'function' || !src) {
       resolve(null)
       return
     }
     const image = new Image()
+    if (remote) image.crossOrigin = 'anonymous'
     image.decoding = 'async'
     image.onload = () => resolve(image)
     image.onerror = () => resolve(null)
@@ -125,6 +148,9 @@ function measureNameCue(element) {
     // 크기가 바뀌면 다시 재야 한다. 대상을 좌표와 함께 들고 있으면 ref 없이도
     // 이전 상태에서 꺼내 쓸 수 있다.
     target: element,
+    // 줄마다 고치는 대상이 다르다. 셋 다 '이름 수정'이라고 뜨면 국적을
+    // 누르려던 사람이 잘못 눌렀다고 생각한다.
+    label: element.dataset.cueLabel ?? '이름 수정',
     left: left - frameBox.left,
     top: box.top - frameBox.top,
     width: Math.max(0, right - left),
@@ -168,18 +194,28 @@ export default function PassportPageTurn({
   const [rendererMode, setRendererMode] = useState('fallback')
   // 이미지 14장을 다 받았는지. 받고 나서 한 번 다시 구워야 빈 면이 남지 않는다.
   const [assetsReady, setAssetsReady] = useState(false)
+  // 스탬프 그림처럼 뒤늦게 도착하는 것이 있으면 올려서 다시 굽게 한다.
+  const [repaintKey, setRepaintKey] = useState(0)
   const [turnState, setTurnState] = useState('idle')
 
   const viewportRef = useRef(null)
   const canvasHostRef = useRef(null)
   const bookRef = useRef(null)
   const assetsRef = useRef({})
+  // 방문마다 다른 스탬프 그림. 백엔드가 URL을 주면 여기에 URL로 담기고,
+  // 못 받으면 비어 있어 기본 스탬프가 그려진다.
+  const stampImagesRef = useRef({})
   const frameRef = useRef(null)
   // 지금 화면에 그려진 넘김 정도. 정수면 정지, 소수면 넘어가는 중이다.
   const turnRef = useRef(0)
   const pointerRef = useRef({ ...IDLE_POINTER })
   // 같은 면을 반복해서 굽지 않도록 캔버스를 보관한다. 데이터가 바뀌면 비운다.
   const faceCacheRef = useRef(new Map())
+  // 마지막으로 구울 때 쓴 텍스처 배수. 화면이 커지면 필요한 배수도 커지는데,
+  // 그때 다시 굽지 않으면 넓어진 지면이 낮은 해상도 텍스처를 늘려 쓴다.
+  const ratioRef = useRef(0)
+  // 폰트를 기다린 뒤 구웠는지. 상한에 걸려 먼저 구웠다면 늦게 온 폰트로 한 번 더 굽는다.
+  const fontBakedRef = useRef(false)
 
   const progress = ((step + 1) / (LAST_STEP + 1)) * 100
   const inputLocked = disabled || turnState !== 'idle'
@@ -199,29 +235,16 @@ export default function PassportPageTurn({
   const clearNameCue = useCallback(() => setNameCue(null), [])
 
   // 여권 데이터는 API에서 온다. 연동 전에는 훅이 고정 데이터로 떨어진다.
-  const { profile, stamps } = usePassport()
+  const { profile, stamps, status } = usePassport()
   const pageData = useCallback(
-    () => ({ profile: { ...profile, ...profileOverride }, stamps, assets: assetsRef.current }),
+    () => ({
+      profile: { ...profile, ...profileOverride },
+      stamps,
+      assets: assetsRef.current,
+      stampImages: stampImagesRef.current,
+    }),
     [profile, profileOverride, stamps],
   )
-
-  /** 네 장을 한 번에 굽고 장면에 올린다. 낱장은 step마다 다시 구울 일이 없다. */
-  const paintSheets = useCallback(() => {
-    const sheets = bookRef.current
-    if (!sheets) return
-    const data = pageData()
-
-    const face = (name) => {
-      const cached = faceCacheRef.current.get(name)
-      if (cached) return cached
-      const painted = paintFace(name, data, 'sheet')
-      faceCacheRef.current.set(name, painted)
-      return painted
-    }
-
-    // 앞면은 각 단계의 내용, 뒷면은 실제 여권처럼 빈 종이결이다.
-    sheets.setSheets(SHEET_FACES.map((name) => ({ front: face(name), back: face(SHEET_BACK) })))
-  }, [pageData])
 
   const measure = useCallback(() => {
     const viewport = viewportRef.current
@@ -250,6 +273,31 @@ export default function PassportPageTurn({
    * 프레임마다 부르면 안 된다. setSize는 내부에서 setPixelRatio까지 거쳐
    * 버퍼를 다시 잡으므로 넘김 도중 매 프레임 재할당이 일어난다.
    */
+  /** 네 장을 한 번에 굽고 장면에 올린다. 낱장은 step마다 다시 구울 일이 없다. */
+  const paintSheets = useCallback(() => {
+    const sheets = bookRef.current
+    if (!sheets) return
+    const data = pageData()
+    // 지면이 화면에서 실제로 몇 픽셀을 차지하는지 보고 텍스처 배수를 정한다.
+    // 고정 2배로 두면 고밀도 화면에서 WebGL이 텍스처를 늘려 쓰게 되고 글자
+    // 획이 뭉개진다. 아직 못 쟀으면 지금까지 쓰던 2배로 간다.
+    const ratio = texturePixelRatio(measure()?.leafW ?? SHEET_W)
+    ratioRef.current = ratio
+
+    const face = (name) => {
+      // 배수가 바뀌면 다시 구워야 한다. 같은 이름으로 두면 흐린 판이 남는다.
+      const key = `${name}@${ratio}`
+      const cached = faceCacheRef.current.get(key)
+      if (cached) return cached
+      const painted = paintFace(name, data, 'sheet', ratio)
+      faceCacheRef.current.set(key, painted)
+      return painted
+    }
+
+    // 앞면은 각 단계의 내용, 뒷면은 실제 여권처럼 빈 종이결이다.
+    sheets.setSheets(SHEET_FACES.map((name) => ({ front: face(name), back: face(SHEET_BACK) })))
+  }, [measure, pageData])
+
   const fitToBox = useCallback(() => {
     const host = canvasHostRef.current
     const box = measure()
@@ -277,6 +325,35 @@ export default function PassportPageTurn({
     if (frameRef.current !== null) {
       cancelAnimationFrame(frameRef.current)
       frameRef.current = null
+    }
+  }, [])
+
+  /**
+   * 드래그 중 그리기를 화면 주사율에 맞춘다.
+   *
+   * pointermove는 한 프레임에 여러 번 온다(고주사율 화면·합쳐진 이벤트).
+   * 올 때마다 그리면 화면에 나가지도 못할 프레임을 만드느라 손이 밀린다.
+   * 마지막 값만 남겼다가 프레임당 한 번만 그린다.
+   */
+  const dragFrameRef = useRef(null)
+  const dragTargetRef = useRef(0)
+
+  const scheduleDragFrame = useCallback(
+    (turned) => {
+      dragTargetRef.current = turned
+      if (dragFrameRef.current !== null) return
+      dragFrameRef.current = requestAnimationFrame(() => {
+        dragFrameRef.current = null
+        drawFrame(dragTargetRef.current)
+      })
+    },
+    [drawFrame],
+  )
+
+  const stopDragFrame = useCallback(() => {
+    if (dragFrameRef.current !== null) {
+      cancelAnimationFrame(dragFrameRef.current)
+      dragFrameRef.current = null
     }
   }, [])
 
@@ -364,10 +441,18 @@ export default function PassportPageTurn({
 
   // 페이지에 그릴 이미지들을 미리 받아둔다. 14장이라 단계마다 다시 받으면
   // 모바일에서 눈에 띄게 끊긴다. 한 번만 받고 준비됐다는 사실만 알린다.
+  // Pretendard도 같이 기다린다. 먼저 구우면 지면 글자가 대체 글꼴로 굳어,
+  // 같은 자리를 재는 DOM 히트박스와 폭이 갈라진다.
   useEffect(() => {
     let alive = true
     const names = Object.keys(ASSET_SOURCES)
-    Promise.all(names.map((name) => loadImage(ASSET_SOURCES[name]))).then((loaded) => {
+    Promise.all([
+      Promise.all(names.map((name) => loadImage(ASSET_SOURCES[name]))),
+      waitForPageFont().then((arrived) => {
+        // 상한 전에 왔으면 아래 굽기가 이미 제 글꼴을 쓴다.
+        fontBakedRef.current = arrived
+      }),
+    ]).then(([loaded]) => {
       if (!alive) return
       assetsRef.current = Object.fromEntries(names.map((name, index) => [name, loaded[index]]))
       faceCacheRef.current.clear()
@@ -377,6 +462,58 @@ export default function PassportPageTurn({
       alive = false
     }
   }, [])
+
+  // 폰트 대기에는 상한이 있다. 그 뒤에 도착하면 이미 구운 텍스처는 대체 글꼴로
+  // 굳어 있고, 캔버스는 CSS와 달리 알아서 다시 그려지지 않는다. 한 번만 다시 굽는다.
+  useEffect(() => {
+    const fonts = typeof document === 'undefined' ? null : document.fonts
+    if (!fonts?.ready) return undefined
+    let alive = true
+
+    fonts.ready.then(() => {
+      if (!alive) return
+      // 상한 안에 도착했으면 이미 그 글꼴로 구웠다. 다시 구울 이유가 없다.
+      if (fontBakedRef.current) return
+      fontBakedRef.current = true
+      faceCacheRef.current.clear()
+      setRepaintKey((key) => key + 1)
+    })
+
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  // 백엔드가 방문마다 다른 스탬프 그림을 준다(PassportStampResponse.stampAssetUrl).
+  // 지면 이미지와 달리 개수도 주소도 사용자마다 달라 함께 미리 받을 수 없다.
+  // 받아 두면 다시 굽고, 못 받으면 그 자리에 기본 스탬프가 남는다.
+  const stampUrls = stamps
+    .slice(0, 6)
+    .map((stamp) => stamp.imageUrl)
+    .filter(Boolean)
+    .join('\n')
+
+  useEffect(() => {
+    if (!stampUrls) return undefined
+    let alive = true
+    const urls = [...new Set(stampUrls.split('\n'))]
+
+    Promise.all(urls.map((url) => loadImage(url, true))).then((loaded) => {
+      if (!alive) return
+      const arrived = urls
+        .map((url, index) => [url, loaded[index]])
+        .filter(([, image]) => image !== null)
+      // 하나도 못 받았으면 이미 그려진 기본 스탬프가 맞다. 다시 구울 이유가 없다.
+      if (!arrived.length) return
+      stampImagesRef.current = { ...stampImagesRef.current, ...Object.fromEntries(arrived) }
+      faceCacheRef.current.clear()
+      setRepaintKey((key) => key + 1)
+    })
+
+    return () => {
+      alive = false
+    }
+  }, [stampUrls])
 
   useEffect(() => {
     const host = canvasHostRef.current
@@ -402,10 +539,11 @@ export default function PassportPageTurn({
     return () => {
       alive = false
       stopFrame()
+      stopDragFrame()
       bookRef.current = null
       book.dispose()
     }
-  }, [stopFrame])
+  }, [stopDragFrame, stopFrame])
 
   // 장은 내용이 바뀔 때만 다시 굽는다. setSheets는 네 장과 텍스처 여덟 장을
   // 통째로 새로 만들므로 단계마다 부르면 낭비고, 드래그 중에 끼어들면 장면이
@@ -417,7 +555,7 @@ export default function PassportPageTurn({
     // 넘김 도중에 이미지나 여권 데이터가 도착할 수 있다. step으로 되돌리면
     // 손이 놓인 장이 원위치로 튄다. 그려져 있던 값을 그대로 이어 그린다.
     drawFrame(turnRef.current)
-  }, [assetsReady, drawFrame, fitToBox, paintSheets, rendererMode])
+  }, [assetsReady, drawFrame, fitToBox, paintSheets, rendererMode, repaintKey])
 
   // 단계가 확정되면 각도만 바꿔 다시 그린다.
   useEffect(() => {
@@ -434,12 +572,19 @@ export default function PassportPageTurn({
     fitToBox()
     return observeResize(host, () => {
       fitToBox()
+      // 화면이 커지면 필요한 배수가 올라간다(320x568 → 390x844에서 2.5 → 4).
+      // 굽지 않으면 넓어진 지면이 예전 해상도를 늘려 써 다시 흐려진다.
+      const nextRatio = texturePixelRatio(measure()?.leafW ?? SHEET_W)
+      if (nextRatio !== ratioRef.current) {
+        faceCacheRef.current.clear()
+        setRepaintKey((key) => key + 1)
+      }
       if (bookRef.current) drawFrame(turnRef.current)
       // 지면이 줄면 이름도 움직인다. 재 둔 좌표를 그대로 두면 밑줄만 남는다.
       // 갱신 함수로 이전 상태에서 대상을 꺼내면 이 효과가 표시에 매이지 않는다.
       setNameCue((current) => (current ? measureNameCue(current.target) : null))
     })
-  }, [drawFrame, fitToBox])
+  }, [drawFrame, fitToBox, measure])
 
   const resetPointer = (event) => {
     pointerRef.current = { ...IDLE_POINTER }
@@ -458,6 +603,9 @@ export default function PassportPageTurn({
       startedAt: performance.now(),
       direction: null,
       progress: 0,
+      // 손을 대는 순간 한 번만 잰다. move마다 재면 매번 레이아웃이 다시 계산돼
+      // 손가락이 밀린다. 드래그 도중에는 지면 폭이 바뀌지 않는다.
+      width: Math.max(event.currentTarget.getBoundingClientRect().width, 1),
     }
     event.currentTarget.setPointerCapture?.(event.pointerId)
   }
@@ -484,9 +632,8 @@ export default function PassportPageTurn({
       if (rendererMode === 'ready' && bookRef.current) setTurnState('dragging')
     }
 
-    const width = Math.max(event.currentTarget.getBoundingClientRect().width, 1)
-    pointer.progress = Math.min(Math.abs(dx) / width, 1)
-    if (rendererMode === 'ready') drawFrame(step + pointer.direction * pointer.progress)
+    pointer.progress = Math.min(Math.abs(dx) / pointer.width, 1)
+    if (rendererMode === 'ready') scheduleDragFrame(step + pointer.direction * pointer.progress)
     event.preventDefault()
   }
 
@@ -541,13 +688,25 @@ export default function PassportPageTurn({
         onPointerUp={onPointerUp}
         onPointerCancel={releaseWithoutCommit}
         onLostPointerCapture={releaseWithoutCommit}
+        // 지면 위 이미지에서 손을 대면 브라우저가 기본 이미지 끌기를 시작해
+        // pointermove가 끊기고 넘김이 멈춘다. 끌기를 막아 포인터를 지킨다.
+        onDragStart={(event) => event.preventDefault()}
       >
         {/* 캔버스가 책을 그리고, 같은 자리의 DOM은 투명하게 남아
             스크린리더 읽기와 버튼 클릭을 그대로 담당한다. */}
         <div ref={canvasHostRef} aria-hidden="true" className={styles.bookLayer} />
-        <div className={styles.contentLayer} data-transparent={rendererMode === 'ready'}>
+        {/* 캔버스가 아직 아무것도 굽지 못했으면 DOM 지면을 남겨 둔다.
+            렌더러 준비만 보고 숨기면, 이미지가 늦거나 멈춘 동안 빈 캔버스가
+            그대로 드러난다. */}
+        <div
+          className={styles.contentLayer}
+          data-transparent={rendererMode === 'ready' && assetsReady}
+        >
           {renderStep(step, { ...profile, ...profileOverride }, stamps, {
             onNameHover: showNameCue,
+            // 조회가 끝나기 전에는 고정 데이터를 보여 준다. 그 값을 초안으로
+            // 복사해 저장하면 뒤늦게 도착한 진짜 값을 고정 데이터로 덮는다.
+            profileReady: status !== 'loading',
           })}
         </div>
         {/* 시트가 열렸거나 지면이 넘어가는 중이면 좌표가 어긋난다. */}
@@ -566,7 +725,7 @@ export default function PassportPageTurn({
             {/* 무엇을 하는 버튼인지 알린다. 네이티브 title은 운영체제 기본
                 모양이라 여권 화면에서 겉돈다. 읽어 주는 이름은 버튼의
                 aria-label이 맡으므로 여기는 눈으로만 본다. */}
-            <span className={styles.nameCueLabel}>이름 수정</span>
+            <span className={styles.nameCueLabel}>{nameCue.label}</span>
           </span>
         ) : null}
         {/* 모바일에는 넘김 화살표가 없어 슬라이드가 유일한 방법이다.

@@ -27,6 +27,7 @@ export async function getPassport() {
     passportNumber: result.passportNo ?? '',
     // 백엔드는 이름을 한 필드로 준다. 화면도 한 줄로 표시한다.
     name: result.name ?? '',
+    // ISO 3166-1 alpha-2(`KR`). 지면 표기(alpha-3) 변환은 화면이 맡는다.
     nationality: (result.nationality ?? '').toUpperCase(),
     // 생년월일도 발급일과 같은 표기로 맞춘다. 빠뜨리면 성공 응답에서 칸이 빈다.
     birthDate: formatIssueDate(result.birthDate),

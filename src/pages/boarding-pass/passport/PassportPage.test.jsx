@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -39,6 +39,18 @@ function renderPassport() {
   )
 
   return router
+}
+
+/**
+ * 신분 정보 조회가 끝날 때까지 기다렸다가 수정 줄을 돌려준다.
+ *
+ * 조회 중에는 화면에 고정 데이터가 떠 있고 수정 줄이 잠긴다. 그때 눌러 저장하면
+ * 뒤늦게 온 진짜 값을 고정 데이터로 덮으므로 일부러 막아 둔 상태다.
+ */
+async function findEditableRow(name) {
+  const button = await screen.findByRole('button', { name })
+  await waitFor(() => expect(button).toBeEnabled())
+  return button
 }
 
 describe('PassportPage', { timeout: 15_000 }, () => {
@@ -195,6 +207,45 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(router.state.location.pathname).toBe('/boarding-pass')
   })
 
+  it('티켓 시트는 막대 없이 스크롤하고 짧은 화면에서 티켓을 줄인다', () => {
+    renderPassport()
+    const next = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(next)
+    fireEvent.click(next)
+    fireEvent.click(next)
+    fireEvent.click(screen.getByRole('button', { name: '티켓 보기' }))
+
+    const sheet = screen.getByRole('dialog', { name: '탑승권' })
+    const style = window.getComputedStyle(sheet)
+
+    // 시트가 화면을 덮는 형태라 막대가 뜨면 둥근 모서리 위로 회색 띠가 지나간다.
+    expect(style.scrollbarWidth).toBe('none')
+    expect(style.overflowY).toBe('auto')
+
+    // 티켓은 접히지 않는 한 장이라 짧은 화면에서 넘친다. 배율과 시트 위치를
+    // 뷰포트에 묶어 둔다. 기준이 100svh라 주소창·툴바가 이미 반영된다.
+    expect(style.getPropertyValue('--ticket-scale')).toContain('--mcm-viewport-stable')
+    expect(style.getPropertyValue('--ticket-sheet-top')).toContain('--mcm-viewport-stable')
+    // 길이를 숫자로 나누면 clamp가 무효가 되어 transform이 통째로 버려진다.
+    expect(style.getPropertyValue('--ticket-scale')).toContain('423px')
+    // 비세토스 바탕은 jsdom이 다층 url() 배경을 풀지 않아 여기서 못 본다.
+    // 브라우저에서 확인했다.
+  })
+
+  it('닫기 버튼을 본문보다 위에 둬 44px이 가려지지 않게 한다', () => {
+    renderPassport()
+
+    const close = screen.getByRole('button', { name: '닫기' })
+    const content = close.parentElement.querySelector('[class*=content]')
+
+    // 둘 다 z-index 1이면 DOM에서 뒤에 오는 .content가 이겨 버튼 오른쪽을
+    // 덮었다. 보이는 X가 통째로 가려져 왼쪽 15px만 눌렸다.
+    // jsdom은 hit-test를 하지 않아 쌓임 순서로만 확인한다.
+    const closeZ = Number(window.getComputedStyle(close).zIndex)
+    const contentZ = Number(window.getComputedStyle(content).zIndex)
+    expect(closeZ).toBeGreaterThan(contentZ)
+  })
+
   it('네이티브 키보드 클릭으로 한 단계만 이동하고 닫기 버튼에 44px 터치 영역을 준다', () => {
     renderPassport()
 
@@ -283,8 +334,11 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(openImageStyle.height).toBe('122.36%')
     expect(openImageStyle.left).toBe('-10.21%')
     expect(openImageStyle.top).toBe('-11.8%')
-    // 캔버스가 28px 간격으로 그린다(줄 높이 16 + 사이 12). 어긋나면 클릭 영역이 밀린다.
-    expect(window.getComputedStyle(profile).gap).toBe('0.75rem')
+    // 캔버스가 26px 간격으로 그린다(줄 높이 16 + 사이 10, Figma 120:263).
+    // 어긋나면 클릭 영역과 이름 호버 밑줄이 글자에서 밀린다.
+    expect(window.getComputedStyle(profile).gap).toBe('0.625rem')
+    // 캔버스는 행을 197px 폭에 그리고 값을 오른쪽 끝에 맞춘다.
+    expect(window.getComputedStyle(profile).width).toBe('12.3125rem')
   })
 
   it('프로필 제품 CTA와 현재 여권 단계 정보를 제공한다', async () => {
@@ -296,16 +350,35 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(progress).toHaveAttribute('aria-valuetext', '2단계 / 4단계')
 
     const products = screen.getByRole('button', { name: '제품 보러가기' })
-    // 지면이 줄면 안쪽 버튼도 같이 줄어든다. 배율의 역수를 곱해 화면에서
-    // 차지하는 크기를 44px로 유지한다.
-    expect(window.getComputedStyle(products).minHeight).toBe(
-      'calc(2.75rem / var(--passport-scale, 1))',
-    )
-    expect(window.getComputedStyle(products).minWidth).toBe(
-      'calc(2.75rem / var(--passport-scale, 1))',
-    )
+    // 상자는 글자에 딱 맞아야 한다. min-height로 키우면 flex 줄 높이가 같이
+    // 커지고, 그 줄은 아래가 고정이라 위로 자라 글자가 캔버스보다 올라간다.
+    expect(window.getComputedStyle(products).minHeight).toBe('')
+    expect(window.getComputedStyle(products).minWidth).toBe('')
+    // 44px 터치 영역은 레이아웃 밖(::after)에서 확보한다. jsdom은 가상 요소
+    // 스타일을 계산하지 않아 여기서는 확인할 수 없다.
+    expect(window.getComputedStyle(products).position).toBe('relative')
     fireEvent.click(products)
     await waitFor(() => expect(router.state.location.pathname).toBe('/products'))
+  })
+
+  it('날짜 목록이 열려 있으면 Escape가 목록만 닫는다', async () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    fireEvent.click(await findEditableRow(/생년월일 .* 수정/))
+    await screen.findByRole('button', { name: '연도' }, { timeout: 5000 })
+
+    fireEvent.click(screen.getByRole('button', { name: '연도' }))
+    expect(screen.getByRole('listbox', { name: '연도' })).toBeInTheDocument()
+
+    // 목록과 시트가 같은 document에서 Escape를 듣는다. 시트가 열린 목록을
+    // 모르면 한 번의 Escape로 둘 다 닫혀 입력하던 값이 사라진다.
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    expect(screen.queryByRole('listbox', { name: '연도' })).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: '여권 신분 정보 수정' })).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('최종 단계 장식을 투명 비행기와 티켓 레이어를 담은 두 카드로 구성한다', () => {
@@ -324,18 +397,18 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     }
   })
 
-  it('이름 수정 시트는 입력칸부터 잡고 조합 중인 한글은 저장하지 않는다', () => {
+  it('이름 수정 시트는 입력칸부터 잡고 조합 중인 한글은 저장하지 않는다', async () => {
     renderPassport()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
 
-    fireEvent.click(screen.getByRole('button', { name: /이름 .* 수정/ }))
+    fireEvent.click(await findEditableRow(/이름 .* 수정/))
     const input = screen.getByLabelText('여권에 표기할 영문 이름')
     expect(input).toHaveFocus()
 
     // 조합이 끝나기 전에 제출해도 허용되지 않는 글자는 걸러진다.
     fireEvent.change(input, { target: { value: '홍길동' } })
     fireEvent.submit(input.closest('form'))
-    expect(screen.getByRole('dialog', { name: '여권 이름 수정' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: '여권 신분 정보 수정' })).toBeInTheDocument()
 
     fireEvent.change(input, { target: { value: "o'brien kim" } })
     fireEvent.submit(input.closest('form'))
@@ -343,10 +416,42 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent("O'BRIEN KIM")
   })
 
-  it('조합이 끝나기 전에 제출하면 저장하지 않고 시트를 열어 둔다', () => {
+  it('생년월일과 국적도 같은 시트에서 고치고 지면 표기로 되돌린다', async () => {
     renderPassport()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    fireEvent.click(screen.getByRole('button', { name: /이름 .* 수정/ }))
+
+    // 백엔드가 셋을 한 번에 받으므로(UserUpdateRequest) 어느 줄을 눌러도 같은 시트다.
+    fireEvent.click(await findEditableRow(/생년월일 .* 수정/))
+    const sheet = screen.getByRole('dialog', { name: '여권 신분 정보 수정' })
+
+    // 수정 칸은 시트를 열 때 따로 받아온다(lazy). 국가 목록 223개까지 함께
+    // 들어와 기본 1초로는 모자란다.
+    await screen.findByRole('button', { name: '연도' }, { timeout: 5000 })
+    // 달력은 ISO를 다룬다. 지면 표기(2000 01 01)를 그대로 주면 값을 못 읽는다.
+    expect(sheet.querySelector('input[name="birthDate"]')).toHaveValue('2000-01-01')
+    // 백엔드는 alpha-2를 받는다(추가 정보 입력·회원정보 수정 명세).
+    expect(sheet.querySelector('input[name="nationality"]')).toHaveValue('KR')
+
+    // 지면에도 '국적 ... 수정' 버튼이 있어 시트 안으로 좁힌다.
+    fireEvent.click(within(sheet).getByRole('button', { name: /^국적/ }))
+    // 250개 나라를 이름으로 훑으면 jsdom에서 몇 초가 걸린다. 실제 사용자도
+    // 검색으로 좁히므로 같은 경로를 쓴다.
+    fireEvent.change(screen.getByRole('searchbox', { name: '국가 검색' }), {
+      target: { value: 'Japan' },
+    })
+    fireEvent.click(await screen.findByRole('option', { name: '日本 (Japan)' }))
+    fireEvent.submit(screen.getByLabelText('여권에 표기할 영문 이름').closest('form'))
+
+    // 공식 국명은 최대 46자라 지면에서 잘린다. 실제 여권처럼 alpha-3을 찍는다.
+    const profile = screen.getByRole('region', { name: '여권 프로필' })
+    expect(profile).toHaveTextContent('JPN')
+    expect(profile).toHaveTextContent('2000 01 01')
+  })
+
+  it('조합이 끝나기 전에 제출하면 저장하지 않고 시트를 열어 둔다', async () => {
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    fireEvent.click(await findEditableRow(/이름 .* 수정/))
     const input = screen.getByLabelText('여권에 표기할 영문 이름')
 
     // 영문을 친 뒤 한글 조합을 시작한 상태. 여기서 제출하면 영문만 남기고
@@ -356,7 +461,7 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     fireEvent.change(input, { target: { value: 'GIL홍' } })
     fireEvent.submit(input.closest('form'))
 
-    expect(screen.getByRole('dialog', { name: '여권 이름 수정' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: '여권 신분 정보 수정' })).toBeInTheDocument()
     expect(screen.getByRole('region', { name: '여권 프로필', hidden: true })).not.toHaveTextContent(
       'GIL',
     )
@@ -368,10 +473,10 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent('GIL')
   })
 
-  it('이름을 여권 표기 한도로 자르고 넘치면 말줄임으로 가린다', () => {
+  it('이름을 여권 표기 한도로 자르고 넘치면 말줄임으로 가린다', async () => {
     renderPassport()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    fireEvent.click(screen.getByRole('button', { name: /이름 .* 수정/ }))
+    fireEvent.click(await findEditableRow(/이름 .* 수정/))
     const input = screen.getByLabelText('여권에 표기할 영문 이름')
 
     // ICAO 9303 MRZ 이름 칸이 39자다. 길이를 열어 두면 지면 밖으로 넘친다.
@@ -380,7 +485,8 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(input).toHaveValue('A'.repeat(39))
 
     fireEvent.submit(input.closest('form'))
-    const value = screen.getByRole('region', { name: '여권 프로필' }).querySelector('button strong')
+    // 국적·생년월일도 같은 버튼 구조라 지면에서 첫 button을 집으면 안 된다.
+    const value = (await findEditableRow(/이름 .* 수정/)).querySelector('strong')
     expect(value).toHaveTextContent('A'.repeat(39))
     // 39자도 197px 행보다 길다. 잘라서 보여 줘야 라벨을 덮지 않는다.
     const style = window.getComputedStyle(value)
@@ -393,10 +499,10 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     )
   })
 
-  it('짧은 이름도 캔버스처럼 행 오른쪽 끝에 붙인다', () => {
+  it('짧은 이름도 캔버스처럼 행 오른쪽 끝에 붙인다', async () => {
     renderPassport()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    const value = screen.getByRole('button', { name: /이름 .* 수정/ }).querySelector('strong')
+    const value = (await findEditableRow(/이름 .* 수정/)).querySelector('strong')
 
     // 캔버스는 값을 행 오른쪽 끝에 그린다. 이름이 짧으면 버튼이 44px까지
     // 넓어지는데, 글자가 왼쪽에 붙으면 그림과 37px 어긋난다.
@@ -406,11 +512,11 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(style.maxWidth).toBe('100%')
   })
 
-  it('이름 버튼의 44px 클릭 영역을 행이 잘라내지 않는다', () => {
+  it('이름 버튼의 44px 클릭 영역을 행이 잘라내지 않는다', async () => {
     renderPassport()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
 
-    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+    const button = await findEditableRow(/이름 .* 수정/)
     // 행 높이는 16px인데 버튼은 44px이다. 행에 overflow: hidden이 걸리면
     // 위아래로 튀어나온 클릭 영역이 통째로 잘려 16px만 남는다.
     // jsdom은 실제 hit-test를 하지 않아 잘림 여부는 스타일로만 확인한다.
@@ -421,10 +527,10 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     )
   })
 
-  it('신분면 행 글꼴을 캔버스와 같게 둔다', () => {
+  it('신분면 행 글꼴을 캔버스와 같게 둔다', async () => {
     renderPassport()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    const row = screen.getByRole('button', { name: /이름 .* 수정/ }).closest('p')
+    const row = (await findEditableRow(/이름 .* 수정/)).closest('p')
 
     // 캔버스 drawRow가 600 10px으로 그린다. DOM이 더 크면 글자 상자가 그림보다
     // 넓어져, 클릭 영역과 호버 밑줄이 실제 글자 밖까지 뻗는다.
@@ -434,10 +540,10 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(window.getComputedStyle(row.querySelector('strong')).fontWeight).toBe('600')
   })
 
-  it('이름에 호버하면 캔버스 위에 수정 가능 표시를 얹는다', () => {
+  it('이름에 호버하면 캔버스 위에 수정 가능 표시를 얹는다', async () => {
     renderPassport()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+    const button = await findEditableRow(/이름 .* 수정/)
 
     // 내용 DOM은 캔버스와 겹치지 않게 opacity 0이라, 버튼 안에 그리면 보이지
     // 않는다. 표시는 투명 레이어 밖에 있어야 한다.
@@ -459,10 +565,10 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
   })
 
-  it('호버와 포커스를 따로 세어 둘 다 풀렸을 때만 표시를 지운다', () => {
+  it('호버와 포커스를 따로 세어 둘 다 풀렸을 때만 표시를 지운다', async () => {
     renderPassport()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+    const button = await findEditableRow(/이름 .* 수정/)
 
     // 키보드로 이름에 머문 채 마우스가 스쳐 지나간 상황.
     act(() => button.focus())
@@ -479,12 +585,12 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
   })
 
-  it('지면을 넘겼다 돌아오면 남은 호버 상태를 들고 있지 않는다', () => {
+  it('지면을 넘겼다 돌아오면 남은 호버 상태를 들고 있지 않는다', async () => {
     renderPassport()
     const next = screen.getByRole('button', { name: '다음 단계' })
     fireEvent.click(next)
 
-    fireEvent.pointerEnter(screen.getByRole('button', { name: /이름 .* 수정/ }))
+    fireEvent.pointerEnter(await findEditableRow(/이름 .* 수정/))
     expect(screen.getByTestId('passport-name-cue')).toBeInTheDocument()
 
     // 손을 올린 채 키보드로 넘기면 버튼이 사라져 pointerleave가 오지 않는다.
@@ -493,7 +599,7 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     fireEvent.click(screen.getByRole('button', { name: '이전 단계' }))
 
     // 돌아온 뒤 포커스만 스쳤을 뿐인데 지난 호버가 남아 표시가 붙어 있었다.
-    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+    const button = await findEditableRow(/이름 .* 수정/)
     act(() => button.focus())
     act(() => button.blur())
     expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
@@ -502,13 +608,13 @@ describe('PassportPage', { timeout: 15_000 }, () => {
   it('이름 수정 시트를 닫으면 남은 호버 표시를 거둔다', async () => {
     renderPassport()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+    const button = await findEditableRow(/이름 .* 수정/)
 
     // 손을 올린 채로 누르면 시트가 열리고 지면은 inert가 된다. 포인터
     // 이벤트가 끊겨 pointerleave가 오지 않는다.
     fireEvent.pointerEnter(button)
     fireEvent.click(button)
-    expect(screen.getByRole('dialog', { name: '여권 이름 수정' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: '여권 신분 정보 수정' })).toBeInTheDocument()
 
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -517,10 +623,10 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(screen.queryByTestId('passport-name-cue')).not.toBeInTheDocument()
   })
 
-  it('창 크기가 바뀌면 밑줄 좌표를 다시 잰다', () => {
+  it('창 크기가 바뀌면 밑줄 좌표를 다시 잰다', async () => {
     renderPassport()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-    const button = screen.getByRole('button', { name: /이름 .* 수정/ })
+    const button = await findEditableRow(/이름 .* 수정/)
     const strong = button.querySelector('strong')
 
     act(() => button.focus())

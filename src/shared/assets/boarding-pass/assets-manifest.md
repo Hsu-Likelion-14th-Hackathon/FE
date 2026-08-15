@@ -131,15 +131,15 @@
 
 2026-08-12 검증: `passport-spread.png`는 최신 Figma 파일 `aklj7UjNcG6PDFJVRU9JXv`의 exact child `52:18665` raw source를 Figma 배치 크기 507×394로 저장했다. 스탬프 단계는 흰 배경 raster 대신 이 spread와 DOM 스탬프를 사용한다.
 
-| id                  | path                                                             | Figma node | type | use                     |
-| ------------------- | ---------------------------------------------------------------- | ---------- | ---- | ----------------------- |
-| passport-emblem     | src/shared/assets/boarding-pass/passport/passport-emblem.png     | 52:18581   | png  | Cover emblem composite  |
-| cover-mcm           | src/shared/assets/boarding-pass/passport/cover-mcm.png           | 52:18583   | png  | Cover MCM word          |
-| cover-star          | src/shared/assets/boarding-pass/passport/cover-star.png          | 52:18585   | png  | Cover center star       |
-| cover-passport      | src/shared/assets/boarding-pass/passport/cover-passport.png      | 52:18584   | png  | Cover PASSPORT word     |
-| passport-bow-left   | src/shared/assets/boarding-pass/passport/passport-bow-left.png   | 52:18586   | png  | Cover left bow          |
-| passport-bow-right  | src/shared/assets/boarding-pass/passport/passport-bow-right.png  | 52:18587   | png  | Cover right bow         |
-| journey-ticket      | src/shared/assets/boarding-pass/passport/journey-ticket.png      | 52:19138   | png  | Journey ticket tile     |
-| journey-ticket-mark | src/shared/assets/boarding-pass/passport/journey-ticket-mark.png | 52:19138   | png  | Journey ticket MCM mark |
-| passport-stamp      | src/shared/assets/boarding-pass/passport/passport-stamp.png      | 52:18845   | png  | Transparent visit stamp |
-| passport-stamp-bow  | src/shared/assets/boarding-pass/passport/passport-stamp-bow.png  | 52:18863   | png  | Transparent stamp bow   |
+| id                  | path                                                             | Figma node | type | use                                               |
+| ------------------- | ---------------------------------------------------------------- | ---------- | ---- | ------------------------------------------------- |
+| passport-emblem     | src/shared/assets/boarding-pass/passport/passport-emblem.png     | 52:18581   | png  | Cover emblem composite                            |
+| cover-mcm           | src/shared/assets/boarding-pass/passport/cover-mcm.png           | 52:18583   | png  | Cover MCM word                                    |
+| cover-star          | src/shared/assets/boarding-pass/passport/cover-star.png          | 52:18585   | png  | Cover center star                                 |
+| cover-passport      | src/shared/assets/boarding-pass/passport/cover-passport.png      | 52:18584   | png  | Cover PASSPORT word                               |
+| passport-bow-left   | src/shared/assets/boarding-pass/passport/passport-bow-left.png   | 52:18586   | png  | Cover left bow                                    |
+| passport-bow-right  | src/shared/assets/boarding-pass/passport/passport-bow-right.png  | 52:18587   | png  | Cover right bow                                   |
+| journey-ticket      | src/shared/assets/boarding-pass/passport/journey-ticket.png      | 52:19138   | png  | Journey ticket tile                               |
+| journey-ticket-mark | src/shared/assets/boarding-pass/passport/journey-ticket-mark.png | 52:19138   | png  | Journey ticket MCM mark                           |
+| passport-stamp      | src/shared/assets/boarding-pass/passport/passport-stamp.webp     | 71:6124    | webp | Transparent visit stamp (Figma 708x708 crop @256) |
+| passport-stamp-bow  | src/shared/assets/boarding-pass/passport/passport-stamp-bow.png  | 52:18863   | png  | Transparent stamp bow                             |

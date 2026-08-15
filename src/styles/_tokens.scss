@@ -6,6 +6,9 @@
   --mcm-color-muted: #777;
   --mcm-color-brand-brown: #c07346;
   --mcm-color-product-surface: #f2f2f2;
+  /* 목록에서 손이 얹힌 줄. 고른 줄(product-surface)보다 한 단계 옅다.
+     어두운 화면에 얹히는 목록은 이 값을 그 배경에 맞게 바꿔야 한다. */
+  --mcm-color-hover-surface: #f7f1ed;
   --mcm-color-kakao: #ffe812;
   --mcm-color-border: #bfbfbf;
   --mcm-color-cream: #fff7d5;

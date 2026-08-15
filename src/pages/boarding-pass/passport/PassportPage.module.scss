@@ -26,13 +26,15 @@
      화면이 짧으면 넘김 버튼이 잘려 나갔다.
      여백을 다 걷어내고도 모자라면 그제야 여권이 줄어든다. 하한은 16rem이다.
      20rem으로 두면 320×568 같은 화면에서 넘김 버튼이 잘렸다. 작아도 보이는
-     편이 잘려 못 누르는 것보다 낫다.
+     편이 잘려 못 누르는 것보다 낫다. 그 하한마저 안 들어가는 화면(가로 모드
+     등)은 아래 media query가 하한을 더 낮춘다.
 
      상한 33.25rem은 설계 높이(394)가 아니라 폭에서 나온 값이다. 지면 폭은
      253.5 * (높이/394)라 88vw를 넘지 않는 선이 390 화면에서 533px이다.
      설계 크기에 묶어 두면 남는 세로 공간을 못 쓰고 글자가 작은 채로 남는다. */
+  --passport-min-h: 16rem;
   --passport-h: max(
-    16rem,
+    var(--passport-min-h),
     min(
       33.25rem,
       calc(
@@ -83,9 +85,11 @@
   pointer-events: none;
 }
 
+/* .content가 같은 z-index 1이면서 DOM에서 뒤에 와 이 버튼을 덮었다. 44px 판
+   중 왼쪽 15px만 눌리고 정작 보이는 X는 눌리지 않았다. 한 층 위로 올린다. */
 .close {
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   top: 0.3125rem;
   left: 0.3125rem;
   display: grid;
@@ -228,10 +232,14 @@
   line-height: 1.15;
 }
 .profile {
-  padding-top: 11.1875rem;
-  /* 캔버스가 28px 간격으로 그린다(줄 높이 16 + 사이 12). 여기가 32px이면
-     NAME 클릭 영역이 글자보다 아래로 밀린다. */
-  gap: 0.75rem;
+  /* 캔버스는 행을 30~227(197px)에 그리고 값을 오른쪽 끝에 맞춘다. 여기가
+     196px이면 이름과 '제품 보러가기'가 통째로 1px 왼쪽에 놓인다. */
+  width: 12.3125rem;
+  /* 캔버스가 195에서 첫 줄을 그린다(.profile 상단 24 + 171). */
+  padding-top: 10.6875rem;
+  /* 캔버스가 26px 간격으로 그린다(줄 높이 16 + 사이 10). 어긋나면 NAME
+     클릭 영역과 호버 밑줄이 글자에서 밀린다(Figma 120:263). */
+  gap: 0.625rem;
   line-height: 1rem;
 }
 .profile h3 {
@@ -288,12 +296,13 @@
 }
 
 .profileFooter {
-  /* 캔버스가 그리는 위치(페이지 로컬 y=349)와 히트박스를 맞춘다.
-     DOM은 투명하지만 클릭·포커스를 담당하므로 좌표가 어긋나면 안 된다.
-     .profile 바닥이 페이지 기준 386px이므로 거기서 7px 위가 캔버스 baseline 375와 맞는다. */
+  /* 캔버스가 그리는 자리(Figma 120:282 — 글자 상자 349~363)와 히트박스를
+     맞춘다. DOM은 투명하지만 클릭·포커스를 담당하므로 어긋나면 안 된다.
+     캔버스 baseline이 360이라 8px 글자의 em 상자는 352~362다. 줄 높이 16의
+     한가운데에 놓이므로 .profile 바닥(386)에서 21px 위가 그 자리다. */
   position: absolute;
   right: 0;
-  bottom: 0.4375rem;
+  bottom: 1.3125rem;
   left: 0;
   display: flex;
   align-items: center;
@@ -303,7 +312,6 @@
 
 /* 지면이 줄면 안쪽 버튼도 같이 줄어 44px이 무너진다. 배율의 역수를 곱해
    화면에서 차지하는 크기는 유지한다. */
-.profileFooter button,
 .journeyTile,
 .journeyActions button {
   min-width: calc(2.75rem / var(--passport-scale, 1));
@@ -311,12 +319,25 @@
 }
 
 .profileFooter button {
-  /* 최소 크기는 위 역배율 규칙이 정한다. 여기서 다시 쓰면 그게 덮여
-     배율이 걸린 만큼 작아진다(320/394에서 35.7px). */
-  margin-block: -0.75rem;
+  /* 상자를 글자에 딱 맞춘다. 캔버스가 오른쪽 끝(227)에 맞춰 그리므로
+     상자가 넓어지면 안쪽에서 글자가 가운데로 밀려 캔버스와 어긋난다. */
+  position: relative;
   color: #fff7d5;
   font-size: 0.5rem;
   text-decoration: underline;
+}
+
+/* 44px 터치 영역은 레이아웃 밖에서 확보한다. min-height로 키우면 flex 줄
+   높이가 같이 커지고, 그 줄은 아래가 고정이라 위로 자라 글자가 캔버스보다
+   올라간다. 배율이 작을수록(모바일) 어긋남이 커진다. */
+.profileFooter button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, calc(2.75rem / var(--passport-scale, 1)));
+  height: calc(2.75rem / var(--passport-scale, 1));
+  transform: translate(-50%, -50%);
 }
 .stamps {
   clip: auto;
@@ -463,37 +484,46 @@
 }
 .journeys span {
   color: #c07346;
-  font-size: 0.375rem;
+  /* Figma 71:6265는 8px이다. 6px으로 두면 캔버스와 글자 상자가 어긋난다. */
+  font-size: 0.5rem;
   white-space: nowrap;
 }
-.journeys time {
+
+/* Figma 71:6262 — 날짜·매장명·주소는 한 블록으로 라벨색(#c07346)이고,
+   '입장 번호' 줄(71:6266)만 #fafafa다. 캔버스 drawJourney도 같은 값을 쓴다.
+   DOM이 어긋나면 WebGL을 못 쓰는 화면에서 다른 색으로 보이고, 글자 상자가
+   달라져 클릭 영역도 밀린다. */
+.journeys time,
+.journeys strong {
+  color: #c07346;
   font-size: 0.625rem;
-}
-.history {
-  margin-top: 0.5rem;
-  padding: 0.75rem;
-  border: 1px solid #fff7d5;
-  border-radius: 6.25rem;
-  background: rgba(255, 247, 213, 0.14);
-  color: #fff7d5;
   font-weight: 600;
 }
+
+.journeys > p:nth-child(2) {
+  color: #fafafa;
+  font-weight: 600;
+}
+/* Figma 71:6272 — 96x24, 채움 rgba(174,97,30,0.2), 모서리 2, 테두리 없음,
+   글자 #fafafa 8px Regular. 캔버스 drawJourney가 같은 값으로 그린다.
+   버튼 자체는 44px을 확보하고, 보이는 판은 ::before가 24px로 그린다. */
 .history {
   position: relative;
   height: 2.75rem;
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 0;
   background: transparent;
-  font-size: 0.625rem;
+  color: #fafafa;
+  font-size: 0.5rem;
+  font-weight: 400;
 }
 
 .history::before {
   position: absolute;
   inset: 0.625rem 0;
-  border: 1px solid #fff7d5;
-  background: rgba(255, 247, 213, 0.14);
+  border-radius: 0.125rem;
+  background: rgb(174 97 30 / 20%);
   content: '';
 }
 .journeyActions {
@@ -528,11 +558,19 @@
   max-height: none;
   margin: 0 auto;
   overflow-y: auto;
+  /* 스크롤은 살리되 막대는 감춘다. 시트가 화면을 덮는 형태라 막대가 뜨면
+     둥근 모서리 위로 회색 띠가 지나간다. */
+  scrollbar-width: none;
   padding: 2rem max(1.25rem, calc((100% - 19.375rem) / 2)) max(2rem, var(--mcm-safe-bottom));
   border-radius: 1.875rem 1.875rem 0 0;
   background: #894a26;
   box-shadow: 0 -0.625rem 1.875rem rgba(0, 0, 0, 0.2);
 }
+/* 사파리·크롬은 scrollbar-width를 아직 안 받는 버전이 있어 함께 둔다. */
+.sheet::-webkit-scrollbar {
+  display: none;
+}
+
 .sheetTitle {
   margin: 0;
   color: #fff7d5;
@@ -551,7 +589,9 @@
    시트 색을 반투명으로 한 겹 덮는다. 덮개 0.7이면 문양이 #945830으로 앉아
    Figma와 같은 진하기가 된다(바탕 #894a26, 원본 문양 rgb(174,119,71) 역산). */
 .sheet-history,
-.sheet-name {
+.sheet-history-detail,
+.sheet-profile,
+.sheet-ticket {
   background-image:
     linear-gradient(rgba(137, 74, 38, 0.7), rgba(137, 74, 38, 0.7)),
     url('@/shared/assets/boarding-pass/passport/bisepok.svg');
@@ -566,19 +606,68 @@
     100% auto;
 }
 
-/* 이름 수정은 입력칸 하나뿐이라 화면을 다 덮을 이유가 없다. 내용만큼만 올라온다. */
-.sheet-name {
+/* 신분 정보는 세 칸이라 화면을 다 덮을 이유는 없지만, 달력이 펼쳐지면 내용이
+   길어진다. 내용만큼 올라오되 넘치면 시트 안에서 스크롤한다. overflow를 visible로
+   두면 달력 아랫부분이 화면 밖으로 잘려 날짜를 고를 수 없다. */
+.sheet-profile {
   top: auto;
   bottom: 0;
-  overflow-y: visible;
+  max-height: calc(var(--mcm-viewport-stable) - 3rem);
+  overflow-y: auto;
   padding-block: 1.5rem max(1.5rem, var(--mcm-safe-bottom));
+
+  /* 회원가입은 흰 바탕이라 입력칸이 밝은 토큰을 쓴다. 여기는 진한 갈색이라
+     같은 값이면 글자도 테두리도 바탕에 묻힌다. 컴포넌트를 고치는 대신 토큰만
+     이 시트 안에서 갈아 끼운다 — 회원가입 화면은 그대로 둔다. */
+  --mcm-color-ink: #fff7d5;
+  --mcm-color-canvas: #3a1c0c;
+  --mcm-color-border: rgb(255 247 213 / 34%);
+  --mcm-color-muted: #d9ab88;
+  --mcm-color-brand-brown: #ffdba0;
+  --mcm-color-product-surface: rgb(255 219 160 / 16%);
+  --mcm-color-hover-surface: rgb(255 219 160 / 9%);
 }
 
 .sheet-history-detail .historyCard {
   margin-top: 1.875rem;
 }
+/* 티켓은 접히지 않는 한 장이라 화면이 짧으면 시트를 넘친다. 390x844에서
+   카드(423px)가 딱 맞았으므로, 그보다 줄어든 만큼을 그대로 배율로 옮긴다.
+   기준은 --mcm-viewport-stable(100svh)이라 주소창·툴바가 떠 있는 상태를
+   이미 반영한다. 홈 인디케이터가 2rem 패딩보다 두꺼우면 그만큼 더 뺀다.
+   0.72 아래로는 글씨가 읽기 어려워, 그때부터는 스크롤에 맡긴다. */
+.sheet-ticket {
+  /* 화면이 짧으면 티켓을 더 줄이기 전에 시트를 위로 끌어올려 자리를 먼저
+     만든다. 글씨를 살리는 쪽이 낫다. 844에서는 원래 위치(8.875rem) 그대로다. */
+  --ticket-sheet-top: clamp(
+    3rem,
+    calc(8.875rem - (52.75rem - var(--mcm-viewport-stable)) * 0.9),
+    8.875rem
+  );
+  top: var(--ticket-sheet-top);
+
+  /* 시트 안쪽 여백과 제목까지 138px을 쓰고 남는 자리에 카드(423px)를 넣는다.
+     423px으로 나눠 무단위 비율을 만든다. 423으로 나누면 결과가 길이로 남아
+     clamp(0.72, <length>, 1)이 무효가 되고 transform 선언이 통째로 버려진다. */
+  --ticket-scale: clamp(
+    0.72,
+    calc(
+      (
+          var(--mcm-viewport-stable) - 141px - var(--ticket-sheet-top) -
+            138px - max(0px, calc(var(--mcm-safe-bottom) - 2rem))
+        ) /
+        423px
+    ),
+    1
+  );
+}
+
 .sheet-ticket > :last-child {
   margin-top: 0.375rem;
+  transform: scale(var(--ticket-scale));
+  transform-origin: top center;
+  /* 줄인 만큼 아래에 빈 자리가 남는다. 카드 설계 높이(423px)에 비례해 걷어낸다. */
+  margin-bottom: calc((var(--ticket-scale) - 1) * 26.4375rem);
 }
 .dimmed {
   filter: brightness(0.4);
@@ -606,7 +695,8 @@
   border-radius: 0.5rem;
   background: #c07346;
   box-shadow: 0.125rem 0.125rem 0.875rem rgba(0, 0, 0, 0.2);
-  color: #fff7d5;
+  /* 디자인 지정색이다. 크림색(#fff7d5)이면 주황 카드 위에서 대비가 무뎌진다. */
+  color: #fafafa;
   text-align: left;
 }
 .sheet .historyCard {
@@ -624,11 +714,11 @@ button.historyCard {
 }
 .journeyCardContent > span,
 .journeyCardContent time {
-  color: #f3c497;
+  color: #fafafa;
   font-size: 0.75rem;
 }
 .detailCopy {
-  color: #fff7d5;
+  color: #fafafa;
   font-size: 0.6875rem;
   line-height: 1.5;
 }
@@ -687,6 +777,15 @@ button.historyCard {
   white-space: nowrap;
 }
 
+/* 지면 하한(16rem)까지 줄여도 넘김 줄이 화면 밖으로 나가는 높이가 있다.
+   32.5rem 아래면 하한 자체를 낮춰 줄을 화면 안에 남긴다. 지면이 더 작아지는 건
+   아쉽지만, 지금 몇 번째 장인지 모르고 넘길 방법도 안 보이는 것보다 낫다. */
+@media (max-height: 32.5rem) {
+  .page {
+    --passport-min-h: 11rem;
+  }
+}
+
 @media (max-width: 22rem) {
   .stage {
     padding-inline: 0.75rem;
@@ -700,25 +799,11 @@ button.historyCard {
   }
 }
 
-/* 모바일은 좌우 슬라이드로 넘긴다. 화살표 줄이 68px을 차지하는데, 이걸 걷어내야
-   펼침 여권이 설계 크기(394px) 그대로 한 화면에 들어간다.
-   다만 키보드로 넘길 길은 남겨야 하므로 지우지 않고 접어 두었다가,
-   포커스가 들어오면 다시 펼친다. */
-@media (hover: none) and (pointer: coarse) {
-  .navigation {
-    height: 0;
-    margin: 0;
-    overflow: hidden;
-    opacity: 0;
-  }
-
-  .navigation:focus-within {
-    height: auto;
-    margin: 1.5rem auto 0;
-    overflow: visible;
-    opacity: 1;
-  }
-}
+/* 모바일에서도 화살표와 진행 바를 그대로 둔다.
+   예전에는 이 줄을 접어 펼침 여권을 키웠지만, 슬라이드는 해 봐야 아는 동작이라
+   지금 몇 번째 장인지, 더 넘길 곳이 있는지 알 방법이 사라졌다.
+   높이 예산(--passport-h)은 이미 이 줄(넘김 버튼 44 + --passport-nav-gap)을
+   빼고 지면 크기를 정하므로, 드러내도 지면이 잘리지 않는다. */
 
 /* 이름은 눌러서 고칠 수 있다. 캔버스가 글자를 그리고 이 DOM은 투명하므로,
    버튼 자체는 보이지 않고 클릭만 받는다. 보이는 편집칸은 시트로 꺼낸다. */
@@ -766,12 +851,17 @@ button.historyCard {
 .nameForm {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  /* 세 칸이 되면서 서로 붙어 보인다. 라벨과 칸은 컴포넌트가 6px로 붙여 두므로
+     칸 사이만 벌린다. */
+  gap: 0.875rem;
 }
 
+/* 시트 바탕(#894a26)에서 #c07346은 명암비가 1.6:1이라 읽기 어렵다.
+   국적·생년월일 라벨과 같은 밝기로 맞춘다. */
 .nameLabel {
-  color: #c07346;
-  font-size: 0.75rem;
+  color: #fff7d5;
+  font-size: 0.875rem;
+  font-weight: 600;
   line-height: 1.125rem;
 }
 
@@ -785,6 +875,16 @@ button.historyCard {
   color: #fff7d5;
   font-size: 1rem;
   text-transform: uppercase;
+}
+
+/* 수정 칸을 따로 받아오는 동안 자리만 지킨다. 두 칸 높이(50+50)와 사이 간격. */
+.fieldsLoading {
+  display: grid;
+  min-height: 6.75rem;
+  margin: 0;
+  place-items: center;
+  color: #fff7d5;
+  font-size: 0.75rem;
 }
 
 .nameSubmit {
