@@ -6,7 +6,7 @@ import AppProviders from '@/app/providers.jsx'
 
 const mockGetLatestBoardingPass = vi.hoisted(() => vi.fn())
 const mockGetWishlist = vi.hoisted(() => vi.fn())
-const mockGetCart = vi.hoisted(() => vi.fn())
+const mockGetShoppingBag = vi.hoisted(() => vi.fn())
 const activeRouters = []
 
 vi.mock('@/shared/api/boardingPassApi.js', () => ({
@@ -17,8 +17,8 @@ vi.mock('@/shared/api/wishlistApi.js', () => ({
   getWishlist: mockGetWishlist,
 }))
 
-vi.mock('@/shared/api/cartApi.js', () => ({
-  getCart: mockGetCart,
+vi.mock('@/shared/api/shoppingBagApi.js', () => ({
+  getShoppingBag: mockGetShoppingBag,
 }))
 
 import { Component as LandingPage } from './LandingPage.jsx'
@@ -52,7 +52,7 @@ describe('LandingPage', () => {
     activeRouters.splice(0).forEach((router) => router.dispose())
     mockGetLatestBoardingPass.mockReset()
     mockGetWishlist.mockReset()
-    mockGetCart.mockReset()
+    mockGetShoppingBag.mockReset()
   })
 
   it('routes guests to intro from the start flight button', async () => {
@@ -132,7 +132,7 @@ describe('LandingPage', () => {
   })
 
   it('쇼핑백이 비면 랜딩에 머무르고 빈 가방 토스트를 보여 준다', async () => {
-    mockGetCart.mockResolvedValue([])
+    mockGetShoppingBag.mockResolvedValue([])
     const router = renderLanding()
 
     fireEvent.click(await screen.findByRole('link', { name: '쇼핑백' }))

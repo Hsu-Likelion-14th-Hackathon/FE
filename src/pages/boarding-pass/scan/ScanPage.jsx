@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import CreditToast from '@/features/boarding-pass/credit-toast/CreditToast.jsx'
 import ScanDepartLoadingOverlay from '@/features/boarding-pass/scan-loading/ScanDepartLoadingOverlay.jsx'
-import { getLatestBoardingPass, simulateScan } from '@/shared/api/boardingPassApi.js'
+import { getLatestBoardingPass, scanBoardingPass } from '@/shared/api/boardingPassApi.js'
 import backArrowIcon from '@/shared/assets/boarding-pass/icons/back-arrow.svg'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import checkCircleIcon from '@/shared/assets/boarding-pass/scan/check-circle.svg'
@@ -92,7 +92,7 @@ export function Component() {
     setScanning(true)
     try {
       const passId = pass?.boardingPassId || pass?.id
-      const result = await simulateScan(passId)
+      const result = await scanBoardingPass(passId)
       setPhase('success')
       toastClosingRef.current = false
       setCredit(result.credit)

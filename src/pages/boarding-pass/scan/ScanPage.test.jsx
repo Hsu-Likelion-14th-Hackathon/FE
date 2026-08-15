@@ -20,7 +20,7 @@ const defaultPass = {
 }
 
 const getLatestBoardingPass = vi.fn(async () => defaultPass)
-const simulateScan = vi.fn(async () => ({
+const scanBoardingPass = vi.fn(async () => ({
   status: 'SUCCESS',
   credit: {
     amount: 100,
@@ -31,14 +31,14 @@ const simulateScan = vi.fn(async () => ({
 
 vi.mock('@/shared/api/boardingPassApi.js', () => ({
   getLatestBoardingPass: (...args) => getLatestBoardingPass(...args),
-  simulateScan: (...args) => simulateScan(...args),
+  scanBoardingPass: (...args) => scanBoardingPass(...args),
 }))
 
 import { Component as ScanPage } from './ScanPage.jsx'
 
 describe('ScanPage', () => {
   beforeEach(() => {
-    simulateScan.mockClear()
+    scanBoardingPass.mockClear()
     getLatestBoardingPass.mockReset()
     getLatestBoardingPass.mockResolvedValue(defaultPass)
   })
@@ -73,7 +73,7 @@ describe('ScanPage', () => {
     fireEvent.click(simButton)
 
     await waitFor(() => {
-      expect(simulateScan).toHaveBeenCalled()
+      expect(scanBoardingPass).toHaveBeenCalled()
     })
     expect(await screen.findByText('SUCCESS SCAN')).toBeInTheDocument()
     expect(screen.getByText(/AI 가상 피팅 크레딧이 지급되었습니다/)).toBeInTheDocument()

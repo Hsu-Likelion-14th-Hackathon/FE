@@ -5,7 +5,7 @@ import EmptyBagToast from '@/features/boarding-pass/empty-bag-toast/EmptyBagToas
 import NoPassToast from '@/features/boarding-pass/no-pass-toast/NoPassToast.jsx'
 import noticeStyles from '@/features/boarding-pass/notice-toast/PassNoticeToast.module.scss'
 import { getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
-import { getCart } from '@/shared/api/cartApi.js'
+import { getShoppingBag } from '@/shared/api/shoppingBagApi.js'
 import { getWishlist } from '@/shared/api/wishlistApi.js'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import ctaPlaneIcon from '@/shared/assets/boarding-pass/landing/cta-plane.svg'
@@ -33,7 +33,7 @@ export function Component() {
   }
 
   async function openBag(bag) {
-    const fetchItems = bag === 'cart' ? getCart : getWishlist
+    const fetchItems = bag === 'cart' ? getShoppingBag : getWishlist
     const path = bag === 'cart' ? '/cart' : '/wishlist'
     try {
       const items = await fetchItems()

@@ -32,7 +32,9 @@ export const boardingPassHandlers = [
     return HttpResponse.json(currentPass)
   }),
   // 스캔 시뮬레이션: 즉시 SUCCESS 반환 (카메라·실 스캐너 없음)
-  http.post(API.boardingPass.scan, async () => {
+  // 경로에 보딩패스 ID가 들어간다. 목도 같은 모양이어야 실제 서버에서만
+  // 드러나는 계약 오류를 숨기지 않는다.
+  http.post(API.boardingPass.scan(':boardingPassId'), async () => {
     await delay(300)
     return HttpResponse.json(scanSuccessResult)
   }),
