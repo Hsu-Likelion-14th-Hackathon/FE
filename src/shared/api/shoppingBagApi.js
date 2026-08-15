@@ -16,8 +16,8 @@ import { API } from './endpoints.js'
  */
 
 /** GET /shopping-bag */
-export async function getShoppingBag() {
-  const result = await apiFetch(API.shoppingBag, { unwrap: true })
+export async function getShoppingBag({ signal } = {}) {
+  const result = await apiFetch(API.shoppingBag, { unwrap: true, signal })
   return (result.items ?? []).map((item) => ({
     shoppingBagItemId: item.shoppingBagItemId,
     productSizeId: item.productSizeId,

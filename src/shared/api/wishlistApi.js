@@ -9,8 +9,8 @@ import { API } from './endpoints.js'
  */
 
 /** GET /wishlist */
-export async function getWishlist() {
-  const result = await apiFetch(API.wishlist, { unwrap: true })
+export async function getWishlist({ signal } = {}) {
+  const result = await apiFetch(API.wishlist, { unwrap: true, signal })
   return (result.items ?? []).map((item) => ({
     productColorId: item.productColorId,
     productId: item.productId,
