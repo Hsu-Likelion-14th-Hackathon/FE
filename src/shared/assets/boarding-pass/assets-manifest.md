@@ -21,10 +21,10 @@
 
 ## intro/
 
-| 키                | 경로                                                  | 원본 nodeId        | 타입 | 사용처                                          |
-| ----------------- | ----------------------------------------------------- | ------------------ | ---- | ----------------------------------------------- |
-| intro-pass-card   | src/shared/assets/boarding-pass/intro/pass-card.png   | 3012:414+426+427   | png  | (22) 인트로 패스 카드 그래픽만(보우·리본, 카피 제외). Figma `EcjMcxEJlMBy1c4A1aCKD8` 4x |
-| intro-ticket-logo | src/shared/assets/boarding-pass/intro/ticket-logo.png | 472:4805           | png  | 티켓/완료 등에서 쓰는 MCM 로렐 엠블럼           |
+| 키                | 경로                                                  | 원본 nodeId      | 타입 | 사용처                                                                                  |
+| ----------------- | ----------------------------------------------------- | ---------------- | ---- | --------------------------------------------------------------------------------------- |
+| intro-pass-card   | src/shared/assets/boarding-pass/intro/pass-card.png   | 3012:414+426+427 | png  | (22) 인트로 패스 카드 그래픽만(보우·리본, 카피 제외). Figma `EcjMcxEJlMBy1c4A1aCKD8` 4x |
+| intro-ticket-logo | src/shared/assets/boarding-pass/intro/ticket-logo.png | 472:4805         | png  | 티켓/완료 등에서 쓰는 MCM 로렐 엠블럼                                                   |
 
 ## landing/
 
