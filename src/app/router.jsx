@@ -22,6 +22,11 @@ export function createAppRoutes() {
           lazy: () => import('@/pages/signup/SignupPage.jsx'),
         },
         {
+          // 카카오 콘솔에 등록한 Redirect URI와 같아야 한다(KAKAO_CALLBACK_PATH).
+          path: 'auth/kakao/callback',
+          lazy: () => import('@/pages/auth/KakaoCallbackPage.jsx'),
+        },
+        {
           path: 'products',
           lazy: () => import('@/pages/product-list/ProductListPage.jsx'),
         },

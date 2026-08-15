@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 
 import backIcon from '@/assets/icons/auth/back.svg'
 import userIcon from '@/assets/icons/auth/user.svg'
@@ -101,8 +101,13 @@ function SignupError({ error }) {
  */
 export function Component() {
   const navigate = useNavigate()
+  const location = useLocation()
   // 'account' → 'profile'
-  const [step, setStep] = useState('account')
+  // 카카오로 새로 가입한 사람은 계정이 이미 있으므로 두 번째 단계로 들어온다.
+  // 카카오는 인증만 맡아 이름·생년월일·국적을 주지 않는다.
+  const [step, setStep] = useState(() =>
+    location.state?.step === 'profile' ? 'profile' : 'account',
+  )
   const [submitting, setSubmitting] = useState(false)
   // 백엔드 message를 그대로 싣는다. 이미 가입된 이메일이면 어느 방식으로
   // 로그인해야 하는지까지 담겨 온다.

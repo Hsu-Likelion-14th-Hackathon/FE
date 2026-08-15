@@ -1,0 +1,36 @@
+/* 지나가는 자리. 빈 화면을 두면 느린 회선에서 멈춘 것처럼 보인다. */
+.page {
+  display: flex;
+  min-height: var(--mcm-viewport-stable);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px;
+  text-align: center;
+}
+
+.status {
+  margin: 0;
+  color: var(--mcm-color-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.error {
+  margin: 0;
+  color: #d14343;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.retry {
+  height: 44px;
+  padding-inline: 20px;
+  border: 0;
+  border-radius: 8px;
+  color: #fafafa;
+  background: #191919;
+  font-size: 14px;
+  font-weight: 600;
+}

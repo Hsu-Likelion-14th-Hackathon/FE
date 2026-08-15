@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import backIcon from '@/assets/icons/auth/back.svg'
 import kakaoIcon from '@/assets/icons/auth/kakao.svg'
 import { login } from '@/shared/api/authApi.js'
+import { startKakaoLogin } from '@/shared/api/kakaoAuth.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import styles from './LoginPage.module.scss'
@@ -120,7 +121,17 @@ export function Component() {
           </button>
         </form>
 
-        <button className={styles.kakaoButton} type="button">
+        <button
+          className={styles.kakaoButton}
+          type="button"
+          onClick={() => {
+            // 키가 없으면 갈 곳이 없다. 아무 일도 안 일어나면 고장으로 보이므로
+            // 이유를 남긴다. 디자인에 있는 버튼이라 감추지는 않는다.
+            if (!startKakaoLogin({ from: location.state?.from })) {
+              setError('카카오 로그인이 아직 준비되지 않았습니다.')
+            }
+          }}
+        >
           <img className={styles.kakaoIcon} src={kakaoIcon} alt="" aria-hidden="true" />
           <span>카카오로 로그인</span>
         </button>

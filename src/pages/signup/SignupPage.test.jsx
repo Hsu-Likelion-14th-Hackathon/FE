@@ -47,7 +47,9 @@ beforeEach(() => {
   createProfile.mockResolvedValue({ userId: 1 })
 })
 
-describe('SignupPage', () => {
+// 국가 목록 249개를 그리고 단계까지 넘어간다. 다른 파일과 함께 돌면 기본
+// 5초로는 모자라 간헐적으로 시간이 초과된다.
+describe('SignupPage', { timeout: 15_000 }, () => {
   it('국기를 포함한 현지어·영문 국가명을 검색하고 ISO alpha-2 국적을 보낸다', async () => {
     await renderProfileStep()
 
