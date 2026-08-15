@@ -19,13 +19,17 @@ import passportEmblem from '@/shared/assets/boarding-pass/passport/passport-embl
 import passportSpread from '@/shared/assets/boarding-pass/passport/passport-spread.png'
 import passportStamp from '@/shared/assets/boarding-pass/passport/passport-stamp.webp'
 import passportStampBow from '@/shared/assets/boarding-pass/passport/passport-stamp-bow.png'
+import { usePassport } from '@/entities/passport/usePassport.js'
+import { updateMe } from '@/shared/api/authApi.js'
+import { getAccessToken } from '@/shared/api/authToken.js'
+import { getVisitDetail } from '@/shared/api/passportApi.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import {
   findCountryByStoredValue,
   getCountryOption,
 } from '@/shared/ui/profile-fields/country-options.js'
 
-import { journeyRecords, passportTicket } from './passportData.js'
+import { passportTicket, passportVisit } from './passportData.js'
 import styles from './PassportPage.module.scss'
 import PassportPageTurn from './PassportPageTurn.jsx'
 
@@ -161,6 +165,28 @@ export function Component() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [sheet, setSheet] = useState(null)
+  // 여권 데이터는 페이지가 한 번 불러와 지면(PageTurn)과 시트가 나눠 쓴다.
+  const passport = usePassport()
+  // 여행 기록 면(마지막 면)은 스탬프를 눌러야 열린다. 어느 방문을 보는지가
+  // 이 상태다. 고르기 전에는 그 면으로 넘길 수 없다(lastStep).
+  const [visit, setVisit] = useState(null)
+
+  const openVisit = (stamp) => {
+    // 채움 스탬프(조회 실패 시)는 방문 번호가 없다. 채움 방문 상세로 연다.
+    if (!stamp.visitLogId) {
+      setVisit(passportVisit)
+      setStep(3)
+      return
+    }
+    getVisitDetail(stamp.visitLogId)
+      .then((detail) => {
+        setVisit(detail)
+        setStep(3)
+      })
+      .catch(() => {
+        // 상세를 못 열면 스탬프 면에 머문다.
+      })
+  }
   // 신분 정보는 사용자가 직접 고칠 수 있다. 캔버스도 이 값으로 다시 굽는다.
   // 저장 형식은 PATCH /users/me(UserUpdateRequest)와 같은 { name, birthDate,
   // nationality }다. birthDate는 ISO, nationality는 `Republic of Korea` 표기다.
@@ -188,6 +214,9 @@ export function Component() {
   const [nameRejected, setNameRejected] = useState(false)
   // 조합 중인 글자가 받을 수 없는 문자면 흐리게 보여 유효하지 않음을 드러낸다.
   const [nameBlocked, setNameBlocked] = useState(false)
+  // PATCH /users/me 진행 상태. 실패하면 시트를 열어 둔 채 사유를 보여 준다.
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
   // 입력 경로가 onChange와 onCompositionEnd 둘이라 필터는 여기 하나로 모은다.
   const handleNameInput = (raw) => {
@@ -222,6 +251,7 @@ export function Component() {
     // 다시 열었을 때 지난 안내와 흐림이 남아 있으면 안 된다.
     setNameRejected(false)
     setNameBlocked(false)
+    setSaveError(null)
     setOpenPicker(null)
     composingName.current = false
     restoringFocus.current = true
@@ -291,6 +321,8 @@ export function Component() {
           <PassportPageTurn
             step={step}
             disabled={Boolean(sheet)}
+            passport={{ ...passport, visit }}
+            lastStep={visit ? 3 : 2}
             profileOverride={profileOverride}
             onCommit={(direction) =>
               setStep((current) => Math.min(3, Math.max(0, current + direction)))
@@ -302,10 +334,12 @@ export function Component() {
                 isRestoringFocus={() => restoringFocus.current}
                 profile={visibleProfile}
                 stamps={visibleStamps}
+                visit={visit}
                 onNameHover={helpers?.onNameHover}
                 profileReady={helpers?.profileReady ?? true}
                 // 세 칸이 한 시트를 함께 쓴다. 백엔드도 셋을 한 번에 받으므로
                 // (UserUpdateRequest는 셋 다 필수) 어느 칸을 눌러도 같은 화면이다.
+                onSelectStamp={openVisit}
                 onEditProfile={(event) => {
                   setNameDraft(toDisplayName(visibleProfile))
                   setBirthDraft(toIsoBirthDate(visibleProfile?.birthDate))
@@ -341,6 +375,7 @@ export function Component() {
             >
               {sheet === 'history' ? (
                 <HistoryList
+                  visit={visit}
                   onSelectJourney={(event) => openSheet('history-detail', event.currentTarget)}
                 />
               ) : null}
@@ -364,15 +399,32 @@ export function Component() {
                       return
                     }
                     // PATCH /users/me(UserUpdateRequest)와 같은 모양으로 담는다.
-                    // birthDate는 ISO, nationality는 `Republic of Korea` 표기다.
-                    setProfileEdit({
+                    // birthDate는 ISO. 백엔드는 alpha-2를 받고, 지면 표기(alpha-3)
+                    // 변환은 toDisplayNationality가 맡는다.
+                    const body = {
                       name: next,
                       birthDate: birthDraft,
-                      // 백엔드는 alpha-2를 받는다. 지면 표기(alpha-3) 변환은
-                      // toDisplayNationality가 맡는다.
                       nationality: getCountryOption(countryDraft)?.code ?? '',
-                    })
-                    closeSheet()
+                    }
+
+                    // 여권은 로그인 없이도 열람할 수 있다. 토큰이 없으면 보낼
+                    // 곳이 없으므로 지면 표기만 바꾼다.
+                    if (!getAccessToken()) {
+                      setProfileEdit(body)
+                      closeSheet()
+                      return
+                    }
+
+                    setSaving(true)
+                    setSaveError(null)
+                    updateMe(body)
+                      .then(() => {
+                        // 서버가 받아 준 값이므로 지면도 그 값으로 굽는다.
+                        setProfileEdit(body)
+                        closeSheet()
+                      })
+                      .catch((cause) => setSaveError(cause))
+                      .finally(() => setSaving(false))
                   }}
                 >
                   <h3 className={styles.sheetTitle}>신분 정보</h3>
@@ -429,16 +481,30 @@ export function Component() {
                       onOpenChange={(isOpen) => setOpenPicker(isOpen ? 'nationality' : null)}
                     />
                   </Suspense>
-                  <button className={styles.nameSubmit} type="submit">
-                    저장
+                  {saveError ? (
+                    <p className={styles.nameNotice} role="alert">
+                      {saveError.message ?? '신분 정보를 저장하지 못했습니다.'}
+                    </p>
+                  ) : null}
+                  <button className={styles.nameSubmit} type="submit" disabled={saving}>
+                    {saving ? '저장 중…' : '저장'}
                   </button>
                 </form>
               ) : null}
-              {sheet === 'history-detail' ? <JourneyDetail /> : null}
+              {sheet === 'history-detail' ? <JourneyDetail visit={visit} /> : null}
               {sheet === 'ticket' ? (
                 <>
                   <h3 className={styles.sheetTitle}>TICKET</h3>
-                  <BoardingTicketCard pass={passportTicket} size="md" />
+                  {/* 탑승자·패스 코드는 방문 상세의 실제 값으로 덮는다. 편명·시간
+                      등 나머지는 방문 상세 계약에 없어 데모 티켓 표기를 쓴다. */}
+                  <BoardingTicketCard
+                    pass={{
+                      ...passportTicket,
+                      passengerName: visit?.passengerName || passportTicket.passengerName,
+                      passCode: visit?.passCode || passportTicket.passCode,
+                    }}
+                    size="md"
+                  />
                 </>
               ) : null}
             </section>
@@ -452,11 +518,11 @@ export function Component() {
 /**
  * 여권 지면의 투명 오버레이.
  *
- * 여권 데이터는 PassportPageTurn이 이미 불러왔다. 여기서 다시 부르면 단계를
- * 넘길 때마다 같은 API를 또 치게 된다.
+ * 여권 데이터는 페이지(usePassport)가 한 번 불러와 내려준다. 여기서 다시
+ * 부르면 단계를 넘길 때마다 같은 API를 또 치게 된다.
  *
- * 모든 값은 캔버스와 같은 profile/stamps에서 꺼낸다. 여기서 고정 데이터를 쓰면
- * WebGL을 못 쓰는 기기와 스크린리더만 다른 값을 보게 된다.
+ * 모든 값은 캔버스와 같은 profile/stamps/visit에서 꺼낸다. 여기서 고정
+ * 데이터를 쓰면 WebGL을 못 쓰는 기기와 스크린리더만 다른 값을 보게 된다.
  */
 function PassportSpread({
   step,
@@ -464,8 +530,10 @@ function PassportSpread({
   isRestoringFocus,
   profile,
   stamps = [],
+  visit,
   onNameHover,
   profileReady = true,
+  onSelectStamp,
   onEditProfile,
   onHistory,
   onTicket,
@@ -588,10 +656,17 @@ function PassportSpread({
             {/* 캔버스도 여섯 칸(3열 2행)만 그린다. 더 읽어 주면 화면과 어긋난다. */}
             {stamps.slice(0, 6).map((stamp) => (
               <li key={stamp.id ?? stamp.date}>
-                {/* 캔버스와 같은 그림을 가리켜야 한다. 백엔드가 방문마다 다른
-                    스탬프를 주면 여기도 따라간다. */}
-                <img src={stamp.imageUrl ?? passportStamp} alt="" />
-                <time>{stamp.date}</time>
+                {/* 스탬프를 눌러야 그 방문의 여행 기록 면이 열린다. */}
+                <button
+                  type="button"
+                  aria-label={`${stamp.date} 방문 기록 보기`}
+                  onClick={() => onSelectStamp?.(stamp)}
+                >
+                  {/* 캔버스와 같은 그림을 가리켜야 한다. 백엔드가 방문마다 다른
+                      스탬프를 주면 여기도 따라간다. */}
+                  <img src={stamp.imageUrl ?? passportStamp} alt="" />
+                  <time>{stamp.date}</time>
+                </button>
               </li>
             ))}
           </ul>
@@ -625,12 +700,12 @@ function PassportSpread({
       <h3 className={styles.journeyHeading}>PASSPORT</h3>
       <div className={styles.journeys}>
         <p>
-          <time>2026 07 27</time>
-          <strong>MCM HAUS</strong>
-          <span>412 Apgujeong-ro, Gangnam-gu, Seoul of Korea</span>
+          <time>{visit?.visitedOn}</time>
+          <strong>{visit?.storeName}</strong>
+          <span>{visit?.address}</span>
         </p>
         <p>
-          <strong>입장 번호 00001 | 비행 시간 46M</strong>
+          <strong>{visit ? `입장 번호 ${visit.entryNo} | 비행 시간 ${visit.stayMinutes}M` : ''}</strong>
         </p>
         <div className={styles.journeyActions}>
           <button type="button" onClick={onHistory} className={styles.history}>
@@ -650,17 +725,19 @@ function PassportSpread({
   )
 }
 
-function HistoryList({ onSelectJourney }) {
+function HistoryList({ visit, onSelectJourney }) {
+  const records = visit?.travelHistory ?? []
   return (
     <>
       <h3 className={styles.sheetTitle}>TRAVEL HISTORY</h3>
       <div className={styles.historyList}>
-        {journeyRecords.map((record) =>
-          record.id === 'journey' ? (
+        {/* 방문 상세의 동선(travelHistory)이다. 첫 층만 브랜드 스토리 상세가 있다. */}
+        {records.map((record, index) =>
+          index === 0 ? (
             <button
               key={record.id}
               type="button"
-              aria-label="1F JOURNEY 상세 보기"
+              aria-label={`${record.floorNo}F ${record.code} 상세 보기`}
               className={styles.historyCard}
               onClick={onSelectJourney}
             >
@@ -677,14 +754,16 @@ function HistoryList({ onSelectJourney }) {
   )
 }
 
-function JourneyDetail() {
-  const journey = journeyRecords[0]
+function JourneyDetail({ visit }) {
+  const journey = visit?.travelHistory?.[0]
   return (
     <>
       <h3 className={styles.sheetTitle}>TRAVEL HISTORY</h3>
-      <article className={styles.historyCard}>
-        <JourneyCard record={journey} />
-      </article>
+      {journey ? (
+        <article className={styles.historyCard}>
+          <JourneyCard record={journey} />
+        </article>
+      ) : null}
       <div className={styles.detailCopy}>
         <h4>1976년, München - 밤의 도시가 낳은 대담함</h4>
         <p>
@@ -710,8 +789,8 @@ function JourneyDetail() {
 function JourneyCard({ record }) {
   return (
     <span className={styles.journeyCardContent}>
-      <span>{record.floor}</span>
-      <strong>{record.title}</strong>
+      <span>{`${record.floorNo}F ${record.code} | ${record.title}`}</span>
+      <strong>{record.tagline}</strong>
     </span>
   )
 }

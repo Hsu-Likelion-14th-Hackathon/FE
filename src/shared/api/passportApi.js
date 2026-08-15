@@ -67,6 +67,7 @@ export async function getVisitDetail(visitLogId) {
       floorNo: floor.floorNo,
       code: floor.code,
       title: floor.title,
+      tagline: floor.tagline ?? '',
     })),
   }
 }

@@ -24,20 +24,42 @@ const FETCHED_PROFILE = {
 }
 
 const FETCHED_STAMPS = [
-  { id: 'stamp-a', date: '2026 03 03' },
-  { id: 'stamp-b', date: '2026 04 04' },
+  { id: 'stamp-a', visitLogId: 4, date: '2026 03 03' },
+  { id: 'stamp-b', visitLogId: 9, date: '2026 04 04' },
 ]
+
+/** 채움 데이터(MCM HAUS)와 겹치지 않는 값으로 채워 어느 쪽을 읽는지 가른다. */
+const FETCHED_VISIT = {
+  visitLogId: 9,
+  storeName: 'MCM MUNICH',
+  address: '1 Odeonsplatz, München',
+  entryNo: '00777',
+  visitedOn: '2026 05 05',
+  stayMinutes: 12,
+  passengerName: 'ADA LOVELACE',
+  passCode: 'MCM-TEST-0505',
+  travelHistory: [
+    { id: 'floor-1', floorNo: 1, code: 'JOURNEY', title: '여정', tagline: '뮌헨의 밤이 낳은 대담함' },
+    { id: 'floor-2', floorNo: 2, code: 'EMBLEM', title: '상징', tagline: '태도를 담은 로고' },
+  ],
+}
+
+const getVisitDetail = vi.hoisted(() => vi.fn())
+const getPassportStamps = vi.hoisted(() => vi.fn())
 
 vi.mock('@/shared/api/passportApi.js', () => ({
   getPassport: vi.fn(async () => FETCHED_PROFILE),
-  getPassportStamps: vi.fn(async () => ({
-    visits: FETCHED_PROFILE.visits,
-    stamps: FETCHED_STAMPS,
-  })),
-  getVisitDetail: vi.fn(async () => ({})),
+  getPassportStamps: (...args) => getPassportStamps(...args),
+  getVisitDetail: (...args) => getVisitDetail(...args),
 }))
 
-beforeEach(() => vi.spyOn(console, 'warn').mockImplementation(() => {}))
+beforeEach(() => {
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
+  getPassportStamps
+    .mockReset()
+    .mockResolvedValue({ visits: FETCHED_PROFILE.visits, stamps: FETCHED_STAMPS })
+  getVisitDetail.mockReset().mockResolvedValue(FETCHED_VISIT)
+})
 afterEach(() => vi.restoreAllMocks())
 
 function renderPassport() {
@@ -88,6 +110,47 @@ describe('여권 DOM 데이터', () => {
       expect(stamps).toHaveTextContent(stamp.date)
     }
     // 고정 데이터 6개가 섞여 들어오면 안 된다.
+    expect(stamps).not.toHaveTextContent('2026 07 21')
+  })
+
+  it('스탬프를 누르면 그 방문의 여행 기록 면과 시트가 열린다', async () => {
+    renderPassport()
+    const next = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(next)
+    fireEvent.click(next)
+
+    // 넘겨서는 못 간다 — 어느 방문을 볼지 모르기 때문이다.
+    expect(next).toBeDisabled()
+    fireEvent.click(await screen.findByRole('button', { name: '2026 04 04 방문 기록 보기' }))
+
+    const journey = await screen.findByRole('region', { name: '여권 여행 기록' })
+    await waitFor(() => expect(journey).toHaveTextContent('MCM MUNICH'))
+    expect(journey).toHaveTextContent('2026 05 05')
+    expect(journey).toHaveTextContent('입장 번호 00777 | 비행 시간 12M')
+    // 채움 데이터를 읽으면 여기서 MCM HAUS가 나온다.
+    expect(journey).not.toHaveTextContent('MCM HAUS')
+
+    // 누른 스탬프의 방문으로 조회한다.
+    expect(getVisitDetail).toHaveBeenCalledWith(9)
+
+    fireEvent.click(screen.getByRole('button', { name: 'TRAVEL HISTORY' }))
+    const sheet = await screen.findByRole('dialog', { name: '여행 기록' })
+    expect(sheet).toHaveTextContent('1F JOURNEY | 여정')
+    expect(sheet).toHaveTextContent('뮌헨의 밤이 낳은 대담함')
+    expect(sheet).not.toHaveTextContent('삶은 여행이다')
+  })
+
+  it('방문이 없으면 스탬프 면을 채움 데이터로 메우지 않는다', async () => {
+    // 방문한 적 없는 계정에 채움 스탬프 여섯 개를 찍으면 가짜 기록이 된다.
+    getPassportStamps.mockResolvedValue({ visits: 0, stamps: [] })
+    renderPassport()
+    const nextButton = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(nextButton)
+    fireEvent.click(nextButton)
+
+    const stamps = await screen.findByRole('region', { name: '여권 방문 스탬프' })
+    await waitFor(() => expect(stamps).toHaveTextContent('총 방문 횟수 | 0회'))
+    expect(stamps.querySelectorAll('li')).toHaveLength(0)
     expect(stamps).not.toHaveTextContent('2026 07 21')
   })
 })

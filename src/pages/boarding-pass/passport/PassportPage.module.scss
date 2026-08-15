@@ -444,6 +444,26 @@
   text-align: center;
 }
 
+/* 스탬프는 그 방문의 여행 기록 면을 여는 버튼이다. 칸 배치는 li가 하던
+   그대로 물려받는다. */
+.stamps li button {
+  display: flex;
+  padding: 0;
+  border: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+}
+
+.stamps li button:focus-visible {
+  outline: 2px solid #c07346;
+  outline-offset: 2px;
+}
+
 .stamps li img {
   width: 4.0625rem;
   height: 4.0625rem;

@@ -22,8 +22,7 @@ import stampSrc from '@/shared/assets/boarding-pass/passport/passport-stamp.webp
 
 import observeResize from '@/shared/layout/observe-resize.js'
 
-import { usePassport } from '@/entities/passport/usePassport.js'
-
+import { passportProfile, passportStamps } from './passportData.js'
 import { createPassportSheets } from './passportSheetScene.js'
 import pageStyles from './PassportPage.module.scss'
 import {
@@ -175,6 +174,13 @@ export default function PassportPageTurn({
   onCommit,
   renderStep,
   profileOverride,
+  // 여권 데이터는 페이지가 불러와 내려준다(usePassport). 시트들도 같은 방문
+  // 상세를 쓰므로 여기서 따로 부르면 페이지와 어긋난다. 프롭 없이 단독으로
+  // 쓰는 자리(테스트 하네스)는 채움 데이터로 돈다.
+  passport,
+  // 넘겨서 갈 수 있는 마지막 면. 여행 기록 면(3)은 스탬프를 눌러야 열리므로
+  // 평소에는 2에서 막고, 페이지가 방문을 고르면 3으로 늘려 내려준다.
+  lastStep = LAST_STEP,
 }) {
   const [showHint, setShowHint] = useState(() => step === 0 && !readHintSeen())
 
@@ -234,16 +240,23 @@ export default function PassportPageTurn({
 
   const clearNameCue = useCallback(() => setNameCue(null), [])
 
-  // 여권 데이터는 API에서 온다. 연동 전에는 훅이 고정 데이터로 떨어진다.
-  const { profile, stamps, status } = usePassport()
+  const {
+    profile = passportProfile,
+    stamps = passportStamps,
+    status = 'fallback',
+    // 페이지가 고른 방문. 고르기 전이면 null이고, 그동안 여행 기록 면은
+    // 넘겨서 갈 수 없다(lastStep).
+    visit = null,
+  } = passport ?? {}
   const pageData = useCallback(
     () => ({
       profile: { ...profile, ...profileOverride },
       stamps,
+      visit,
       assets: assetsRef.current,
       stampImages: stampImagesRef.current,
     }),
-    [profile, profileOverride, stamps],
+    [profile, profileOverride, stamps, visit],
   )
 
   const measure = useCallback(() => {
@@ -402,7 +415,7 @@ export default function PassportPageTurn({
       if (
         (disabled && (!isActiveDrag || commit)) ||
         nextStep < 0 ||
-        nextStep > LAST_STEP ||
+        nextStep > lastStep ||
         (turnState !== 'idle' && !isActiveDrag)
       ) {
         return
@@ -431,13 +444,13 @@ export default function PassportPageTurn({
         commit,
       })
     },
-    [animateTo, clearNameCue, disabled, dismissHint, onCommit, rendererMode, step, turnState],
+    [animateTo, clearNameCue, disabled, dismissHint, lastStep, onCommit, rendererMode, step, turnState],
   )
 
   // 여권 데이터가 바뀌면 구워둔 면을 버린다.
   useEffect(() => {
     faceCacheRef.current.clear()
-  }, [profile, profileOverride, stamps])
+  }, [profile, profileOverride, stamps, visit])
 
   // 페이지에 그릴 이미지들을 미리 받아둔다. 14장이라 단계마다 다시 받으면
   // 모바일에서 눈에 띄게 끊긴다. 한 번만 받고 준비됐다는 사실만 알린다.
@@ -624,7 +637,7 @@ export default function PassportPageTurn({
         return
       }
       const direction = dx < 0 ? 1 : -1
-      if (step + direction < 0 || step + direction > LAST_STEP) {
+      if (step + direction < 0 || step + direction > lastStep) {
         resetPointer(event)
         return
       }
@@ -761,7 +774,7 @@ export default function PassportPageTurn({
           type="button"
           aria-label="다음 단계"
           aria-disabled={inputLocked || undefined}
-          disabled={step === LAST_STEP}
+          disabled={step >= lastStep}
           onClick={() => requestTurn(1)}
         >
           <img src={navNext} alt="" />
