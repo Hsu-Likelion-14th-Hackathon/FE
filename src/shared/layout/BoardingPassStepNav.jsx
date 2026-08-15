@@ -35,8 +35,10 @@ export default function BoardingPassStepNav({
         >
           <img src={navPrevImg} alt="" className={styles.navBtnImg} />
         </button>
-        <div className={styles.progressTrack}>
-          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+        <div className={styles.progressWrap}>
+          <div className={styles.progressTrack} aria-hidden="true">
+            <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+          </div>
           <div className={styles.progressHits} role="group" aria-label="여행 단계">
             {BOARDING_PASS_STEP_LABELS.map((label, index) => {
               const targetStep = index + 1

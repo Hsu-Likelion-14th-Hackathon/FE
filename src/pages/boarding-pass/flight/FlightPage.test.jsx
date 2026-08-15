@@ -6,6 +6,8 @@ vi.mock('@/shared/api/boardingPassApi.js', () => ({
   getLatestBoardingPass: vi.fn(async () => null),
 }))
 
+import navStyles from '@/shared/layout/BoardingPassStepNav.module.scss'
+
 import { Component as FlightPage } from './FlightPage.jsx'
 import styles from './FlightPage.module.scss'
 
@@ -31,6 +33,14 @@ function renderFlight() {
 describe('FlightPage', () => {
   afterEach(() => {
     activeRouters.splice(0).forEach((router) => router.dispose())
+  })
+
+  it('keeps step hit targets outside the 10px rail', async () => {
+    renderFlight()
+
+    const hit = await screen.findByRole('button', { name: '가이드 개요로 이동' })
+    expect(hit.closest(`.${navStyles.progressTrack}`)).toBeNull()
+    expect(hit).toHaveClass(navStyles.progressHit)
   })
 
   it('jumps to the travel guide overview when the second slider segment is pressed', async () => {

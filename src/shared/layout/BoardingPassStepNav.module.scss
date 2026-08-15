@@ -37,17 +37,21 @@
   height: 2.125rem;
 }
 
-.progressTrack {
+.progressWrap {
   position: relative;
   flex: 1;
   height: 0.625rem;
+}
+
+.progressTrack {
+  height: 100%;
   overflow: hidden;
   border-radius: 6.25rem;
   background: #e0e0e0;
+  pointer-events: none;
 }
 
 .progressFill {
-  pointer-events: none;
   height: 100%;
   border-radius: 6.25rem;
   background: var(--mcm-color-brand-brown);
@@ -56,12 +60,18 @@
 
 .progressHits {
   position: absolute;
-  inset: 0;
+  top: 50%;
+  right: 0;
+  left: 0;
+  z-index: 1;
   display: flex;
+  height: 2.75rem;
+  transform: translateY(-50%);
 }
 
 .progressHit {
   flex: 1;
+  min-height: 2.75rem;
   padding: 0;
   border: 0;
   background: transparent;
