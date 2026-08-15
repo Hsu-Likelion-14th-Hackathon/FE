@@ -38,6 +38,7 @@ export const passportVisit = {
   travelHistory: [
     {
       id: 'floor-1',
+      floorId: 1,
       floorNo: 1,
       code: 'JOURNEY',
       title: '여정',
@@ -45,6 +46,7 @@ export const passportVisit = {
     },
     {
       id: 'floor-2',
+      floorId: 2,
       floorNo: 2,
       code: 'EMBLEM',
       title: '상징',
@@ -52,6 +54,7 @@ export const passportVisit = {
     },
     {
       id: 'floor-3',
+      floorId: 3,
       floorNo: 3,
       code: 'TRY',
       title: '시도',

@@ -9,10 +9,15 @@ import { Component as PassportPage } from './PassportPage.jsx'
 import { passportTicket } from './passportData.js'
 
 const updateMe = vi.hoisted(() => vi.fn())
+const getFloor = vi.hoisted(() => vi.fn())
 
 vi.mock('@/shared/api/authApi.js', async (importOriginal) => ({
   ...(await importOriginal()),
   updateMe: (...args) => updateMe(...args),
+}))
+
+vi.mock('@/shared/api/floorApi.js', () => ({
+  getFloor: (...args) => getFloor(...args),
 }))
 
 vi.mock('three/addons/renderers/CSS3DRenderer.js', async (importOriginal) => {
@@ -30,6 +35,19 @@ vi.mock('three/addons/renderers/CSS3DRenderer.js', async (importOriginal) => {
 beforeEach(() => {
   vi.spyOn(console, 'warn').mockImplementation(() => {})
   updateMe.mockReset().mockResolvedValue({})
+  // 층 이야기(GET /floors/{id})는 실서버 계약 모양으로 준다.
+  getFloor.mockReset().mockResolvedValue({
+    contents: [
+      {
+        orderNo: 1,
+        blockType: 'TEXT',
+        body: '1976년, München - 밤의 도시가 낳은 대담함',
+        imageUrl: null,
+        product: null,
+      },
+      { orderNo: 2, blockType: 'LIST', body: '1976년 뮌헨 창립', imageUrl: null, product: null },
+    ],
+  })
 })
 afterEach(() => vi.restoreAllMocks())
 
@@ -78,9 +96,16 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(screen.getByRole('dialog', { name: '여행 기록' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' })).toHaveFocus()
 
+    // 카드는 아코디언이다 — 누르면 시트 안에서 층 이야기가 펼쳐진다.
     fireEvent.click(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' }))
-    expect(screen.getByRole('dialog', { name: '1F JOURNEY 상세' })).toBeInTheDocument()
-    fireEvent.keyDown(document, { key: 'Escape' })
+    const toggled = await screen.findByRole('button', { name: '1F JOURNEY 상세 접기' })
+    expect(toggled).toHaveAttribute('aria-expanded', 'true')
+    expect(await screen.findByText('1976년, München - 밤의 도시가 낳은 대담함')).toBeInTheDocument()
+
+    // 한 번 더 누르면 원래대로 접힌다.
+    fireEvent.click(toggled)
+    expect(screen.queryByText('1976년, München - 밤의 도시가 낳은 대담함')).not.toBeInTheDocument()
+
     fireEvent.keyDown(document, { key: 'Escape' })
     fireEvent.click(screen.getByRole('button', { name: '티켓 보기' }))
     expect(screen.getByRole('dialog', { name: '탑승권' })).toHaveFocus()
@@ -296,7 +321,7 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     )
   })
 
-  it('모든 단계에 여권 안내 카피와 상세 여행 콘텐츠를 제공한다', () => {
+  it('모든 단계에 여권 안내 카피와 상세 여행 콘텐츠를 제공한다', async () => {
     renderPassport()
 
     // 브랜드 문구만 남긴다. 안내 두 줄은 랜딩에서 이미 읽었고, 걷어낸 자리는
@@ -318,12 +343,18 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     fireEvent.click(screen.getByRole('button', { name: 'TRAVEL HISTORY' }))
     fireEvent.click(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' }))
 
-    expect(screen.getByText('1976년, München - 밤의 도시가 낳은 대담함')).toBeInTheDocument()
-    expect(screen.getByText('Modern Creation München')).toBeInTheDocument()
-    expect(screen.getByText(/미하엘 크로머\(Michael Cromer\)/)).toBeInTheDocument()
-    expect(screen.getByText(/‘어디론가 떠날 수 있는 태도’를/)).toBeInTheDocument()
+    // 층 이야기(GET /floors/{id})가 카드 아래로 펼쳐진다. TEXT는 문단,
+    // LIST는 목록이다.
+    expect(await screen.findByText('1976년, München - 밤의 도시가 낳은 대담함')).toBeInTheDocument()
+    expect(screen.getByText('1976년 뮌헨 창립')).toBeInTheDocument()
+    expect(getFloor).toHaveBeenCalledWith(1)
+
+    // 첫 층만이 아니라 모든 층이 같은 방식으로 펼쳐진다.
+    fireEvent.click(screen.getByRole('button', { name: '2F EMBLEM 상세 보기' }))
+    expect(await screen.findByRole('button', { name: '2F EMBLEM 상세 접기' })).toBeInTheDocument()
+    await waitFor(() => expect(getFloor).toHaveBeenCalledWith(2))
+
     expect(passportTicket.to.localName).toBe('MCM')
-    expect(screen.getByRole('dialog', { name: '1F JOURNEY 상세' })).not.toHaveTextContent('TICKET')
   })
 
   it('열린 여권 원본의 투명 여백만 장면 밖으로 잘라낸다', () => {

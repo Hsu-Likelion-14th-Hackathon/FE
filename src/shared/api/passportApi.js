@@ -64,6 +64,7 @@ export async function getVisitDetail(visitLogId) {
     passCode: result.boardingPass?.passCode ?? '',
     travelHistory: (result.travelHistory ?? []).map((floor) => ({
       id: `floor-${floor.floorNo}`,
+      floorId: floor.floorId ?? null,
       floorNo: floor.floorNo,
       code: floor.code,
       title: floor.title,

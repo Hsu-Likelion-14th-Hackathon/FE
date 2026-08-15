@@ -22,6 +22,7 @@ import passportStampBow from '@/shared/assets/boarding-pass/passport/passport-st
 import { usePassport } from '@/entities/passport/usePassport.js'
 import { updateMe } from '@/shared/api/authApi.js'
 import { getAccessToken } from '@/shared/api/authToken.js'
+import { getFloor } from '@/shared/api/floorApi.js'
 import { getVisitDetail } from '@/shared/api/passportApi.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import {
@@ -43,7 +44,6 @@ const NationalitySelect = lazy(() => import('@/shared/ui/profile-fields/National
 const sheetLabels = {
   profile: '여권 신분 정보 수정',
   history: '여행 기록',
-  'history-detail': '1F JOURNEY 상세',
   ticket: '탑승권',
 }
 
@@ -373,12 +373,7 @@ export function Component() {
               tabIndex="-1"
               className={`${styles.sheet} ${styles[`sheet-${sheet}`]}`}
             >
-              {sheet === 'history' ? (
-                <HistoryList
-                  visit={visit}
-                  onSelectJourney={(event) => openSheet('history-detail', event.currentTarget)}
-                />
-              ) : null}
+              {sheet === 'history' ? <HistoryList visit={visit} /> : null}
               {sheet === 'profile' ? (
                 <form
                   className={styles.nameForm}
@@ -491,7 +486,6 @@ export function Component() {
                   </button>
                 </form>
               ) : null}
-              {sheet === 'history-detail' ? <JourneyDetail visit={visit} /> : null}
               {sheet === 'ticket' ? (
                 <>
                   <h3 className={styles.sheetTitle}>TICKET</h3>
@@ -727,65 +721,129 @@ function PassportSpread({
   )
 }
 
-function HistoryList({ visit, onSelectJourney }) {
+/**
+ * TRAVEL HISTORY — 방문 동선(travelHistory)을 층 카드로 세운다.
+ *
+ * 카드는 전부 아코디언이다. 누르면 그 층의 이야기(GET /floors/{floorId}
+ * contents)가 펼쳐지고, 다시 누르면 접힌다. 층 이야기는 처음 펼칠 때 받아
+ * 캐시한다 — 시트를 닫으면 상태가 사라지므로 오래 들고 있지 않는다.
+ */
+function HistoryList({ visit }) {
   const records = visit?.travelHistory ?? []
+  const [expandedId, setExpandedId] = useState(null)
+  const [floorStories, setFloorStories] = useState({})
+
+  const expanded = records.find((record) => record.id === expandedId)
+
+  useEffect(() => {
+    if (!expanded?.floorId || floorStories[expanded.floorId]) return undefined
+
+    let alive = true
+    const { floorId } = expanded
+    getFloor(floorId)
+      .then((data) => {
+        if (alive) {
+          setFloorStories((current) => ({
+            ...current,
+            [floorId]: { status: 'ready', contents: data.contents },
+          }))
+        }
+      })
+      .catch(() => {
+        if (alive) setFloorStories((current) => ({ ...current, [floorId]: { status: 'error' } }))
+      })
+
+    return () => {
+      alive = false
+    }
+  }, [expanded, floorStories])
+
+  const toggle = (record) => {
+    setExpandedId((current) => (current === record.id ? null : record.id))
+    // 실패했던 층은 다시 펼칠 때 새로 받는다.
+    setFloorStories((current) => {
+      if (current[record.floorId]?.status !== 'error') return current
+      const next = { ...current }
+      delete next[record.floorId]
+      return next
+    })
+  }
+
   return (
     <>
       <h3 className={styles.sheetTitle}>TRAVEL HISTORY</h3>
       <div className={styles.historyList}>
-        {/* 방문 상세의 동선(travelHistory)이다. 첫 층만 브랜드 스토리 상세가 있다. */}
-        {records.map((record, index) =>
-          index === 0 ? (
-            <button
-              key={record.id}
-              type="button"
-              aria-label={`${record.floorNo}F ${record.code} 상세 보기`}
-              className={styles.historyCard}
-              onClick={onSelectJourney}
-            >
-              <JourneyCard record={record} />
-            </button>
-          ) : (
-            <article key={record.id} className={styles.historyCard}>
-              <JourneyCard record={record} />
-            </article>
-          ),
-        )}
+        {records.map((record) => {
+          const isOpen = expandedId === record.id
+          const story = floorStories[record.floorId]
+          return (
+            <div key={record.id} className={styles.historyItem}>
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                aria-label={`${record.floorNo}F ${record.code} 상세 ${isOpen ? '접기' : '보기'}`}
+                className={styles.historyCard}
+                onClick={() => toggle(record)}
+              >
+                <JourneyCard record={record} />
+              </button>
+              {isOpen ? (
+                <div className={styles.detailCopy}>
+                  {story?.status === 'ready' ? (
+                    <FloorStory contents={story.contents} />
+                  ) : story?.status === 'error' ? (
+                    <p>층 이야기를 불러오지 못했습니다. 다시 눌러 주세요.</p>
+                  ) : (
+                    <p>층 이야기를 불러오는 중…</p>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          )
+        })}
       </div>
     </>
   )
 }
 
-function JourneyDetail({ visit }) {
-  const journey = visit?.travelHistory?.[0]
-  return (
-    <>
-      <h3 className={styles.sheetTitle}>TRAVEL HISTORY</h3>
-      {journey ? (
-        <article className={styles.historyCard}>
-          <JourneyCard record={journey} />
-        </article>
-      ) : null}
-      <div className={styles.detailCopy}>
-        <h4>1976년, München - 밤의 도시가 낳은 대담함</h4>
-        <p>
-          1976년 뮌헨, 데이비드 보위와 프레디 머큐리가 밤거리를 자유롭게 거닐며 예술과 반항을
-          모의하던 시절
-        </p>
-        <p>
-          배우이자 창립자인 미하엘 크로머(Michael Cromer)는 이 도시의 시대 정신을 담아낼 하나의
-          이름을 지었습니다
-        </p>
-        <h4>Modern Creation München</h4>
-        <p>
-          그것은 단순한 가방 브랜드의 탄생이 아닌 정체되어 있던 당시 럭셔리 씬을 향한 대담한
-          선언이었습니다
-        </p>
-        <p>화려함 그 자체 보다 ‘어디론가 떠날 수 있는 태도’를 가방에 주입하고자 했던 순간</p>
-        <p>MCM의 여정을 지금 시작합니다</p>
-      </div>
-    </>
-  )
+/** 층 상세 콘텐츠 블록. TEXT는 문단으로, 연이은 LIST는 한 목록으로 묶는다. */
+function FloorStory({ contents }) {
+  const rendered = []
+  let listBuffer = []
+
+  const flushList = (key) => {
+    if (!listBuffer.length) return
+    rendered.push(
+      <ul key={key}>
+        {listBuffer.map((block) => (
+          <li key={block.orderNo}>{block.body}</li>
+        ))}
+      </ul>,
+    )
+    listBuffer = []
+  }
+
+  for (const block of contents) {
+    if (block.blockType === 'LIST') {
+      listBuffer.push(block)
+      continue
+    }
+    flushList(`list-${block.orderNo}`)
+    if (block.blockType === 'QUOTE') {
+      rendered.push(<h4 key={block.orderNo}>{block.body}</h4>)
+    } else if (block.body) {
+      rendered.push(
+        <div key={block.orderNo}>
+          {block.body.split('\n').map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </div>,
+      )
+    }
+  }
+  flushList('list-end')
+
+  return <>{rendered}</>
 }
 
 function JourneyCard({ record }) {
