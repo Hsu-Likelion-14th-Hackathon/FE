@@ -34,6 +34,14 @@ describe('IntroPage', () => {
     expect(screen.getByRole('main')).toHaveClass(styles.page)
   })
 
+  it('패스 카드 카피를 DOM 텍스트로 렌더한다', () => {
+    renderIntro(['/boarding-pass/intro'])
+
+    expect(screen.getByText('Check-in')).toBeInTheDocument()
+    expect(screen.getByText('BOARDING PASS')).toBeInTheDocument()
+    expect(screen.getByText('당신의 MCM HAUS 비행을 위한')).toBeInTheDocument()
+  })
+
   it('닫기는 이전 설문이 아니라 보딩패스 랜딩으로 이동한다', () => {
     const router = renderIntro()
 
