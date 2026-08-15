@@ -16,7 +16,7 @@ export function Component() {
   const navigate = useNavigate()
 
   function handleClose() {
-    navigate('/boarding-pass')
+    navigate('/boarding-pass', { replace: true })
   }
 
   return (

@@ -10,6 +10,7 @@ import styles from './IntroPage.module.scss'
 function renderIntro(initialEntries = ['/boarding-pass/survey', '/boarding-pass/intro']) {
   const router = createMemoryRouter(
     [
+      { path: '/', element: <p>Home</p> },
       { path: '/boarding-pass', element: <p>Landing</p> },
       { path: '/boarding-pass/intro', element: <Component /> },
       { path: '/boarding-pass/survey', element: <p>Survey</p> },
@@ -39,5 +40,16 @@ describe('IntroPage', () => {
     fireEvent.click(screen.getByRole('button', { name: '닫기' }))
 
     expect(router.state.location.pathname).toBe('/boarding-pass')
+  })
+
+  it('닫기는 intro history를 교체해서 뒤로 가도 intro가 다시 열리지 않는다', async () => {
+    const router = renderIntro(['/', '/boarding-pass', '/boarding-pass/intro'])
+
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }))
+    expect(router.state.location.pathname).toBe('/boarding-pass')
+
+    await router.navigate(-1)
+    expect(router.state.location.pathname).toBe('/boarding-pass')
+    expect(router.state.location.pathname).not.toBe('/boarding-pass/intro')
   })
 })
