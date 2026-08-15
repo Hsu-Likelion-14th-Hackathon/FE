@@ -24,6 +24,13 @@
   height: var(--passport-h);
 }
 
+/* 사파리·크롬은 이미지를 기본으로 끌 수 있게 둔다. 지면 위에서 손을 대면
+   끌기가 시작돼 넘김이 멈춘다. onDragStart와 함께 양쪽에서 막는다. */
+.viewport img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
 /* WebGL이 책을 그리는 레이어. 화면에 보이는 것은 전부 이 캔버스다.
    Figma는 여권이 화면 끝까지 흘러가므로 stage 좌우 패딩(20px) 밖으로 넓힌다. */
 .bookLayer {

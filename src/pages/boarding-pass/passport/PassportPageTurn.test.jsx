@@ -156,6 +156,49 @@ describe('PassportPageTurn', () => {
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
   })
 
+  it('지면 위 이미지 끌기를 막아 넘김이 끊기지 않게 한다', async () => {
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+    const surface = setSurfaceRect()
+
+    // 브라우저는 이미지를 기본으로 끌 수 있게 둔다. 지면 위에서 손을 대면
+    // 끌기가 시작돼 pointermove가 끊기고 넘김이 멈춘다.
+    const started = fireEvent.dragStart(surface)
+
+    // fireEvent는 preventDefault가 불렸으면 false를 돌려준다.
+    expect(started).toBe(false)
+  })
+
+  it('손을 댈 때 잰 폭으로 진행률을 계산한다', async () => {
+    render(<TurnHarness />)
+    await waitFor(() =>
+      expect(screen.getByTestId('passport-turn')).toHaveAttribute('data-renderer', 'ready'),
+    )
+    const surface = setSurfaceRect()
+    const measure = vi.spyOn(surface, 'getBoundingClientRect')
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 1,
+      button: 0,
+      isPrimary: true,
+      clientX: 300,
+      clientY: 100,
+    })
+    const afterDown = measure.mock.calls.length
+    fireEvent.pointerMove(surface, { pointerId: 1, clientX: 260, clientY: 102 })
+    fireEvent.pointerMove(surface, { pointerId: 1, clientX: 220, clientY: 102 })
+    fireEvent.pointerMove(surface, { pointerId: 1, clientX: 190, clientY: 102 })
+
+    // move마다 재면 매번 레이아웃이 다시 계산돼 손가락이 밀린다.
+    expect(measure.mock.calls.length).toBe(afterDown)
+
+    fireEvent.pointerUp(surface, { pointerId: 1, clientX: 190, clientY: 102 })
+    await finishAnimation(900)
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
+  })
+
   it('25% 미만의 느린 스와이프는 220ms 안에 원래 단계로 복귀한다', async () => {
     render(<TurnHarness />)
     await waitFor(() =>
