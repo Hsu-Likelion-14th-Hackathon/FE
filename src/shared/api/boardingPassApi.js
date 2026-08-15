@@ -134,3 +134,43 @@ export async function scanBoardingPass(boardingPassId, { storeId } = {}) {
     },
   }
 }
+
+/**
+ * GET /boarding-passes/{id}/route — AI 추천 동선.
+ *
+ * 발급 때 계산되어 저장된 순서다. isRecommended가 아닌 층도 끝에 붙어
+ * 오므로(전체 동선), 화면은 표시만 다르게 한다.
+ */
+export async function getBoardingPassRoute(boardingPassId) {
+  const result = await apiFetch(API.boardingPass.route(boardingPassId), { unwrap: true })
+  return (result.steps ?? []).map((step) => ({
+    sequence: step.sequence,
+    id: `${step.floorNo}f`,
+    floorId: step.floorId,
+    floorNo: step.floorNo,
+    code: step.code ?? '',
+    title: step.title ?? '',
+    isRecommended: Boolean(step.isRecommended),
+    reason: step.reason ?? null,
+  }))
+}
+
+/**
+ * POST /boarding-passes/{id}/complete — 비행 종료(매장 나가기).
+ *
+ * 이때 방문이 확정되어 여권 스탬프가 생긴다(passportStampId). 화면은 종료
+ * 직후 여권으로 보내 그 스탬프를 보여 준다.
+ */
+export async function completeBoardingPass(boardingPassId) {
+  const result = await apiFetch(API.boardingPass.complete(boardingPassId), {
+    method: 'POST',
+    unwrap: true,
+  })
+  return {
+    boardingPassId: result.boardingPassId,
+    status: result.status ?? 'COMPLETED',
+    stayMinutes: result.stayMinutes ?? 0,
+    passportStampId: result.passportStampId ?? null,
+    totalVisitCount: result.totalVisitCount ?? 0,
+  }
+}

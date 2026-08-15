@@ -1,7 +1,8 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
-import { guideFloorContent } from '@/features/boarding-pass/travel-guide/guideFloorContent.js'
+import { getBoardingPassRoute, getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
+import { getFloor, getFloors } from '@/shared/api/floorApi.js'
 import guideDecoTopImg from '@/shared/assets/boarding-pass/guide/deco-top.png'
 import emblemCrestImg from '@/shared/assets/boarding-pass/guide/emblem-crest.png'
 import emblemLaurelImg from '@/shared/assets/boarding-pass/guide/emblem-laurel.png'
@@ -18,14 +19,25 @@ import {
   guideFloorStep,
 } from '@/shared/layout/boardingPassSteps.js'
 import scrollDocumentToTop from '@/shared/layout/scrollDocumentToTop.js'
+import StateNotice from '@/shared/ui/state-notice/StateNotice.jsx'
 
 import styles from './GuidePage.module.scss'
 
 /**
  * 여행 가이드 (44)(45)(46)(47)(47-1).
- * 개요 → 1F → 2F → 3F → 5F. 상태바 미구현. 도슨트는 BoardingPassDocent(M-01).
- * 하단 슬라이더는 MAPS(1) 다음 2~6단계.
+ * 개요 → 1F → 2F → 3F → 5F. 층 구성·배지·콘텐츠는 백엔드(GET /floors,
+ * GET /floors/{id})에서 오고, 개요 인트로 카피만 디자인 문구다.
+ * AI 추천 동선(GET /boarding-passes/{id}/route)은 개요 칩에 표시한다.
  */
+
+/** 개요 인트로 — 계약에 없는 Figma 카피 */
+const INTRO_COPY = {
+  lead: '1976년 뮌헨에서 태어난 이름 하나가',
+  emphasis: '2026년',
+  tail: ' 다시 같은 질문을 던진다',
+  quote: '우리는 어디로, 왜 떠나는가?',
+}
+
 function initialGuideFloor(location) {
   const requested = location.state?.floor
   return GUIDE_FLOOR_ORDER.includes(requested) ? requested : 'overview'
@@ -35,6 +47,14 @@ export function Component() {
   const navigate = useNavigate()
   const location = useLocation()
   const [floor, setFloor] = useState(() => initialGuideFloor(location))
+  // 층 목록·추천 동선. 상세는 층에 처음 들어갈 때 받아 캐시한다.
+  const [floors, setFloors] = useState(null)
+  const [floorsError, setFloorsError] = useState(null)
+  const [retryCount, setRetryCount] = useState(0)
+  const [route, setRoute] = useState(null)
+  const [details, setDetails] = useState({})
+  // 요청 중인 층. state로 두면 effect 안에서 동기 setState가 필요해진다.
+  const inFlightRef = useRef(new Set())
   const floorIndex = GUIDE_FLOOR_ORDER.indexOf(floor)
   const atStart = floorIndex <= 0
   const atEnd = floorIndex >= GUIDE_FLOOR_ORDER.length - 1
@@ -42,6 +62,71 @@ export function Component() {
   useLayoutEffect(() => {
     scrollDocumentToTop()
   }, [floor])
+
+  useEffect(() => {
+    let alive = true
+
+    getFloors()
+      .then(({ floors: loaded }) => {
+        if (!alive) return
+        setFloors(loaded)
+        setFloorsError(null)
+      })
+      .catch((cause) => {
+        if (alive) setFloorsError(cause)
+      })
+
+    // 추천 표시는 장식이다. 보딩패스가 없거나 실패해도 가이드는 그대로 돈다.
+    getLatestBoardingPass()
+      .then((pass) => (pass ? getBoardingPassRoute(pass.boardingPassId) : null))
+      .then((steps) => {
+        if (alive && steps) setRoute(steps)
+      })
+      .catch(() => {})
+
+    return () => {
+      alive = false
+    }
+  }, [retryCount])
+
+  // 층 상세 lazy 로드. 한 번 받은 층은 다시 부르지 않는다. 상세가 없는 동안
+  // 화면은 로딩으로 그린다(entry 없음 = 로딩).
+  useEffect(() => {
+    if (floor === 'overview' || !floors) return undefined
+    const meta = floors.find((item) => item.id === floor)
+    if (!meta || details[floor] || inFlightRef.current.has(floor)) return undefined
+
+    let alive = true
+    inFlightRef.current.add(floor)
+    getFloor(meta.floorId)
+      .then((data) => {
+        if (alive) setDetails((current) => ({ ...current, [floor]: { status: 'ready', data } }))
+      })
+      .catch(() => {
+        if (alive) setDetails((current) => ({ ...current, [floor]: { status: 'error' } }))
+      })
+      .finally(() => {
+        inFlightRef.current.delete(floor)
+      })
+
+    return () => {
+      alive = false
+    }
+  }, [floor, floors, details])
+
+  const retryFloors = () => {
+    setFloors(null)
+    setFloorsError(null)
+    setRetryCount((count) => count + 1)
+  }
+
+  const retryDetail = () => {
+    setDetails((current) => {
+      const next = { ...current }
+      delete next[floor]
+      return next
+    })
+  }
 
   function goRelative(delta) {
     if (delta > 0) {
@@ -57,10 +142,6 @@ export function Component() {
 
     const prev = GUIDE_FLOOR_ORDER[floorIndex - 1]
     if (prev) setFloor(prev)
-  }
-
-  function selectFloor(id) {
-    setFloor(id)
   }
 
   function goToStep(step) {
@@ -88,9 +169,19 @@ export function Component() {
 
           <div key={floor} className={styles.scroll}>
             {floor === 'overview' ? (
-              <OverviewView onSelectFloor={selectFloor} />
+              <OverviewView
+                floors={floors}
+                error={floorsError}
+                route={route}
+                onRetry={retryFloors}
+                onSelectFloor={setFloor}
+              />
             ) : (
-              <FloorView floor={floor} />
+              <FloorView
+                meta={floors?.find((item) => item.id === floor) ?? null}
+                entry={details[floor] ?? null}
+                onRetry={retryDetail}
+              />
             )}
           </div>
         </main>
@@ -109,8 +200,12 @@ export function Component() {
   )
 }
 
-function OverviewView({ onSelectFloor }) {
-  const content = guideFloorContent.overview
+function OverviewView({ floors, error, route, onRetry, onSelectFloor }) {
+  // 건물처럼 위층부터 쌓는다.
+  const ordered = [...(floors ?? [])].sort((a, b) => b.floorNo - a.floorNo)
+  const recommended = new Set(
+    (route ?? []).filter((step) => step.isRecommended).map((step) => step.id),
+  )
 
   return (
     <div>
@@ -118,13 +213,13 @@ function OverviewView({ onSelectFloor }) {
         <img src={guideDecoTopImg} alt="" aria-hidden="true" className={styles.planeDeco} />
         <div className={styles.introCard}>
           <div className={styles.introLines}>
-            <p>{content.introLead}</p>
+            <p>{INTRO_COPY.lead}</p>
             <p>
-              <span className={styles.introEm}>{content.introEmphasis}</span>
-              {content.introTail}
+              <span className={styles.introEm}>{INTRO_COPY.emphasis}</span>
+              {INTRO_COPY.tail}
             </p>
           </div>
-          <p className={styles.introQuote}>“ {content.quote} ”</p>
+          <p className={styles.introQuote}>“ {INTRO_COPY.quote} ”</p>
         </div>
       </div>
 
@@ -132,135 +227,176 @@ function OverviewView({ onSelectFloor }) {
         <img src={overviewMainImg} alt="MCM HAUS 야간 전경" className={styles.overviewMain} />
         <img src={overviewFigureImg} alt="" aria-hidden="true" className={styles.overviewFigure} />
 
-        <div className={styles.floorChips}>
-          {content.floors.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onSelectFloor(item.id)}
-              className={`${styles.floorChip} ${
-                item.shape === 'top'
-                  ? styles.floorChipTop
-                  : item.shape === 'mid'
-                    ? styles.floorChipMid
-                    : styles.floorChipBottom
-              }`}
-            >
-              <p className={styles.floorChipBadge}>{item.badge}</p>
-              <p className={styles.floorChipSub}>{item.subtitle}</p>
-            </button>
-          ))}
-        </div>
+        {error ? (
+          <StateNotice
+            role="alert"
+            variant="dark"
+            eyebrow="Notice"
+            message={error.message ?? '층 안내를 불러오지 못했습니다.'}
+            hint="잠시 후 다시 시도해 주세요"
+            action={{ label: '다시 시도', onClick: onRetry }}
+          />
+        ) : !floors ? (
+          <p className={styles.floorStatus} role="status">
+            층 안내를 불러오는 중…
+          </p>
+        ) : (
+          <div className={styles.floorChips}>
+            {ordered.map((item, index) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectFloor(item.id)}
+                className={`${styles.floorChip} ${
+                  index === 0
+                    ? styles.floorChipTop
+                    : index === ordered.length - 1
+                      ? styles.floorChipBottom
+                      : styles.floorChipMid
+                }`}
+              >
+                <p className={styles.floorChipBadge}>
+                  {item.badge}
+                  {recommended.has(item.id) ? (
+                    <span className={styles.aiPick} aria-label="AI 추천 층">
+                      ✦ AI
+                    </span>
+                  ) : null}
+                </p>
+                <p className={styles.floorChipSub}>{item.tagline || item.subtitle}</p>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-function FloorView({ floor }) {
-  const content = guideFloorContent[floor]
-  if (!content) return null
+/**
+ * 층 상세. 배지·부제는 층 목록에서, 본문 블록은 층 상세 계약에서 온다.
+ * blockType이 그리는 모양을 정한다 — TEXT 문단, LIST 목록, QUOTE 인용,
+ * IMAGE 사진, PRODUCT 상품 카드.
+ */
+function FloorView({ meta, entry, onRetry }) {
+  if (!meta) return null
 
   return (
     <div className={styles.panelStack}>
       <div className={styles.floorBadge}>
-        <p className={styles.floorChipBadge}>{content.badge}</p>
-        <p className={styles.floorChipSub}>{content.subtitle}</p>
+        <p className={styles.floorChipBadge}>{meta.badge}</p>
+        <p className={styles.floorChipSub}>{meta.tagline || meta.subtitle}</p>
       </div>
 
-      {content.showEmblems ? (
+      {meta.code === 'EMBLEM' ? (
         <div className={styles.headlineWithEmblem}>
           <div className={styles.emblemRow} aria-hidden="true">
             <img src={emblemLaurelImg} alt="" className={styles.emblemLaurel} />
             <img src={emblemCrestImg} alt="" className={styles.emblemCrest} />
           </div>
-          <div className={styles.floorHeadline}>
-            <p className={styles.floorHeadlineText}>{content.headline}</p>
-            <p className={styles.floorQuote}>“ {content.quote} ”</p>
-          </div>
+          <FloorHeadline meta={meta} />
         </div>
       ) : (
-        <div className={styles.floorHeadline}>
-          <p className={styles.floorHeadlineText}>{content.headline}</p>
-          <p className={styles.floorQuote}>“ {content.quote} ”</p>
-        </div>
+        <FloorHeadline meta={meta} />
       )}
 
-      {content.panels.map((panel, panelIndex) => (
-        <div key={`${floor}-panel-${panelIndex}`} className={styles.panel}>
-          {panel.blocks.map((lines, blockIndex) => (
-            <div key={`${floor}-block-${panelIndex}-${blockIndex}`} className={styles.panelBlock}>
-              {lines.map((line) => (
-                <p key={line}>{line}</p>
-              ))}
-            </div>
-          ))}
-        </div>
-      ))}
-
-      {content.productRow === 'pair' ? (
-        <div className={styles.productPair}>
-          {content.products.map((product) => (
-            <ProductCard key={product.nameLines.join(' ')} product={product} />
-          ))}
-        </div>
-      ) : null}
-
-      {content.productRow === 'cognac' ? (
-        <div className={styles.productCognacRow}>
-          <div className={styles.cognacNote}>
-            {content.cognacNote.map((line) => (
-              <p key={line}>{line}</p>
-            ))}
-          </div>
-          {content.products.map((product) => (
-            <ProductCard key={product.nameLines.join(' ')} product={product} />
-          ))}
-        </div>
-      ) : null}
-
-      {content.productRow === 'stack' ? (
-        <div className={styles.productStack}>
-          {content.products.map((product) => (
-            <ProductCard key={product.nameLines.join(' ')} product={product} wide />
-          ))}
-        </div>
-      ) : null}
+      {entry?.status === 'ready' ? (
+        <FloorContents contents={entry.data.contents} />
+      ) : entry?.status === 'error' ? (
+        <StateNotice
+          role="alert"
+          variant="dark"
+          eyebrow="Notice"
+          message="층 콘텐츠를 불러오지 못했습니다."
+          hint="잠시 후 다시 시도해 주세요"
+          action={{ label: '다시 시도', onClick: onRetry }}
+        />
+      ) : (
+        <p className={styles.floorStatus} role="status">
+          층 안내를 불러오는 중…
+        </p>
+      )}
     </div>
   )
 }
 
-function ProductCard({ product, wide = false }) {
+function FloorHeadline({ meta }) {
   return (
-    <div
-      className={`${styles.productCard} ${
-        wide || product.layout === 'wide' ? styles.productCardWide : styles.productCardCompact
-      }`}
-    >
+    <div className={styles.floorHeadline}>
+      <p className={styles.floorHeadlineText}>{meta.subtitle}</p>
+      {meta.tagline ? <p className={styles.floorQuote}>“ {meta.tagline} ”</p> : null}
+    </div>
+  )
+}
+
+function FloorContents({ contents }) {
+  const rendered = []
+  let listBuffer = []
+
+  const flushList = (key) => {
+    if (!listBuffer.length) return
+    rendered.push(
+      <div className={styles.panel} key={key}>
+        <ul className={styles.panelList}>
+          {listBuffer.map((block) => (
+            <li key={block.orderNo}>{block.body}</li>
+          ))}
+        </ul>
+      </div>,
+    )
+    listBuffer = []
+  }
+
+  for (const block of contents) {
+    if (block.blockType === 'LIST') {
+      // 연이은 LIST 블록은 한 목록으로 묶는다.
+      listBuffer.push(block)
+      continue
+    }
+    flushList(`list-${block.orderNo}`)
+
+    if (block.blockType === 'TEXT') {
+      rendered.push(
+        <div className={styles.panel} key={block.orderNo}>
+          <div className={styles.panelBlock}>
+            {block.body.split('\n').map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+        </div>,
+      )
+    } else if (block.blockType === 'QUOTE') {
+      rendered.push(
+        <p className={styles.floorQuote} key={block.orderNo}>
+          “ {block.body} ”
+        </p>,
+      )
+    } else if (block.blockType === 'IMAGE' && block.imageUrl) {
+      rendered.push(
+        <img className={styles.contentImage} src={block.imageUrl} alt="" key={block.orderNo} />,
+      )
+    } else if (block.blockType === 'PRODUCT' && block.product) {
+      rendered.push(<FloorProductCard product={block.product} key={block.orderNo} />)
+    }
+  }
+  flushList('list-end')
+
+  return <>{rendered}</>
+}
+
+function FloorProductCard({ product }) {
+  return (
+    <div className={`${styles.productCard} ${styles.productCardWide}`}>
       <div className={styles.productThumb}>
-        <img src={product.image} alt="" className={styles.productThumbImg} />
+        {product.imageUrl ? (
+          <img src={product.imageUrl} alt="" className={styles.productThumbImg} />
+        ) : null}
       </div>
       <div className={styles.productMeta}>
-        <p
-          className={`${styles.productName} ${
-            product.layout === 'wide' ? styles.productNameWide : ''
-          }`}
-        >
-          {product.nameLines.map((line) => (
-            <FitLine key={line} className={styles.productNameLine}>
-              {line}
-            </FitLine>
-          ))}
+        <p className={`${styles.productName} ${styles.productNameWide}`}>
+          <FitLine className={styles.productNameLine}>{product.name}</FitLine>
         </p>
-        {product.price ? <p className={styles.productPrice}>{product.price}</p> : null}
-        {product.detailLines ? (
-          <p className={styles.productDetail}>
-            {product.detailLines.map((line) => (
-              <span key={line} style={{ display: 'block' }}>
-                {line}
-              </span>
-            ))}
-          </p>
-        ) : null}
+        {product.priceLabel ? <p className={styles.productPrice}>{product.priceLabel}</p> : null}
       </div>
     </div>
   )

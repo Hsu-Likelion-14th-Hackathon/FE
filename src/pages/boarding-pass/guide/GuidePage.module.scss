@@ -495,3 +495,40 @@
   line-height: 0.875rem;
   color: var(--mcm-color-muted);
 }
+
+/* 백엔드 콘텐츠 렌더용 — API 연동 후 추가 */
+
+/* AI 추천 층 마크. 배지 오른쪽에 작게 붙는다. */
+.aiPick {
+  margin-left: 0.375rem;
+  padding: 0.0625rem 0.375rem;
+  border-radius: 6.25rem;
+  background: rgb(192 115 70 / 35%);
+  color: #fff7d5;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* 층 목록·상세 로딩 한 줄 */
+.floorStatus {
+  margin: 2rem 0;
+  color: #fff7d5;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* LIST 블록 묶음 */
+.panelList {
+  display: flex;
+  margin: 0;
+  padding-left: 1.1em;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* IMAGE 블록 */
+.contentImage {
+  width: 100%;
+  border-radius: 0.5rem;
+}

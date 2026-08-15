@@ -4,6 +4,7 @@ import { API } from '@/shared/api/endpoints.js'
 
 import { getPassFixture } from '../devFixtures.js'
 import { issuedBoardingPass, scanSuccessResult, surveyQuestions } from '../fixtures/boardingPass.js'
+import { floorDetails, floorList, routeSteps } from '../fixtures/floors.js'
 
 /** 실제 서버와 같은 공통 래퍼로 감싼다. 목만 다른 모양이면 계약 오류가 숨는다. */
 const ok = (result) => HttpResponse.json({ isSuccess: true, code: 'COMMON2000', result })
@@ -42,4 +43,18 @@ export const boardingPassHandlers = [
     await delay(300)
     return ok(scanSuccessResult)
   }),
+  http.get(API.boardingPass.route(':boardingPassId'), () => ok(routeSteps)),
+  http.post(API.boardingPass.complete(':boardingPassId'), () =>
+    ok({
+      boardingPassId: issuedBoardingPass.boardingPassId,
+      status: 'COMPLETED',
+      stayMinutes: 46,
+      passportStampId: 7,
+      totalVisitCount: 1,
+    }),
+  ),
+  http.get(API.floor.list, () => ok(floorList)),
+  http.get(API.floor.detail(':floorId'), ({ params }) =>
+    ok(floorDetails[params.floorId] ?? { ...floorList.floors[0], contents: [] }),
+  ),
 ]

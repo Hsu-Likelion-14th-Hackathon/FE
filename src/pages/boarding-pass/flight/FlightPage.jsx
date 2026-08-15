@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
-import { getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
+import { completeBoardingPass, getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
 import cameraDotImg from '@/shared/assets/boarding-pass/flight/camera-dot.svg'
 import controlArrowImg from '@/shared/assets/boarding-pass/flight/control-arrow.svg'
 import controlBrightnessImg from '@/shared/assets/boarding-pass/flight/control-brightness.svg'
@@ -20,6 +20,7 @@ import BoardingPassStageBackdrop from '@/shared/layout/BoardingPassStageBackdrop
 import BoardingPassStageHeader from '@/shared/layout/BoardingPassStageHeader.jsx'
 import BoardingPassStepNav from '@/shared/layout/BoardingPassStepNav.jsx'
 import { FLIGHT_STEP, guideFloorFromStep } from '@/shared/layout/boardingPassSteps.js'
+import { useToast } from '@/shared/ui/toastContext.js'
 
 import styles from './FlightPage.module.scss'
 
@@ -33,6 +34,35 @@ export function Component() {
   const [pass, setPass] = useState(null)
   const [passStatus, setPassStatus] = useState('loading')
   const [ticketOpen, setTicketOpen] = useState(false)
+  const [ending, setEnding] = useState(false)
+  const { showToast } = useToast()
+
+  // 비행 종료 — 방문이 확정되어 여권 스탬프가 생긴다. 바로 여권으로 보내
+  // 찍힌 스탬프를 보여 준다.
+  async function handleEndFlight() {
+    if (ending) return
+    const passId = pass?.boardingPassId
+    if (!passId) {
+      navigate('/boarding-pass')
+      return
+    }
+
+    setEnding(true)
+    try {
+      await completeBoardingPass(passId)
+      navigate('/boarding-pass/passport')
+    } catch (cause) {
+      // 이미 종료된 패스 등 사유를 백엔드가 담아 준다. 그대로 알린다.
+      showToast(
+        <div className="pr-7">
+          <p className="text-sm leading-5">{cause?.message ?? '비행을 종료하지 못했습니다.'}</p>
+          <p className="mt-1 text-xs text-[#c07346]">잠시 후 다시 시도해 주세요</p>
+        </div>,
+        { position: 'center' },
+      )
+      setEnding(false)
+    }
+  }
   const sheetRef = useRef(null)
   const dragRef = useRef({ pointerId: null, startY: 0, startAt: 0, dy: 0 })
 
@@ -201,10 +231,11 @@ export function Component() {
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/boarding-pass')}
+                onClick={handleEndFlight}
+                disabled={ending}
                 className={styles.actionBtn}
               >
-                <span className={styles.actionBtnLabel}>비행 종료</span>
+                <span className={styles.actionBtnLabel}>{ending ? '종료 중…' : '비행 종료'}</span>
               </button>
             </div>
             <p className={styles.passportHint}>
