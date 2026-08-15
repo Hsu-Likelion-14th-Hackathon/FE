@@ -8,10 +8,13 @@ import { getPassport, getPassportStamps, getVisitDetail } from './passportApi.js
  * 문자열을 그리기만 할 뿐 손대지 않으니 여기가 마지막 방어선이다.
  */
 function respondWith(result) {
+  // apiFetch는 Content-Type을 믿지 않고 text로 읽은 뒤 파싱한다. Swagger가
+  // 모든 응답의 media type을 와일드카드로 선언해 헤더를 신뢰할 수 없어서다.
+  const body = JSON.stringify({ isSuccess: true, code: 'COMMON200', result })
   return vi.fn().mockResolvedValue({
     ok: true,
     status: 200,
-    json: () => Promise.resolve({ isSuccess: true, result }),
+    text: () => Promise.resolve(body),
   })
 }
 
