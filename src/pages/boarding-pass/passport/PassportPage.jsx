@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { PASSPORT_NAME_MAX_LENGTH, toPassportName } from '@/shared/lib/passportName.js'
@@ -17,16 +17,27 @@ import coverStar from '@/shared/assets/boarding-pass/passport/cover-star.png'
 import passportCover from '@/shared/assets/boarding-pass/passport/passport-cover.png'
 import passportEmblem from '@/shared/assets/boarding-pass/passport/passport-emblem.png'
 import passportSpread from '@/shared/assets/boarding-pass/passport/passport-spread.png'
-import passportStamp from '@/shared/assets/boarding-pass/passport/passport-stamp.png'
+import passportStamp from '@/shared/assets/boarding-pass/passport/passport-stamp.webp'
 import passportStampBow from '@/shared/assets/boarding-pass/passport/passport-stamp-bow.png'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import {
+  findCountryByStoredValue,
+  getCountryOption,
+} from '@/shared/ui/profile-fields/country-options.js'
 
 import { journeyRecords, passportTicket } from './passportData.js'
 import styles from './PassportPage.module.scss'
 import PassportPageTurn from './PassportPageTurn.jsx'
 
+/*
+ * 수정 칸은 시트를 열어야 보인다. 함께 묶으면 국가 223개 목록과 국기 CSS가
+ * 여권 첫 화면에 딸려 와, 정작 급한 3D 지면이 늦게 뜬다.
+ */
+const BirthDateSpinner = lazy(() => import('@/shared/ui/profile-fields/BirthDateSpinner.jsx'))
+const NationalitySelect = lazy(() => import('@/shared/ui/profile-fields/NationalitySelect.jsx'))
+
 const sheetLabels = {
-  name: '여권 이름 수정',
+  profile: '여권 신분 정보 수정',
   history: '여행 기록',
   'history-detail': '1F JOURNEY 상세',
   ticket: '탑승권',
@@ -42,18 +53,126 @@ function toDisplayName(profile) {
   return profile?.name ?? `${profile?.givenName ?? ''} ${profile?.surname ?? ''}`.trim()
 }
 
+/**
+ * 여권 지면 표기 ↔ API 표기.
+ *
+ * 지면은 Figma를 따라 `2000 01 01`로 그리지만, 백엔드와 달력 컴포넌트는 둘 다
+ * ISO(`2000-01-01`)를 쓴다(UserUpdateRequest.birthDate). 두 표기가 섞이면 달력이
+ * 값을 못 읽어 빈 채로 열린다.
+ */
+function toIsoBirthDate(display) {
+  return String(display ?? '')
+    .trim()
+    .replaceAll(' ', '-')
+}
+
+function toDisplayBirthDate(iso) {
+  return String(iso ?? '')
+    .slice(0, 10)
+    .replaceAll('-', ' ')
+}
+
+/**
+ * 지면에 찍는 국적.
+ *
+ * ISO 3166-1 alpha-3(`KOR`)를 그대로 쓴다. 공식 국명은 최대 46자
+ * (`Independent and Sovereign Republic of Kiribati`)라 197px 행에서 절반이
+ * 말줄임으로 사라진다. 실제 여권도 세 자리 코드를 찍는다.
+ */
+function toDisplayNationality(stored) {
+  return String(stored ?? '').toUpperCase()
+}
+
+/**
+ * 눌러서 고칠 수 있는 신분 정보 한 줄.
+ *
+ * 캔버스가 글자를 그리고 이 DOM은 투명하다. 버튼이 보이지 않으니 눌러서 고칠 수
+ * 있다는 걸 알 방법이 없어, 호버·포커스 때 글자 위에 표시를 얹는다.
+ *
+ * 호버와 포커스는 서로 독립이다. 하나로 합치면 키보드로 머문 채 마우스가
+ * 스치기만 해도(pointerleave) 표시가 사라진다. 둘 다 풀렸을 때만 지운다.
+ * 표시할 자리는 44px 클릭 영역이 아니라 실제 글자 상자다.
+ */
+function EditableRow({
+  label,
+  value,
+  editLabel,
+  cueLabel,
+  isRestoringFocus,
+  onNameHover,
+  onEdit,
+  resetKey,
+}) {
+  const active = useRef({ hover: false, focus: false })
+  const sync = (event) => {
+    const { hover, focus } = active.current
+    onNameHover?.(hover || focus ? event.currentTarget.querySelector('strong') : null)
+  }
+
+  // 지면을 넘기거나 시트가 열리면 pointerleave 없이 버튼이 사라진다. 켜진 채
+  // 남은 상태를 털지 않으면 돌아왔을 때 만진 적 없는 표시가 뜬다.
+  useEffect(() => {
+    active.current = { hover: false, focus: false }
+  }, [resetKey])
+
+  return (
+    <p>
+      {label}{' '}
+      <button
+        className={styles.nameButton}
+        type="button"
+        aria-label={editLabel}
+        onPointerEnter={(event) => {
+          active.current.hover = true
+          sync(event)
+        }}
+        onPointerLeave={(event) => {
+          active.current.hover = false
+          sync(event)
+        }}
+        onFocus={(event) => {
+          // 시트를 닫으면 초점이 여기로 돌아온다. 그건 사용자가 이 줄로 온 것이
+          // 아니므로 표시를 켜지 않는다.
+          if (isRestoringFocus?.()) return
+          active.current.focus = true
+          sync(event)
+        }}
+        onBlur={(event) => {
+          active.current.focus = false
+          sync(event)
+        }}
+        onClick={onEdit}
+      >
+        {/* 호버 표시가 이 글자 상자를 재고, 무엇을 고치는 줄인지도 여기서 읽는다. */}
+        <strong data-cue-label={cueLabel}>{value}</strong>
+      </button>
+    </p>
+  )
+}
+
 export function Component() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [sheet, setSheet] = useState(null)
-  // 여권 이름은 사용자가 직접 고칠 수 있다. 캔버스도 이 값으로 다시 굽는다.
-  const [nameOverride, setNameOverride] = useState(null)
+  // 신분 정보는 사용자가 직접 고칠 수 있다. 캔버스도 이 값으로 다시 굽는다.
+  // 저장 형식은 PATCH /users/me(UserUpdateRequest)와 같은 { name, birthDate,
+  // nationality }다. birthDate는 ISO, nationality는 `Republic of Korea` 표기다.
+  const [profileEdit, setProfileEdit] = useState(null)
   const [nameDraft, setNameDraft] = useState('')
-  // 매 렌더 새 객체를 넘기면 텍스처를 통째로 다시 굽는다. 이름이 바뀔 때만 바꾼다.
-  const profileOverride = useMemo(
-    () => (nameOverride ? { name: nameOverride } : null),
-    [nameOverride],
-  )
+  const [birthDraft, setBirthDraft] = useState('')
+  // NationalitySelect는 국가 코드를 다룬다. 저장할 때 API 표기로 옮긴다.
+  const [countryDraft, setCountryDraft] = useState('')
+  // 달력과 국가 목록은 한 번에 하나만 열린다. 겹치면 서로를 가린다.
+  const [openPicker, setOpenPicker] = useState(null)
+  // 매 렌더 새 객체를 넘기면 텍스처를 통째로 다시 굽는다. 값이 바뀔 때만 바꾼다.
+  const profileOverride = useMemo(() => {
+    if (!profileEdit) return null
+    return {
+      name: profileEdit.name,
+      birthDate: toDisplayBirthDate(profileEdit.birthDate),
+      nationality: toDisplayNationality(profileEdit.nationality),
+    }
+  }, [profileEdit])
   // 한글은 ㅇ→아→안 처럼 조합을 거친다. 조합 중에 값을 바꾸면 IME가 되돌리므로
   // (모바일 키보드에서 특히) 조합이 끝난 뒤에 걸러낸다.
   const composingName = useRef(false)
@@ -95,6 +214,7 @@ export function Component() {
     // 다시 열었을 때 지난 안내와 흐림이 남아 있으면 안 된다.
     setNameRejected(false)
     setNameBlocked(false)
+    setOpenPicker(null)
     composingName.current = false
     restoringFocus.current = true
     requestAnimationFrame(() => {
@@ -102,20 +222,28 @@ export function Component() {
       restoringFocus.current = false
     })
   }
+  // 초점 잡기는 시트가 열릴 때 한 번뿐이다. 달력을 여닫을 때마다 다시 돌면
+  // 초점이 첫 입력칸으로 끌려와 날짜를 고를 수가 없다.
   useEffect(() => {
-    if (!sheet) return undefined
+    if (!sheet) return
     const dialog = dialogRef.current
     dialog.scrollTop = 0
     // 이름 수정처럼 입력이 있는 시트는 입력칸부터 잡아야 한다. 버튼을 먼저
     // 찾으면 저장 버튼에 초점이 가서 바로 칠 수가 없다.
     const initialFocus = dialog?.querySelector('input, button') ?? dialog
     initialFocus?.focus()
+  }, [sheet])
+
+  useEffect(() => {
+    if (!sheet) return undefined
     const onKeyDown = (event) => {
-      if (event.key === 'Escape') closeSheet()
+      // 달력이나 국가 목록이 떠 있으면 그쪽이 먼저 Escape를 먹는다. 여기서도
+      // 닫으면 시트까지 한 번에 사라져 고르던 값을 잃는다.
+      if (event.key === 'Escape' && !openPicker) closeSheet()
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [sheet])
+  }, [openPicker, sheet])
 
   return (
     <div className={styles.page}>
@@ -167,12 +295,17 @@ export function Component() {
                 profile={visibleProfile}
                 stamps={visibleStamps}
                 onNameHover={helpers?.onNameHover}
-                onEditName={(event, current) => {
-                  setNameDraft(current)
+                // 세 칸이 한 시트를 함께 쓴다. 백엔드도 셋을 한 번에 받으므로
+                // (UserUpdateRequest는 셋 다 필수) 어느 칸을 눌러도 같은 화면이다.
+                onEditProfile={(event) => {
+                  setNameDraft(toDisplayName(visibleProfile))
+                  setBirthDraft(toIsoBirthDate(visibleProfile?.birthDate))
+                  setCountryDraft(findCountryByStoredValue(visibleProfile?.nationality)?.code ?? '')
                   setNameRejected(false)
                   setNameBlocked(false)
+                  setOpenPicker(null)
                   composingName.current = false
-                  openSheet('name', event.currentTarget)
+                  openSheet('profile', event.currentTarget)
                 }}
                 onHistory={(event) => openSheet('history', event.currentTarget)}
                 onTicket={(event) => openSheet('ticket', event.currentTarget)}
@@ -202,7 +335,7 @@ export function Component() {
                   onSelectJourney={(event) => openSheet('history-detail', event.currentTarget)}
                 />
               ) : null}
-              {sheet === 'name' ? (
+              {sheet === 'profile' ? (
                 <form
                   className={styles.nameForm}
                   onSubmit={(event) => {
@@ -221,11 +354,18 @@ export function Component() {
                       setNameRejected(true)
                       return
                     }
-                    setNameOverride(next)
+                    // PATCH /users/me(UserUpdateRequest)와 같은 모양으로 담는다.
+                    // birthDate는 ISO, nationality는 `Republic of Korea` 표기다.
+                    setProfileEdit({
+                      name: next,
+                      birthDate: birthDraft,
+                      // 백엔드도 같은 세 자리 코드를 받는다(UserUpdateRequest.nationality).
+                      nationality: getCountryOption(countryDraft)?.alpha3 ?? '',
+                    })
                     closeSheet()
                   }}
                 >
-                  <h3 className={styles.sheetTitle}>NAME</h3>
+                  <h3 className={styles.sheetTitle}>신분 정보</h3>
                   <label className={styles.nameLabel} htmlFor="passport-name">
                     여권에 표기할 영문 이름
                   </label>
@@ -263,6 +403,17 @@ export function Component() {
                       여권 표기에 맞춰 영문 대문자로만 입력됩니다. 한글은 입력할 수 없습니다.
                     </p>
                   )}
+                  {/* 달력은 여섯 주짜리 격자라 아래에서 올라오는 시트에 넣으면
+                      자리를 다 먹는다. 태어난 해는 목록에서 바로 고르는 편이 빠르다. */}
+                  <Suspense fallback={<p className={styles.fieldsLoading}>불러오는 중…</p>}>
+                    <BirthDateSpinner value={birthDraft} onChange={setBirthDraft} />
+                    <NationalitySelect
+                      value={countryDraft}
+                      onChange={setCountryDraft}
+                      isOpen={openPicker === 'nationality'}
+                      onOpenChange={(isOpen) => setOpenPicker(isOpen ? 'nationality' : null)}
+                    />
+                  </Suspense>
                   <button className={styles.nameSubmit} type="submit">
                     저장
                   </button>
@@ -299,29 +450,23 @@ function PassportSpread({
   profile,
   stamps = [],
   onNameHover,
-  onEditName,
+  onEditProfile,
   onHistory,
   onTicket,
   onProducts,
 }) {
   const displayName = toDisplayName(profile)
-  // 호버와 포커스는 서로 독립이다. 하나로 합치면 키보드로 이름에 머문 채
-  // 마우스가 스치기만 해도(pointerleave) 표시가 사라진다. 둘 다 풀렸을 때만
-  // 지운다. 표시할 자리는 44px 클릭 영역이 아니라 실제 글자 상자다.
-  const nameActive = useRef({ hover: false, focus: false })
-  const syncNameCue = (event) => {
-    const { hover, focus } = nameActive.current
-    onNameHover?.(hover || focus ? event.currentTarget.querySelector('strong') : null)
-  }
 
   // 버튼이 손 밑에서 사라지는 두 경우가 있다. 지면을 넘기면 통째로 없어지고,
   // 시트가 열리면 inert가 되어 포인터 이벤트가 끊긴다. 둘 다 pointerleave가
   // 오지 않아 hover가 켜진 채 남고, 돌아왔을 때 만진 적 없는 표시가 뜬다.
-  // 상태를 털고 표시도 함께 내린다.
+  // 표시를 내리고, 각 줄도 제 상태를 턴다(resetKey).
   useEffect(() => {
-    nameActive.current = { hover: false, focus: false }
     onNameHover?.(null)
   }, [onNameHover, sheetOpen, step])
+
+  const resetKey = `${sheetOpen}|${step}`
+  const editable = { isRestoringFocus, onNameHover, onEdit: onEditProfile, resetKey }
 
   if (step === 0) {
     return (
@@ -359,46 +504,29 @@ function PassportSpread({
           <p>
             NUMBER <strong>{profile.passportNumber}</strong>
           </p>
-          <p>
-            NATIONALITY <strong>{profile.nationality}</strong>
-          </p>
-          {/* 캔버스가 글자를 그리고 이 DOM은 투명하다. 누르면 이름을 고칠 수
-              있다는 표시는 시트를 열어 보여준다. */}
-          <p>
-            NAME{' '}
-            <button
-              className={styles.nameButton}
-              type="button"
-              aria-label={`이름 ${displayName} 수정`}
-              // 캔버스가 글자를 그려 버튼은 보이지 않는다. 눌러서 고칠 수 있다는
-              // 걸 알 방법이 없으므로 호버·포커스 때 글자 위에 표시를 얹는다.
-              onPointerEnter={(event) => {
-                nameActive.current.hover = true
-                syncNameCue(event)
-              }}
-              onPointerLeave={(event) => {
-                nameActive.current.hover = false
-                syncNameCue(event)
-              }}
-              onFocus={(event) => {
-                // 시트를 닫으면 초점이 여기로 돌아온다. 그건 사용자가 이름으로
-                // 온 것이 아니므로 표시를 켜지 않는다.
-                if (isRestoringFocus?.()) return
-                nameActive.current.focus = true
-                syncNameCue(event)
-              }}
-              onBlur={(event) => {
-                nameActive.current.focus = false
-                syncNameCue(event)
-              }}
-              onClick={(event) => onEditName(event, displayName)}
-            >
-              <strong>{displayName}</strong>
-            </button>
-          </p>
-          <p>
-            DATE OF BIRTH <strong>{profile?.birthDate}</strong>
-          </p>
+          {/* 백엔드가 셋을 한 번에 받으므로(UserUpdateRequest) 어느 줄을 눌러도
+              같은 시트가 열린다. */}
+          <EditableRow
+            label="NATIONALITY"
+            value={profile.nationality}
+            editLabel={`국적 ${profile.nationality} 수정`}
+            cueLabel="국적 수정"
+            {...editable}
+          />
+          <EditableRow
+            label="NAME"
+            value={displayName}
+            editLabel={`이름 ${displayName} 수정`}
+            cueLabel="이름 수정"
+            {...editable}
+          />
+          <EditableRow
+            label="DATE OF BIRTH"
+            value={profile?.birthDate}
+            editLabel={`생년월일 ${profile?.birthDate ?? ''} 수정`}
+            cueLabel="생년월일 수정"
+            {...editable}
+          />
           <p>
             DATE OF ISSUE <strong>{profile.issueDate}</strong>
           </p>
@@ -436,7 +564,9 @@ function PassportSpread({
             {/* 캔버스도 여섯 칸(3열 2행)만 그린다. 더 읽어 주면 화면과 어긋난다. */}
             {stamps.slice(0, 6).map((stamp) => (
               <li key={stamp.id ?? stamp.date}>
-                <img src={passportStamp} alt="" />
+                {/* 캔버스와 같은 그림을 가리켜야 한다. 백엔드가 방문마다 다른
+                    스탬프를 주면 여기도 따라간다. */}
+                <img src={stamp.imageUrl ?? passportStamp} alt="" />
                 <time>{stamp.date}</time>
               </li>
             ))}

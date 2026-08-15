@@ -2,7 +2,8 @@ export const passportProfile = {
   passportNumber: '0001',
   surname: 'LIM',
   givenName: 'YEONJU',
-  nationality: 'REPUBLIC OF KOREA',
+  // 여권은 ISO 3166-1 alpha-3을 찍는다. 백엔드도 같은 값을 준다.
+  nationality: 'KOR',
   birthDate: '2000 01 01',
   issueDate: '2026 08 25',
   credit: 100,

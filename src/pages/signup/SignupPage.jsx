@@ -5,8 +5,8 @@ import backIcon from '@/assets/icons/auth/back.svg'
 import userIcon from '@/assets/icons/auth/user.svg'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
-import BirthDateField from './components/BirthDateField.jsx'
-import NationalitySelect from './components/NationalitySelect.jsx'
+import BirthDateField from '@/shared/ui/profile-fields/BirthDateField.jsx'
+import NationalitySelect from '@/shared/ui/profile-fields/NationalitySelect.jsx'
 import { PASSPORT_NAME_MAX_LENGTH, toPassportName } from '@/shared/lib/passportName.js'
 
 import styles from './SignupPage.module.scss'

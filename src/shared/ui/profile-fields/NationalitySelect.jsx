@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import 'country-flag-icons/3x2/flags.css'
 
@@ -10,6 +10,20 @@ import mapPinMutedIcon from '@/assets/icons/auth/map-pin-muted.svg'
 
 import { countryOptions, getCountryOption } from './country-options.js'
 import styles from './NationalitySelect.module.scss'
+
+/**
+ * 목록 맨 위에 고정할 국가.
+ *
+ * 250개를 알파벳순으로 훑게 두면 대한민국을 고르는 데도 한참 걸린다. MCM HAUS를
+ * 찾는 사람 대부분은 이 여섯 중 하나라 위로 올려 한 번에 끝나게 한다.
+ * 검색을 시작하면 이 구분은 사라지고 결과만 남는다.
+ */
+const PINNED_CODES = ['KR', 'JP', 'US', 'CN', 'FR', 'DE']
+
+const pinnedCountries = PINNED_CODES.map((code) => getCountryOption(code)).filter(Boolean)
+const restCountries = countryOptions.filter((country) => !PINNED_CODES.includes(country.code))
+/** 검색 전 기본 순서. 하나의 평평한 배열이라 위아래 이동은 두 묶음을 그냥 넘나든다. */
+const defaultCountries = [...pinnedCountries, ...restCountries]
 
 function normalizeSearchText(value) {
   return value
@@ -56,12 +70,13 @@ export default function NationalitySelect({ value, onChange, isOpen, onOpenChang
   const [activeIndex, setActiveIndex] = useState(0)
 
   const selectedCountry = getCountryOption(value)
+  const pinnedCount = pinnedCountries.length
 
   const filteredCountries = useMemo(() => {
     const normalizedQuery = normalizeSearchText(query)
 
     if (!normalizedQuery) {
-      return countryOptions
+      return defaultCountries
     }
 
     return countryOptions.filter((country) => {
@@ -89,7 +104,9 @@ export default function NationalitySelect({ value, onChange, isOpen, onOpenChang
   )
 
   const openList = ({ focusOption = false, index } = {}) => {
-    const selectedIndex = countryOptions.findIndex(
+    // 열 때는 검색이 비므로 기준도 기본 순서다. countryOptions로 재면 자주 찾는
+    // 국가를 위로 올린 만큼 초점이 엉뚱한 줄에 간다.
+    const selectedIndex = defaultCountries.findIndex(
       (country) => country.code === selectedCountry?.code,
     )
     const nextIndex = index ?? Math.max(selectedIndex, 0)
@@ -163,10 +180,10 @@ export default function NationalitySelect({ value, onChange, isOpen, onOpenChang
     }
 
     event.preventDefault()
-    const selectedIndex = countryOptions.findIndex(
+    const selectedIndex = defaultCountries.findIndex(
       (country) => country.code === selectedCountry?.code,
     )
-    const index = event.key === 'ArrowUp' ? countryOptions.length - 1 : Math.max(selectedIndex, 0)
+    const index = event.key === 'ArrowUp' ? defaultCountries.length - 1 : Math.max(selectedIndex, 0)
 
     if (isOpen) {
       focusOption(index)
@@ -265,7 +282,9 @@ export default function NationalitySelect({ value, onChange, isOpen, onOpenChang
         <img className={styles.chevron} src={countryChevron} alt="" aria-hidden="true" />
       </button>
 
-      <input type="hidden" name="nationality" value={selectedCountry?.apiValue ?? ''} />
+      {/* 백엔드는 ISO 3166-1 alpha-3을 받는다(ProfileRequest / UserUpdateRequest).
+          공식 국명은 최대 46자라 여권 지면에서 절반이 잘려 나간다. */}
+      <input type="hidden" name="nationality" value={selectedCountry?.alpha3 ?? ''} />
 
       {isOpen ? (
         <div className={styles.panel}>
@@ -291,28 +310,41 @@ export default function NationalitySelect({ value, onChange, isOpen, onOpenChang
                 const isActive = index === activeIndex
 
                 return (
-                  <button
-                    className={`${styles.option} ${isSelected ? styles.optionSelected : ''} ${isActive ? styles.optionActive : ''}`}
-                    key={country.code}
-                    ref={(element) => {
-                      optionRefs.current[index] = element
-                    }}
-                    type="button"
-                    role="option"
-                    tabIndex={isActive ? 0 : -1}
-                    aria-label={`${country.nativeName} (${country.englishName})`}
-                    aria-selected={isSelected}
-                    onClick={() => handleCountrySelect(country)}
-                    onFocus={() => setActiveIndex(index)}
-                    onKeyDown={(event) => handleOptionKeyDown(event, index)}
-                    onPointerMove={() => setActiveIndex(index)}
-                  >
-                    <span
-                      className={`${styles.optionFlag} flag:${country.code}`}
-                      aria-hidden="true"
-                    />
-                    <CountryName country={country} className={styles.optionName} />
-                  </button>
+                  <Fragment key={country.code}>
+                    {/* 고정 묶음과 전체 목록의 경계. 검색 중에는 순서가 하나뿐이라
+                        머리말을 붙이지 않는다. 화면에서는 구분선 겸 이름표다. */}
+                    {!query && index === 0 ? (
+                      <p className={styles.groupLabel} role="presentation">
+                        자주 찾는 국가
+                      </p>
+                    ) : null}
+                    {!query && index === pinnedCount ? (
+                      <p className={styles.groupLabel} role="presentation">
+                        전체 국가
+                      </p>
+                    ) : null}
+                    <button
+                      className={`${styles.option} ${isSelected ? styles.optionSelected : ''} ${isActive ? styles.optionActive : ''}`}
+                      ref={(element) => {
+                        optionRefs.current[index] = element
+                      }}
+                      type="button"
+                      role="option"
+                      tabIndex={isActive ? 0 : -1}
+                      aria-label={`${country.nativeName} (${country.englishName})`}
+                      aria-selected={isSelected}
+                      onClick={() => handleCountrySelect(country)}
+                      onFocus={() => setActiveIndex(index)}
+                      onKeyDown={(event) => handleOptionKeyDown(event, index)}
+                      onPointerMove={() => setActiveIndex(index)}
+                    >
+                      <span
+                        className={`${styles.optionFlag} flag:${country.code}`}
+                        aria-hidden="true"
+                      />
+                      <CountryName country={country} className={styles.optionName} />
+                    </button>
+                  </Fragment>
                 )
               })
             ) : (

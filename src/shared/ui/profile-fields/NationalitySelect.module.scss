@@ -141,8 +141,16 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-gutter: stable;
   -webkit-overflow-scrolling: touch;
+  /* 스크롤은 살리되 막대는 감춘다. 여권 시트처럼 어두운 화면에서는 회색 막대가
+     둥근 모서리 위로 지나가 겉돈다. scrollbar-gutter로 자리를 비워 두던 것도
+     막대가 없으면 오른쪽만 빈 것처럼 보여 함께 걷어낸다. */
+  scrollbar-width: none;
+}
+
+/* 사파리·크롬은 scrollbar-width를 아직 안 받는 버전이 있어 함께 둔다. */
+.options::-webkit-scrollbar {
+  display: none;
 }
 
 .option {
@@ -173,8 +181,10 @@
   font-weight: 600;
 }
 
+/* 손이 얹힌 줄. 흰색을 박아 두면 어두운 화면(여권 시트)에서 번쩍인다.
+   화면이 정하는 값을 쓴다. */
 .optionActive {
-  background: #f7f1ed;
+  background: var(--mcm-color-hover-surface);
 }
 
 .optionName {
@@ -240,4 +250,19 @@
   .option {
     transition: background-color 120ms ease;
   }
+}
+
+/* 고정 묶음과 전체 목록을 가르는 머리말. 목록 항목이 아니므로 위아래 이동과
+   선택에는 끼지 않는다(role="presentation"). */
+.groupLabel {
+  position: sticky;
+  top: 0;
+  margin: 0;
+  padding: 8px 12px 4px;
+  border-bottom: 1px solid var(--mcm-color-border);
+  background: var(--mcm-color-canvas);
+  color: var(--mcm-color-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
 }

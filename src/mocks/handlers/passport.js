@@ -15,7 +15,7 @@ function ok(result) {
 const passport = {
   passportNo: '0001',
   name: 'YEONJU LIM',
-  nationality: 'Republic of Korea',
+  nationality: 'KOR',
   birthDate: '2000-01-01',
   issuedOn: '2026-08-25',
   creditBalance: 100,
