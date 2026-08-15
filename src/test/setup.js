@@ -3,6 +3,8 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, vi } from 'vitest'
 
+import { clearAccessToken } from '@/shared/api/authToken.js'
+
 afterEach(cleanup)
 
 /**
@@ -16,6 +18,19 @@ afterEach(cleanup)
  * 로컬을 CI와 같은 조건으로 맞춘다. 특정 응답이 필요한 테스트는 자기 파일에서
  * vi.stubGlobal('fetch', ...)로 덮어쓰면 된다.
  */
+/**
+ * 테스트는 로그인하지 않은 상태에서 시작한다.
+ *
+ * vitest는 DEV로 도는 탓에 .env의 VITE_BEARER_TOKEN이 그대로 초기값이 된다.
+ * 그러면 화면마다 세션 복원(/users/me)이 돌아, .env를 둔 로컬에서만 비동기
+ * 작업이 하나 더 끼어들며 타이밍에 민감한 테스트가 흔들린다. 로그인 상태가
+ * 필요한 테스트는 자기 파일에서 setAccessToken으로 만들면 된다.
+ */
+beforeEach(() => {
+  clearAccessToken()
+  sessionStorage.clear()
+})
+
 beforeEach(() => {
   vi.stubGlobal(
     'fetch',

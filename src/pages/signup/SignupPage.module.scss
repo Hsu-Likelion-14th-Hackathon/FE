@@ -221,6 +221,23 @@
   transition: color 0.12s ease;
 }
 
+/* 칸 옆에 붙는 실패 사유. 라벨과 같은 줄에 두어 어느 칸의 문제인지 바로 보인다.
+   필수 표시(*)와 같은 크기라 줄 높이가 흔들리지 않는다. */
+.fieldError {
+  margin-left: auto;
+  color: #d14343;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  text-align: right;
+}
+
+/* 문제가 있는 칸을 함께 표시한다. 글자만으로는 어느 칸인지 놓치기 쉽다.
+   테두리는 .input이 아니라 감싸는 .inputShell이 갖고 있다. */
+.inputShellInvalid {
+  border-color: #d14343;
+}
+
 /* 가입 실패 사유. 백엔드 message를 그대로 싣고 화면에 남긴다. */
 .errorNotice {
   display: flex;

@@ -108,7 +108,12 @@ export function Component() {
   // 로그인해야 하는지까지 담겨 온다.
   const [error, setError] = useState(null)
   const [openPicker, setOpenPicker] = useState(null)
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  // 이미 쓰인 이메일이면 그 조합으로는 더 갈 곳이 없다. 다음 동작이 오면
+  // 칸을 비워 새 이메일부터 치게 한다. 지우는 시점을 미루는 이유는, 실패하자마자
+  // 비우면 사용자가 방금 무엇을 넣었는지 확인할 새가 없기 때문이다.
+  const [resetArmed, setResetArmed] = useState(false)
   // 규칙은 처음부터 보여 주되, 통과 여부 표시는 한 글자라도 친 뒤에 켠다.
   // 빈 칸에 빨간 표시가 다섯 개 떠 있으면 혼내는 화면처럼 보인다.
   const [passwordTouched, setPasswordTouched] = useState(false)
@@ -166,9 +171,25 @@ export function Component() {
       setStep('profile')
     } catch (signupError) {
       setError(signupError)
+      setResetArmed(true)
     } finally {
       setSubmitting(false)
     }
+  }
+
+  /**
+   * 실패를 한 번 보여 준 뒤, 다음 동작이 오면 계정 칸을 비운다.
+   *
+   * 이미 쓰인 이메일이라 같은 값으로는 다시 시도해도 결과가 같다. 지우고
+   * 처음부터 치는 편이 고쳐 쓰는 것보다 빠르다.
+   */
+  function consumeReset() {
+    if (!resetArmed) return
+    setResetArmed(false)
+    setEmail('')
+    setPassword('')
+    setPasswordTouched(false)
+    setError(null)
   }
 
   async function handleProfileSubmit(event) {
@@ -221,7 +242,14 @@ export function Component() {
         </header>
 
         {step === 'account' ? (
-          <form className={styles.form} onSubmit={handleAccountSubmit}>
+          // 화면 어디를 건드리든 다음 동작으로 본다. 캡처 단계에서 받아야
+          // 입력칸을 눌러 초점이 들어가기 전에 비울 수 있다.
+          <form
+            className={styles.form}
+            onSubmit={handleAccountSubmit}
+            onPointerDownCapture={consumeReset}
+            onKeyDownCapture={consumeReset}
+          >
             <div className={styles.fields}>
               <div className={styles.fieldGroup}>
                 <label className={styles.label} htmlFor="signup-email">
@@ -230,8 +258,15 @@ export function Component() {
                     *
                   </span>
                   <span className="sr-only">필수 입력</span>
+                  {/* 이메일 문제라 이메일 칸 옆에 붙인다. 다른 칸에 두면 어디를
+                      고쳐야 하는지 눈으로도 스크린리더로도 알 수 없다. */}
+                  {error ? (
+                    <span className={styles.fieldError} id="signup-email-error" role="alert">
+                      {error.message || '가입하지 못했습니다. 잠시 후 다시 시도해 주세요.'}
+                    </span>
+                  ) : null}
                 </label>
-                <div className={styles.inputShell}>
+                <div className={`${styles.inputShell} ${error ? styles.inputShellInvalid : ''}`}>
                   <input
                     className={styles.input}
                     id="signup-email"
@@ -239,6 +274,10 @@ export function Component() {
                     type="email"
                     autoComplete="email"
                     placeholder="이메일 주소를 입력해 주세요"
+                    aria-invalid={error ? true : undefined}
+                    aria-describedby={error ? 'signup-email-error' : undefined}
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
                     required
                   />
                 </div>
@@ -273,7 +312,11 @@ export function Component() {
               </div>
             </div>
 
-            <SignupError error={error} />
+            {error?.code === EMAIL_ALREADY_REGISTERED ? (
+              <Link className={styles.errorAction} to="/login">
+                로그인 화면으로 이동
+              </Link>
+            ) : null}
 
             <button className={styles.submitButton} type="submit" disabled={submitting}>
               {submitting ? '확인 중…' : '다음'}

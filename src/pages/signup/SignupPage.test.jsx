@@ -193,10 +193,13 @@ describe('SignupPage', () => {
     fireEvent.change(screen.getByLabelText(/비밀번호/), { target: { value: 'Passw0rd!' } })
     fireEvent.click(screen.getByRole('button', { name: '다음' }))
 
+    // 이메일 문제라 이메일 칸 옆에 붙는다. 다른 칸에 두면 어디를 고쳐야
+    // 하는지 눈으로도 스크린리더로도 알 수 없다.
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent('카카오 로그인을 이용해주세요')
+    expect(screen.getByLabelText(/이메일 주소/)).toHaveAttribute('aria-invalid', 'true')
     // 토스트로 띄우면 사라져서 안내를 다시 볼 수 없다. 화면에 남기고 갈 곳도 준다.
-    expect(within(alert).getByRole('link', { name: '로그인 화면으로 이동' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: '로그인 화면으로 이동' })).toHaveAttribute(
       'href',
       '/login',
     )
@@ -242,5 +245,38 @@ describe('SignupPage', () => {
     // 대문자·숫자·특수문자 세 가지가 빠졌다.
     expect(screen.getAllByText(/아직 충족하지 않음/)).toHaveLength(3)
     expect(screen.queryByLabelText(/이름/)).not.toBeInTheDocument()
+  })
+
+  it('실패를 한 번 보여 준 뒤 다음 동작이 오면 계정 칸을 비운다', async () => {
+    signup.mockRejectedValue(
+      Object.assign(new Error('이미 가입된 이메일입니다'), {
+        name: 'ApiError',
+        status: 409,
+        code: 'EMAIL_ALREADY_REGISTERED',
+      }),
+    )
+
+    render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>,
+    )
+
+    const email = screen.getByLabelText(/이메일 주소/)
+    const password = screen.getByLabelText(/비밀번호/)
+    fireEvent.change(email, { target: { value: 'a@b.c' } })
+    fireEvent.change(password, { target: { value: 'Passw0rd!' } })
+    fireEvent.click(screen.getByRole('button', { name: '다음' }))
+
+    await screen.findByRole('alert')
+    // 실패하자마자 비우면 방금 무엇을 넣었는지 확인할 새가 없다.
+    expect(email).toHaveValue('a@b.c')
+
+    // 같은 이메일로는 결과가 같다. 다음 동작이 오면 처음부터 치게 한다.
+    fireEvent.pointerDown(email)
+
+    expect(email).toHaveValue('')
+    expect(password).toHaveValue('')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })

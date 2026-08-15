@@ -27,6 +27,9 @@ describe('application startup', () => {
 
   test('starts MSW in development by default', async () => {
     vi.stubEnv('DEV', true)
+    // 개발자의 .env에 VITE_ENABLE_MSW=false가 있으면 그 값을 그대로 읽어
+    // "기본값"을 검증하지 못한다. 기본 상태를 여기서 못 박는다.
+    vi.stubEnv('VITE_ENABLE_MSW', undefined)
 
     await import('./main.jsx')
 
@@ -46,6 +49,7 @@ describe('application startup', () => {
 
   test('renders when starting MSW fails', async () => {
     vi.stubEnv('DEV', true)
+    vi.stubEnv('VITE_ENABLE_MSW', undefined)
     const error = new Error('worker failed')
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     start.mockRejectedValueOnce(error)

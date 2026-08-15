@@ -246,6 +246,10 @@
 
 .loginButton {
   display: flex;
+  /* 로그인 전에는 링크, 로그인한 뒤에는 버튼이 이 자리를 쓴다. 버튼의 기본
+     테두리와 폭을 지워야 두 상태의 생김새가 같다. */
+  width: 100%;
+  border: 0;
   height: 50px;
   align-items: center;
   justify-content: center;
