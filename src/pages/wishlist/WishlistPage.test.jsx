@@ -126,9 +126,8 @@ describe('WishlistPage', () => {
     getWishlist.mockRejectedValue(Object.assign(new Error('인증이 필요합니다.'), { status: 401 }))
     renderWishlist()
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      '위시리스트를 보려면 로그인이 필요합니다.',
-    )
+    // 탑승 안내 카드 — CHECK-IN 라벨과 로그인 CTA가 함께 나온다.
+    expect(await screen.findByRole('alert')).toHaveTextContent('로그인이 필요한 공간입니다')
     expect(screen.getByRole('link', { name: '로그인하기' })).toHaveAttribute('href', '/login')
   })
 })

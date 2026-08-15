@@ -8,6 +8,14 @@
   min-height: calc(var(--mcm-viewport-stable) - 97px - var(--mcm-safe-top));
 }
 
+/* 로딩 한 줄. 카드가 오기 전 자리를 조용히 지킨다. */
+.status {
+  margin: 2.5rem 1.25rem;
+  color: var(--mcm-color-muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
 .collectionTabs {
   display: flex;
   height: 40px;

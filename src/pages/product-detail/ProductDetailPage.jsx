@@ -7,6 +7,7 @@ import { addToWishlist, removeFromWishlist } from '@/shared/api/wishlistApi.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import { HeartIcon } from '@/shared/ui/icons/StoreIcons.jsx'
 import ProductArtwork from '@/shared/ui/product-card/ProductArtwork.jsx'
+import StateNotice from '@/shared/ui/state-notice/StateNotice.jsx'
 
 import styles from './ProductDetailPage.module.scss'
 
@@ -105,12 +106,17 @@ export function Component() {
         <StoreHeader />
         <div className={styles.notFound}>
           <h1>상품 상세</h1>
-          <p role="alert">
-            {error && error.status !== 404
-              ? (error.message ?? '상품을 불러오지 못했습니다.')
-              : '요청한 상품을 찾을 수 없습니다.'}
-          </p>
-          <Link to="/products">상품 목록으로 돌아가기</Link>
+          <StateNotice
+            role="alert"
+            eyebrow="Notice"
+            message={
+              error && error.status !== 404
+                ? (error.message ?? '상품을 불러오지 못했습니다.')
+                : '요청한 상품을 찾을 수 없습니다.'
+            }
+            hint="다른 컬렉션에서 여정을 이어가세요"
+            action={{ label: '상품 목록으로 돌아가기', to: '/products' }}
+          />
         </div>
       </div>
     )

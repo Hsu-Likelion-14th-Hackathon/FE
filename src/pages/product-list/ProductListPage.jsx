@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router'
 
 import collectionImage from '@/assets/images/home/aw26-collection.webp'
 import { getProducts, toRepresentativeList } from '@/shared/api/productApi.js'
@@ -7,6 +6,7 @@ import { addToWishlist, removeFromWishlist } from '@/shared/api/wishlistApi.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import ProductCard from '@/shared/ui/product-card/ProductCard.jsx'
 import ScrollFade from '@/shared/ui/scroll-fade/ScrollFade.jsx'
+import StateNotice from '@/shared/ui/state-notice/StateNotice.jsx'
 
 import styles from './ProductListPage.module.scss'
 
@@ -16,6 +16,8 @@ const collectionDescription =
 export function Component() {
   const [products, setProducts] = useState(null)
   const [error, setError] = useState(null)
+  // '다시 시도'가 올릴 때마다 조회 effect가 다시 돈다.
+  const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -34,7 +36,13 @@ export function Component() {
       })
 
     return () => controller.abort()
-  }, [])
+  }, [retryCount])
+
+  const retryLoad = () => {
+    setProducts(null)
+    setError(null)
+    setRetryCount((count) => count + 1)
+  }
 
   const setWished = (productColorId, isWished) => {
     setProducts((current) =>
@@ -98,17 +106,25 @@ export function Component() {
           ))}
         </section>
 
+        {/* 목록은 로그인해야 볼 수 있다. 토큰이 없으면 여기서 막힌다. */}
         {error ? (
-          <p className={styles.status} role="alert">
-            {/* 목록은 로그인해야 볼 수 있다. 토큰이 없으면 여기서 막힌다. */}
-            {error.status === 401 ? (
-              <>
-                상품을 보려면 로그인이 필요합니다. <Link to="/login">로그인하기</Link>
-              </>
-            ) : (
-              (error.message ?? '상품을 불러오지 못했습니다.')
-            )}
-          </p>
+          error.status === 401 ? (
+            <StateNotice
+              role="alert"
+              eyebrow="Check-in"
+              message="로그인이 필요한 공간입니다"
+              hint="로그인하고 컬렉션 여정을 이어가세요"
+              action={{ label: '로그인하기', to: '/login' }}
+            />
+          ) : (
+            <StateNotice
+              role="alert"
+              eyebrow="Notice"
+              message={error.message ?? '상품을 불러오지 못했습니다.'}
+              hint="잠시 후 다시 시도해 주세요"
+              action={{ label: '다시 시도', onClick: retryLoad }}
+            />
+          )
         ) : null}
 
         {!products && !error ? (
@@ -117,7 +133,13 @@ export function Component() {
           </p>
         ) : null}
 
-        {products?.length === 0 ? <p className={styles.status}>등록된 상품이 없습니다.</p> : null}
+        {products?.length === 0 ? (
+          <StateNotice
+            eyebrow="Next flight"
+            message="등록된 상품이 없습니다"
+            hint="새 컬렉션이 착륙을 준비하고 있습니다"
+          />
+        ) : null}
       </div>
 
       <ScrollFade />

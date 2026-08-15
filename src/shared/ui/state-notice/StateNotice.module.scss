@@ -1,0 +1,87 @@
+/* 탑승 안내 카드. 상태 지면을 탑승권 스텁으로 그린다 — 절취선과 양옆 노치가
+   시그니처고, 나머지는 조용히 둔다. 색·서체는 전부 기존 토큰이다. */
+
+.notice {
+  width: min(17.5rem, calc(100% - 2.5rem));
+  padding: 1.25rem 1.5rem 1.5rem;
+  border-radius: 8px;
+  margin: 2.5rem auto;
+  background: var(--mcm-color-product-surface);
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--mcm-color-brand-brown);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* 절취선. 점선 위 양끝에 카드 밖 배경색 원을 얹어 티켓을 찢는 자리를 만든다. */
+.perforation {
+  position: relative;
+  height: 0;
+  border-top: 1px dashed rgb(192 115 70 / 40%);
+  margin: 0.875rem -1.5rem 0;
+}
+
+.notch {
+  position: absolute;
+  top: -0.375rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--mcm-color-canvas);
+}
+
+.notch:first-child {
+  left: -0.375rem;
+}
+
+.notch:last-child {
+  right: -0.375rem;
+}
+
+.message {
+  margin: 1rem 0 0;
+  color: var(--mcm-color-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.hint {
+  margin: 0.375rem 0 0;
+  color: var(--mcm-color-muted);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+}
+
+.action {
+  display: inline-flex;
+  height: 2.5rem;
+  padding: 0 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  margin-top: 1.125rem;
+  color: var(--mcm-color-canvas);
+  background: var(--mcm-color-brand-brown);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--mcm-color-brand-brown);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .action:hover {
+    background: color-mix(in srgb, var(--mcm-color-brand-brown) 88%, #000);
+  }
+}
