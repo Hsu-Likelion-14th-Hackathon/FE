@@ -9,7 +9,7 @@ import styles from './IntroPage.module.scss'
 
 /**
  * (22) 보딩패스 인트로.
- * 패스 카드는 Figma 정적 이미지(보우·리본·카피 포함). Next만 기존 버튼 스타일 유지.
+ * 패스 카드 그래픽은 PNG, 카피는 DOM(Figma 472:4800). Next만 기존 버튼 스타일 유지.
  * Next → (24) 설문. 상태바·홈 인디케이터는 구현하지 않는다.
  */
 export function Component() {
@@ -29,12 +29,20 @@ export function Component() {
 
         <div className={styles.cluster}>
           <div className={styles.cardWrap}>
-            <img
-              src={passCard}
-              alt="MCM BOARDING PASS — Check-in. 당신의 MCM HAUS 비행을 위한 완벽한 맞춤형 동선을 추천합니다."
-              className={styles.passCard}
-              draggable={false}
-            />
+            <img src={passCard} alt="" className={styles.passCard} draggable={false} />
+            <div className={styles.copy}>
+              <p className={styles.checkIn}>Check-in</p>
+              <span className={styles.rule} aria-hidden="true" />
+              <p className={styles.title}>
+                <span>MCM</span>
+                <span>BOARDING PASS</span>
+              </p>
+              <span className={styles.dot} aria-hidden="true" />
+              <p className={styles.body}>
+                <span>당신의 MCM HAUS 비행을 위한</span>
+                <span>완벽한 맞춤형 동선을 추천합니다</span>
+              </p>
+            </div>
           </div>
 
           <button
