@@ -107,6 +107,7 @@ function EditableRow({
   onNameHover,
   onEdit,
   resetKey,
+  disabled = false,
 }) {
   const active = useRef({ hover: false, focus: false })
   const sync = (event) => {
@@ -127,6 +128,7 @@ function EditableRow({
         className={styles.nameButton}
         type="button"
         aria-label={editLabel}
+        disabled={disabled}
         onPointerEnter={(event) => {
           active.current.hover = true
           sync(event)
@@ -300,6 +302,7 @@ export function Component() {
                 profile={visibleProfile}
                 stamps={visibleStamps}
                 onNameHover={helpers?.onNameHover}
+                profileReady={helpers?.profileReady ?? true}
                 // 세 칸이 한 시트를 함께 쓴다. 백엔드도 셋을 한 번에 받으므로
                 // (UserUpdateRequest는 셋 다 필수) 어느 칸을 눌러도 같은 화면이다.
                 onEditProfile={(event) => {
@@ -456,6 +459,7 @@ function PassportSpread({
   profile,
   stamps = [],
   onNameHover,
+  profileReady = true,
   onEditProfile,
   onHistory,
   onTicket,
@@ -472,7 +476,15 @@ function PassportSpread({
   }, [onNameHover, sheetOpen, step])
 
   const resetKey = `${sheetOpen}|${step}`
-  const editable = { isRestoringFocus, onNameHover, onEdit: onEditProfile, resetKey }
+  const editable = {
+    isRestoringFocus,
+    onNameHover,
+    onEdit: onEditProfile,
+    resetKey,
+    // 조회 중에는 화면에 고정 데이터가 떠 있다. 그걸 초안으로 들고 저장하면
+    // 뒤늦게 온 진짜 값이 고정 데이터로 덮인다. 도착할 때까지 못 누르게 한다.
+    disabled: !profileReady,
+  }
 
   if (step === 0) {
     return (

@@ -230,7 +230,7 @@ export default function PassportPageTurn({
   const clearNameCue = useCallback(() => setNameCue(null), [])
 
   // 여권 데이터는 API에서 온다. 연동 전에는 훅이 고정 데이터로 떨어진다.
-  const { profile, stamps } = usePassport()
+  const { profile, stamps, status } = usePassport()
   const pageData = useCallback(
     () => ({
       profile: { ...profile, ...profileOverride },
@@ -661,6 +661,9 @@ export default function PassportPageTurn({
         <div className={styles.contentLayer} data-transparent={rendererMode === 'ready'}>
           {renderStep(step, { ...profile, ...profileOverride }, stamps, {
             onNameHover: showNameCue,
+            // 조회가 끝나기 전에는 고정 데이터를 보여 준다. 그 값을 초안으로
+            // 복사해 저장하면 뒤늦게 도착한 진짜 값을 고정 데이터로 덮는다.
+            profileReady: status !== 'loading',
           })}
         </div>
         {/* 시트가 열렸거나 지면이 넘어가는 중이면 좌표가 어긋난다. */}
