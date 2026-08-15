@@ -220,3 +220,31 @@
   caret-color: var(--mcm-color-ink);
   transition: color 0.12s ease;
 }
+
+/* 가입 실패 사유. 백엔드 message를 그대로 싣고 화면에 남긴다. */
+.errorNotice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid #f0c9c9;
+  border-radius: 8px;
+  background: #fdf3f3;
+}
+
+.errorMessage {
+  margin: 0;
+  color: #d14343;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* 이미 가입된 이메일일 때만 나온다. 어디로 가야 하는지 바로 눌러 갈 수 있게. */
+.errorAction {
+  align-self: flex-start;
+  color: var(--mcm-color-brand-brown);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  text-decoration: underline;
+}
