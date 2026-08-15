@@ -82,10 +82,13 @@ function setFont(ctx, { size, weight = 400, family = PAGE_FONT_STACK }) {
  * Pretendard보다 먼저 구우면 지면 전체가 대체 글꼴로 굳는다. 굽기 전에 실제로
  * 쓰는 굵기를 먼저 받아 둔다. 다만 폰트를 못 받는 환경에서 여권이 영영 안
  * 나오면 안 되므로 상한을 두고 그냥 진행한다.
+ *
+ * @returns 상한 안에 폰트가 도착했으면 true. false면 대체 글꼴로 굽게 되므로
+ *   호출부가 나중에 한 번 다시 구워야 한다.
  */
 export function waitForPageFont(timeout = 1500) {
   const fonts = typeof document === 'undefined' ? null : document.fonts
-  if (!fonts?.load) return Promise.resolve()
+  if (!fonts?.load) return Promise.resolve(false)
   // 서브셋 woff2라 굵기별로 파일이 갈린다. 한글이 실제로 들어 있는지도 봐야
   // 하므로 지면에 그리는 문구를 그대로 넘긴다.
   const sample = 'NAME 제품 보러가기'
@@ -94,11 +97,11 @@ export function waitForPageFont(timeout = 1500) {
     fonts.load('600 10px Pretendard', sample),
   ]).then(() => fonts.ready)
   const capped = new Promise((resolve) => {
-    setTimeout(resolve, timeout)
+    setTimeout(() => resolve(false), timeout)
   })
-  return Promise.race([ready, capped]).then(
-    () => undefined,
-    () => undefined,
+  return Promise.race([ready.then(() => true), capped]).then(
+    (arrived) => arrived === true,
+    () => false,
   )
 }
 

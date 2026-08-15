@@ -211,6 +211,8 @@ export default function PassportPageTurn({
   const pointerRef = useRef({ ...IDLE_POINTER })
   // 같은 면을 반복해서 굽지 않도록 캔버스를 보관한다. 데이터가 바뀌면 비운다.
   const faceCacheRef = useRef(new Map())
+  // 폰트를 기다린 뒤 구웠는지. 상한에 걸려 먼저 구웠다면 늦게 온 폰트로 한 번 더 굽는다.
+  const fontBakedRef = useRef(false)
 
   const progress = ((step + 1) / (LAST_STEP + 1)) * 100
   const inputLocked = disabled || turnState !== 'idle'
@@ -442,13 +444,37 @@ export default function PassportPageTurn({
     const names = Object.keys(ASSET_SOURCES)
     Promise.all([
       Promise.all(names.map((name) => loadImage(ASSET_SOURCES[name]))),
-      waitForPageFont(),
+      waitForPageFont().then((arrived) => {
+        // 상한 전에 왔으면 아래 굽기가 이미 제 글꼴을 쓴다.
+        fontBakedRef.current = arrived
+      }),
     ]).then(([loaded]) => {
       if (!alive) return
       assetsRef.current = Object.fromEntries(names.map((name, index) => [name, loaded[index]]))
       faceCacheRef.current.clear()
       setAssetsReady(true)
     })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  // 폰트 대기에는 상한이 있다. 그 뒤에 도착하면 이미 구운 텍스처는 대체 글꼴로
+  // 굳어 있고, 캔버스는 CSS와 달리 알아서 다시 그려지지 않는다. 한 번만 다시 굽는다.
+  useEffect(() => {
+    const fonts = typeof document === 'undefined' ? null : document.fonts
+    if (!fonts?.ready) return undefined
+    let alive = true
+
+    fonts.ready.then(() => {
+      if (!alive) return
+      // 상한 안에 도착했으면 이미 그 글꼴로 구웠다. 다시 구울 이유가 없다.
+      if (fontBakedRef.current) return
+      fontBakedRef.current = true
+      faceCacheRef.current.clear()
+      setRepaintKey((key) => key + 1)
+    })
+
     return () => {
       alive = false
     }
@@ -658,7 +684,13 @@ export default function PassportPageTurn({
         {/* 캔버스가 책을 그리고, 같은 자리의 DOM은 투명하게 남아
             스크린리더 읽기와 버튼 클릭을 그대로 담당한다. */}
         <div ref={canvasHostRef} aria-hidden="true" className={styles.bookLayer} />
-        <div className={styles.contentLayer} data-transparent={rendererMode === 'ready'}>
+        {/* 캔버스가 아직 아무것도 굽지 못했으면 DOM 지면을 남겨 둔다.
+            렌더러 준비만 보고 숨기면, 이미지가 늦거나 멈춘 동안 빈 캔버스가
+            그대로 드러난다. */}
+        <div
+          className={styles.contentLayer}
+          data-transparent={rendererMode === 'ready' && assetsReady}
+        >
           {renderStep(step, { ...profile, ...profileOverride }, stamps, {
             onNameHover: showNameCue,
             // 조회가 끝나기 전에는 고정 데이터를 보여 준다. 그 값을 초안으로
