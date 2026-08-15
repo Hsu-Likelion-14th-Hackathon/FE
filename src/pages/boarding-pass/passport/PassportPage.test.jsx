@@ -397,7 +397,8 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     await screen.findByRole('button', { name: '연도' }, { timeout: 5000 })
     // 달력은 ISO를 다룬다. 지면 표기(2000 01 01)를 그대로 주면 값을 못 읽는다.
     expect(sheet.querySelector('input[name="birthDate"]')).toHaveValue('2000-01-01')
-    expect(sheet.querySelector('input[name="nationality"]')).toHaveValue('KOR')
+    // 백엔드는 alpha-2를 받는다(추가 정보 입력·회원정보 수정 명세).
+    expect(sheet.querySelector('input[name="nationality"]')).toHaveValue('KR')
 
     // 지면에도 '국적 ... 수정' 버튼이 있어 시트 안으로 좁힌다.
     fireEvent.click(within(sheet).getByRole('button', { name: /^국적/ }))

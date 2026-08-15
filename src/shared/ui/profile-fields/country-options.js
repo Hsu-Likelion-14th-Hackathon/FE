@@ -43,6 +43,7 @@ const countryRecords = [
     'Bosnia and Herzegovina',
     'Bosnia and Herzegovina',
     '보스니아 헤르체고비나',
+    'BIH',
   ],
   ['BW', 'Botswana', 'Botswana', 'Republic of Botswana', '보츠와나', 'BWA'],
   ['BV', 'Bouvetøya', 'Bouvet Island', 'Bouvet Island', '부베 섬', 'BVT'],
@@ -53,6 +54,7 @@ const countryRecords = [
     'British Indian Ocean Territory',
     'British Indian Ocean Territory',
     '인도',
+    'IOT',
   ],
   [
     'VG',
@@ -60,6 +62,7 @@ const countryRecords = [
     'British Virgin Islands',
     'Virgin Islands',
     '영국령 버진아일랜드',
+    'VGB',
   ],
   [
     'BN',
@@ -82,6 +85,7 @@ const countryRecords = [
     'Caribbean Netherlands',
     'Bonaire, Sint Eustatius and Saba',
     '카리브 네덜란드',
+    'BES',
   ],
   ['KY', 'Cayman Islands', 'Cayman Islands', 'Cayman Islands', '케이맨 제도', 'CYM'],
   [
@@ -90,6 +94,7 @@ const countryRecords = [
     'Central African Republic',
     'Central African Republic',
     '중앙아프리카 공화국',
+    'CAF',
   ],
   ['TD', 'تشاد', 'Chad', 'Republic of Chad', '차드', 'TCD'],
   ['CL', 'Chile', 'Chile', 'Republic of Chile', '칠레', 'CHL'],
@@ -108,6 +113,7 @@ const countryRecords = [
     'Cocos (Keeling) Islands',
     'Territory of the Cocos (Keeling) Islands',
     '코코스 제도',
+    'CCK',
   ],
   ['CO', 'Colombia', 'Colombia', 'Republic of Colombia', '콜롬비아', 'COL'],
   ['KM', 'جزر القمر', 'Comoros', 'Union of the Comoros', '코모로', 'COM'],
@@ -165,6 +171,7 @@ const countryRecords = [
     'French Southern and Antarctic Lands',
     'Territory of the French Southern and Antarctic Lands',
     '프랑스령 남부와 남극 지역',
+    'ATF',
   ],
   ['GA', 'Gabon', 'Gabon', 'Gabonese Republic', '가봉', 'GAB'],
   ['GM', 'Gambia', 'Gambia', 'Republic of the Gambia', '감비아', 'GMB'],
@@ -189,6 +196,7 @@ const countryRecords = [
     'Heard Island and McDonald Islands',
     'Heard Island and McDonald Islands',
     '허드 맥도널드 제도',
+    'HMD',
   ],
   ['HN', 'Honduras', 'Honduras', 'Republic of Honduras', '온두라스', 'HND'],
   [
@@ -197,6 +205,7 @@ const countryRecords = [
     'Hong Kong',
     "Hong Kong Special Administrative Region of the People's Republic of China",
     '홍콩',
+    'HKG',
   ],
   ['HU', 'Magyarország', 'Hungary', 'Hungary', '헝가리', 'HUN'],
   ['IS', 'Ísland', 'Iceland', 'Iceland', '아이슬란드', 'ISL'],
@@ -240,6 +249,7 @@ const countryRecords = [
     'Macau',
     "Macao Special Administrative Region of the People's Republic of China",
     '마카오',
+    'MAC',
   ],
   ['MG', 'Madagascar', 'Madagascar', 'Republic of Madagascar', '마다가스카르', 'MDG'],
   ['MW', 'Malaŵi', 'Malawi', 'Republic of Malawi', '말라위', 'MWI'],
@@ -281,6 +291,7 @@ const countryRecords = [
     'Northern Mariana Islands',
     'Commonwealth of the Northern Mariana Islands',
     '북마리아나 제도',
+    'MNP',
   ],
   ['NO', 'Noreg', 'Norway', 'Kingdom of Norway', '노르웨이', 'NOR'],
   ['OM', 'عمان', 'Oman', 'Sultanate of Oman', '오만', 'OMN'],
@@ -294,6 +305,7 @@ const countryRecords = [
     'Papua New Guinea',
     'Independent State of Papua New Guinea',
     '파푸아뉴기니',
+    'PNG',
   ],
   ['PY', 'Paraguái', 'Paraguay', 'Republic of Paraguay', '파라과이', 'PRY'],
   ['PE', 'Piruw', 'Peru', 'Republic of Peru', '페루', 'PER'],
@@ -314,6 +326,7 @@ const countryRecords = [
     'Saint Barthélemy',
     'Collectivity of Saint Barthélemy',
     '생바르텔레미',
+    'BLM',
   ],
   [
     'SH',
@@ -321,6 +334,7 @@ const countryRecords = [
     'Saint Helena, Ascension and Tristan da Cunha',
     'Saint Helena, Ascension and Tristan da Cunha',
     '세인트헬레나',
+    'SHN',
   ],
   [
     'KN',
@@ -328,6 +342,7 @@ const countryRecords = [
     'Saint Kitts and Nevis',
     'Federation of Saint Christopher and Nevis',
     '세인트키츠 네비스',
+    'KNA',
   ],
   ['LC', 'Saint Lucia', 'Saint Lucia', 'Saint Lucia', '세인트루시아', 'LCA'],
   ['MF', 'Saint-Martin', 'Saint Martin', 'Saint Martin', '생마르탱', 'MAF'],
@@ -337,6 +352,7 @@ const countryRecords = [
     'Saint Pierre and Miquelon',
     'Saint Pierre and Miquelon',
     '생피에르 미클롱',
+    'SPM',
   ],
   [
     'VC',
@@ -344,6 +360,7 @@ const countryRecords = [
     'Saint Vincent and the Grenadines',
     'Saint Vincent and the Grenadines',
     '세인트빈센트 그레나딘',
+    'VCT',
   ],
   ['WS', 'Sāmoa', 'Samoa', 'Independent State of Samoa', '사모아', 'WSM'],
   ['SM', 'San Marino', 'San Marino', 'Most Serene Republic of San Marino', '산마리노', 'SMR'],
@@ -353,6 +370,7 @@ const countryRecords = [
     'São Tomé and Príncipe',
     'Democratic Republic of São Tomé and Príncipe',
     '상투메 프린시페',
+    'STP',
   ],
   ['SA', 'السعودية', 'Saudi Arabia', 'Kingdom of Saudi Arabia', '사우디아라비아', 'SAU'],
   ['SN', 'Sénégal', 'Senegal', 'Republic of Senegal', '세네갈', 'SEN'],
@@ -372,6 +390,7 @@ const countryRecords = [
     'South Georgia',
     'South Georgia and the South Sandwich Islands',
     '조지아',
+    'SGS',
   ],
   ['SS', 'South Sudan', 'South Sudan', 'Republic of South Sudan', '남수단', 'SSD'],
   ['ES', 'España', 'Spain', 'Kingdom of Spain', '스페인', 'ESP'],
@@ -391,6 +410,7 @@ const countryRecords = [
     'Svalbard and Jan Mayen',
     'Svalbard og Jan Mayen',
     '스발바르 얀마옌 제도',
+    'SJM',
   ],
   ['SE', 'Sverige', 'Sweden', 'Kingdom of Sweden', '스웨덴', 'SWE'],
   ['CH', 'Suisse', 'Switzerland', 'Swiss Confederation', '스위스', 'CHE'],
@@ -409,6 +429,7 @@ const countryRecords = [
     'Trinidad and Tobago',
     'Republic of Trinidad and Tobago',
     '트리니다드 토바고',
+    'TTO',
   ],
   ['TN', 'تونس', 'Tunisia', 'Tunisian Republic', '튀니지', 'TUN'],
   ['TR', 'Türkiye', 'Türkiye', 'Republic of Türkiye', '터키', 'TUR'],
@@ -419,6 +440,7 @@ const countryRecords = [
     'Turks and Caicos Islands',
     'Turks and Caicos Islands',
     '터크스 케이커스 제도',
+    'TCA',
   ],
   ['TV', 'Tuvalu', 'Tuvalu', 'Tuvalu', '투발루', 'TUV'],
   ['UG', 'Uganda', 'Uganda', 'Republic of Uganda', '우간다', 'UGA'],
@@ -430,6 +452,7 @@ const countryRecords = [
     'United Kingdom',
     'United Kingdom of Great Britain and Northern Ireland',
     '영국',
+    'GBR',
   ],
   ['US', 'United States', 'United States', 'United States of America', '미국', 'USA'],
   [
@@ -438,6 +461,7 @@ const countryRecords = [
     'United States Minor Outlying Islands',
     'United States Minor Outlying Islands',
     '미국령 군소 제도',
+    'UMI',
   ],
   [
     'VI',
@@ -445,6 +469,7 @@ const countryRecords = [
     'United States Virgin Islands',
     'Virgin Islands of the United States',
     '미국령 버진아일랜드',
+    'VIR',
   ],
   ['UY', 'Uruguay', 'Uruguay', 'Oriental Republic of Uruguay', '우루과이', 'URY'],
   ['UZ', 'Узбекистан', 'Uzbekistan', 'Republic of Uzbekistan', '우즈베키스탄', 'UZB'],
@@ -458,6 +483,7 @@ const countryRecords = [
     'Wallis and Futuna',
     'Territory of the Wallis and Futuna Islands',
     '왈리스 퓌튀나',
+    'WLF',
   ],
   ['EH', 'Western Sahara', 'Western Sahara', 'Sahrawi Arab Democratic Republic', '서사하라', 'ESH'],
   ['YE', 'اليمن', 'Yemen', 'Republic of Yemen', '예멘', 'YEM'],
@@ -480,12 +506,14 @@ export function getCountryOption(code) {
 /**
  * 저장된 값으로 선택지를 되찾는 표.
  *
- * 백엔드와 여권 지면은 ISO 3166-1 alpha-3(`KOR`)를 주고받는다. 다만 예전에
- * `Republic of Korea` 같은 공식 국명으로 저장된 값이 남아 있을 수 있어 그쪽도
- * 함께 받는다. 셋 다 대문자로 눕혀 두므로 대소문자는 신경 쓰지 않아도 된다.
+ * 백엔드는 ISO 3166-1 alpha-2(`KR`)를 주고받는다(회원정보 수정·추가 정보 입력
+ * 명세). 다만 여권 지면은 같은 나라를 alpha-3(`KOR`)로 그리고, 예전에 공식
+ * 국명으로 저장된 값이 남아 있을 수도 있다. 어느 표기로 와도 같은 나라를
+ * 찾도록 셋을 모두 받는다. 전부 대문자로 눕혀 두므로 대소문자는 상관없다.
  */
 const countryOptionByStored = new Map(
   countryOptions.flatMap((country) => [
+    [country.code, country],
     [country.alpha3, country],
     [country.apiValue.toUpperCase(), country],
   ]),

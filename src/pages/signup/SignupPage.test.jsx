@@ -19,7 +19,7 @@ function getSignupFormData() {
 }
 
 describe('SignupPage', () => {
-  it('국기를 포함한 현지어·영문 국가명을 검색하고 ISO alpha-3 국적을 보낸다', () => {
+  it('국기를 포함한 현지어·영문 국가명을 검색하고 ISO alpha-2 국적을 보낸다', () => {
     renderSignupPage()
 
     const countryButton = screen.getByRole('button', { name: /국적/ })
@@ -41,12 +41,11 @@ describe('SignupPage', () => {
     expect(countryButton).toHaveAttribute('aria-expanded', 'false')
     expect(countryButton).toHaveTextContent('대한민국 (Republic of Korea)')
     expect(screen.getByRole('img', { name: 'Republic of Korea 국기' })).toBeInTheDocument()
-    // 백엔드는 ISO 3166-1 alpha-3을 받는다(ProfileRequest.nationality).
-    // 공식 국명은 최대 46자라 여권 지면에서 절반이 잘려 나간다.
-    expect(getSignupFormData().get('nationality')).toBe('KOR')
+    // 백엔드는 ISO 3166-1 alpha-2를 받는다(추가 정보 입력 명세의 `예: KR`).
+    expect(getSignupFormData().get('nationality')).toBe('KR')
   })
 
-  it('RTL 현지어 국가도 검색하고 ISO alpha-3 국적을 보낸다', () => {
+  it('RTL 현지어 국가도 검색하고 ISO alpha-2 국적을 보낸다', () => {
     renderSignupPage()
 
     fireEvent.click(screen.getByRole('button', { name: /국적/ }))
@@ -61,7 +60,7 @@ describe('SignupPage', () => {
     fireEvent.click(bahrainOption)
 
     expect(screen.getByRole('button', { name: /국적/ })).toHaveTextContent('البحرين (Bahrain)')
-    expect(getSignupFormData().get('nationality')).toBe('BHR')
+    expect(getSignupFormData().get('nationality')).toBe('BH')
   })
 
   it('RTL 현지어 국가명도 목록의 왼쪽 기준선에 맞춘다', () => {

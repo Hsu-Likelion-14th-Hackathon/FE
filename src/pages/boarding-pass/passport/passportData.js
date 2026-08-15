@@ -2,8 +2,8 @@ export const passportProfile = {
   passportNumber: '0001',
   surname: 'LIM',
   givenName: 'YEONJU',
-  // 여권은 ISO 3166-1 alpha-3을 찍는다. 백엔드도 같은 값을 준다.
-  nationality: 'KOR',
+  // 백엔드는 alpha-2를 준다. 지면에 alpha-3으로 찍는 것은 표시 단계 변환이다.
+  nationality: 'KR',
   birthDate: '2000 01 01',
   issueDate: '2026 08 25',
   credit: 100,

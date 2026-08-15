@@ -282,9 +282,9 @@ export default function NationalitySelect({ value, onChange, isOpen, onOpenChang
         <img className={styles.chevron} src={countryChevron} alt="" aria-hidden="true" />
       </button>
 
-      {/* 백엔드는 ISO 3166-1 alpha-3을 받는다(ProfileRequest / UserUpdateRequest).
-          공식 국명은 최대 46자라 여권 지면에서 절반이 잘려 나간다. */}
-      <input type="hidden" name="nationality" value={selectedCountry?.alpha3 ?? ''} />
+      {/* 백엔드는 ISO 3166-1 alpha-2를 받는다(추가 정보 입력·회원정보 수정 명세의
+          `예: KR`). 여권 지면이 alpha-3으로 그리는 것은 표시 단계의 변환이다. */}
+      <input type="hidden" name="nationality" value={selectedCountry?.code ?? ''} />
 
       {isOpen ? (
         <div className={styles.panel}>

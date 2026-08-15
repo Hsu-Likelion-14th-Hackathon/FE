@@ -75,12 +75,17 @@ function toDisplayBirthDate(iso) {
 /**
  * 지면에 찍는 국적.
  *
- * ISO 3166-1 alpha-3(`KOR`)를 그대로 쓴다. 공식 국명은 최대 46자
+ * 저장·전송은 백엔드 명세대로 alpha-2(`KR`)지만, 지면에는 실제 여권처럼
+ * alpha-3(`KOR`)을 찍는다. 공식 국명을 쓰면 최대 46자
  * (`Independent and Sovereign Republic of Kiribati`)라 197px 행에서 절반이
- * 말줄임으로 사라진다. 실제 여권도 세 자리 코드를 찍는다.
+ * 말줄임으로 사라진다.
+ *
+ * 모르는 값이 오면 지어내지 않고 받은 그대로 대문자로만 올린다. 빈 칸으로
+ * 두면 백엔드가 무엇을 줬는지 화면에서 알 수 없다.
  */
 function toDisplayNationality(stored) {
-  return String(stored ?? '').toUpperCase()
+  const country = findCountryByStoredValue(stored)
+  return country?.alpha3 ?? String(stored ?? '').toUpperCase()
 }
 
 /**
@@ -359,8 +364,9 @@ export function Component() {
                     setProfileEdit({
                       name: next,
                       birthDate: birthDraft,
-                      // 백엔드도 같은 세 자리 코드를 받는다(UserUpdateRequest.nationality).
-                      nationality: getCountryOption(countryDraft)?.alpha3 ?? '',
+                      // 백엔드는 alpha-2를 받는다. 지면 표기(alpha-3) 변환은
+                      // toDisplayNationality가 맡는다.
+                      nationality: getCountryOption(countryDraft)?.code ?? '',
                     })
                     closeSheet()
                   }}
