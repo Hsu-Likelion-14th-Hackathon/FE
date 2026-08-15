@@ -1,10 +1,7 @@
 import navNextImg from '@/shared/assets/boarding-pass/guide/nav-next.svg'
 import navPrevImg from '@/shared/assets/boarding-pass/guide/nav-prev.svg'
 
-import {
-  BOARDING_PASS_STEP_LABELS,
-  boardingPassStepProgress,
-} from './boardingPassSteps.js'
+import { BOARDING_PASS_STEP_LABELS, boardingPassStepProgress } from './boardingPassSteps.js'
 import styles from './BoardingPassStepNav.module.scss'
 
 /**

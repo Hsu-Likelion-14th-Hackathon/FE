@@ -118,99 +118,99 @@ export function Component() {
         <BoardingPassStageBackdrop />
 
         <main className={styles.main}>
-        <BoardingPassStageHeader
-          title="MAPS"
-          closeLabel="닫기"
-          onClose={() => navigate('/boarding-pass/scan')}
-        />
+          <BoardingPassStageHeader
+            title="MAPS"
+            closeLabel="닫기"
+            onClose={() => navigate('/boarding-pass/scan')}
+          />
 
-        <div className={styles.monitorWrap}>
-          <div className={styles.monitor}>
-            <img src={cameraDotImg} alt="" aria-hidden="true" className={styles.camera} />
+          <div className={styles.monitorWrap}>
+            <div className={styles.monitor}>
+              <img src={cameraDotImg} alt="" aria-hidden="true" className={styles.camera} />
 
-            <div className={styles.bezel}>
-              <div className={styles.screen}>
-                <img
-                  src={mapImg}
-                  alt="서울에서 뮌헨으로 가는 항로 지도"
-                  className={styles.mapImg}
-                />
-                <div className={styles.overlay}>
-                  <p className={styles.date}>{mapDate}</p>
-                  <div className={styles.routeRow}>
-                    <span className={styles.city}>SEOUL</span>
-                    <div className={styles.routeTrack}>
-                      <img src={routePathImg} alt="" className={styles.routePath} />
-                      <img
-                        src={planeMarkerImg}
-                        alt=""
-                        className={styles.planeMarker}
-                        data-testid="plane-marker"
-                      />
+              <div className={styles.bezel}>
+                <div className={styles.screen}>
+                  <img
+                    src={mapImg}
+                    alt="서울에서 뮌헨으로 가는 항로 지도"
+                    className={styles.mapImg}
+                  />
+                  <div className={styles.overlay}>
+                    <p className={styles.date}>{mapDate}</p>
+                    <div className={styles.routeRow}>
+                      <span className={styles.city}>SEOUL</span>
+                      <div className={styles.routeTrack}>
+                        <img src={routePathImg} alt="" className={styles.routePath} />
+                        <img
+                          src={planeMarkerImg}
+                          alt=""
+                          className={styles.planeMarker}
+                          data-testid="plane-marker"
+                        />
+                      </div>
+                      <span className={styles.city}>MUNICH</span>
                     </div>
-                    <span className={styles.city}>MUNICH</span>
+                  </div>
+                </div>
+
+                <div className={styles.controlBar} aria-hidden="true">
+                  <div className={styles.controlSlot}>
+                    <img
+                      src={controlArrowImg}
+                      alt=""
+                      className={`${styles.controlArrow} ${styles.controlArrowDown}`}
+                    />
+                    <img src={controlBrightnessImg} alt="" className={styles.controlIcon} />
+                    <img src={controlArrowImg} alt="" className={styles.controlArrow} />
+                  </div>
+                  <div className={styles.controlSlot}>
+                    <img src={controlPowerImg} alt="" className={styles.controlIcon} />
+                  </div>
+                  <div className={styles.controlSlot}>
+                    <img
+                      src={controlArrowImg}
+                      alt=""
+                      className={`${styles.controlArrow} ${styles.controlArrowDown}`}
+                    />
+                    <img src={controlSoundImg} alt="" className={styles.controlIcon} />
+                    <img src={controlArrowImg} alt="" className={styles.controlArrow} />
                   </div>
                 </div>
               </div>
 
-              <div className={styles.controlBar} aria-hidden="true">
-                <div className={styles.controlSlot}>
-                  <img
-                    src={controlArrowImg}
-                    alt=""
-                    className={`${styles.controlArrow} ${styles.controlArrowDown}`}
-                  />
-                  <img src={controlBrightnessImg} alt="" className={styles.controlIcon} />
-                  <img src={controlArrowImg} alt="" className={styles.controlArrow} />
-                </div>
-                <div className={styles.controlSlot}>
-                  <img src={controlPowerImg} alt="" className={styles.controlIcon} />
-                </div>
-                <div className={styles.controlSlot}>
-                  <img
-                    src={controlArrowImg}
-                    alt=""
-                    className={`${styles.controlArrow} ${styles.controlArrowDown}`}
-                  />
-                  <img src={controlSoundImg} alt="" className={styles.controlIcon} />
-                  <img src={controlArrowImg} alt="" className={styles.controlArrow} />
-                </div>
-              </div>
+              <img src={tabletLogoImg} alt="" aria-hidden="true" className={styles.tabletLogo} />
+
+              <img src={hingeImg} alt="" aria-hidden="true" className={styles.hinge} />
             </div>
 
-            <img src={tabletLogoImg} alt="" aria-hidden="true" className={styles.tabletLogo} />
-
-            <img src={hingeImg} alt="" aria-hidden="true" className={styles.hinge} />
+            <img src={decoRightImg} alt="" aria-hidden="true" className={styles.trunk} />
           </div>
 
-          <img src={decoRightImg} alt="" aria-hidden="true" className={styles.trunk} />
-        </div>
-
-        <div className={styles.actions}>
-          <div className={styles.actionRow}>
-            <button type="button" onClick={openTicketSheet} className={styles.actionBtn}>
-              <span className={styles.actionBtnLabel}>티켓 정보</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/boarding-pass/guide')}
-              className={styles.actionBtn}
-            >
-              <span className={styles.actionBtnLabel}>여행 가이드</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/boarding-pass')}
-              className={styles.actionBtn}
-            >
-              <span className={styles.actionBtnLabel}>비행 종료</span>
-            </button>
+          <div className={styles.actions}>
+            <div className={styles.actionRow}>
+              <button type="button" onClick={openTicketSheet} className={styles.actionBtn}>
+                <span className={styles.actionBtnLabel}>티켓 정보</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/boarding-pass/guide')}
+                className={styles.actionBtn}
+              >
+                <span className={styles.actionBtnLabel}>여행 가이드</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/boarding-pass')}
+                className={styles.actionBtn}
+              >
+                <span className={styles.actionBtnLabel}>비행 종료</span>
+              </button>
+            </div>
+            <p className={styles.passportHint}>
+              비행 종료 후 여행의 기록이 담긴 Passport가 발급됩니다
+            </p>
           </div>
-          <p className={styles.passportHint}>
-            비행 종료 후 여행의 기록이 담긴 Passport가 발급됩니다
-          </p>
-        </div>
-      </main>
+        </main>
 
         <BoardingPassStepNav
           step={FLIGHT_STEP}
@@ -273,7 +273,7 @@ export function Component() {
             </div>
           )}
         </div>
-        </div>
+      </div>
     </div>
   )
 }

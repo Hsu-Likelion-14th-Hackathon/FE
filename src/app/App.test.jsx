@@ -329,7 +329,9 @@ describe('App', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Next' }))
 
-    expect(await screen.findByRole('button', { name: '이전' }, { timeout: 10_000 })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('button', { name: '이전' }, { timeout: 10_000 }),
+    ).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/boarding-pass/survey')
   })
 
