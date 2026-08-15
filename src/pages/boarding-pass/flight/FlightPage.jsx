@@ -31,6 +31,7 @@ import styles from './FlightPage.module.scss'
 export function Component() {
   const navigate = useNavigate()
   const [pass, setPass] = useState(null)
+  const [passStatus, setPassStatus] = useState('loading')
   const [ticketOpen, setTicketOpen] = useState(false)
   const sheetRef = useRef(null)
   const dragRef = useRef({ pointerId: null, startY: 0, startAt: 0, dy: 0 })
@@ -87,10 +88,14 @@ export function Component() {
     let cancelled = false
     getLatestBoardingPass()
       .then((data) => {
-        if (!cancelled) setPass(data)
+        if (cancelled) return
+        setPass(data)
+        setPassStatus(data ? 'ready' : 'empty')
       })
       .catch(() => {
-        if (!cancelled) setPass(null)
+        if (cancelled) return
+        setPass(null)
+        setPassStatus('error')
       })
     return () => {
       cancelled = true
@@ -248,7 +253,24 @@ export function Component() {
           {pass ? (
             <BoardingTicketCard pass={pass} size="md" className={styles.ticketSlot} />
           ) : (
-            <p className={styles.ticketLoading}>티켓을 불러오는 중…</p>
+            <div className={styles.ticketLoading}>
+              <p>
+                {passStatus === 'error'
+                  ? '티켓을 불러오지 못했습니다.'
+                  : passStatus === 'empty'
+                    ? '발급된 보딩패스를 찾을 수 없습니다.'
+                    : '티켓을 불러오는 중…'}
+              </p>
+              {passStatus === 'empty' || passStatus === 'error' ? (
+                <button
+                  type="button"
+                  className={styles.ticketEmptyCta}
+                  onClick={() => navigate('/boarding-pass')}
+                >
+                  발급 페이지로 이동
+                </button>
+              ) : null}
+            </div>
           )}
         </div>
         </div>

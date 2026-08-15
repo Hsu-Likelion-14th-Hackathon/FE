@@ -27,6 +27,7 @@ const TOAST_EXIT_MS = 320
 export function Component() {
   const navigate = useNavigate()
   const [pass, setPass] = useState(null)
+  const [passStatus, setPassStatus] = useState('loading')
   const [phase, setPhase] = useState('idle')
   const [scanning, setScanning] = useState(false)
   const [credit, setCredit] = useState(null)
@@ -39,10 +40,14 @@ export function Component() {
     let cancelled = false
     getLatestBoardingPass()
       .then((data) => {
-        if (!cancelled) setPass(data)
+        if (cancelled) return
+        setPass(data)
+        setPassStatus(data ? 'ready' : 'empty')
       })
       .catch(() => {
-        if (!cancelled) setPass(null)
+        if (cancelled) return
+        setPass(null)
+        setPassStatus('error')
       })
     return () => {
       cancelled = true
@@ -135,7 +140,13 @@ export function Component() {
           {pass ? (
             <BoardingTicketCard pass={pass} size="md" />
           ) : (
-            <div className={styles.ticketSkeleton}>탑승권을 불러오는 중…</div>
+            <div className={styles.ticketSkeleton}>
+              {passStatus === 'error'
+                ? '탑승권을 불러오지 못했습니다.'
+                : passStatus === 'empty'
+                  ? '발급된 보딩패스를 찾을 수 없습니다.'
+                  : '탑승권을 불러오는 중…'}
+            </div>
           )}
         </div>
 
@@ -183,6 +194,14 @@ export function Component() {
                 className={styles.cta}
               >
                 비행 이륙하기
+              </button>
+            ) : passStatus === 'empty' || passStatus === 'error' ? (
+              <button
+                type="button"
+                onClick={() => navigate('/boarding-pass')}
+                className={styles.cta}
+              >
+                발급 페이지로 이동
               </button>
             ) : (
               <button

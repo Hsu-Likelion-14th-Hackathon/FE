@@ -81,4 +81,14 @@ describe('FlightPage', () => {
     expect(marker).toHaveClass(styles.planeMarker)
     expect(marker.getAttribute('src')).toBeTruthy()
   })
+
+  it('shows a recoverable empty ticket instead of endless loading', async () => {
+    renderFlight()
+
+    fireEvent.click(await screen.findByRole('button', { name: '티켓 정보' }))
+
+    expect(await screen.findByText('발급된 보딩패스를 찾을 수 없습니다.')).toBeInTheDocument()
+    expect(screen.queryByText('티켓을 불러오는 중…')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '발급 페이지로 이동' })).toBeEnabled()
+  })
 })
