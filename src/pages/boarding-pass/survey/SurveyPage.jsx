@@ -9,6 +9,7 @@ import qPlane from '@/shared/assets/boarding-pass/survey/q-plane.svg'
 import revealBelowBrowserChrome from '@/shared/layout/revealBelowBrowserChrome.js'
 import scrollDocumentToTop from '@/shared/layout/scrollDocumentToTop.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import StateNotice from '@/shared/ui/state-notice/StateNotice.jsx'
 
 import styles from './SurveyPage.module.scss'
 
@@ -23,6 +24,8 @@ export function Component() {
   const [answers, setAnswers] = useState({})
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState(null)
+  // '다시 시도'가 올릴 때마다 문항 조회 effect가 다시 돈다.
+  const [retryCount, setRetryCount] = useState(0)
   const scrollRef = useRef(null)
   const ctaRef = useRef(null)
 
@@ -43,7 +46,12 @@ export function Component() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [retryCount])
+
+  const retryLoad = () => {
+    setLoadError(null)
+    setRetryCount((count) => count + 1)
+  }
 
   const question = questions[step]
   const selectedOptionId = question ? answers[question.id] : null
@@ -105,7 +113,13 @@ export function Component() {
       <div className={styles.body}>
         <div ref={scrollRef} className={styles.scroll}>
           {loadError && !question ? (
-            <p className={styles.status}>{loadError}</p>
+            <StateNotice
+              role="alert"
+              eyebrow="Notice"
+              message={loadError}
+              hint="잠시 후 다시 시도해 주세요"
+              action={{ label: '다시 시도', onClick: retryLoad }}
+            />
           ) : question ? (
             <>
               <div className={styles.qLabel}>

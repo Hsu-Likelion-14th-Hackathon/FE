@@ -2,12 +2,23 @@
    시그니처고, 나머지는 조용히 둔다. 색·서체는 전부 기존 토큰이다. */
 
 .notice {
+  /* 절취선 세로 위치: 위 여백 20 + 눈썹 줄 10 + 사이 14 = 44px. mask가 이
+     좌표에 구멍을 뚫으므로 눈썹 줄 높이(line-height: 1)와 함께 움직인다. */
+  --notch-y: 2.75rem;
+
   width: min(17.5rem, calc(100% - 2.5rem));
   padding: 1.25rem 1.5rem 1.5rem;
   border-radius: 8px;
   margin: 2.5rem auto;
   background: var(--mcm-color-product-surface);
   text-align: center;
+
+  /* 절취선 양끝의 노치. 배경색 원을 얹는 대신 카드에 진짜 구멍을 뚫는다 —
+     그라데이션 무대 위에서도 배경이 그대로 비친다. */
+  mask:
+    radial-gradient(circle 0.375rem at 0 var(--notch-y), transparent 97%, #000),
+    radial-gradient(circle 0.375rem at 100% var(--notch-y), transparent 97%, #000);
+  mask-composite: intersect;
 }
 
 .eyebrow {
@@ -16,32 +27,15 @@
   font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 0.18em;
+  line-height: 1;
   text-transform: uppercase;
 }
 
-/* 절취선. 점선 위 양끝에 카드 밖 배경색 원을 얹어 티켓을 찢는 자리를 만든다. */
+/* 절취선. 티켓을 찢는 자리다. */
 .perforation {
-  position: relative;
   height: 0;
   border-top: 1px dashed rgb(192 115 70 / 40%);
   margin: 0.875rem -1.5rem 0;
-}
-
-.notch {
-  position: absolute;
-  top: -0.375rem;
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 50%;
-  background: var(--mcm-color-canvas);
-}
-
-.notch:first-child {
-  left: -0.375rem;
-}
-
-.notch:last-child {
-  right: -0.375rem;
 }
 
 .message {
@@ -84,4 +78,24 @@
   .action:hover {
     background: color-mix(in srgb, var(--mcm-color-brand-brown) 88%, #000);
   }
+}
+
+/* 보딩패스 무대 변형. 여권 여행 기록 면의 타일과 같은 반투명 검정에
+   크림(#fff7d5) 글자 — 무대 위 다른 지면들과 같은 팔레트다. 무대의 밝은
+   모노그램이 안내 글자를 밀어내지 않게 뒤를 흐린다. */
+.dark {
+  background: rgb(20 10 4 / 55%);
+  backdrop-filter: blur(8px);
+}
+
+.dark .perforation {
+  border-top-color: rgb(255 247 213 / 30%);
+}
+
+.dark .message {
+  color: #fff7d5;
+}
+
+.dark .hint {
+  color: rgb(255 247 213 / 70%);
 }

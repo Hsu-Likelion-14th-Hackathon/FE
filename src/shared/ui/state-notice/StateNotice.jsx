@@ -16,15 +16,13 @@ import styles from './StateNotice.module.scss'
  * @param {{ label: string, to?: string, onClick?: () => void }} [props.action]
  *   행동 하나. to면 링크, onClick이면 버튼이다.
  * @param {string} [props.role] 오류면 'alert'. 안내·초대면 비워 둔다.
+ * @param {'light' | 'dark'} [props.variant] 보딩패스 무대(어두운 배경)면 'dark'.
  */
-function StateNotice({ eyebrow, message, hint, action, role }) {
+function StateNotice({ eyebrow, message, hint, action, role, variant = 'light' }) {
   return (
-    <div className={styles.notice} role={role}>
+    <div className={`${styles.notice} ${variant === 'dark' ? styles.dark : ''}`} role={role}>
       <p className={styles.eyebrow}>{eyebrow}</p>
-      <div className={styles.perforation} aria-hidden="true">
-        <span className={styles.notch} />
-        <span className={styles.notch} />
-      </div>
+      <div className={styles.perforation} aria-hidden="true" />
       <p className={styles.message}>{message}</p>
       {hint ? <p className={styles.hint}>{hint}</p> : null}
       {action ? (
