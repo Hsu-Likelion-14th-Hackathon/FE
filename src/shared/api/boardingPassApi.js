@@ -11,9 +11,14 @@ export function issueBoardingPass(answers) {
   return apiFetch(API.boardingPass.issue, { method: 'POST', body: { answers } })
 }
 
+/** 가장 최근 발급된 보딩패스를 조회한다. */
+export function getCurrentBoardingPass() {
+  return apiFetch(API.boardingPass.current)
+}
+
 /**
- * 최근 발급 보딩패스 조회.
- * 404 → null (T-01 · 완료/스캔/비행 빈 상태).
+ * 최근 발급 보딩패스 조회 (기존 BP 스캔).
+ * 404 → null (T-01 안내 토스트용).
  */
 export function getLatestBoardingPass() {
   return apiFetch(API.boardingPass.latest, { notFoundAsNull: true })

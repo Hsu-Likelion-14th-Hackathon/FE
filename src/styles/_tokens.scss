@@ -48,7 +48,6 @@
   --mcm-safe-right: env(safe-area-inset-right, 0px);
   --mcm-safe-bottom: env(safe-area-inset-bottom, 0px);
   --mcm-safe-left: env(safe-area-inset-left, 0px);
-  /* 바가 숨은 큰 뷰포트. 바가 보이면 문서가 조금 넘쳐 스크롤하면 바가 접힌다. */
   --mcm-viewport-stable: 100vh;
   --mcm-viewport-dynamic: 100vh;
 
@@ -67,9 +66,9 @@
   --mcm-menu-easing: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@supports (height: 100lvh) {
+@supports (height: 100svh) {
   :root {
-    --mcm-viewport-stable: 100lvh;
+    --mcm-viewport-stable: 100svh;
   }
 }
 

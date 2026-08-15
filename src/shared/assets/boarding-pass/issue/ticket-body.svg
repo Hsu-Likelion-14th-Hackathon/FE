@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 310 480" preserveAspectRatio="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 310 450" preserveAspectRatio="none">
   <path
     fill="#fff"
-    d="M14 0H296A14 14 0 0 1 310 14V396A14 14 0 0 1 296 410A14 14 0 0 1 310 424V466A14 14 0 0 1 296 480H14A14 14 0 0 1 0 466V424A14 14 0 0 1 14 410A14 14 0 0 1 0 396V14A14 14 0 0 1 14 0Z"
+    d="M14 0H296A14 14 0 0 1 310 14V366A14 14 0 0 1 296 380A14 14 0 0 1 310 394V436A14 14 0 0 1 296 450H14A14 14 0 0 1 0 436V394A14 14 0 0 1 14 380A14 14 0 0 1 0 366V14A14 14 0 0 1 14 0Z"
   />
 </svg>

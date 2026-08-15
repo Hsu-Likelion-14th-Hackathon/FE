@@ -29,63 +29,59 @@ function BoardingTicketCard({ pass, className = '', size = 'md' }) {
     <div className={`${styles.wrap} ${compact ? styles.wrapSm : ''} ${className}`.trim()}>
       <TicketStamp size={compact ? 'sm' : 'md'} />
 
-      <div className={styles.shadow}>
-        <article className={styles.card}>
-          <div className={styles.topBar} aria-hidden="true" />
+      <article className={styles.card}>
+        <div className={styles.topBar} aria-hidden="true" />
 
-          <div className={styles.main}>
-            <div className={styles.routeHeader}>
-              <div className={styles.endpoint}>
-                <span className={styles.city}>{fromCity}</span>
-                <span className={styles.code}>{pass.from?.code ?? 'ICN'}</span>
-                <span className={styles.local}>{fromLocal}</span>
-              </div>
-
-              <div className={styles.routeMid} aria-hidden="true">
-                <img src={planeRouteImg} alt="" className={styles.plane} />
-              </div>
-
-              <div className={styles.endpoint}>
-                <span className={styles.city}>{toCity}</span>
-                <span className={styles.code}>{pass.to?.code ?? 'MUC'}</span>
-                <span className={styles.local}>{toLocal}</span>
-              </div>
+        <div className={styles.main}>
+          <div className={styles.routeHeader}>
+            <div className={styles.endpoint}>
+              <span className={styles.city}>{fromCity}</span>
+              <span className={styles.code}>{pass.from?.code ?? 'ICN'}</span>
+              <span className={styles.local}>{fromLocal}</span>
             </div>
 
-            <hr className={styles.divider} aria-hidden="true" />
-
-            <div className={styles.fields}>
-              <TicketField label="PASSENGER" value={pass.passengerName} />
-              <TicketField label="CLASS" value={pass.cabinClass} align="end" />
-              <TicketField label="FLIGHT" value={pass.flightCode} />
-              <TicketField label="GATE" value={pass.gate} align="end" />
-              <TicketField label="BOARDING" value={pass.boardingLabel} />
-              <div className={`${styles.field} ${styles.fieldEnd}`}>
-                <p className={styles.label}>TIME</p>
-                <p className={styles.value}>{depart}</p>
-                <p className={styles.value}>{arrive}</p>
-              </div>
+            <div className={styles.routeMid} aria-hidden="true">
+              <img src={planeRouteImg} alt="" className={styles.plane} />
             </div>
 
-            <div className={styles.logoRow}>
-              <img src={ticketLogoImg} alt="MCM" className={styles.mainLogo} />
+            <div className={styles.endpoint}>
+              <span className={styles.city}>{toCity}</span>
+              <span className={styles.code}>{pass.to?.code ?? 'MUC'}</span>
+              <span className={styles.local}>{toLocal}</span>
             </div>
           </div>
 
-          <div className={styles.tear} aria-hidden="true">
-            <span className={styles.tearLine} />
-          </div>
+          <hr className={styles.divider} aria-hidden="true" />
 
-          <div className={styles.stub}>
-            <img src={barcodeImg} alt="" aria-hidden="true" className={styles.barcode} />
-            <div className={styles.qr} aria-label="탑승권 QR 코드">
-              {qrValue ? (
-                <QRCode value={qrValue} size={qrPx} bgColor="#FFFFFF" fgColor="#191919" />
-              ) : null}
+          <div className={styles.fields}>
+            <TicketField label="PASSENGER" value={pass.passengerName} />
+            <TicketField label="CLASS" value={pass.cabinClass} align="end" />
+            <TicketField label="FLIGHT" value={pass.flightCode} />
+            <TicketField label="GATE" value={pass.gate} align="end" />
+            <TicketField label="BOARDING" value={pass.boardingLabel} />
+            <div className={`${styles.field} ${styles.fieldEnd}`}>
+              <p className={styles.label}>TIME</p>
+              <p className={styles.value}>{depart}</p>
+              <p className={styles.value}>{arrive}</p>
             </div>
           </div>
-        </article>
-      </div>
+
+          <img src={ticketLogoImg} alt="MCM" className={styles.mainLogo} />
+        </div>
+
+        <div className={styles.tear} aria-hidden="true">
+          <span className={styles.tearLine} />
+        </div>
+
+        <div className={styles.stub}>
+          <img src={barcodeImg} alt="" aria-hidden="true" className={styles.barcode} />
+          <div className={styles.qr} aria-label="탑승권 QR 코드">
+            {qrValue ? (
+              <QRCode value={qrValue} size={qrPx} bgColor="#FFFFFF" fgColor="#191919" />
+            ) : null}
+          </div>
+        </div>
+      </article>
     </div>
   )
 }

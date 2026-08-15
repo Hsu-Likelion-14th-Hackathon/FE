@@ -5,46 +5,15 @@
   display: flex;
   min-height: var(--mcm-viewport-stable);
   flex-direction: column;
-  overflow-x: hidden;
-  background-color: #efe6e1;
-  background-image: linear-gradient(rgb(179 131 103 / 20%), rgb(179 131 103 / 20%));
-}
-
-.stageBack {
-  position: absolute;
-  /* 뷰포트 높이 기준으로 고정 — 스크롤되어도 PNG가 늘어나지 않음 */
-  top: calc(var(--scan-stage-h) * -141 / 703);
-  left: 0;
-  z-index: 0;
-  display: block;
-  width: 100%;
-  height: calc(var(--scan-stage-h) * 844 / 703);
-  object-fit: cover;
-  object-position: top center;
-  pointer-events: none;
-}
-
-.pageLoading {
-  min-height: var(--mcm-viewport-stable);
-  isolation: isolate;
+  background: var(--mcm-color-canvas);
 }
 
 .main {
-  --scan-stage-h: calc(var(--mcm-viewport-stable) - var(--mcm-header-height) - var(--mcm-safe-top));
-
   position: relative;
-  z-index: 1;
   display: flex;
-  flex: 1 0 auto;
+  flex: 1;
   flex-direction: column;
   padding: 0 1.25rem 1.5rem;
-  background-color: #efe6e1;
-  background-image: linear-gradient(rgb(179 131 103 / 20%), rgb(179 131 103 / 20%));
-}
-
-.main > :not(.stageBack) {
-  position: relative;
-  z-index: 1;
 }
 
 .back {
@@ -138,10 +107,10 @@
 }
 .footer {
   display: flex;
-  flex: 1 0 auto;
+  flex: 1;
   flex-direction: column;
-  justify-content: flex-end;
-  padding-top: 1.5rem;
+  justify-content: center; /* status 하단 ↔ 화면 하단 사이 중앙 */
+  padding-top: 0;
 }
 
 .ctaCluster {

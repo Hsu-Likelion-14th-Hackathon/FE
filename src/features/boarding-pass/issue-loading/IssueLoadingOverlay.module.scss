@@ -5,19 +5,7 @@
   inset: 0;
   z-index: 50;
   background: rgba(0, 0, 0, 0.6);
-  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.6);
   pointer-events: auto;
-}
-
-/* 하단 바가 접혀 드러난 여백만 같은 어두운 색으로 채운다.
-   오버레이는 absolute로 두어 설문 선택지가 위로 새지 않게 한다. */
-@media (max-width: 1199px) {
-  :global(html.mcm-issue-loading),
-  :global(html.mcm-issue-loading body),
-  :global(html.mcm-issue-loading #root) {
-    min-height: var(--mcm-viewport-stable);
-    background: color-mix(in srgb, #000 60%, var(--mcm-color-canvas));
-  }
 }
 
 .loadingRow {

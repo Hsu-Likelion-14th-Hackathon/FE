@@ -31,7 +31,7 @@ function BoardingCard({ onClose }) {
   return (
     <Link
       className={styles.contentGroup}
-      to="/boarding-pass"
+      to="/boarding-pass/intro"
       aria-label="MCM Boarding Pass 둘러보기"
       onClick={onClose}
     >

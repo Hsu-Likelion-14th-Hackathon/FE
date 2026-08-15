@@ -18,10 +18,10 @@ const routeCases = [
   ['/products//try-on', '페이지를 찾을 수 없습니다'],
 ]
 
-const storeHeaderRouteCases = [
+const boardingChromeRouteCases = [
   ['MCM 메인', '/', '메인'],
   ['위시리스트', '/wishlist', '위시리스트'],
-  ['쇼핑백', '/cart', '쇼핑백'],
+  ['장바구니', '/cart', '쇼핑백'],
 ]
 
 const activeRouters = []
@@ -44,7 +44,7 @@ describe('App', () => {
     document.body.classList.remove('store-menu-open')
   })
 
-  it('renders the passport route', { timeout: 15_000 }, async () => {
+  it('renders the passport route', async () => {
     renderRoute('/boarding-pass/passport')
 
     expect(
@@ -250,8 +250,8 @@ describe('App', () => {
     expect(menuButton).toHaveFocus()
   })
 
-  it.each(storeHeaderRouteCases)(
-    '보딩패스 StoreHeader의 %s 링크가 %s로 이동한다',
+  it.each(boardingChromeRouteCases)(
+    '보딩패스 Chrome의 %s 링크가 %s로 이동한다',
     async (linkName, pathname, heading) => {
       const router = renderRoute('/boarding-pass')
 
@@ -262,7 +262,7 @@ describe('App', () => {
     },
   )
 
-  it('보딩패스 화면도 공통 StoreHeader를 쓰고 검색 glyph가 없다', async () => {
+  it('일반 헤더 SVG와 보딩패스 Chrome 이미지에서 검색 glyph를 제거한다', async () => {
     renderRoute('/')
     await screen.findByRole('link', { name: 'Boarding' })
     expect(document.querySelectorAll('header svg')).toHaveLength(4)
@@ -270,11 +270,11 @@ describe('App', () => {
     cleanup()
     renderRoute('/boarding-pass')
     const menuButton = await screen.findByRole('button', { name: '메뉴 열기' })
-    const header = menuButton.closest('header')
-    // 조작 요소는 메뉴·로고·위시리스트·쇼핑백 4개뿐이어야 한다(검색이 생기면 5개가 된다).
+    const chrome = menuButton.closest('header')
+    // 조작 요소는 메뉴·로고·위시리스트·장바구니 4개뿐이어야 한다(검색이 생기면 5개가 된다).
     // 타이틀 밴드의 점·마름모는 aria-hidden 장식이라 개수 검증 대상이 아니다.
-    expect(header.querySelectorAll('a, button')).toHaveLength(4)
-    expect(header.querySelector('[aria-label*="검색"]')).toBeNull()
+    expect(chrome.querySelectorAll('a, button')).toHaveLength(4)
+    expect(chrome.querySelector('[aria-label*="검색"]')).toBeNull()
   })
 
   it('열린 메뉴 안에서 Tab 포커스를 순환한다', async () => {
@@ -311,27 +311,23 @@ describe('App', () => {
     expect(document.body).not.toHaveClass('store-menu-open')
   })
 
-  it('메인 Boarding에서 보딩패스 랜딩에 진입한다', async () => {
+  it('메인 Boarding에서 인트로를 거쳐 보딩패스 랜딩에 진입한다', async () => {
     const router = renderRoute('/')
 
     fireEvent.click(await screen.findByRole('link', { name: 'Boarding' }))
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Next' }))
 
     expect(await screen.findByRole('button', { name: '비행 시작하기' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/boarding-pass')
   })
 
-  it('보딩패스 랜딩에서 비행 시작하기를 누르면 인트로를 거쳐 설문에 진입한다', async () => {
+  it('보딩패스 랜딩에서 로그인 없이 비행 설문에 진입한다', async () => {
     const router = renderRoute('/boarding-pass')
 
     fireEvent.click(await screen.findByRole('button', { name: '비행 시작하기' }))
-    expect(await screen.findByRole('button', { name: 'Next' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/boarding-pass/intro')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Next' }))
-
-    expect(
-      await screen.findByRole('button', { name: '이전' }, { timeout: 10_000 }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: '이전' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/boarding-pass/survey')
   })
 
@@ -346,14 +342,14 @@ describe('App', () => {
     expect(router.state.location.pathname).toBe('/boarding-pass/passport')
   })
 
-  it('메뉴 Boarding으로 랜딩에 진입하고 메뉴를 닫는다', async () => {
+  it('메뉴 Boarding으로 인트로에 진입하고 메뉴를 닫는다', async () => {
     const router = renderRoute('/')
 
     fireEvent.click(await screen.findByRole('button', { name: '메뉴 열기' }))
     fireEvent.click(screen.getByRole('link', { name: 'MCM Boarding Pass 둘러보기' }))
 
-    expect(await screen.findByRole('button', { name: '비행 시작하기' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/boarding-pass')
+    expect(await screen.findByRole('button', { name: 'Next' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/boarding-pass/intro')
     expect(screen.queryByRole('dialog', { name: '전체 메뉴' })).not.toBeInTheDocument()
     expect(document.documentElement).not.toHaveClass('store-menu-open')
     expect(document.body).not.toHaveClass('store-menu-open')
