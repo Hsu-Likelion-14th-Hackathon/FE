@@ -47,6 +47,8 @@ export function Component() {
   const [floorsError, setFloorsError] = useState(null)
   const [retryCount, setRetryCount] = useState(0)
   const [route, setRoute] = useState(null)
+  // 추천 밖의 층을 한 번이라도 봤으면 전 층 순서를 유지한다.
+  const [allFloorsPinned, setAllFloorsPinned] = useState(false)
   const [details, setDetails] = useState({})
   // 요청 중인 층. state로 두면 effect 안에서 동기 setState가 필요해진다.
   const inFlightRef = useRef(new Set())
@@ -61,12 +63,15 @@ export function Component() {
   const allFloorIds = floors
     ? [...floors].sort((a, b) => a.floorNo - b.floorNo).map((item) => item.id)
     : GUIDE_FLOOR_ORDER.slice(1)
-  const guidedIds = recommendedIds.length ? recommendedIds : allFloorIds
-  // 비행 화면 슬라이더는 전 층 눈금을 준다. 추천에 없는 층으로 들어왔으면 전 층
+  // 비행 화면 슬라이더는 전 층 눈금을 준다. 추천에 없는 층을 보고 있으면 전 층
   // 순서로 안내한다 — 추천만 남기면 현재 층이 순서에 없어 슬라이더 위치가
-  // 어긋나고 "이전"이 비행 화면으로 이탈한다.
+  // 어긋나고 "이전"이 비행 화면으로 이탈한다. 한 번 전 층 모드가 됐으면 이
+  // 방문 동안 고정한다(allFloorsPinned). 층을 옮길 때마다 다시 판정하면 추천
+  // 층에 도착하는 순간 순서가 접혀 방금 있던 층의 눈금이 사라진다.
+  const offRoute =
+    floor !== 'overview' && recommendedIds.length > 0 && !recommendedIds.includes(floor)
   const visibleFloorIds =
-    floor !== 'overview' && !guidedIds.includes(floor) ? allFloorIds : guidedIds
+    !recommendedIds.length || offRoute || allFloorsPinned ? allFloorIds : recommendedIds
   const order = ['overview', ...visibleFloorIds]
   const floorIndex = order.indexOf(floor)
   const atStart = floorIndex <= 0
@@ -153,10 +158,17 @@ export function Component() {
     })
   }
 
+  // 층 이동은 전부 여기를 지난다. 추천 밖 층에서 떠나는 순간 전 층 모드를
+  // 고정해, 도착한 층이 추천이어도 방금 있던 층의 눈금이 사라지지 않게 한다.
+  function moveTo(nextFloor) {
+    if (offRoute) setAllFloorsPinned(true)
+    setFloor(nextFloor)
+  }
+
   function goRelative(delta) {
     if (delta > 0) {
       const next = order[floorIndex + 1]
-      if (next) setFloor(next)
+      if (next) moveTo(next)
       return
     }
 
@@ -166,7 +178,7 @@ export function Component() {
     }
 
     const prev = order[floorIndex - 1]
-    if (prev) setFloor(prev)
+    if (prev) moveTo(prev)
   }
 
   function goToStep(nextStep) {
@@ -175,7 +187,7 @@ export function Component() {
       return
     }
     const nextFloor = order[nextStep - FLIGHT_STEP - 1]
-    if (nextFloor) setFloor(nextFloor)
+    if (nextFloor) moveTo(nextFloor)
   }
 
   return (
@@ -199,7 +211,7 @@ export function Component() {
                 error={floorsError}
                 route={route}
                 onRetry={retryFloors}
-                onSelectFloor={setFloor}
+                onSelectFloor={moveTo}
               />
             ) : (
               <FloorView

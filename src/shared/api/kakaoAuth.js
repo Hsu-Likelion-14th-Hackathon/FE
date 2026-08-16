@@ -41,17 +41,24 @@ export function startKakaoLogin({ from } = {}) {
   const clientId = import.meta.env.VITE_KAKAO_CLIENT_ID
   if (!clientId) return false
 
-  // CSRF 방어용 일회성 값. 콜백이 이 값을 그대로 돌려받는지 대조한다. 저장이
-  // 막힌 환경이면 보내지도 않는다 — 보낸 것과 저장한 것이 늘 함께여야
-  // 콜백의 대조가 성립한다.
-  let state = null
+  // 되돌아올 자리부터 처리한다. 아래 state 생성과 한 try에 묶으면
+  // crypto.randomUUID가 없는 환경(http IP 접속 등 비보안 컨텍스트)에서
+  // 복귀 저장·청소까지 통째로 건너뛴다.
   try {
-    state = crypto.randomUUID()
-    sessionStorage.setItem(STATE_KEY, state)
     if (from) sessionStorage.setItem(RETURN_TO_KEY, from)
     else sessionStorage.removeItem(RETURN_TO_KEY)
   } catch {
     // 저장이 막힌 환경이면 로그인 뒤 홈으로 간다. 로그인 자체는 막지 않는다.
+  }
+
+  // CSRF 방어용 일회성 값. 콜백이 이 값을 그대로 돌려받는지 대조한다. 만들
+  // 수 없거나 저장이 막히면 보내지도 않는다 — 보낸 것과 저장한 것이 늘
+  // 함께여야 콜백의 대조가 성립한다.
+  let state = null
+  try {
+    state = crypto.randomUUID()
+    sessionStorage.setItem(STATE_KEY, state)
+  } catch {
     state = null
   }
 

@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 
 import { Component } from './LoginPage.jsx'
@@ -54,5 +54,23 @@ describe('LoginPage', () => {
     renderLogin()
 
     expect(screen.getByRole('button', { name: '카카오로 로그인' })).toBeInTheDocument()
+  })
+
+  it('회원가입 링크가 보호 라우트가 남긴 자리를 이어 준다', async () => {
+    // 위시리스트에서 튕겨 온 사람이 이메일로 가입해도, 가입 완료 뒤 원래
+    // 가려던 곳으로 돌아가야 한다.
+    const router = createMemoryRouter(
+      [
+        { path: '/login', Component },
+        { path: '/signup', element: <h1>가입</h1> },
+      ],
+      { initialEntries: [{ pathname: '/login', state: { from: '/wishlist' } }] },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.click(screen.getByRole('link', { name: '회원가입' }))
+
+    expect(router.state.location.pathname).toBe('/signup')
+    expect(router.state.location.state).toEqual({ from: '/wishlist' })
   })
 })

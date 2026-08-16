@@ -203,6 +203,13 @@ describe('GuidePage', { timeout: 15_000 }, () => {
     // 전 층 순서(개요·1F·2F·5F)에서 5F는 마지막이다.
     expect(screen.getByRole('button', { name: '다음' })).toBeDisabled()
     expect(screen.getByRole('button', { name: '이전' })).toBeEnabled()
+
+    // 추천 층(2F)으로 옮겨도 전 층 순서가 유지된다. 층마다 다시 판정하면
+    // 이 순간 순서가 접혀 방금 있던 5F로 돌아갈 눈금이 사라진다.
+    fireEvent.click(screen.getByRole('button', { name: '이전' }))
+    await waitFor(() => expect(getFloor).toHaveBeenCalledWith(2))
+    expect(screen.getByRole('button', { name: '5F로 이동' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '다음' })).toBeEnabled()
   })
 
   it('층을 떠났다 돌아와도 도착한 상세를 그린다', async () => {

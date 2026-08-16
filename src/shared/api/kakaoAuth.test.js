@@ -55,6 +55,22 @@ describe('되돌아올 자리', () => {
     expect(sessionStorage.getItem(RETURN_TO_KEY)).toBe('/wishlist')
   })
 
+  it('state를 만들 수 없는 환경에서도 되돌아올 자리는 지킨다', () => {
+    // crypto.randomUUID는 보안 컨텍스트 전용이다. http IP 접속(휴대폰 LAN
+    // 확인)에서는 없다 — 그래도 복귀 저장·청소는 되어야 한다.
+    vi.stubEnv('VITE_KAKAO_CLIENT_ID', 'test-key')
+    vi.spyOn(crypto, 'randomUUID').mockImplementation(() => {
+      throw new TypeError('crypto.randomUUID is not a function')
+    })
+    sessionStorage.setItem('mcm-kakao-return-to', '/cart')
+
+    expect(startKakaoLogin({ from: '/wishlist' })).toBe(true)
+
+    expect(sessionStorage.getItem(RETURN_TO_KEY)).toBe('/wishlist')
+    // 저장 못 한 state는 보내지도 않았어야 하므로 대조 값도 없다.
+    expect(sessionStorage.getItem(STATE_KEY)).toBeNull()
+  })
+
   it('로그인을 시작하면 CSRF 대조용 state도 남긴다', () => {
     // 콜백이 이 값과 주소의 state를 대조한다. 다르면 남의 code다.
     vi.stubEnv('VITE_KAKAO_CLIENT_ID', 'test-key')

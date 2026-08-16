@@ -57,7 +57,13 @@ export function Component() {
             <p className={styles.description}>
               회원으로 가입하시면 빠르고 편리하게 이용하실 수 있습니다.
             </p>
-            <Link className={styles.textLink} to="/signup">
+            {/* 보호 라우트가 남긴 자리를 가입 흐름에도 잇는다. 끊으면 이메일로
+                가입한 사람만 가입 후 홈에 떨어진다. */}
+            <Link
+              className={styles.textLink}
+              to="/signup"
+              state={{ from: location.state?.from ?? null }}
+            >
               회원가입
             </Link>
           </div>
