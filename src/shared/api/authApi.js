@@ -144,3 +144,25 @@ export async function updateMe({ name, birthDate, nationality }) {
   })
   return toMember(result)
 }
+
+/**
+ * PUT /users/me/body-image — 기본 전신 이미지 등록/수정.
+ *
+ * 전용 업로드 경로는 없다. 피팅 업로드(createUploadUrl → Azure PUT)로 얻은
+ * fileKey를 그대로 재사용한다. 등록해 두면 피팅에서 사진 없이(fileKey 생략)
+ * 이 이미지를 쓴다.
+ */
+export async function registerBodyImage(fileKey) {
+  const result = await apiFetch(API.user.bodyImage, {
+    method: 'PUT',
+    body: { fileKey },
+    unwrap: true,
+  })
+  return { bodyImageUrl: result.bodyImageUrl ?? null }
+}
+
+/** DELETE /users/me/body-image — 기본 전신 이미지 삭제 */
+export async function deleteBodyImage() {
+  const result = await apiFetch(API.user.bodyImage, { method: 'DELETE', unwrap: true })
+  return { deleted: Boolean(result.deleted) }
+}

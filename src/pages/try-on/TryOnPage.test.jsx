@@ -2,12 +2,23 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import AppProviders from '@/app/providers.jsx'
+
 const getProduct = vi.hoisted(() => vi.fn())
 const getPassport = vi.hoisted(() => vi.fn())
 const createUploadUrl = vi.hoisted(() => vi.fn())
 const uploadToAzure = vi.hoisted(() => vi.fn())
 const createFittingSession = vi.hoisted(() => vi.fn())
 const getFittingSession = vi.hoisted(() => vi.fn())
+const getMe = vi.hoisted(() => vi.fn())
+const registerBodyImage = vi.hoisted(() => vi.fn())
+const deleteBodyImage = vi.hoisted(() => vi.fn())
+
+vi.mock('@/shared/api/authApi.js', () => ({
+  getMe: (...args) => getMe(...args),
+  registerBodyImage: (...args) => registerBodyImage(...args),
+  deleteBodyImage: (...args) => deleteBodyImage(...args),
+}))
 
 vi.mock('@/shared/api/productApi.js', async (importOriginal) => ({
   ...(await importOriginal()),
@@ -75,11 +86,13 @@ const doneSession = {
 
 function renderTryOn(path = '/products/1/try-on') {
   render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/products/:productId/try-on" element={<Component />} />
-      </Routes>
-    </MemoryRouter>,
+    <AppProviders>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/products/:productId/try-on" element={<Component />} />
+        </Routes>
+      </MemoryRouter>
+    </AppProviders>,
   )
 }
 
@@ -94,6 +107,9 @@ beforeEach(() => {
   uploadToAzure.mockReset().mockResolvedValue(undefined)
   createFittingSession.mockReset().mockResolvedValue(pendingSession)
   getFittingSession.mockReset().mockResolvedValue(doneSession)
+  getMe.mockReset().mockResolvedValue({ defaultBodyImageUrl: null })
+  registerBodyImage.mockReset().mockResolvedValue({ bodyImageUrl: 'https://cdn/body.jpg' })
+  deleteBodyImage.mockReset().mockResolvedValue({ deleted: true })
 })
 
 afterEach(() => {
@@ -156,6 +172,48 @@ describe('TryOnPage', () => {
       productColorId: 1,
       fileKey: 'uploads/me.jpg',
     })
+  })
+
+  it('등록된 기본 전신 이미지가 있으면 안내와 삭제 버튼을 보여 준다', async () => {
+    getMe.mockResolvedValue({ defaultBodyImageUrl: 'https://cdn/default-body.jpg' })
+    renderTryOn()
+
+    expect(
+      await screen.findByText('사진을 고르지 않으면 등록된 기본 전신 이미지를 사용해요'),
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '삭제' }))
+    await waitFor(() => expect(deleteBodyImage).toHaveBeenCalled())
+    expect(
+      screen.queryByText('사진을 고르지 않으면 등록된 기본 전신 이미지를 사용해요'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('저장을 체크하고 Fitting하면 업로드한 fileKey로 기본 이미지도 등록한다', async () => {
+    renderTryOn()
+    await screen.findByText('Credit | 150')
+
+    const file = new File(['photo-bytes'], 'me.jpg', { type: 'image/jpeg' })
+    fireEvent.change(screen.getByLabelText('전신 이미지 파일'), { target: { files: [file] } })
+    fireEvent.click(screen.getByRole('checkbox', { name: '이 사진을 기본 전신 이미지로 저장' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Fitting' }))
+    await waitFor(() => expect(createFittingSession).toHaveBeenCalled())
+
+    // 업로드는 한 번뿐 — 피팅에 쓴 fileKey를 그대로 재사용한다.
+    expect(registerBodyImage).toHaveBeenCalledWith('uploads/me.jpg')
+  })
+
+  it('저장을 체크하지 않으면 기본 이미지를 등록하지 않는다', async () => {
+    renderTryOn()
+    await screen.findByText('Credit | 150')
+
+    const file = new File(['photo-bytes'], 'me.jpg', { type: 'image/jpeg' })
+    fireEvent.change(screen.getByLabelText('전신 이미지 파일'), { target: { files: [file] } })
+    fireEvent.click(screen.getByRole('button', { name: 'Fitting' }))
+    await waitFor(() => expect(createFittingSession).toHaveBeenCalled())
+
+    expect(registerBodyImage).not.toHaveBeenCalled()
   })
 
   it('PENDING 동안 로딩을 보여주고, 폴링이 DONE을 받으면 결과 화면으로 넘어간다', async () => {

@@ -17,6 +17,14 @@ const COLLECTION_LABEL = 'NEW COLLECTION'
 /** 이보다 짧게 쓸면 넘기지 않는다. 탭하다 손이 미끄러진 것과 구분해야 한다. */
 const SWIPE_THRESHOLD = 40
 
+/**
+ * 재고가 0이거나 미확정(null)이면 품절로 잠근다.
+ *
+ * 백엔드 확답(2026-08-16): stock null은 "재고 미확정/품절"이다. 개수를
+ * 모르는 채 담게 두는 쪽이 아니라 잠그는 쪽이 계약이다.
+ */
+const isSoldOut = (size) => !(size?.stock > 0)
+
 function ChevronIcon({ direction }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 14 14">
@@ -280,7 +288,8 @@ export function Component() {
           <div className={styles.productInformation}>
             <h2 id="product-name">{product.name}</h2>
             <p className={styles.price}>{product.priceLabel}</p>
-            {/* 수량 미상(null)이면 아무 말도 하지 않는다. "0개 남음"은 거짓이다. */}
+            {/* 수량 미확정(null)이면 개수는 말하지 않는다. "0개 남음"은 거짓이다.
+                품절 잠금은 담기 버튼이 맡는다. */}
             {typeof selectedSize?.stock === 'number' ? (
               <p className={styles.stock}>{selectedSize.stock}개 남음</p>
             ) : null}
@@ -337,7 +346,7 @@ export function Component() {
                     key={size.productSizeId}
                     type="button"
                     aria-pressed={index === sizeIndex}
-                    disabled={size.stock === 0}
+                    disabled={isSoldOut(size)}
                     onClick={() => setSizeIndex(index)}
                   >
                     {size.label}
@@ -350,10 +359,10 @@ export function Component() {
               className={`${styles.addToBagButton} ${addedToBag ? styles.added : ''}`}
               type="button"
               aria-describedby="cart-feedback"
-              disabled={!selectedSize || selectedSize.stock === 0}
+              disabled={!selectedSize || isSoldOut(selectedSize)}
               onClick={addToBag}
             >
-              {selectedSize?.stock === 0
+              {selectedSize && isSoldOut(selectedSize)
                 ? '품절'
                 : addedToBag
                   ? '쇼핑백에 담겼어요'

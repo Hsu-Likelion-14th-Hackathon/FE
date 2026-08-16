@@ -215,16 +215,17 @@ describe('ProductDetailPage', () => {
     expect(screen.getByText('0개 남음')).toBeInTheDocument()
   })
 
-  it('재고가 미상(null)이면 품절로 보지 않는다', async () => {
-    // 백엔드가 수량을 아직 넣지 않은 상품이다. 담기를 막으면 팔 수 있는 것을
-    // 못 팔게 된다.
+  it('재고가 미확정(null)이면 품절로 잠근다', async () => {
+    // 백엔드 확답(2026-08-16): stock null은 "재고 미확정/품절"이다.
     getProduct.mockResolvedValue({
       ...detail,
       colors: [{ ...detail.colors[0], sizes: [{ ...detail.colors[0].sizes[0], stock: null }] }],
     })
     renderPage()
 
-    expect(await screen.findByRole('button', { name: '쇼핑백에 추가' })).toBeEnabled()
+    const button = await screen.findByRole('button', { name: '품절' })
+    expect(button).toBeDisabled()
+    // 개수는 모른다 — "0개 남음"이라고 말하지 않는다.
     expect(screen.queryByText(/개 남음/)).not.toBeInTheDocument()
   })
 

@@ -6,6 +6,7 @@ import fittingSpinner from '@/assets/icons/state/fitting-spinner.png'
 import closeIcon from '@/assets/icons/state/close.svg'
 import creditDiamondIcon from '@/assets/icons/state/credit-diamond.svg'
 import uploadArrowIcon from '@/assets/icons/state/upload-arrow.svg'
+import { deleteBodyImage, getMe, registerBodyImage } from '@/shared/api/authApi.js'
 import {
   createFittingSession,
   createUploadUrl,
@@ -15,6 +16,7 @@ import {
 import { getPassport } from '@/shared/api/passportApi.js'
 import { formatPrice, getProduct } from '@/shared/api/productApi.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import { useToast } from '@/shared/ui/toastContext.js'
 
 import styles from './TryOnPage.module.scss'
 
@@ -51,14 +53,19 @@ function usePrefersReducedMotion() {
 }
 
 function UploadStage({
+  bodyImage,
   credit,
   error,
   fileInputRef,
   fileName,
   onClose,
   onFileChange,
+  onRemoveBodyImage,
   onStartFitting,
+  onToggleSaveDefault,
   previewImage,
+  removingBody,
+  saveAsDefault,
 }) {
   return (
     <section
@@ -112,6 +119,30 @@ function UploadStage({
         <span className="sr-only" aria-live="polite">
           {fileName ? `${fileName} 이미지가 선택되었습니다.` : '선택된 이미지가 없습니다.'}
         </span>
+
+        {/* 기본 전신 이미지가 있으면 사진 없이도 시작할 수 있음을 보여 준다. */}
+        {bodyImage && !fileName ? (
+          <div className={styles.bodyImageRow}>
+            <img className={styles.bodyThumb} src={bodyImage} alt="" />
+            <span>사진을 고르지 않으면 등록된 기본 전신 이미지를 사용해요</span>
+            <button
+              className={styles.bodyRemove}
+              type="button"
+              onClick={onRemoveBodyImage}
+              disabled={removingBody}
+            >
+              {removingBody ? '삭제 중…' : '삭제'}
+            </button>
+          </div>
+        ) : null}
+
+        {/* 고른 사진을 다음에도 쓰도록 기본 이미지로 남길 수 있다. */}
+        {fileName ? (
+          <label className={styles.saveDefault}>
+            <input type="checkbox" checked={saveAsDefault} onChange={onToggleSaveDefault} />
+            <span>이 사진을 기본 전신 이미지로 저장</span>
+          </label>
+        ) : null}
 
         {error ? (
           <p className={styles.errorMessage} role="alert">
@@ -247,6 +278,24 @@ export function Component() {
   // 것에서 파생된다 — 눈금은 장식이고, 완료는 서버만 안다.
   const [session, setSession] = useState(null)
   const [error, setError] = useState(null)
+  const { showToast } = useToast()
+  // 등록된 기본 전신 이미지(GET /users/me). 있으면 사진 없이도 피팅이 된다는
+  // 것을 화면에 드러내고, 삭제 버튼을 단다.
+  const [bodyImage, setBodyImage] = useState(null)
+  const [saveAsDefault, setSaveAsDefault] = useState(false)
+  const [removingBody, setRemovingBody] = useState(false)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    getMe({ signal: controller.signal })
+      .then((me) => {
+        if (!controller.signal.aborted) setBodyImage(me.defaultBodyImageUrl)
+      })
+      .catch(() => {
+        // 안내 한 줄이 빠질 뿐이다. 피팅 흐름은 그대로 간다.
+      })
+    return () => controller.abort()
+  }, [])
 
   // 미리보기 카드는 지금 보고 있는 상품·색을 보여줘야 한다. URL이 기준이다.
   useEffect(() => {
@@ -361,6 +410,21 @@ export function Component() {
         })
         await uploadToAzure(grant.uploadUrl, file)
         fileKey = grant.fileKey
+
+        if (saveAsDefault) {
+          // 같은 fileKey를 재사용해 기본 전신 이미지로도 등록한다. 부가
+          // 작업이므로 실패해도 피팅은 계속 간다 — 사유만 토스트로 알린다.
+          try {
+            const saved = await registerBodyImage(fileKey)
+            setBodyImage(saved.bodyImageUrl)
+          } catch {
+            showToast(
+              <p className="text-sm leading-5">
+                기본 전신 이미지 저장에 실패했습니다. 피팅은 계속 진행됩니다.
+              </p>,
+            )
+          }
+        }
       }
 
       const created = await createFittingSession({ productColorId, fileKey })
@@ -387,6 +451,19 @@ export function Component() {
     setFile(target.files?.[0] ?? null)
   }
 
+  const removeBodyImage = async () => {
+    setRemovingBody(true)
+    setError(null)
+    try {
+      await deleteBodyImage()
+      setBodyImage(null)
+    } catch (cause) {
+      setError(cause)
+    } finally {
+      setRemovingBody(false)
+    }
+  }
+
   const showResult = phase === 'loading' && session?.status === 'DONE'
 
   return (
@@ -401,14 +478,19 @@ export function Component() {
 
       {phase === 'upload' ? (
         <UploadStage
+          bodyImage={bodyImage}
           credit={credit}
           error={error}
           fileInputRef={fileInputRef}
           fileName={file?.name ?? ''}
           onClose={closeUpload}
           onFileChange={handleFileChange}
+          onRemoveBodyImage={removeBodyImage}
           onStartFitting={startFitting}
+          onToggleSaveDefault={() => setSaveAsDefault((current) => !current)}
           previewImage={selectedColor?.images?.[0] ?? null}
+          removingBody={removingBody}
+          saveAsDefault={saveAsDefault}
         />
       ) : null}
       {phase === 'loading' && !showResult ? (

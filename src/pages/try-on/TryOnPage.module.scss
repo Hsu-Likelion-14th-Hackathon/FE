@@ -186,6 +186,57 @@
   display: none;
 }
 
+/* 등록된 기본 전신 이미지 안내 줄. 어두운 무대라 크림 톤으로 띄운다. */
+.bodyImageRow {
+  display: flex;
+  margin: 16px 0 0;
+  align-items: center;
+  gap: 8px;
+  color: #fff7d5;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.bodyThumb {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255, 247, 213, 0.5);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bodyRemove {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 247, 213, 0.5);
+  border-radius: 100px;
+  background: none;
+  color: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.bodyRemove:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* 고른 사진을 기본 이미지로 남기는 선택. */
+.saveDefault {
+  display: flex;
+  margin-top: 16px;
+  align-items: center;
+  gap: 6px;
+  color: #fff7d5;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.saveDefault input {
+  accent-color: #c07346;
+}
+
 /* 요청 실패 사유. 어두운 무대 위라 밝은 경고색을 쓴다. */
 .errorMessage {
   margin: 16px 0 0;
