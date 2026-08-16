@@ -1,6 +1,8 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { clearAccessToken, setAccessToken } from '@/shared/api/authToken.js'
 
 // 상품 상세는 서버에서 받아 온다. 통합 테스트는 라우팅을 보는 자리라
 // 네트워크까지 실어 나르지 않는다.
@@ -62,7 +64,14 @@ function renderRoute(pathname) {
 }
 
 describe('App', () => {
+  beforeEach(() => {
+    // 백엔드 데이터를 그리는 라우트는 보호 구간에 있다. 라우팅 검사가
+    // 로그인 화면으로 튕기지 않도록 토큰을 쥐여 준다.
+    setAccessToken('app-test-token')
+  })
+
   afterEach(() => {
+    clearAccessToken()
     activeRouters.splice(0).forEach((router) => router.dispose())
     document.documentElement.classList.remove('store-menu-open')
     document.body.classList.remove('store-menu-open')
@@ -372,7 +381,20 @@ describe('App', () => {
     expect(router.state.location.pathname).toBe('/boarding-pass/survey')
   })
 
-  it('보딩패스 랜딩에서 로그인 없이 Passport에 진입한다', async () => {
+  it('로그인 없이 Passport를 누르면 로그인으로 보내고 돌아올 곳을 남긴다', async () => {
+    clearAccessToken()
+    const router = renderRoute('/boarding-pass')
+
+    fireEvent.click(await screen.findByRole('button', { name: 'PASSPORT 확인' }))
+
+    expect(
+      await screen.findByRole('heading', { name: '로그인' }, { timeout: 10_000 }),
+    ).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/login')
+    expect(router.state.location.state?.from).toBe('/boarding-pass/passport')
+  })
+
+  it('로그인한 사용자는 랜딩에서 Passport에 진입한다', async () => {
     const router = renderRoute('/boarding-pass')
 
     fireEvent.click(await screen.findByRole('button', { name: 'PASSPORT 확인' }))

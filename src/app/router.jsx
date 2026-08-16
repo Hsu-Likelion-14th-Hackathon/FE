@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router'
 
 import App, { HydrateFallback } from './App.jsx'
+import { ProtectedRoute } from './ProtectedRoute.jsx'
 
 export function createAppRoutes() {
   return [
@@ -27,26 +28,6 @@ export function createAppRoutes() {
           lazy: () => import('@/pages/auth/KakaoCallbackPage.jsx'),
         },
         {
-          path: 'products',
-          lazy: () => import('@/pages/product-list/ProductListPage.jsx'),
-        },
-        {
-          path: 'products/:productId',
-          lazy: () => import('@/pages/product-detail/ProductDetailPage.jsx'),
-        },
-        {
-          path: 'products/:productId/try-on',
-          lazy: () => import('@/pages/try-on/TryOnPage.jsx'),
-        },
-        {
-          path: 'wishlist',
-          lazy: () => import('@/pages/wishlist/WishlistPage.jsx'),
-        },
-        {
-          path: 'cart',
-          lazy: () => import('@/pages/cart/CartPage.jsx'),
-        },
-        {
           path: 'boarding-pass/intro',
           lazy: () => import('@/pages/boarding-pass/intro/IntroPage.jsx'),
         },
@@ -55,28 +36,57 @@ export function createAppRoutes() {
           lazy: () => import('@/pages/boarding-pass/landing/LandingPage.jsx'),
         },
         {
-          path: 'boarding-pass/survey',
-          lazy: () => import('@/pages/boarding-pass/survey/SurveyPage.jsx'),
-        },
-        {
-          path: 'boarding-pass/complete',
-          lazy: () => import('@/pages/boarding-pass/complete/CompletePage.jsx'),
-        },
-        {
-          path: 'boarding-pass/scan',
-          lazy: () => import('@/pages/boarding-pass/scan/ScanPage.jsx'),
-        },
-        {
-          path: 'boarding-pass/flight',
-          lazy: () => import('@/pages/boarding-pass/flight/FlightPage.jsx'),
-        },
-        {
-          path: 'boarding-pass/guide',
-          lazy: () => import('@/pages/boarding-pass/guide/GuidePage.jsx'),
-        },
-        {
-          path: 'boarding-pass/passport',
-          lazy: () => import('@/pages/boarding-pass/passport/PassportPage.jsx'),
+          // 로그인해야 여는 구간. 스웨거상 인증(auth) 계열을 뺀 모든 API가
+          // JWT 필수라, 백엔드 데이터로 그리는 화면은 전부 여기 든다.
+          // 홈·랜딩·인트로는 정적 무대라 공개로 남는다 — 버튼을 눌러 이
+          // 구간에 들어오는 순간 로그인으로 보내고, 마치면 제자리로 돌아온다.
+          Component: ProtectedRoute,
+          children: [
+            {
+              path: 'products',
+              lazy: () => import('@/pages/product-list/ProductListPage.jsx'),
+            },
+            {
+              path: 'products/:productId',
+              lazy: () => import('@/pages/product-detail/ProductDetailPage.jsx'),
+            },
+            {
+              path: 'products/:productId/try-on',
+              lazy: () => import('@/pages/try-on/TryOnPage.jsx'),
+            },
+            {
+              path: 'wishlist',
+              lazy: () => import('@/pages/wishlist/WishlistPage.jsx'),
+            },
+            {
+              path: 'cart',
+              lazy: () => import('@/pages/cart/CartPage.jsx'),
+            },
+            {
+              path: 'boarding-pass/passport',
+              lazy: () => import('@/pages/boarding-pass/passport/PassportPage.jsx'),
+            },
+            {
+              path: 'boarding-pass/survey',
+              lazy: () => import('@/pages/boarding-pass/survey/SurveyPage.jsx'),
+            },
+            {
+              path: 'boarding-pass/complete',
+              lazy: () => import('@/pages/boarding-pass/complete/CompletePage.jsx'),
+            },
+            {
+              path: 'boarding-pass/scan',
+              lazy: () => import('@/pages/boarding-pass/scan/ScanPage.jsx'),
+            },
+            {
+              path: 'boarding-pass/flight',
+              lazy: () => import('@/pages/boarding-pass/flight/FlightPage.jsx'),
+            },
+            {
+              path: 'boarding-pass/guide',
+              lazy: () => import('@/pages/boarding-pass/guide/GuidePage.jsx'),
+            },
+          ],
         },
         {
           path: '*',

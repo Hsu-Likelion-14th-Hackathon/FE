@@ -430,8 +430,9 @@ export function Component() {
                       nationality: getCountryOption(countryDraft)?.code ?? '',
                     }
 
-                    // 여권은 로그인 없이도 열람할 수 있다. 토큰이 없으면 보낼
-                    // 곳이 없으므로 지면 표기만 바꾼다.
+                    // 여권 라우트는 보호 구간이지만, 시트를 열어 둔 사이
+                    // 401로 토큰이 지워졌을 수 있다. 보낼 곳이 없으면 지면
+                    // 표기만 바꾼다.
                     if (!getAccessToken()) {
                       setProfileEdit(body)
                       closeSheet()
