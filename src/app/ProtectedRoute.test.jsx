@@ -63,6 +63,9 @@ describe('ProtectedRoute', () => {
     const guardedPaths = guarded.children.map((route) => route.path)
 
     expect(guardedPaths).toEqual([
+      // 인트로는 데이터가 없지만 여정의 입구라 함께 잠근다 — 공개로 두면
+      // 인트로를 보다가 Next(설문)에서 끊긴다.
+      'boarding-pass/intro',
       'products',
       'products/:productId',
       'products/:productId/try-on',
@@ -79,7 +82,7 @@ describe('ProtectedRoute', () => {
     // 정적 무대는 공개로 남는다 — 로그인 없이 행사 소개까지는 볼 수 있어야 한다.
     const openPaths = root.children.filter((route) => route.path).map((route) => route.path)
     expect(openPaths).toContain('boarding-pass')
-    expect(openPaths).toContain('boarding-pass/intro')
+    expect(openPaths).not.toContain('boarding-pass/intro')
     expect(openPaths).toContain('login')
   })
 })
