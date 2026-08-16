@@ -75,13 +75,13 @@ const FLOOR_1_DETAIL = {
 
 const activeRouters = []
 
-function renderGuide() {
+function renderGuide({ state } = {}) {
   const router = createMemoryRouter(
     [
       { path: '/boarding-pass/guide', Component: GuidePage },
       { path: '/boarding-pass/flight', element: <p>Flight</p> },
     ],
-    { initialEntries: ['/boarding-pass/guide'] },
+    { initialEntries: [{ pathname: '/boarding-pass/guide', state }] },
   )
 
   render(
@@ -190,6 +190,40 @@ describe('GuidePage', { timeout: 15_000 }, () => {
     expect(list).toHaveTextContent('창립자 이니셜 MCM')
     // 층 배지·인용도 백엔드 값이다.
     expect(screen.getByText('“ 모든 여정은 하나의 이름에서 시작된다 ”')).toBeInTheDocument()
+  })
+
+  it('추천에 없는 층으로 들어오면 전 층 순서로 안내한다', async () => {
+    // 비행 화면 슬라이더는 전 층 눈금을 준다. 5F(비추천)로 들어왔는데 추천만
+    // 남기면 현재 층이 순서에 없어 슬라이더가 어긋나고 "이전"이 이탈한다.
+    renderGuide({ state: { floor: '5f' } })
+
+    await waitFor(() => expect(getBoardingPassRoute).toHaveBeenCalled())
+    expect(await screen.findByRole('button', { name: '5F로 이동' })).toBeInTheDocument()
+    await waitFor(() => expect(getFloor).toHaveBeenCalledWith(5))
+    // 전 층 순서(개요·1F·2F·5F)에서 5F는 마지막이다.
+    expect(screen.getByRole('button', { name: '다음' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '이전' })).toBeEnabled()
+  })
+
+  it('층을 떠났다 돌아와도 도착한 상세를 그린다', async () => {
+    // 상세가 느린 사이 개요에 다녀오면, 요청 중 표식 때문에 재요청은 안 나간다.
+    // 그래도 원 요청 결과를 캐시해야 로딩 화면에 갇히지 않는다.
+    let resolveDetail
+    getFloor.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveDetail = resolve
+        }),
+    )
+    renderGuide()
+
+    fireEvent.click(await screen.findByRole('button', { name: /1F ORIGIN/ }))
+    fireEvent.click(screen.getByRole('button', { name: '가이드 개요로 이동' }))
+    fireEvent.click(await screen.findByRole('button', { name: /1F ORIGIN/ }))
+
+    resolveDetail(FLOOR_1_DETAIL)
+    expect(await screen.findByText('1976년 뮌헨의 밤에서 시작된 이야기.')).toBeInTheDocument()
+    expect(getFloor).toHaveBeenCalledTimes(1)
   })
 
   it('returns to MAPS when the first slider segment is pressed', async () => {

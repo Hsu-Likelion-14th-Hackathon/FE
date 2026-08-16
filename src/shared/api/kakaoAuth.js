@@ -41,28 +41,48 @@ export function startKakaoLogin({ from } = {}) {
   const clientId = import.meta.env.VITE_KAKAO_CLIENT_ID
   if (!clientId) return false
 
+  // CSRF 방어용 일회성 값. 콜백이 이 값을 그대로 돌려받는지 대조한다. 저장이
+  // 막힌 환경이면 보내지도 않는다 — 보낸 것과 저장한 것이 늘 함께여야
+  // 콜백의 대조가 성립한다.
+  let state = null
   try {
+    state = crypto.randomUUID()
+    sessionStorage.setItem(STATE_KEY, state)
     if (from) sessionStorage.setItem(RETURN_TO_KEY, from)
     else sessionStorage.removeItem(RETURN_TO_KEY)
   } catch {
     // 저장이 막힌 환경이면 로그인 뒤 홈으로 간다. 로그인 자체는 막지 않는다.
+    state = null
   }
 
   const url = new URL(AUTHORIZE_URL)
   url.searchParams.set('client_id', clientId)
   url.searchParams.set('redirect_uri', getKakaoRedirectUri())
   url.searchParams.set('response_type', 'code')
+  if (state) url.searchParams.set('state', state)
   window.location.assign(url.toString())
   return true
 }
 
 const RETURN_TO_KEY = 'mcm-kakao-return-to'
+const STATE_KEY = 'mcm-kakao-state'
 
 /** 카카오를 거치기 전에 있던 자리. 한 번 읽으면 지운다. */
 export function takeKakaoReturnTo() {
   try {
     const value = sessionStorage.getItem(RETURN_TO_KEY)
     sessionStorage.removeItem(RETURN_TO_KEY)
+    return value || null
+  } catch {
+    return null
+  }
+}
+
+/** 인가 요청에 실어 보낸 state. 한 번 읽으면 지운다. */
+export function takeKakaoState() {
+  try {
+    const value = sessionStorage.getItem(STATE_KEY)
+    sessionStorage.removeItem(STATE_KEY)
     return value || null
   } catch {
     return null

@@ -211,7 +211,8 @@ export function Component() {
         // 백엔드는 alpha-2를 받는다(추가 정보 입력 명세의 `예: KR`).
         nationality: getCountryOption(countryCode)?.code ?? '',
       })
-      navigate('/', { replace: true })
+      // 보호 라우트나 카카오 콜백이 남긴 원래 자리로 돌아간다. 없으면 홈이다.
+      navigate(location.state?.from ?? '/', { replace: true })
     } catch (profileError) {
       setError(profileError)
     } finally {

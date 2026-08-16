@@ -5,9 +5,11 @@ import {
   isKakaoLoginReady,
   startKakaoLogin,
   takeKakaoReturnTo,
+  takeKakaoState,
 } from './kakaoAuth.js'
 
 const RETURN_TO_KEY = 'mcm-kakao-return-to'
+const STATE_KEY = 'mcm-kakao-state'
 
 beforeEach(() => {
   sessionStorage.clear()
@@ -51,6 +53,19 @@ describe('되돌아올 자리', () => {
 
     expect(startKakaoLogin({ from: '/wishlist' })).toBe(true)
     expect(sessionStorage.getItem(RETURN_TO_KEY)).toBe('/wishlist')
+  })
+
+  it('로그인을 시작하면 CSRF 대조용 state도 남긴다', () => {
+    // 콜백이 이 값과 주소의 state를 대조한다. 다르면 남의 code다.
+    vi.stubEnv('VITE_KAKAO_CLIENT_ID', 'test-key')
+
+    startKakaoLogin()
+
+    const stored = sessionStorage.getItem(STATE_KEY)
+    expect(stored).toBeTruthy()
+    // 한 번 읽으면 지워져 재사용될 수 없다.
+    expect(takeKakaoState()).toBe(stored)
+    expect(takeKakaoState()).toBeNull()
   })
 
   it('자리 없이 시작하면 이전에 남긴 자리를 지운다', () => {

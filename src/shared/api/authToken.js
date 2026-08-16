@@ -31,18 +31,7 @@ function writeStored(next) {
   }
 }
 
-/**
- * 개발 토큰은 개발 빌드에서만 읽는다.
- *
- * VITE_ 접두사가 붙은 값은 빌드 결과물에 문자열로 박힌다. 조건 없이 두면
- * 운영 번들에서 누구나 토큰을 꺼내 쓸 수 있다. 로그인이 붙으면 이 변수는
- * 통째로 없앤다.
- */
-function readDevToken() {
-  return import.meta.env.DEV ? (import.meta.env.VITE_BEARER_TOKEN ?? null) : null
-}
-
-let token = readStored() ?? readDevToken()
+let token = readStored()
 
 /** 토큰이 바뀐 것을 알아야 하는 쪽(인증 UI)이 구독한다. */
 const listeners = new Set()

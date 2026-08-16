@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 
 import { EMAIL_ALREADY_REGISTERED, loginWithKakao } from '@/shared/api/authApi.js'
-import { getKakaoRedirectUri, takeKakaoReturnTo } from '@/shared/api/kakaoAuth.js'
+import { getKakaoRedirectUri, takeKakaoReturnTo, takeKakaoState } from '@/shared/api/kakaoAuth.js'
 
 import styles from './KakaoCallbackPage.module.scss'
 
@@ -39,18 +39,31 @@ export function Component() {
     if (blocked || startedRef.current) return
     startedRef.current = true
 
-    loginWithKakao({ code, redirectUri: getKakaoRedirectUri() })
+    // 로그인 CSRF 방어. 우리가 인가 요청에 실어 보낸 state가 그대로 돌아와야
+    // 한다. 공격자가 자기 code를 붙인 콜백 URL을 열게 해도, 이 브라우저가
+    // 보관한 state와 달라 교환이 막힌다. 보낸 적 없으면(저장 막힌 환경) 둘 다
+    // null이라 통과한다.
+    const verifyState = () => {
+      if ((params.get('state') ?? null) !== takeKakaoState()) {
+        throw new Error('카카오 인증 확인에 실패했습니다. 처음부터 다시 시도해 주세요.')
+      }
+    }
+
+    Promise.resolve()
+      .then(verifyState)
+      .then(() => loginWithKakao({ code, redirectUri: getKakaoRedirectUri() }))
       .then((session) => {
         const returnTo = takeKakaoReturnTo()
         if (session.isNewUser) {
-          // 일반 가입의 2단계와 같은 화면이다.
-          navigate('/signup', { replace: true, state: { step: 'profile' } })
+          // 일반 가입의 2단계와 같은 화면이다. 가려던 자리(returnTo)는 여기서
+          // 이미 소비됐으므로 state로 넘겨 프로필 완료 뒤 이어 가게 한다.
+          navigate('/signup', { replace: true, state: { step: 'profile', from: returnTo } })
           return
         }
         navigate(returnTo ?? '/', { replace: true })
       })
       .catch(setExchangeError)
-  }, [blocked, code, navigate])
+  }, [blocked, code, navigate, params])
 
   if (!error) {
     return (

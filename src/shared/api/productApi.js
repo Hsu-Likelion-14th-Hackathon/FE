@@ -107,8 +107,9 @@ export async function getProduct(productId, { signal } = {}) {
         label: size.sizeLabel ?? '',
         note: size.sizeNote ?? null,
         sku: size.sku ?? '',
-        // null은 "0개"가 아니라 "수량 미상"이다. 0으로 접으면 재고를 아직
-        // 넣지 않은 상품이 품절로 잠긴다(실제로 18개 중 6개가 null이다).
+        // null은 "0개"가 아니라 "재고 미확정"이다. 구분을 남겨 두면 화면이
+        // 개수 표기(N개 남음)를 뺄 수 있다. 잠금 여부는 화면이 정한다 —
+        // 백엔드 확답(2026-08-16)대로 미확정도 품절과 같이 잠근다.
         stock: typeof size.stock === 'number' ? size.stock : null,
       })),
       isWished: Boolean(color.isWished),

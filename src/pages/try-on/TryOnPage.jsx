@@ -428,8 +428,16 @@ export function Component() {
       }
 
       const created = await createFittingSession({ productColorId, fileKey })
-      setSession(created)
-      if (created.status === 'DONE') setProgress(100)
+      if (created.status === 'DONE' || created.status === 'PENDING') {
+        setSession(created)
+        if (created.status === 'DONE') setProgress(100)
+      } else {
+        // 생성 응답이 곧장 FAILED(또는 모르는 상태)면 폴링이 걸리지 않아
+        // 로딩 화면에 갇힌다. 여기서 바로 접는다 — 크레딧은 자동 환급된다.
+        setPhase('upload')
+        setProgress(0)
+        setError(new Error('AI Fitting 생성에 실패했습니다. 차감된 크레딧은 돌려드립니다.'))
+      }
     } catch (cause) {
       setPhase('upload')
       setProgress(0)

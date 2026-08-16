@@ -558,8 +558,9 @@ describe('PassportPage', { timeout: 15_000 }, () => {
   })
 
   it('토큰이 없으면 서버 없이 지면 표기만 바꾼다', async () => {
-    // 여권은 로그인 없이도 열람할 수 있다. 보낼 곳이 없는데 PATCH를 쏘면
-    // 401 오류만 띄우고 아무것도 못 고치게 된다.
+    // 여권은 보호 라우트라 보통 토큰이 있지만, 시트를 열어 둔 사이 401로
+    // 토큰이 지워질 수 있다. 그때 PATCH를 쏘면 401 오류만 띄우고 아무것도
+    // 못 고치게 되므로 안전망으로 지면 표기만 바꾼다.
     renderPassport()
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
     fireEvent.click(await findEditableRow(/이름 .* 수정/))

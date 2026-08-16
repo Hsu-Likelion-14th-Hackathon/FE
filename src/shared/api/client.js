@@ -25,7 +25,15 @@ export class ApiError extends Error {
  * 본문도 흔하므로 비어 있으면 그대로 null이다.
  */
 async function readBody(response) {
-  const text = await response.text().catch(() => '')
+  let text
+  try {
+    text = await response.text()
+  } catch (cause) {
+    // 화면 이탈로 끊긴(abort) 요청이다. 삼키면 계약 오류로 둔갑해 호출부의
+    // AbortError 가드를 통과하지 못한다. 그 밖의 읽기 실패만 빈 본문으로 본다.
+    if (cause?.name === 'AbortError') throw cause
+    text = ''
+  }
   if (!text) return null
   try {
     return JSON.parse(text)
@@ -87,9 +95,11 @@ export async function apiFetch(
   const parsed = await readBody(response)
 
   if (!response.ok) {
-    // 401은 토큰이 죽었다는 뜻이다. 지워야 다음 요청이 죽은 토큰을 또 보내지
-    // 않고, 구독 중인 화면도 미인증으로 바뀐다. 어디로 보낼지는 화면이 정한다.
-    if (response.status === 401) clearAccessToken()
+    // 401은 붙여 보낸 토큰이 죽었다는 뜻이다. 지워야 다음 요청이 죽은 토큰을 또
+    // 보내지 않고, 구독 중인 화면도 미인증으로 바뀐다. 어디로 보낼지는 화면이
+    // 정한다. 단 토큰 없이 나간 요청(로그인 실패 401 등)은 세션과 무관하므로
+    // 멀쩡한 기존 토큰을 건드리지 않는다.
+    if (response.status === 401 && token) clearAccessToken()
     throw new ApiError({
       status: response.status,
       code: parsed?.code,

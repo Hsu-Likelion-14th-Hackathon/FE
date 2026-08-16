@@ -155,6 +155,20 @@ describe('TryOnPage', () => {
     expect(createFittingSession).toHaveBeenCalledWith({ productColorId: 2, fileKey: undefined })
   })
 
+  it('세션이 생성 즉시 FAILED로 오면 업로드 화면으로 돌아와 사유를 보여 준다', async () => {
+    // 폴링은 PENDING에서만 돈다. 여기서 접지 않으면 로딩 95%에 갇힌다.
+    createFittingSession.mockResolvedValue({ ...pendingSession, status: 'FAILED' })
+    renderTryOn()
+    await screen.findByText('Credit | 150')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Fitting' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('AI Fitting 생성에 실패했습니다')
+    // 업로드 화면으로 돌아와 다시 시도할 수 있고, 폴링은 걸리지 않는다.
+    expect(screen.getByRole('button', { name: 'Fitting' })).toBeInTheDocument()
+    expect(getFittingSession).not.toHaveBeenCalled()
+  })
+
   it('파일을 고르면 업로드 URL 발급 → Azure 업로드 → fileKey로 세션을 만든다', async () => {
     renderTryOn()
     await screen.findByText('Credit | 150')

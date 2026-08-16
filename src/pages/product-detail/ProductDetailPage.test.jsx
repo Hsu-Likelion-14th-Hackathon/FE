@@ -178,6 +178,27 @@ describe('ProductDetailPage', () => {
     )
   })
 
+  it('담기는 요청이 끝나기 전 재탭을 무시한다', async () => {
+    // 실서버는 같은 사이즈를 기존 항목에 합친다 — 더블 탭이 그대로 수량 2가 된다.
+    let resolveAdd
+    addToShoppingBag.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveAdd = resolve
+        }),
+    )
+    renderPage()
+
+    const button = await screen.findByRole('button', { name: '쇼핑백에 추가' })
+    fireEvent.click(button)
+    fireEvent.click(button)
+    fireEvent.click(button)
+
+    resolveAdd({ shoppingBagItemId: 99 })
+    expect(await screen.findByRole('button', { name: '쇼핑백에 담겼어요' })).toBeInTheDocument()
+    expect(addToShoppingBag).toHaveBeenCalledTimes(1)
+  })
+
   it('쇼핑백 담기에 실패하면 사유를 보여 준다', async () => {
     addToShoppingBag.mockRejectedValue(new Error('재고가 없습니다'))
     renderPage()

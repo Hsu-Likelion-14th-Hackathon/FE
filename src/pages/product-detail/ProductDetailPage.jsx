@@ -66,6 +66,7 @@ export function Component() {
   const [imageIndex, setImageIndex] = useState(0)
   const [sizeIndex, setSizeIndex] = useState(0)
   const [addedSizeId, setAddedSizeId] = useState(null)
+  const [addingBag, setAddingBag] = useState(false)
   const [bagError, setBagError] = useState(null)
   /** 쓸어 넘기기 시작점. 그리는 값이 아니라 상태로 둘 이유가 없다. */
   const swipeRef = useRef(null)
@@ -222,12 +223,16 @@ export function Component() {
   }
 
   const addToBag = () => {
-    if (!selectedSize) return
+    // 요청 중 재탭을 막는다. 실서버는 같은 사이즈를 기존 항목에 합치므로
+    // 더블 탭이 그대로 수량 2가 된다.
+    if (!selectedSize || addingBag) return
 
+    setAddingBag(true)
     setBagError(null)
     addToShoppingBag(selectedSize.productSizeId)
       .then(() => setAddedSizeId(selectedSize.productSizeId))
       .catch((cause) => setBagError(cause.message ?? '쇼핑백에 담지 못했습니다.'))
+      .finally(() => setAddingBag(false))
   }
 
   return (
@@ -359,7 +364,7 @@ export function Component() {
               className={`${styles.addToBagButton} ${addedToBag ? styles.added : ''}`}
               type="button"
               aria-describedby="cart-feedback"
-              disabled={!selectedSize || isSoldOut(selectedSize)}
+              disabled={!selectedSize || isSoldOut(selectedSize) || addingBag}
               onClick={addToBag}
             >
               {selectedSize && isSoldOut(selectedSize)

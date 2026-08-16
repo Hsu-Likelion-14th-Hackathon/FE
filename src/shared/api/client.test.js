@@ -100,6 +100,30 @@ describe('apiFetch', () => {
     expect(getAccessToken()).toBeNull()
   })
 
+  it('토큰 없이 나간 요청의 401은 기존 토큰을 지우지 않는다', async () => {
+    // 로그인된 채 /login에서 비밀번호를 틀리면 POST /auth/login이 401을 준다.
+    // 이때 멀쩡한 세션까지 지우면 비밀번호 오타 한 번에 로그아웃된다.
+    setAccessToken('healthy')
+    globalThis.fetch = respond({ ok: false, status: 401, body: '' })
+
+    await expect(apiFetch('/auth/login', { method: 'POST', auth: false })).rejects.toBeInstanceOf(
+      ApiError,
+    )
+    expect(getAccessToken()).toBe('healthy')
+  })
+
+  it('본문을 읽다 끊긴 요청은 AbortError를 그대로 올린다', async () => {
+    // 계약 오류로 둔갑시키면 호출부의 error.name === 'AbortError' 가드가 뚫린다.
+    const abortError = new DOMException('The user aborted a request.', 'AbortError')
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.reject(abortError),
+    })
+
+    await expect(apiFetch('/passport', { unwrap: true })).rejects.toBe(abortError)
+  })
+
   it('notFoundAsNull은 404만 null로 바꾼다', async () => {
     globalThis.fetch = respond({ ok: false, status: 404, body: '' })
     expect(await apiFetch('/boarding-passes/latest', { notFoundAsNull: true })).toBeNull()

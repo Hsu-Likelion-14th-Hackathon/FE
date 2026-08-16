@@ -58,11 +58,15 @@ export function Component() {
     .filter((step) => step.isRecommended)
     .sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0))
     .map((step) => step.id)
-  const visibleFloorIds = recommendedIds.length
-    ? recommendedIds
-    : floors
-      ? [...floors].sort((a, b) => a.floorNo - b.floorNo).map((item) => item.id)
-      : GUIDE_FLOOR_ORDER.slice(1)
+  const allFloorIds = floors
+    ? [...floors].sort((a, b) => a.floorNo - b.floorNo).map((item) => item.id)
+    : GUIDE_FLOOR_ORDER.slice(1)
+  const guidedIds = recommendedIds.length ? recommendedIds : allFloorIds
+  // 비행 화면 슬라이더는 전 층 눈금을 준다. 추천에 없는 층으로 들어왔으면 전 층
+  // 순서로 안내한다 — 추천만 남기면 현재 층이 순서에 없어 슬라이더 위치가
+  // 어긋나고 "이전"이 비행 화면으로 이탈한다.
+  const visibleFloorIds =
+    floor !== 'overview' && !guidedIds.includes(floor) ? allFloorIds : guidedIds
   const order = ['overview', ...visibleFloorIds]
   const floorIndex = order.indexOf(floor)
   const atStart = floorIndex <= 0
@@ -101,29 +105,38 @@ export function Component() {
     }
   }, [retryCount])
 
+  // 화면을 떠난 뒤 도착한 응답을 버리기 위한 표식. StrictMode는 마운트 효과를
+  // 두 번 돌리므로 설치 시점에 true로 되돌려 둔다.
+  const mountedRef = useRef(true)
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
+
   // 층 상세 lazy 로드. 한 번 받은 층은 다시 부르지 않는다. 상세가 없는 동안
   // 화면은 로딩으로 그린다(entry 없음 = 로딩).
   useEffect(() => {
-    if (floor === 'overview' || !floors) return undefined
+    if (floor === 'overview' || !floors) return
     const meta = floors.find((item) => item.id === floor)
-    if (!meta || details[floor] || inFlightRef.current.has(floor)) return undefined
+    if (!meta || details[floor] || inFlightRef.current.has(floor)) return
 
-    let alive = true
     inFlightRef.current.add(floor)
     getFloor(meta.floorId)
+      // 층을 떠난 뒤 도착한 결과도 캐시한다. 버리면 그 층에 돌아왔을 때
+      // inFlightRef 때문에 재요청도 안 나가 로딩 화면에 갇힌다.
       .then((data) => {
-        if (alive) setDetails((current) => ({ ...current, [floor]: { status: 'ready', data } }))
+        if (mountedRef.current)
+          setDetails((current) => ({ ...current, [floor]: { status: 'ready', data } }))
       })
       .catch(() => {
-        if (alive) setDetails((current) => ({ ...current, [floor]: { status: 'error' } }))
+        if (mountedRef.current)
+          setDetails((current) => ({ ...current, [floor]: { status: 'error' } }))
       })
       .finally(() => {
         inFlightRef.current.delete(floor)
       })
-
-    return () => {
-      alive = false
-    }
   }, [floor, floors, details])
 
   const retryFloors = () => {

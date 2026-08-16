@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const signup = vi.hoisted(() => vi.fn())
@@ -227,6 +227,26 @@ describe('SignupPage', { timeout: 15_000 }, () => {
         nationality: 'KR',
       }),
     )
+  })
+
+  it('카카오 콜백이 남긴 자리가 있으면 프로필 완료 뒤 그리로 돌아간다', async () => {
+    // 위시리스트 가려다 카카오로 가입한 사람이 가입 후 홈에 떨어지면 안 된다.
+    const router = createMemoryRouter(
+      [
+        { path: '/signup', Component: SignupPage },
+        { path: '/wishlist', element: <h1>위시리스트</h1> },
+        { path: '/', element: <h1>메인</h1> },
+      ],
+      {
+        initialEntries: [{ pathname: '/signup', state: { step: 'profile', from: '/wishlist' } }],
+      },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.change(screen.getByLabelText(/이름/), { target: { value: 'yeonju lim' } })
+    fireEvent.submit(screen.getByRole('button', { name: '가입하기' }).closest('form'))
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/wishlist'))
   })
 
   it('규칙에 못 미치는 비밀번호는 서버까지 보내지 않고 무엇이 모자란지 보여 준다', async () => {

@@ -1,4 +1,10 @@
-import { expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+
+// endpoints.js는 import 시점에 env를 읽는다. 모듈 캐시를 비우지 않으면 두
+// 번째 테스트부터는 첫 테스트의 env로 평가된 모듈을 그대로 받아, 스텁이
+// 걸린 척만 하는 테스트가 된다.
+beforeEach(() => vi.resetModules())
+afterEach(() => vi.unstubAllEnvs())
 
 test('base URL 끝의 슬래시를 제거해 API 경로를 결합한다', async () => {
   vi.stubEnv('VITE_API_BASE_URL', 'https://api.example.test/')
