@@ -408,8 +408,8 @@ Passport 생년월일은 배포 전환기에만 이미 로드된 session 값을 
 
 - 기능별 단위 실행: `npm.cmd run test:run -- <test-file>`
 - 단계 완료: `npm.cmd run verify`
-- 개발 계약 검증: `VITE_ENABLE_MSW=true`
-- 실서버 smoke: `VITE_ENABLE_MSW=false`
+- 개발은 항상 실서버를 본다 — MSW 계층은 전 도메인 연동 완료로 제거됐다
+  (`VITE_ENABLE_MSW`는 더 이상 읽지 않는 변수다, 2026-08-16)
 - 계약 smoke: 라이브 OpenAPI 31개 method/path와 endpoint inventory의 차이가 0인지 확인
 - Vercel Preview에서 일반 로그인, 상품 mutation, Boarding Pass 발급·스캔, Passport, 피팅을 실제 모바일 viewport로 확인
 
