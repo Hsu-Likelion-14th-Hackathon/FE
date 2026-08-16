@@ -46,22 +46,19 @@
 
 .artworkFrame {
   position: absolute;
-  bottom: var(--product-frame-bottom);
-  left: var(--product-frame-left);
+  inset: 0;
   display: block;
-  width: var(--product-frame-width);
   overflow: hidden;
-  aspect-ratio: var(--product-frame-aspect);
   transition: transform 180ms ease;
 }
 
+// 사진(0.923)이 칸(193/190)보다 세로로 길다. 채우고 위아래를 잘라 내면
+// 약 9%가 빠지는데, 카탈로그 컷의 여백 안이라 가방은 온전히 남는다.
 .artworkImage {
-  position: absolute;
-  top: var(--product-image-top);
-  left: var(--product-image-left);
-  width: var(--product-image-width);
-  height: auto;
-  max-width: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   user-select: none;
   -webkit-user-drag: none;
 }

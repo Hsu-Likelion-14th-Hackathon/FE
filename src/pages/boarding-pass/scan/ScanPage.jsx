@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import CreditToast from '@/features/boarding-pass/credit-toast/CreditToast.jsx'
 import ScanDepartLoadingOverlay from '@/features/boarding-pass/scan-loading/ScanDepartLoadingOverlay.jsx'
-import { getLatestBoardingPass, simulateScan } from '@/shared/api/boardingPassApi.js'
+import { getLatestBoardingPass, scanBoardingPass } from '@/shared/api/boardingPassApi.js'
 import backArrowIcon from '@/shared/assets/boarding-pass/icons/back-arrow.svg'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import checkCircleIcon from '@/shared/assets/boarding-pass/scan/check-circle.svg'
@@ -14,6 +14,7 @@ import scanFrameIcon from '@/shared/assets/boarding-pass/scan/scan-frame.svg'
 import stageBack from '@/shared/assets/boarding-pass/scan/stage-back.png'
 import scrollDocumentToTop from '@/shared/layout/scrollDocumentToTop.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import { useToast } from '@/shared/ui/toastContext.js'
 
 import styles from './ScanPage.module.scss'
 
@@ -26,6 +27,7 @@ const TOAST_EXIT_MS = 320
  */
 export function Component() {
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const [pass, setPass] = useState(null)
   const [passStatus, setPassStatus] = useState('loading')
   const [phase, setPhase] = useState('idle')
@@ -92,15 +94,23 @@ export function Component() {
     setScanning(true)
     try {
       const passId = pass?.boardingPassId || pass?.id
-      const result = await simulateScan(passId)
+      const result = await scanBoardingPass(passId)
       setPhase('success')
       toastClosingRef.current = false
       setCredit(result.credit)
       setToastExiting(false)
       setToastEntered(false)
       setToastOpen(true)
-    } catch {
-      // MSW 실패 시에도 UI 스모크를 막지 않음 — 재시도 가능
+    } catch (cause) {
+      // 실패를 조용히 삼키면 버튼이 그냥 안 눌리는 것처럼 보인다.
+      // 백엔드가 사유를 담아 주므로(만료·이미 스캔됨 등) 그대로 알린다.
+      showToast(
+        <div className="pr-7">
+          <p className="text-sm leading-5">{cause?.message ?? '스캔에 실패했습니다.'}</p>
+          <p className="mt-1 text-xs text-[#c07346]">잠시 후 다시 시도해 주세요</p>
+        </div>,
+        { position: 'center' },
+      )
     } finally {
       setScanning(false)
     }

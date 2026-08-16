@@ -1,12 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import AppProviders from '@/app/providers.jsx'
 
 const mockGetLatestBoardingPass = vi.hoisted(() => vi.fn())
 const mockGetWishlist = vi.hoisted(() => vi.fn())
-const mockGetCart = vi.hoisted(() => vi.fn())
+const mockGetShoppingBag = vi.hoisted(() => vi.fn())
 const activeRouters = []
 
 vi.mock('@/shared/api/boardingPassApi.js', () => ({
@@ -17,8 +17,8 @@ vi.mock('@/shared/api/wishlistApi.js', () => ({
   getWishlist: mockGetWishlist,
 }))
 
-vi.mock('@/shared/api/cartApi.js', () => ({
-  getCart: mockGetCart,
+vi.mock('@/shared/api/shoppingBagApi.js', () => ({
+  getShoppingBag: mockGetShoppingBag,
 }))
 
 import { Component as LandingPage } from './LandingPage.jsx'
@@ -33,6 +33,7 @@ function renderLanding() {
       { path: '/boarding-pass/passport', element: <p>Passport</p> },
       { path: '/wishlist', element: <h1>위시리스트</h1> },
       { path: '/cart', element: <h1>쇼핑백</h1> },
+      { path: '/products', element: <h1>상품 목록</h1> },
     ],
     { initialEntries: ['/boarding-pass'] },
   )
@@ -48,11 +49,16 @@ function renderLanding() {
 }
 
 describe('LandingPage', () => {
+  beforeEach(() => {
+    // 랜딩은 진입 시 위시리스트를 확인한다. 기본은 담긴 상태 — 토스트 없음.
+    mockGetWishlist.mockResolvedValue([{ productColorId: 1 }])
+  })
+
   afterEach(() => {
     activeRouters.splice(0).forEach((router) => router.dispose())
     mockGetLatestBoardingPass.mockReset()
     mockGetWishlist.mockReset()
-    mockGetCart.mockReset()
+    mockGetShoppingBag.mockReset()
   })
 
   it('routes guests to intro from the start flight button', async () => {
@@ -120,33 +126,43 @@ describe('LandingPage', () => {
     )
   })
 
-  it('위시리스트가 비면 랜딩에 머무르고 빈 가방 토스트를 보여 준다', async () => {
+  it('위시리스트가 비어 있으면 진입만으로 빈 가방 토스트를 보여 준다', async () => {
     mockGetWishlist.mockResolvedValue([])
     const router = renderLanding()
 
-    fireEvent.click(await screen.findByRole('link', { name: '위시리스트' }))
-
+    // 아무것도 누르지 않아도 초대가 먼저 도착한다.
     expect(await screen.findByText('위시리스트에 담긴 상품이 없습니다')).toBeInTheDocument()
-    expect(screen.getByText('상품을 담은 뒤 다시 이용해 주세요')).toBeInTheDocument()
+    expect(screen.getByText('눌러서 상품을 담으러 가기')).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/boarding-pass')
+
+    // 빈 화면은 초대다 — 토스트를 누르면 상품 목록으로 간다.
+    fireEvent.click(screen.getByRole('button', { name: '상품 목록 보러가기' }))
+    expect(router.state.location.pathname).toBe('/products')
   })
 
-  it('쇼핑백이 비면 랜딩에 머무르고 빈 가방 토스트를 보여 준다', async () => {
-    mockGetCart.mockResolvedValue([])
-    const router = renderLanding()
+  it('위시리스트에 상품이 있으면 토스트 없이 조용하다', async () => {
+    renderLanding()
 
-    fireEvent.click(await screen.findByRole('link', { name: '쇼핑백' }))
-
-    expect(await screen.findByText('쇼핑백에 담긴 상품이 없습니다')).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/boarding-pass')
+    await waitFor(() => expect(mockGetWishlist).toHaveBeenCalled())
+    expect(screen.queryByText('위시리스트에 담긴 상품이 없습니다')).not.toBeInTheDocument()
   })
 
-  it('위시리스트에 상품이 있으면 위시리스트 페이지로 이동한다', async () => {
-    mockGetWishlist.mockResolvedValue([{ id: 'item-1' }])
+  it('위시리스트 확인이 실패해도(비로그인 등) 토스트를 띄우지 않는다', async () => {
+    mockGetWishlist.mockRejectedValue(new Error('401'))
+    renderLanding()
+
+    await waitFor(() => expect(mockGetWishlist).toHaveBeenCalled())
+    expect(screen.queryByText('위시리스트에 담긴 상품이 없습니다')).not.toBeInTheDocument()
+  })
+
+  it('헤더 위시리스트·쇼핑백 아이콘은 바로 해당 화면으로 이동한다', async () => {
     const router = renderLanding()
 
     fireEvent.click(await screen.findByRole('link', { name: '위시리스트' }))
-
     await waitFor(() => expect(router.state.location.pathname).toBe('/wishlist'))
+
+    await router.navigate('/boarding-pass')
+    fireEvent.click(await screen.findByRole('link', { name: '쇼핑백' }))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/cart'))
   })
 })

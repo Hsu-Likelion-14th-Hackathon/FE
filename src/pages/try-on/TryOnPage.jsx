@@ -1,19 +1,31 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 
 import fittingSparkleIcon from '@/assets/icons/state/fitting-sparkle.svg'
 import fittingSpinner from '@/assets/icons/state/fitting-spinner.png'
 import closeIcon from '@/assets/icons/state/close.svg'
 import creditDiamondIcon from '@/assets/icons/state/credit-diamond.svg'
 import uploadArrowIcon from '@/assets/icons/state/upload-arrow.svg'
-import pinkBagImage from '@/assets/images/products/diamant-soft-pink.webp'
-import { getProduct, getProductVariant } from '@/shared/data/products.js'
+import { deleteBodyImage, getMe, registerBodyImage } from '@/shared/api/authApi.js'
+import {
+  createFittingSession,
+  createUploadUrl,
+  getFittingSession,
+  uploadToAzure,
+} from '@/shared/api/fittingApi.js'
+import { getPassport } from '@/shared/api/passportApi.js'
+import { formatPrice, getProduct } from '@/shared/api/productApi.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import { useToast } from '@/shared/ui/toastContext.js'
 
 import styles from './TryOnPage.module.scss'
 
 const PROGRESS_STEP = 4
 const PROGRESS_TICK_MS = 80
+// 실제 완료(DONE)만 100을 채운다. 눈금이 먼저 끝나 버리면 "다 됐는데 안
+// 넘어가는" 화면이 된다.
+const PROGRESS_CEILING = 95
+const POLL_INTERVAL_MS = 2000
 
 function getPrefersReducedMotion() {
   return (
@@ -40,7 +52,21 @@ function usePrefersReducedMotion() {
   return prefersReducedMotion
 }
 
-function UploadStage({ fileInputRef, fileName, onClose, onFileChange, onStartFitting }) {
+function UploadStage({
+  bodyImage,
+  credit,
+  error,
+  fileInputRef,
+  fileName,
+  onClose,
+  onFileChange,
+  onRemoveBodyImage,
+  onStartFitting,
+  onToggleSaveDefault,
+  previewImage,
+  removingBody,
+  saveAsDefault,
+}) {
   return (
     <section
       className={`${styles.stage} ${styles.uploadStage}`}
@@ -57,7 +83,7 @@ function UploadStage({ fileInputRef, fileName, onClose, onFileChange, onStartFit
       </button>
 
       <div className={styles.credit}>
-        <span>Credit&nbsp; | &nbsp;100</span>
+        <span>Credit&nbsp; | &nbsp;{credit ?? '—'}</span>
         <img src={creditDiamondIcon} alt="" />
       </div>
 
@@ -65,7 +91,7 @@ function UploadStage({ fileInputRef, fileName, onClose, onFileChange, onStartFit
         <div className={styles.previewCard}>
           <span className={styles.cardPin} aria-hidden="true" />
           <div className={styles.productCrop}>
-            <img src={pinkBagImage} alt="핑크 Diamant 가방" />
+            {previewImage ? <img src={previewImage} alt="" /> : null}
           </div>
         </div>
 
@@ -79,6 +105,7 @@ function UploadStage({ fileInputRef, fileName, onClose, onFileChange, onStartFit
           className={styles.fileInput}
           type="file"
           accept="image/*"
+          aria-label="전신 이미지 파일"
           onChange={onFileChange}
         />
         <button
@@ -92,6 +119,42 @@ function UploadStage({ fileInputRef, fileName, onClose, onFileChange, onStartFit
         <span className="sr-only" aria-live="polite">
           {fileName ? `${fileName} 이미지가 선택되었습니다.` : '선택된 이미지가 없습니다.'}
         </span>
+
+        {/* 기본 전신 이미지가 있으면 사진 없이도 시작할 수 있음을 보여 준다. */}
+        {bodyImage && !fileName ? (
+          <div className={styles.bodyImageRow}>
+            <img className={styles.bodyThumb} src={bodyImage} alt="" />
+            <span>사진을 고르지 않으면 등록된 기본 전신 이미지를 사용해요</span>
+            <button
+              className={styles.bodyRemove}
+              type="button"
+              onClick={onRemoveBodyImage}
+              disabled={removingBody}
+            >
+              {removingBody ? '삭제 중…' : '삭제'}
+            </button>
+          </div>
+        ) : null}
+
+        {/* 고른 사진을 다음에도 쓰도록 기본 이미지로 남길 수 있다. */}
+        {fileName ? (
+          <label className={styles.saveDefault}>
+            <input type="checkbox" checked={saveAsDefault} onChange={onToggleSaveDefault} />
+            <span>이 사진을 기본 전신 이미지로 저장</span>
+          </label>
+        ) : null}
+
+        {error ? (
+          <p className={styles.errorMessage} role="alert">
+            {error.status === 401 ? (
+              <>
+                로그인이 필요합니다. <Link to="/login">로그인하기</Link>
+              </>
+            ) : (
+              (error.message ?? 'AI Fitting 요청에 실패했습니다.')
+            )}
+          </p>
+        ) : null}
       </div>
 
       <button className={styles.fittingButton} type="button" onClick={onStartFitting}>
@@ -103,9 +166,7 @@ function UploadStage({ fileInputRef, fileName, onClose, onFileChange, onStartFit
 }
 
 /** Figma (17-1) — 피팅이 끝난 뒤 결과와 상품 정보를 보여준다. */
-function ResultStage({ product, onClose, onDetail, onBag }) {
-  // 상품 그림은 대표 색상 안에 있다. product.image는 없는 필드다.
-  const productImage = product ? getProductVariant(product, product.cardVariantId)?.image : null
+function ResultStage({ session, onClose, onDetail, onBag, onSave }) {
   return (
     <section className={`${styles.stage} ${styles.resultStage}`} aria-label="AI Fitting 결과">
       <span className={styles.monogram} aria-hidden="true" />
@@ -120,18 +181,20 @@ function ResultStage({ product, onClose, onDetail, onBag }) {
 
       <p className={styles.resultTitle}>지금, 당신에게 맞는 형태</p>
 
-      {/* 실제 피팅 이미지는 AI 연동 뒤에 들어온다. 지금은 자리만 잡아 둔다. */}
-      <div className={styles.resultCard} role="img" aria-label="AI Fitting 결과 이미지 자리">
+      <div className={styles.resultCard}>
         <span className={styles.resultPin} aria-hidden="true" />
+        {session?.resultImageUrl ? (
+          <img className={styles.resultImage} src={session.resultImageUrl} alt="AI Fitting 결과" />
+        ) : null}
       </div>
 
       <div className={styles.productCard}>
         <div className={styles.productThumb}>
-          <img src={productImage ?? pinkBagImage} alt="" />
+          {session?.thumbnailImageUrl ? <img src={session.thumbnailImageUrl} alt="" /> : null}
         </div>
         <div className={styles.productInfo}>
-          <p className={styles.productName}>{product?.name ?? 'Diamant 비세토스 3D 참'}</p>
-          <p className={styles.productPrice}>{product?.priceLabel ?? '₩490,000'}</p>
+          <p className={styles.productName}>{session?.name ?? ''}</p>
+          <p className={styles.productPrice}>{formatPrice(session?.price ?? 0)}</p>
         </div>
         <div className={styles.productActions}>
           <button type="button" onClick={onDetail}>
@@ -143,7 +206,7 @@ function ResultStage({ product, onClose, onDetail, onBag }) {
         </div>
       </div>
 
-      <button className={styles.saveButton} type="button">
+      <button className={styles.saveButton} type="button" onClick={onSave}>
         이미지 저장
       </button>
     </section>
@@ -151,8 +214,6 @@ function ResultStage({ product, onClose, onDetail, onBag }) {
 }
 
 function LoadingStage({ progress, onClose }) {
-  const isComplete = progress === 100
-
   return (
     <section className={`${styles.stage} ${styles.loadingStage}`} aria-label="AI Fitting 처리 중">
       <span className={styles.monogram} aria-hidden="true" />
@@ -196,7 +257,7 @@ function LoadingStage({ progress, onClose }) {
       </div>
 
       <span className="sr-only" aria-live="polite">
-        {isComplete ? 'AI Fitting 준비가 완료되었습니다.' : 'AI Fitting을 처리하고 있습니다.'}
+        AI Fitting을 처리하고 있습니다.
       </span>
     </section>
   )
@@ -204,37 +265,86 @@ function LoadingStage({ progress, onClose }) {
 
 export function Component() {
   const { productId } = useParams()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
   const prefersReducedMotion = usePrefersReducedMotion()
-  // 결과 화면은 별도 상태가 아니라 진행률에서 파생시킨다. 타이머로 넘기면
-  // 화면을 벗어난 뒤에도 타이머가 남아 다른 곳까지 흔든다.
   const [phase, setPhase] = useState('upload')
   const [progress, setProgress] = useState(0)
-  const [fileName, setFileName] = useState('')
-  // 결과 카드는 지금 보고 있는 상품을 보여줘야 한다. URL이 기준이다.
-  const product = productId ? getProduct(productId) : null
+  const [file, setFile] = useState(null)
+  const [product, setProduct] = useState(null)
+  const [credit, setCredit] = useState(null)
+  // 세션이 화면의 진짜 상태다. 결과 화면은 진행률이 아니라 status가 DONE인
+  // 것에서 파생된다 — 눈금은 장식이고, 완료는 서버만 안다.
+  const [session, setSession] = useState(null)
+  const [error, setError] = useState(null)
+  const { showToast } = useToast()
+  // 등록된 기본 전신 이미지(GET /users/me). 있으면 사진 없이도 피팅이 된다는
+  // 것을 화면에 드러내고, 삭제 버튼을 단다.
+  const [bodyImage, setBodyImage] = useState(null)
+  const [saveAsDefault, setSaveAsDefault] = useState(false)
+  const [removingBody, setRemovingBody] = useState(false)
 
-  // 진행 중에 설정이 켜지면 진행률을 끝으로 확정한다. 표시값만 바꾸면 설정을
-  // 다시 끄는 순간 남아 있던 진행률로 되돌아간다.
   useEffect(() => {
-    const query = window.matchMedia?.('(prefers-reduced-motion: reduce)')
-    if (!query) return undefined
-    const onChange = ({ matches }) => {
-      if (matches) setProgress(100)
-    }
-    query.addEventListener?.('change', onChange)
-    return () => query.removeEventListener?.('change', onChange)
+    const controller = new AbortController()
+    getMe({ signal: controller.signal })
+      .then((me) => {
+        if (!controller.signal.aborted) setBodyImage(me.defaultBodyImageUrl)
+      })
+      .catch(() => {
+        // 안내 한 줄이 빠질 뿐이다. 피팅 흐름은 그대로 간다.
+      })
+    return () => controller.abort()
   }, [])
 
+  // 미리보기 카드는 지금 보고 있는 상품·색을 보여줘야 한다. URL이 기준이다.
+  useEffect(() => {
+    const controller = new AbortController()
+    getProduct(productId, { signal: controller.signal })
+      .then((loaded) => {
+        if (!controller.signal.aborted) setProduct(loaded)
+      })
+      .catch(() => {
+        // 미리보기가 비는 것뿐이다. 피팅 요청은 색 id만 있으면 된다.
+      })
+    return () => controller.abort()
+  }, [productId])
+
+  // 잔액 표시는 장식이다. 여권이 없거나 실패해도 피팅 흐름을 막지 않는다.
+  useEffect(() => {
+    let cancelled = false
+    getPassport()
+      .then((passport) => {
+        if (!cancelled) setCredit(passport.credit)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // 상세에서 고른 색이 쿼리로 온다. 없으면 대표색이다.
+  const colors = product?.colors ?? []
+  const colorParam = Number(searchParams.get('color'))
+  const selectedColor =
+    colors.find((color) => color.productColorId === colorParam) ??
+    colors.find((color) => color.isDefault) ??
+    colors[0] ??
+    null
+  const productColorId =
+    Number.isInteger(colorParam) && colorParam > 0
+      ? colorParam
+      : (selectedColor?.productColorId ?? null)
+
+  // 진행률 눈금. 서버가 끝냈다고 하기 전에는 천장 아래에서 긴다.
   useEffect(() => {
     if (phase !== 'loading' || prefersReducedMotion) return undefined
 
     const timer = window.setInterval(() => {
       setProgress((currentProgress) => {
-        const nextProgress = Math.min(currentProgress + PROGRESS_STEP, 100)
+        const nextProgress = Math.min(currentProgress + PROGRESS_STEP, PROGRESS_CEILING)
 
-        if (nextProgress === 100) window.clearInterval(timer)
+        if (nextProgress === PROGRESS_CEILING) window.clearInterval(timer)
 
         return nextProgress
       })
@@ -243,14 +353,148 @@ export function Component() {
     return () => window.clearInterval(timer)
   }, [phase, prefersReducedMotion])
 
-  const startFitting = () => {
-    setProgress(prefersReducedMotion ? 100 : 0)
+  // 2초 간격 폴링. PENDING이면 세션을 갈아 끼우지 않는다 — 끼우면 이 effect가
+  // 매번 다시 걸려 간격이 초기화된다.
+  useEffect(() => {
+    if (phase !== 'loading' || !session || session.status !== 'PENDING') return undefined
+
+    const controller = new AbortController()
+    const timer = window.setInterval(async () => {
+      try {
+        const next = await getFittingSession(session.fittingSessionId, {
+          signal: controller.signal,
+        })
+        if (controller.signal.aborted || next.status === 'PENDING') return
+        setSession(next)
+        if (next.status === 'DONE') {
+          setProgress(100)
+        } else {
+          // FAILED — 차감된 크레딧은 백엔드가 자동 환급한다.
+          setPhase('upload')
+          setProgress(0)
+          setError(new Error('AI Fitting 생성에 실패했습니다. 차감된 크레딧은 돌려드립니다.'))
+        }
+      } catch (cause) {
+        if (cause?.name === 'AbortError') return
+        // 조회 한 번 실패로 끊지 않는다. 다음 눈금에 다시 물어본다.
+        // 401만은 계속 물어봐도 소용없으므로 접는다.
+        if (cause?.status === 401) {
+          setPhase('upload')
+          setProgress(0)
+          setError(cause)
+        }
+      }
+    }, POLL_INTERVAL_MS)
+
+    return () => {
+      controller.abort()
+      window.clearInterval(timer)
+    }
+  }, [phase, session])
+
+  const startFitting = async () => {
+    if (!productColorId) return
+
+    setError(null)
+    setSession(null)
+    setProgress(prefersReducedMotion ? PROGRESS_CEILING : 0)
     setPhase('loading')
+
+    try {
+      // 파일이 없으면 fileKey를 빼고 보낸다 — 회원의 기본 전신 이미지를 쓴다.
+      let fileKey
+      if (file) {
+        const grant = await createUploadUrl({
+          fileName: file.name,
+          contentType: file.type || 'image/jpeg',
+        })
+        await uploadToAzure(grant.uploadUrl, file)
+        fileKey = grant.fileKey
+
+        if (saveAsDefault) {
+          // 같은 fileKey를 재사용해 기본 전신 이미지로도 등록한다. 부가
+          // 작업이므로 실패해도 피팅은 계속 간다 — 사유만 토스트로 알린다.
+          try {
+            const saved = await registerBodyImage(fileKey)
+            setBodyImage(saved.bodyImageUrl)
+          } catch {
+            showToast(
+              <p className="text-sm leading-5">
+                기본 전신 이미지 저장에 실패했습니다. 피팅은 계속 진행됩니다.
+              </p>,
+            )
+          }
+        }
+      }
+
+      const created = await createFittingSession({ productColorId, fileKey })
+      if (created.status === 'DONE' || created.status === 'PENDING') {
+        setSession(created)
+        if (created.status === 'DONE') setProgress(100)
+      } else {
+        // 생성 응답이 곧장 FAILED(또는 모르는 상태)면 폴링이 걸리지 않아
+        // 로딩 화면에 갇힌다. 여기서 바로 접는다 — 크레딧은 자동 환급된다.
+        setPhase('upload')
+        setProgress(0)
+        setError(new Error('AI Fitting 생성에 실패했습니다. 차감된 크레딧은 돌려드립니다.'))
+      }
+    } catch (cause) {
+      setPhase('upload')
+      setProgress(0)
+      setError(cause)
+    }
   }
 
   const resetFitting = () => {
     setProgress(0)
+    setSession(null)
     setPhase('upload')
+  }
+
+  /**
+   * 결과 이미지를 기기에 저장한다. 세 단계로 내려간다.
+   *
+   * 1. 모바일 — 공유 시트(navigator.share)에 파일로 넘기면 사진 앱에 바로
+   *    저장할 수 있다. 모바일 브라우저의 <a download>는 뷰어만 여는 경우가
+   *    많다.
+   * 2. 데스크톱 — Blob을 받아 <a download>로 내려받는다.
+   * 3. fetch가 스토리지 CORS에 막히면 바이트를 읽을 수 없다(<img>는 되지만
+   *    fetch는 CORS 검사를 받는다). 새 탭으로 열어 길게 눌러 저장하게 한다.
+   */
+  const saveResultImage = async () => {
+    const url = session?.resultImageUrl
+    if (!url) return
+
+    try {
+      const response = await fetch(url)
+      if (!response.ok) throw new Error(`이미지를 받지 못했습니다 (${response.status})`)
+      const blob = await response.blob()
+      const extension = blob.type.includes('png') ? 'png' : 'jpg'
+      const fileName = `mcm-fitting-${session?.fittingSessionId ?? 'result'}.${extension}`
+
+      const shareFile = new File([blob], fileName, { type: blob.type || 'image/jpeg' })
+      if (navigator.canShare?.({ files: [shareFile] })) {
+        try {
+          await navigator.share({ files: [shareFile] })
+          return
+        } catch (cause) {
+          // 시트를 닫은 것은 실패가 아니다. 그 외에는 다운로드로 이어 간다.
+          if (cause?.name === 'AbortError') return
+        }
+      }
+
+      const objectUrl = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = objectUrl
+      anchor.download = fileName
+      document.body.append(anchor)
+      anchor.click()
+      anchor.remove()
+      URL.revokeObjectURL(objectUrl)
+    } catch {
+      window.open(url, '_blank', 'noopener')
+      showToast(<p className="text-sm leading-5">새 탭에서 이미지를 길게 눌러 저장해 주세요.</p>)
+    }
   }
 
   const closeUpload = () => {
@@ -258,8 +502,23 @@ export function Component() {
   }
 
   const handleFileChange = ({ target }) => {
-    setFileName(target.files?.[0]?.name ?? '')
+    setFile(target.files?.[0] ?? null)
   }
+
+  const removeBodyImage = async () => {
+    setRemovingBody(true)
+    setError(null)
+    try {
+      await deleteBodyImage()
+      setBodyImage(null)
+    } catch (cause) {
+      setError(cause)
+    } finally {
+      setRemovingBody(false)
+    }
+  }
+
+  const showResult = phase === 'loading' && session?.status === 'DONE'
 
   return (
     <div className={styles.page}>
@@ -268,24 +527,33 @@ export function Component() {
       {/* 내용이 채워진 채로 새로 붙는 live region은 읽히지 않는 경우가 있다.
           처음부터 비워 두고 완료 시점에 문구만 채운다. */}
       <span className="sr-only" role="status">
-        {phase === 'loading' && progress >= 100 ? 'AI Fitting 결과가 준비되었습니다.' : ''}
+        {showResult ? 'AI Fitting 결과가 준비되었습니다.' : ''}
       </span>
 
       {phase === 'upload' ? (
         <UploadStage
+          bodyImage={bodyImage}
+          credit={credit}
+          error={error}
           fileInputRef={fileInputRef}
-          fileName={fileName}
+          fileName={file?.name ?? ''}
           onClose={closeUpload}
           onFileChange={handleFileChange}
+          onRemoveBodyImage={removeBodyImage}
           onStartFitting={startFitting}
+          onToggleSaveDefault={() => setSaveAsDefault((current) => !current)}
+          previewImage={selectedColor?.images?.[0] ?? null}
+          removingBody={removingBody}
+          saveAsDefault={saveAsDefault}
         />
       ) : null}
-      {phase === 'loading' && progress < 100 ? (
+      {phase === 'loading' && !showResult ? (
         <LoadingStage progress={progress} onClose={resetFitting} />
       ) : null}
-      {phase === 'loading' && progress >= 100 ? (
+      {showResult ? (
         <ResultStage
-          product={product}
+          session={session}
+          onSave={saveResultImage}
           onClose={resetFitting}
           onDetail={() =>
             navigate(productId ? `/products/${encodeURIComponent(productId)}` : '/products')

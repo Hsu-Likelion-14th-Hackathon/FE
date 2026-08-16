@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
+
+import { useSession } from '@/entities/session/useSession.js'
 
 import boardingArrow from '@/assets/icons/boarding-arrow.svg'
 import circleArrow from '@/assets/icons/circle-arrow.svg'
@@ -8,6 +10,51 @@ import collectionImage from '@/assets/images/home/aw26-collection.webp'
 import cardPlaneImage from '@/assets/images/home/hero-card-plane.webp'
 
 import styles from './StoreMenu.module.scss'
+
+/**
+ * 로그인 전에는 로그인 화면으로 보내고, 로그인한 뒤에는 로그아웃한다.
+ *
+ * 같은 자리에 두 가지를 두는 이유는, 로그인한 사람에게 "로그인"만 보이면
+ * 지금 로그인된 상태인지 알 방법이 없기 때문이다.
+ *
+ * 확인이 끝나기 전에는 아무 글자도 바꾸지 않는다. 새로고침 직후 잠깐
+ * "로그인"이 보였다가 "로그아웃"으로 바뀌면 방금 풀린 것처럼 보인다.
+ */
+function SessionAction({ onClose }) {
+  const { isAuthenticated, isRestoring, signOut } = useSession()
+  const navigate = useNavigate()
+
+  if (isRestoring) {
+    return (
+      <span className={styles.loginButton} aria-hidden="true">
+        &nbsp;
+      </span>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Link className={styles.loginButton} to="/login" onClick={onClose}>
+        로그인
+      </Link>
+    )
+  }
+
+  return (
+    <button
+      className={styles.loginButton}
+      type="button"
+      onClick={() => {
+        signOut()
+        onClose()
+        // 보호 화면에 머문 채로 로그아웃하면 다음 요청부터 401이 쏟아진다.
+        navigate('/', { replace: true })
+      }}
+    >
+      로그아웃
+    </button>
+  )
+}
 
 const focusableElementSelector = [
   'a[href]',
@@ -144,9 +191,7 @@ function StoreMenu({ isOpen, onClose }) {
             <div className={styles.menuContent}>
               <BoardingCard onClose={onClose} />
               <CollectionCard onClose={onClose} />
-              <Link className={styles.loginButton} to="/login" onClick={onClose}>
-                로그인
-              </Link>
+              <SessionAction onClose={onClose} />
             </div>
           </nav>
         </div>

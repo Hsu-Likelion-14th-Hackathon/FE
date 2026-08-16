@@ -3,9 +3,22 @@ import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import AppProviders from '@/app/providers.jsx'
+import { setAccessToken } from '@/shared/api/authToken.js'
 import { triggerResize } from '@/test/setup.js'
 import { Component as PassportPage } from './PassportPage.jsx'
 import { passportTicket } from './passportData.js'
+
+const updateMe = vi.hoisted(() => vi.fn())
+const getFloor = vi.hoisted(() => vi.fn())
+
+vi.mock('@/shared/api/authApi.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  updateMe: (...args) => updateMe(...args),
+}))
+
+vi.mock('@/shared/api/floorApi.js', () => ({
+  getFloor: (...args) => getFloor(...args),
+}))
 
 vi.mock('three/addons/renderers/CSS3DRenderer.js', async (importOriginal) => {
   const actual = await importOriginal()
@@ -19,7 +32,23 @@ vi.mock('three/addons/renderers/CSS3DRenderer.js', async (importOriginal) => {
   return { ...actual, CSS3DRenderer: FailingRenderer }
 })
 
-beforeEach(() => vi.spyOn(console, 'warn').mockImplementation(() => {}))
+beforeEach(() => {
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
+  updateMe.mockReset().mockResolvedValue({})
+  // 층 이야기(GET /floors/{id})는 실서버 계약 모양으로 준다.
+  getFloor.mockReset().mockResolvedValue({
+    contents: [
+      {
+        orderNo: 1,
+        blockType: 'TEXT',
+        body: '1976년, München - 밤의 도시가 낳은 대담함',
+        imageUrl: null,
+        product: null,
+      },
+      { orderNo: 2, blockType: 'LIST', body: '1976년 뮌헨 창립', imageUrl: null, product: null },
+    ],
+  })
+})
 afterEach(() => vi.restoreAllMocks())
 
 function renderPassport() {
@@ -59,16 +88,24 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     const nextButton = screen.getByRole('button', { name: '다음 단계' })
     fireEvent.click(nextButton)
     fireEvent.click(nextButton)
-    fireEvent.click(nextButton)
+    // 여행 기록 면은 넘겨서 못 간다. 스탬프를 눌러야 그 방문으로 열린다.
+    fireEvent.click(screen.getAllByRole('button', { name: /방문 기록 보기/ })[0])
 
     const historyTrigger = screen.getByRole('button', { name: 'TRAVEL HISTORY' })
     fireEvent.click(historyTrigger)
     expect(screen.getByRole('dialog', { name: '여행 기록' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' })).toHaveFocus()
 
+    // 카드는 아코디언이다 — 누르면 시트 안에서 층 이야기가 펼쳐진다.
     fireEvent.click(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' }))
-    expect(screen.getByRole('dialog', { name: '1F JOURNEY 상세' })).toBeInTheDocument()
-    fireEvent.keyDown(document, { key: 'Escape' })
+    const toggled = await screen.findByRole('button', { name: '1F JOURNEY 상세 접기' })
+    expect(toggled).toHaveAttribute('aria-expanded', 'true')
+    expect(await screen.findByText('1976년, München - 밤의 도시가 낳은 대담함')).toBeInTheDocument()
+
+    // 한 번 더 누르면 원래대로 접힌다.
+    fireEvent.click(toggled)
+    expect(screen.queryByText('1976년, München - 밤의 도시가 낳은 대담함')).not.toBeInTheDocument()
+
     fireEvent.keyDown(document, { key: 'Escape' })
     fireEvent.click(screen.getByRole('button', { name: '티켓 보기' }))
     expect(screen.getByRole('dialog', { name: '탑승권' })).toHaveFocus()
@@ -85,7 +122,7 @@ describe('PassportPage', { timeout: 15_000 }, () => {
       const nextButton = screen.getByRole('button', { name: '다음 단계' })
       fireEvent.click(nextButton)
       fireEvent.click(nextButton)
-      fireEvent.click(nextButton)
+      fireEvent.click(screen.getAllByRole('button', { name: /방문 기록 보기/ })[0])
 
       const historyTrigger = screen.getByRole('button', { name: 'TRAVEL HISTORY' })
       fireEvent.click(historyTrigger)
@@ -115,7 +152,8 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     const nextButton = screen.getByRole('button', { name: '다음 단계' })
     fireEvent.click(nextButton)
     fireEvent.click(nextButton)
-    fireEvent.click(nextButton)
+    // 여행 기록 면은 넘겨서 못 간다. 스탬프를 눌러야 그 방문으로 열린다.
+    fireEvent.click(screen.getAllByRole('button', { name: /방문 기록 보기/ })[0])
     fireEvent.click(screen.getByRole('button', { name: 'TRAVEL HISTORY' }))
     const surface = screen.getByTestId('passport-turn-surface')
     vi.spyOn(surface, 'getBoundingClientRect').mockReturnValue({ width: 400 })
@@ -142,7 +180,8 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     const nextButton = screen.getByRole('button', { name: '다음 단계' })
     fireEvent.click(nextButton)
     fireEvent.click(nextButton)
-    fireEvent.click(nextButton)
+    // 여행 기록 면은 넘겨서 못 간다. 스탬프를 눌러야 그 방문으로 열린다.
+    fireEvent.click(screen.getAllByRole('button', { name: /방문 기록 보기/ })[0])
 
     const historyTrigger = screen.getByRole('button', { name: 'TRAVEL HISTORY' })
     fireEvent.click(historyTrigger)
@@ -159,7 +198,7 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(router.state.location.pathname).toBe('/boarding-pass')
   })
 
-  it('25%에서 시작해 네 단계 사이만 이동한다', () => {
+  it('25%에서 시작하고 마지막 면은 스탬프를 눌러야 열린다', () => {
     renderPassport()
 
     const progress = screen.getByRole('progressbar', { name: '여권 진행률' })
@@ -170,10 +209,11 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(progress).toHaveAttribute('aria-valuenow', '50')
     fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
     expect(progress).toHaveAttribute('aria-valuenow', '75')
-    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
-
-    expect(progress).toHaveAttribute('aria-valuenow', '100')
+    // 방문을 고르기 전에는 여행 기록 면으로 넘길 수 없다.
     expect(screen.getByRole('button', { name: '다음 단계' })).toBeDisabled()
+
+    fireEvent.click(screen.getAllByRole('button', { name: /방문 기록 보기/ })[0])
+    expect(progress).toHaveAttribute('aria-valuenow', '100')
     expect(screen.getByRole('button', { name: '티켓 보기' })).toBeInTheDocument()
   })
 
@@ -189,7 +229,7 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     expect(window.getComputedStyle(screen.getByText('총 방문 횟수 | 6회')).borderRadius).toBe(
       '0.5rem',
     )
-    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    fireEvent.click(screen.getAllByRole('button', { name: /방문 기록 보기/ })[0])
     expect(screen.getByRole('region', { name: '여권 여행 기록' })).toHaveTextContent('MCM HAUS')
 
     fireEvent.click(screen.getByRole('button', { name: '이전 단계' }))
@@ -212,7 +252,7 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     const next = screen.getByRole('button', { name: '다음 단계' })
     fireEvent.click(next)
     fireEvent.click(next)
-    fireEvent.click(next)
+    fireEvent.click(screen.getAllByRole('button', { name: /방문 기록 보기/ })[0])
     fireEvent.click(screen.getByRole('button', { name: '티켓 보기' }))
 
     const sheet = screen.getByRole('dialog', { name: '탑승권' })
@@ -281,7 +321,7 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     )
   })
 
-  it('모든 단계에 여권 안내 카피와 상세 여행 콘텐츠를 제공한다', () => {
+  it('모든 단계에 여권 안내 카피와 상세 여행 콘텐츠를 제공한다', async () => {
     renderPassport()
 
     // 브랜드 문구만 남긴다. 안내 두 줄은 랜딩에서 이미 읽었고, 걷어낸 자리는
@@ -299,16 +339,22 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     const next = screen.getByRole('button', { name: '다음 단계' })
     fireEvent.click(next)
     fireEvent.click(next)
-    fireEvent.click(next)
+    fireEvent.click(screen.getAllByRole('button', { name: /방문 기록 보기/ })[0])
     fireEvent.click(screen.getByRole('button', { name: 'TRAVEL HISTORY' }))
     fireEvent.click(screen.getByRole('button', { name: '1F JOURNEY 상세 보기' }))
 
-    expect(screen.getByText('1976년, München - 밤의 도시가 낳은 대담함')).toBeInTheDocument()
-    expect(screen.getByText('Modern Creation München')).toBeInTheDocument()
-    expect(screen.getByText(/미하엘 크로머\(Michael Cromer\)/)).toBeInTheDocument()
-    expect(screen.getByText(/‘어디론가 떠날 수 있는 태도’를/)).toBeInTheDocument()
+    // 층 이야기(GET /floors/{id})가 카드 아래로 펼쳐진다. TEXT는 문단,
+    // LIST는 목록이다.
+    expect(await screen.findByText('1976년, München - 밤의 도시가 낳은 대담함')).toBeInTheDocument()
+    expect(screen.getByText('1976년 뮌헨 창립')).toBeInTheDocument()
+    expect(getFloor).toHaveBeenCalledWith(1)
+
+    // 첫 층만이 아니라 모든 층이 같은 방식으로 펼쳐진다.
+    fireEvent.click(screen.getByRole('button', { name: '2F EMBLEM 상세 보기' }))
+    expect(await screen.findByRole('button', { name: '2F EMBLEM 상세 접기' })).toBeInTheDocument()
+    await waitFor(() => expect(getFloor).toHaveBeenCalledWith(2))
+
     expect(passportTicket.to.localName).toBe('MCM')
-    expect(screen.getByRole('dialog', { name: '1F JOURNEY 상세' })).not.toHaveTextContent('TICKET')
   })
 
   it('열린 여권 원본의 투명 여백만 장면 밖으로 잘라낸다', () => {
@@ -386,7 +432,7 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     const next = screen.getByRole('button', { name: '다음 단계' })
     fireEvent.click(next)
     fireEvent.click(next)
-    fireEvent.click(next)
+    fireEvent.click(screen.getAllByRole('button', { name: /방문 기록 보기/ })[0])
 
     expect(screen.getByRole('heading', { name: 'PASSPORT' })).toBeInTheDocument()
     const artwork = screen.getByRole('img', { name: '비행기와 탑승권' })
@@ -471,6 +517,61 @@ describe('PassportPage', { timeout: 15_000 }, () => {
     fireEvent.submit(input.closest('form'))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent('GIL')
+  })
+
+  it('토큰이 있으면 저장을 PATCH /users/me로 보낸다', async () => {
+    setAccessToken('token-1')
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    fireEvent.click(await findEditableRow(/이름 .* 수정/))
+    const input = screen.getByLabelText('여권에 표기할 영문 이름')
+
+    fireEvent.change(input, { target: { value: 'ada kim' } })
+    fireEvent.submit(input.closest('form'))
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    // 세 필드가 전부 필수다(UserUpdateRequest). birthDate는 ISO, 국적은 alpha-2.
+    expect(updateMe).toHaveBeenCalledWith({
+      name: 'ADA KIM',
+      birthDate: '2000-01-01',
+      nationality: 'KR',
+    })
+    expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent('ADA KIM')
+  })
+
+  it('저장이 실패하면 시트를 열어 둔 채 사유를 보여 주고 지면을 바꾸지 않는다', async () => {
+    setAccessToken('token-1')
+    updateMe.mockRejectedValue(new Error('인증이 필요합니다.'))
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    fireEvent.click(await findEditableRow(/이름 .* 수정/))
+    const input = screen.getByLabelText('여권에 표기할 영문 이름')
+
+    fireEvent.change(input, { target: { value: 'ada kim' } })
+    fireEvent.submit(input.closest('form'))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('인증이 필요합니다.')
+    expect(screen.getByRole('dialog', { name: '여권 신분 정보 수정' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '여권 프로필', hidden: true })).not.toHaveTextContent(
+      'ADA KIM',
+    )
+  })
+
+  it('토큰이 없으면 서버 없이 지면 표기만 바꾼다', async () => {
+    // 여권은 보호 라우트라 보통 토큰이 있지만, 시트를 열어 둔 사이 401로
+    // 토큰이 지워질 수 있다. 그때 PATCH를 쏘면 401 오류만 띄우고 아무것도
+    // 못 고치게 되므로 안전망으로 지면 표기만 바꾼다.
+    renderPassport()
+    fireEvent.click(screen.getByRole('button', { name: '다음 단계' }))
+    fireEvent.click(await findEditableRow(/이름 .* 수정/))
+    const input = screen.getByLabelText('여권에 표기할 영문 이름')
+
+    fireEvent.change(input, { target: { value: 'ada kim' } })
+    fireEvent.submit(input.closest('form'))
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(updateMe).not.toHaveBeenCalled()
+    expect(screen.getByRole('region', { name: '여권 프로필' })).toHaveTextContent('ADA KIM')
   })
 
   it('이름을 여권 표기 한도로 자르고 넘치면 말줄임으로 가린다', async () => {

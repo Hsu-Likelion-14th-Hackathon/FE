@@ -319,7 +319,7 @@ function drawStamps(ctx, w, h, { profile, stamps, assets, stampImages = {}, side
  * 방문 상세 면 — Figma (52) 52:18978 우측 페이지.
  * 여권 원점(-183, 340) 기준 로컬 좌표: 블록 x=25.5, y=23.
  */
-function drawJourney(ctx, w, h, { assets, side }) {
+function drawJourney(ctx, w, h, { assets, side, visit }) {
   paintBase(ctx, w, h, 4)
   paintSpread(ctx, w, h, assets, side)
   paintGutter(ctx, w, h, side)
@@ -334,16 +334,19 @@ function drawJourney(ctx, w, h, { assets, side }) {
   // 텍스트 블록: 로컬 y 71 / 89 / 107 / 141 (baseline은 +12, 주소만 +10)
   // Figma 71:6262 — 날짜·매장명·주소는 한 블록으로 라벨색(#c07346)이다.
   // 흰색으로 그리면 아래 '입장 번호' 줄과 구분이 사라진다.
+  // 값은 최근 방문 상세(GET /passport/visits/{id})에서 온다.
   setFont(ctx, { size: 10, weight: 600 })
   ctx.fillStyle = INK_LABEL
-  ctx.fillText('2026 07 27', x, 83 * sy)
-  ctx.fillText('MCM HAUS', x, 101 * sy)
+  ctx.fillText(visit?.visitedOn ?? '', x, 83 * sy)
+  ctx.fillText(visit?.storeName ?? '', x, 101 * sy)
   setFont(ctx, { size: 8, weight: 400 })
-  ctx.fillText('412 Apgujeong-ro, Gangnam-gu, Seoul of Korea', x, 117 * sy)
+  ctx.fillText(visit?.address ?? '', x, 117 * sy)
 
   setFont(ctx, { size: 10, weight: 600 })
   ctx.fillStyle = INK_VALUE
-  ctx.fillText('입장 번호 00001 | 비행 시간 46M', x, 153 * sy)
+  if (visit) {
+    ctx.fillText(`입장 번호 ${visit.entryNo} | 비행 시간 ${visit.stayMinutes}M`, x, 153 * sy)
+  }
 
   // 기념 아트워크 96×100 두 칸, 가로 간격 5
   const tileY = 167 * sy

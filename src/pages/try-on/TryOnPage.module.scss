@@ -143,23 +143,25 @@
   background: color-mix(in srgb, var(--mcm-color-hero-end) 72%, transparent);
 }
 
+/* 백엔드 사진은 흰 배경의 카탈로그 컷이다. multiply로 카드색에 가라앉히면
+   흰 배경은 사라지지만 제품 색까지 곱해져 Soft Pink가 갈색이 된다. 색을
+   왜곡하지 않도록 흰 타일 그대로 보여 준다(결과 화면 썸네일과 같은 방식). */
 .productCrop {
   position: absolute;
-  top: 108px;
+  top: 78px;
   left: 50%;
-  width: 140px;
-  height: 92px;
+  width: 150px;
+  height: 150px;
   overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
   transform: translateX(-50%);
 }
 
 .productCrop img {
-  position: absolute;
-  top: -242.19%;
-  left: -61.45%;
-  width: 226.76%;
-  max-width: none;
-  height: 375.69%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .uploadMessage,
@@ -182,6 +184,71 @@
 
 .fileInput {
   display: none;
+}
+
+/* 등록된 기본 전신 이미지 안내 줄. 어두운 무대라 크림 톤으로 띄운다. */
+.bodyImageRow {
+  display: flex;
+  margin: 16px 0 0;
+  align-items: center;
+  gap: 8px;
+  color: #fff7d5;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.bodyThumb {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255, 247, 213, 0.5);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bodyRemove {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 247, 213, 0.5);
+  border-radius: 100px;
+  background: none;
+  color: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.bodyRemove:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* 고른 사진을 기본 이미지로 남기는 선택. */
+.saveDefault {
+  display: flex;
+  margin-top: 16px;
+  align-items: center;
+  gap: 6px;
+  color: #fff7d5;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.saveDefault input {
+  accent-color: #c07346;
+}
+
+/* 요청 실패 사유. 어두운 무대 위라 밝은 경고색을 쓴다. */
+.errorMessage {
+  margin: 16px 0 0;
+  color: #ffb4a9;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.errorMessage a {
+  color: inherit;
+  text-decoration: underline;
 }
 
 .uploadButton {
@@ -350,7 +417,9 @@
   }
 
   .productCrop {
-    top: 98px;
+    top: 60px;
+    width: 130px;
+    height: 130px;
   }
 
   .loadingMessage {
@@ -427,7 +496,18 @@
   transform: translateX(-50%);
 }
 
+/* AI 결과 사진. 카드를 꽉 채우고 모서리는 카드를 따른다. */
+.resultImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
 .resultPin {
+  z-index: 1;
   position: absolute;
   top: 11.5px;
   left: 11.5px;

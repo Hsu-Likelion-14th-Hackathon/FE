@@ -78,59 +78,13 @@
   inset: 0;
 }
 
-.productCrop {
+/* 백엔드 사진은 1000×1083 카탈로그 컷이라 손크롭 없이 칸만 채운다. */
+.artworkImage {
   position: absolute;
-  overflow: hidden;
-}
-
-.productCrop img {
-  position: absolute;
-  max-width: none;
-}
-
-.diamantCrop {
-  top: 105px;
-  left: 50%;
-  width: 84px;
-  height: 55px;
-  transform: translateX(-50%);
-}
-
-.diamantCrop img {
-  top: -242.19%;
-  left: -61.45%;
-  width: 226.76%;
-  height: 375.69%;
-}
-
-.weekenderCrop {
-  top: 74px;
-  left: 50%;
-  width: 119px;
-  height: 86px;
-  transform: translateX(-50%);
-}
-
-.weekenderCrop img {
-  top: -61.51%;
-  left: -11.16%;
-  width: 123.46%;
-  height: 183.84%;
-}
-
-.walletCrop {
-  top: 105px;
-  left: 50%;
-  width: 74px;
-  height: 55px;
-  transform: translateX(-50%);
-}
-
-.walletCrop img {
-  top: -277.43%;
-  left: -96.19%;
-  width: 293.26%;
-  height: 428.51%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .removeButton {

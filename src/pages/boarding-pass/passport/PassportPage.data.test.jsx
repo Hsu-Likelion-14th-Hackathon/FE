@@ -24,20 +24,87 @@ const FETCHED_PROFILE = {
 }
 
 const FETCHED_STAMPS = [
-  { id: 'stamp-a', date: '2026 03 03' },
-  { id: 'stamp-b', date: '2026 04 04' },
+  { id: 'stamp-a', visitLogId: 4, date: '2026 03 03' },
+  { id: 'stamp-b', visitLogId: 9, date: '2026 04 04' },
 ]
+
+/** 채움 데이터(MCM HAUS)와 겹치지 않는 값으로 채워 어느 쪽을 읽는지 가른다. */
+const FETCHED_VISIT = {
+  visitLogId: 9,
+  storeName: 'MCM MUNICH',
+  address: '1 Odeonsplatz, München',
+  entryNo: '00777',
+  visitedOn: '2026 05 05',
+  stayMinutes: 12,
+  passengerName: 'ADA LOVELACE',
+  passCode: 'MCM-TEST-0505',
+  boardingPassId: 77,
+  travelHistory: [
+    {
+      id: 'floor-1',
+      floorId: 11,
+      floorNo: 1,
+      code: 'JOURNEY',
+      title: '여정',
+      tagline: '뮌헨의 밤이 낳은 대담함',
+    },
+    {
+      id: 'floor-2',
+      floorId: 12,
+      floorNo: 2,
+      code: 'EMBLEM',
+      title: '상징',
+      tagline: '태도를 담은 로고',
+    },
+  ],
+}
+
+/** 그 방문의 보딩패스 동선 — 1층만 AI 추천이다. */
+const FETCHED_ROUTE = [
+  {
+    sequence: 1,
+    id: '1f',
+    floorId: 11,
+    floorNo: 1,
+    code: 'JOURNEY',
+    title: '여정',
+    isRecommended: true,
+    reason: '첫 여정으로 알맞습니다.',
+  },
+  {
+    sequence: 2,
+    id: '2f',
+    floorId: 12,
+    floorNo: 2,
+    code: 'EMBLEM',
+    title: '상징',
+    isRecommended: false,
+    reason: null,
+  },
+]
+
+const getVisitDetail = vi.hoisted(() => vi.fn())
+const getPassportStamps = vi.hoisted(() => vi.fn())
+const getBoardingPassRoute = vi.hoisted(() => vi.fn())
 
 vi.mock('@/shared/api/passportApi.js', () => ({
   getPassport: vi.fn(async () => FETCHED_PROFILE),
-  getPassportStamps: vi.fn(async () => ({
-    visits: FETCHED_PROFILE.visits,
-    stamps: FETCHED_STAMPS,
-  })),
-  getVisitDetail: vi.fn(async () => ({})),
+  getPassportStamps: (...args) => getPassportStamps(...args),
+  getVisitDetail: (...args) => getVisitDetail(...args),
 }))
 
-beforeEach(() => vi.spyOn(console, 'warn').mockImplementation(() => {}))
+vi.mock('@/shared/api/boardingPassApi.js', () => ({
+  getBoardingPassRoute: (...args) => getBoardingPassRoute(...args),
+}))
+
+beforeEach(() => {
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
+  getPassportStamps
+    .mockReset()
+    .mockResolvedValue({ visits: FETCHED_PROFILE.visits, stamps: FETCHED_STAMPS })
+  getVisitDetail.mockReset().mockResolvedValue(FETCHED_VISIT)
+  getBoardingPassRoute.mockReset().mockResolvedValue(FETCHED_ROUTE)
+})
 afterEach(() => vi.restoreAllMocks())
 
 function renderPassport() {
@@ -88,6 +155,75 @@ describe('여권 DOM 데이터', () => {
       expect(stamps).toHaveTextContent(stamp.date)
     }
     // 고정 데이터 6개가 섞여 들어오면 안 된다.
+    expect(stamps).not.toHaveTextContent('2026 07 21')
+  })
+
+  it('스탬프를 누르면 그 방문의 여행 기록 면과 시트가 열린다', async () => {
+    renderPassport()
+    const next = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(next)
+    fireEvent.click(next)
+
+    // 넘겨서는 못 간다 — 어느 방문을 볼지 모르기 때문이다.
+    expect(next).toBeDisabled()
+    fireEvent.click(await screen.findByRole('button', { name: '2026 04 04 방문 기록 보기' }))
+
+    const journey = await screen.findByRole('region', { name: '여권 여행 기록' })
+    await waitFor(() => expect(journey).toHaveTextContent('MCM MUNICH'))
+    expect(journey).toHaveTextContent('2026 05 05')
+    expect(journey).toHaveTextContent('입장 번호 00777 | 비행 시간 12M')
+    // 채움 데이터를 읽으면 여기서 MCM HAUS가 나온다.
+    expect(journey).not.toHaveTextContent('MCM HAUS')
+
+    // 누른 스탬프의 방문으로 조회한다.
+    expect(getVisitDetail).toHaveBeenCalledWith(9)
+
+    fireEvent.click(screen.getByRole('button', { name: 'TRAVEL HISTORY' }))
+    const sheet = await screen.findByRole('dialog', { name: '여행 기록' })
+    expect(sheet).toHaveTextContent('1F JOURNEY | 여정')
+    expect(sheet).toHaveTextContent('뮌헨의 밤이 낳은 대담함')
+    expect(sheet).not.toHaveTextContent('삶은 여행이다')
+
+    // 동선의 AI 추천이 층 카드에 얹히고, 추천 층만 남는다.
+    expect(getBoardingPassRoute).toHaveBeenCalledWith(77)
+    const badges = await screen.findAllByLabelText('AI 추천 층')
+    expect(badges).toHaveLength(1)
+    expect(badges[0].closest('button')).toHaveAccessibleName('1F JOURNEY 상세 보기')
+    // 비추천 2F는 기록 목록에서 빠진다.
+    expect(sheet).not.toHaveTextContent('2F EMBLEM')
+  })
+
+  it('동선 조회가 실패해도 여행 기록은 추천 표시 없이 열린다', async () => {
+    getBoardingPassRoute.mockRejectedValue(new Error('boom'))
+    renderPassport()
+    const next = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(next)
+    fireEvent.click(next)
+
+    fireEvent.click(await screen.findByRole('button', { name: '2026 04 04 방문 기록 보기' }))
+
+    const journey = await screen.findByRole('region', { name: '여권 여행 기록' })
+    await waitFor(() => expect(journey).toHaveTextContent('MCM MUNICH'))
+
+    fireEvent.click(screen.getByRole('button', { name: 'TRAVEL HISTORY' }))
+    const sheet = await screen.findByRole('dialog', { name: '여행 기록' })
+    // 추천 표시가 없으니 걸러낼 근거도 없다 — 기록 전체를 보여 준다.
+    expect(sheet).toHaveTextContent('1F JOURNEY | 여정')
+    expect(sheet).toHaveTextContent('2F EMBLEM | 상징')
+    expect(screen.queryByLabelText('AI 추천 층')).not.toBeInTheDocument()
+  })
+
+  it('방문이 없으면 스탬프 면을 채움 데이터로 메우지 않는다', async () => {
+    // 방문한 적 없는 계정에 채움 스탬프 여섯 개를 찍으면 가짜 기록이 된다.
+    getPassportStamps.mockResolvedValue({ visits: 0, stamps: [] })
+    renderPassport()
+    const nextButton = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(nextButton)
+    fireEvent.click(nextButton)
+
+    const stamps = await screen.findByRole('region', { name: '여권 방문 스탬프' })
+    await waitFor(() => expect(stamps).toHaveTextContent('총 방문 횟수 | 0회'))
+    expect(stamps.querySelectorAll('li')).toHaveLength(0)
     expect(stamps).not.toHaveTextContent('2026 07 21')
   })
 })

@@ -224,6 +224,48 @@
   border-color: var(--mcm-color-ink);
 }
 
+// 사이즈가 둘 이상인 상품에서만 나온다. 하나뿐이면 위 요약에 이미 적혀 있다.
+.sizeList {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  align-items: center;
+  gap: 6px;
+}
+
+.sizeButton {
+  min-width: 60px;
+  height: 36px;
+  padding: 0 12px;
+  border: 0.5px solid var(--mcm-color-border);
+  border-radius: 8px;
+  background: var(--mcm-color-canvas);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.sizeButton:focus-visible {
+  outline: 2px solid var(--mcm-color-ink);
+  outline-offset: 2px;
+}
+
+.sizeButton:disabled {
+  color: var(--mcm-color-muted);
+  text-decoration: line-through;
+}
+
+.selectedSize {
+  border-color: var(--mcm-color-ink);
+}
+
+// 가입 폼의 오류 색과 같은 값이다(SignupPage .fieldError).
+.bagError {
+  margin-top: 8px;
+  color: #d14343;
+  font-size: 12px;
+  line-height: 16px;
+}
+
 .addToBagButton {
   width: 100%;
   height: 50px;

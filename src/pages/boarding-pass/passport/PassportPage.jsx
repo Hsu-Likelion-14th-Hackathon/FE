@@ -19,13 +19,19 @@ import passportEmblem from '@/shared/assets/boarding-pass/passport/passport-embl
 import passportSpread from '@/shared/assets/boarding-pass/passport/passport-spread.png'
 import passportStamp from '@/shared/assets/boarding-pass/passport/passport-stamp.webp'
 import passportStampBow from '@/shared/assets/boarding-pass/passport/passport-stamp-bow.png'
+import { usePassport } from '@/entities/passport/usePassport.js'
+import { updateMe } from '@/shared/api/authApi.js'
+import { getAccessToken } from '@/shared/api/authToken.js'
+import { getFloor } from '@/shared/api/floorApi.js'
+import { getBoardingPassRoute } from '@/shared/api/boardingPassApi.js'
+import { getVisitDetail } from '@/shared/api/passportApi.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import {
   findCountryByStoredValue,
   getCountryOption,
 } from '@/shared/ui/profile-fields/country-options.js'
 
-import { journeyRecords, passportTicket } from './passportData.js'
+import { passportTicket, passportVisit } from './passportData.js'
 import styles from './PassportPage.module.scss'
 import PassportPageTurn from './PassportPageTurn.jsx'
 
@@ -39,7 +45,6 @@ const NationalitySelect = lazy(() => import('@/shared/ui/profile-fields/National
 const sheetLabels = {
   profile: '여권 신분 정보 수정',
   history: '여행 기록',
-  'history-detail': '1F JOURNEY 상세',
   ticket: '탑승권',
 }
 
@@ -157,10 +162,59 @@ function EditableRow({
   )
 }
 
+/**
+ * 방문 동선에 AI 추천 표시를 얹는다.
+ *
+ * 방문 상세(travelHistory)에는 추천 여부가 없다. 그 방문의 보딩패스 동선
+ * (GET /boarding-passes/{id}/route)에 층별 isRecommended·reason이 남아 있어
+ * floorId로 맞춰 합친다. 동선 조회가 실패해도 기록 자체는 보여야 하므로
+ * 그때는 표시 없이 그대로 돌려준다.
+ */
+async function withRouteBadges(detail) {
+  if (!detail.boardingPassId) return detail
+  try {
+    const steps = await getBoardingPassRoute(detail.boardingPassId)
+    const byFloor = new Map(steps.map((step) => [step.floorId, step]))
+    return {
+      ...detail,
+      travelHistory: detail.travelHistory.map((floor) => {
+        const step = byFloor.get(floor.floorId)
+        if (!step?.isRecommended) return floor
+        return { ...floor, isRecommended: true, reason: step.reason }
+      }),
+    }
+  } catch {
+    return detail
+  }
+}
+
 export function Component() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [sheet, setSheet] = useState(null)
+  // 여권 데이터는 페이지가 한 번 불러와 지면(PageTurn)과 시트가 나눠 쓴다.
+  const passport = usePassport()
+  // 여행 기록 면(마지막 면)은 스탬프를 눌러야 열린다. 어느 방문을 보는지가
+  // 이 상태다. 고르기 전에는 그 면으로 넘길 수 없다(lastStep).
+  const [visit, setVisit] = useState(null)
+
+  const openVisit = (stamp) => {
+    // 채움 스탬프(조회 실패 시)는 방문 번호가 없다. 채움 방문 상세로 연다.
+    if (!stamp.visitLogId) {
+      setVisit(passportVisit)
+      setStep(3)
+      return
+    }
+    getVisitDetail(stamp.visitLogId)
+      .then(withRouteBadges)
+      .then((detail) => {
+        setVisit(detail)
+        setStep(3)
+      })
+      .catch(() => {
+        // 상세를 못 열면 스탬프 면에 머문다.
+      })
+  }
   // 신분 정보는 사용자가 직접 고칠 수 있다. 캔버스도 이 값으로 다시 굽는다.
   // 저장 형식은 PATCH /users/me(UserUpdateRequest)와 같은 { name, birthDate,
   // nationality }다. birthDate는 ISO, nationality는 `Republic of Korea` 표기다.
@@ -188,6 +242,9 @@ export function Component() {
   const [nameRejected, setNameRejected] = useState(false)
   // 조합 중인 글자가 받을 수 없는 문자면 흐리게 보여 유효하지 않음을 드러낸다.
   const [nameBlocked, setNameBlocked] = useState(false)
+  // PATCH /users/me 진행 상태. 실패하면 시트를 열어 둔 채 사유를 보여 준다.
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
   // 입력 경로가 onChange와 onCompositionEnd 둘이라 필터는 여기 하나로 모은다.
   const handleNameInput = (raw) => {
@@ -222,6 +279,7 @@ export function Component() {
     // 다시 열었을 때 지난 안내와 흐림이 남아 있으면 안 된다.
     setNameRejected(false)
     setNameBlocked(false)
+    setSaveError(null)
     setOpenPicker(null)
     composingName.current = false
     restoringFocus.current = true
@@ -291,6 +349,8 @@ export function Component() {
           <PassportPageTurn
             step={step}
             disabled={Boolean(sheet)}
+            passport={{ ...passport, visit }}
+            lastStep={visit ? 3 : 2}
             profileOverride={profileOverride}
             onCommit={(direction) =>
               setStep((current) => Math.min(3, Math.max(0, current + direction)))
@@ -302,10 +362,12 @@ export function Component() {
                 isRestoringFocus={() => restoringFocus.current}
                 profile={visibleProfile}
                 stamps={visibleStamps}
+                visit={visit}
                 onNameHover={helpers?.onNameHover}
                 profileReady={helpers?.profileReady ?? true}
                 // 세 칸이 한 시트를 함께 쓴다. 백엔드도 셋을 한 번에 받으므로
                 // (UserUpdateRequest는 셋 다 필수) 어느 칸을 눌러도 같은 화면이다.
+                onSelectStamp={openVisit}
                 onEditProfile={(event) => {
                   setNameDraft(toDisplayName(visibleProfile))
                   setBirthDraft(toIsoBirthDate(visibleProfile?.birthDate))
@@ -339,11 +401,7 @@ export function Component() {
               tabIndex="-1"
               className={`${styles.sheet} ${styles[`sheet-${sheet}`]}`}
             >
-              {sheet === 'history' ? (
-                <HistoryList
-                  onSelectJourney={(event) => openSheet('history-detail', event.currentTarget)}
-                />
-              ) : null}
+              {sheet === 'history' ? <HistoryList visit={visit} /> : null}
               {sheet === 'profile' ? (
                 <form
                   className={styles.nameForm}
@@ -364,15 +422,33 @@ export function Component() {
                       return
                     }
                     // PATCH /users/me(UserUpdateRequest)와 같은 모양으로 담는다.
-                    // birthDate는 ISO, nationality는 `Republic of Korea` 표기다.
-                    setProfileEdit({
+                    // birthDate는 ISO. 백엔드는 alpha-2를 받고, 지면 표기(alpha-3)
+                    // 변환은 toDisplayNationality가 맡는다.
+                    const body = {
                       name: next,
                       birthDate: birthDraft,
-                      // 백엔드는 alpha-2를 받는다. 지면 표기(alpha-3) 변환은
-                      // toDisplayNationality가 맡는다.
                       nationality: getCountryOption(countryDraft)?.code ?? '',
-                    })
-                    closeSheet()
+                    }
+
+                    // 여권 라우트는 보호 구간이지만, 시트를 열어 둔 사이
+                    // 401로 토큰이 지워졌을 수 있다. 보낼 곳이 없으면 지면
+                    // 표기만 바꾼다.
+                    if (!getAccessToken()) {
+                      setProfileEdit(body)
+                      closeSheet()
+                      return
+                    }
+
+                    setSaving(true)
+                    setSaveError(null)
+                    updateMe(body)
+                      .then(() => {
+                        // 서버가 받아 준 값이므로 지면도 그 값으로 굽는다.
+                        setProfileEdit(body)
+                        closeSheet()
+                      })
+                      .catch((cause) => setSaveError(cause))
+                      .finally(() => setSaving(false))
                   }}
                 >
                   <h3 className={styles.sheetTitle}>신분 정보</h3>
@@ -429,16 +505,29 @@ export function Component() {
                       onOpenChange={(isOpen) => setOpenPicker(isOpen ? 'nationality' : null)}
                     />
                   </Suspense>
-                  <button className={styles.nameSubmit} type="submit">
-                    저장
+                  {saveError ? (
+                    <p className={styles.nameNotice} role="alert">
+                      {saveError.message ?? '신분 정보를 저장하지 못했습니다.'}
+                    </p>
+                  ) : null}
+                  <button className={styles.nameSubmit} type="submit" disabled={saving}>
+                    {saving ? '저장 중…' : '저장'}
                   </button>
                 </form>
               ) : null}
-              {sheet === 'history-detail' ? <JourneyDetail /> : null}
               {sheet === 'ticket' ? (
                 <>
                   <h3 className={styles.sheetTitle}>TICKET</h3>
-                  <BoardingTicketCard pass={passportTicket} size="md" />
+                  {/* 탑승자·패스 코드는 방문 상세의 실제 값으로 덮는다. 편명·시간
+                      등 나머지는 방문 상세 계약에 없어 데모 티켓 표기를 쓴다. */}
+                  <BoardingTicketCard
+                    pass={{
+                      ...passportTicket,
+                      passengerName: visit?.passengerName || passportTicket.passengerName,
+                      passCode: visit?.passCode || passportTicket.passCode,
+                    }}
+                    size="md"
+                  />
                 </>
               ) : null}
             </section>
@@ -452,11 +541,11 @@ export function Component() {
 /**
  * 여권 지면의 투명 오버레이.
  *
- * 여권 데이터는 PassportPageTurn이 이미 불러왔다. 여기서 다시 부르면 단계를
- * 넘길 때마다 같은 API를 또 치게 된다.
+ * 여권 데이터는 페이지(usePassport)가 한 번 불러와 내려준다. 여기서 다시
+ * 부르면 단계를 넘길 때마다 같은 API를 또 치게 된다.
  *
- * 모든 값은 캔버스와 같은 profile/stamps에서 꺼낸다. 여기서 고정 데이터를 쓰면
- * WebGL을 못 쓰는 기기와 스크린리더만 다른 값을 보게 된다.
+ * 모든 값은 캔버스와 같은 profile/stamps/visit에서 꺼낸다. 여기서 고정
+ * 데이터를 쓰면 WebGL을 못 쓰는 기기와 스크린리더만 다른 값을 보게 된다.
  */
 function PassportSpread({
   step,
@@ -464,8 +553,10 @@ function PassportSpread({
   isRestoringFocus,
   profile,
   stamps = [],
+  visit,
   onNameHover,
   profileReady = true,
+  onSelectStamp,
   onEditProfile,
   onHistory,
   onTicket,
@@ -588,10 +679,17 @@ function PassportSpread({
             {/* 캔버스도 여섯 칸(3열 2행)만 그린다. 더 읽어 주면 화면과 어긋난다. */}
             {stamps.slice(0, 6).map((stamp) => (
               <li key={stamp.id ?? stamp.date}>
-                {/* 캔버스와 같은 그림을 가리켜야 한다. 백엔드가 방문마다 다른
-                    스탬프를 주면 여기도 따라간다. */}
-                <img src={stamp.imageUrl ?? passportStamp} alt="" />
-                <time>{stamp.date}</time>
+                {/* 스탬프를 눌러야 그 방문의 여행 기록 면이 열린다. */}
+                <button
+                  type="button"
+                  aria-label={`${stamp.date} 방문 기록 보기`}
+                  onClick={() => onSelectStamp?.(stamp)}
+                >
+                  {/* 캔버스와 같은 그림을 가리켜야 한다. 백엔드가 방문마다 다른
+                      스탬프를 주면 여기도 따라간다. */}
+                  <img src={stamp.imageUrl ?? passportStamp} alt="" />
+                  <time>{stamp.date}</time>
+                </button>
               </li>
             ))}
           </ul>
@@ -625,12 +723,14 @@ function PassportSpread({
       <h3 className={styles.journeyHeading}>PASSPORT</h3>
       <div className={styles.journeys}>
         <p>
-          <time>2026 07 27</time>
-          <strong>MCM HAUS</strong>
-          <span>412 Apgujeong-ro, Gangnam-gu, Seoul of Korea</span>
+          <time>{visit?.visitedOn}</time>
+          <strong>{visit?.storeName}</strong>
+          <span>{visit?.address}</span>
         </p>
         <p>
-          <strong>입장 번호 00001 | 비행 시간 46M</strong>
+          <strong>
+            {visit ? `입장 번호 ${visit.entryNo} | 비행 시간 ${visit.stayMinutes}M` : ''}
+          </strong>
         </p>
         <div className={styles.journeyActions}>
           <button type="button" onClick={onHistory} className={styles.history}>
@@ -650,68 +750,148 @@ function PassportSpread({
   )
 }
 
-function HistoryList({ onSelectJourney }) {
+/**
+ * TRAVEL HISTORY — 방문 동선(travelHistory)을 층 카드로 세운다.
+ *
+ * 카드는 전부 아코디언이다. 누르면 그 층의 이야기(GET /floors/{floorId}
+ * contents)가 펼쳐지고, 다시 누르면 접힌다. 층 이야기는 처음 펼칠 때 받아
+ * 캐시한다 — 시트를 닫으면 상태가 사라지므로 오래 들고 있지 않는다.
+ */
+function HistoryList({ visit }) {
+  const all = visit?.travelHistory ?? []
+  // 가이드와 같은 규칙 — AI 추천 층만 세운다. 추천 표시가 하나도 없으면
+  // (동선 조회 실패 등) 기록 전체를 보여 준다.
+  const recommendedOnly = all.filter((record) => record.isRecommended)
+  const records = recommendedOnly.length ? recommendedOnly : all
+  const [expandedId, setExpandedId] = useState(null)
+  const [floorStories, setFloorStories] = useState({})
+
+  const expanded = records.find((record) => record.id === expandedId)
+
+  useEffect(() => {
+    if (!expanded?.floorId || floorStories[expanded.floorId]) return undefined
+
+    let alive = true
+    const { floorId } = expanded
+    getFloor(floorId)
+      .then((data) => {
+        if (alive) {
+          setFloorStories((current) => ({
+            ...current,
+            [floorId]: { status: 'ready', contents: data.contents },
+          }))
+        }
+      })
+      .catch(() => {
+        if (alive) setFloorStories((current) => ({ ...current, [floorId]: { status: 'error' } }))
+      })
+
+    return () => {
+      alive = false
+    }
+  }, [expanded, floorStories])
+
+  const toggle = (record) => {
+    setExpandedId((current) => (current === record.id ? null : record.id))
+    // 실패했던 층은 다시 펼칠 때 새로 받는다.
+    setFloorStories((current) => {
+      if (current[record.floorId]?.status !== 'error') return current
+      const next = { ...current }
+      delete next[record.floorId]
+      return next
+    })
+  }
+
   return (
     <>
       <h3 className={styles.sheetTitle}>TRAVEL HISTORY</h3>
       <div className={styles.historyList}>
-        {journeyRecords.map((record) =>
-          record.id === 'journey' ? (
-            <button
-              key={record.id}
-              type="button"
-              aria-label="1F JOURNEY 상세 보기"
-              className={styles.historyCard}
-              onClick={onSelectJourney}
-            >
-              <JourneyCard record={record} />
-            </button>
-          ) : (
-            <article key={record.id} className={styles.historyCard}>
-              <JourneyCard record={record} />
-            </article>
-          ),
-        )}
+        {records.map((record) => {
+          const isOpen = expandedId === record.id
+          const story = floorStories[record.floorId]
+          return (
+            <div key={record.id} className={styles.historyItem}>
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                aria-label={`${record.floorNo}F ${record.code} 상세 ${isOpen ? '접기' : '보기'}`}
+                className={styles.historyCard}
+                onClick={() => toggle(record)}
+              >
+                <JourneyCard record={record} />
+              </button>
+              {isOpen ? (
+                <div className={styles.detailCopy}>
+                  {record.reason ? <p className={styles.aiReason}>✦ {record.reason}</p> : null}
+                  {story?.status === 'ready' ? (
+                    <FloorStory contents={story.contents} />
+                  ) : story?.status === 'error' ? (
+                    <p>층 이야기를 불러오지 못했습니다. 다시 눌러 주세요.</p>
+                  ) : (
+                    <p>층 이야기를 불러오는 중…</p>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          )
+        })}
       </div>
     </>
   )
 }
 
-function JourneyDetail() {
-  const journey = journeyRecords[0]
-  return (
-    <>
-      <h3 className={styles.sheetTitle}>TRAVEL HISTORY</h3>
-      <article className={styles.historyCard}>
-        <JourneyCard record={journey} />
-      </article>
-      <div className={styles.detailCopy}>
-        <h4>1976년, München - 밤의 도시가 낳은 대담함</h4>
-        <p>
-          1976년 뮌헨, 데이비드 보위와 프레디 머큐리가 밤거리를 자유롭게 거닐며 예술과 반항을
-          모의하던 시절
-        </p>
-        <p>
-          배우이자 창립자인 미하엘 크로머(Michael Cromer)는 이 도시의 시대 정신을 담아낼 하나의
-          이름을 지었습니다
-        </p>
-        <h4>Modern Creation München</h4>
-        <p>
-          그것은 단순한 가방 브랜드의 탄생이 아닌 정체되어 있던 당시 럭셔리 씬을 향한 대담한
-          선언이었습니다
-        </p>
-        <p>화려함 그 자체 보다 ‘어디론가 떠날 수 있는 태도’를 가방에 주입하고자 했던 순간</p>
-        <p>MCM의 여정을 지금 시작합니다</p>
-      </div>
-    </>
-  )
+/** 층 상세 콘텐츠 블록. TEXT는 문단으로, 연이은 LIST는 한 목록으로 묶는다. */
+function FloorStory({ contents }) {
+  const rendered = []
+  let listBuffer = []
+
+  const flushList = (key) => {
+    if (!listBuffer.length) return
+    rendered.push(
+      <ul key={key}>
+        {listBuffer.map((block) => (
+          <li key={block.orderNo}>{block.body}</li>
+        ))}
+      </ul>,
+    )
+    listBuffer = []
+  }
+
+  for (const block of contents) {
+    if (block.blockType === 'LIST') {
+      listBuffer.push(block)
+      continue
+    }
+    flushList(`list-${block.orderNo}`)
+    if (block.blockType === 'QUOTE') {
+      rendered.push(<h4 key={block.orderNo}>{block.body}</h4>)
+    } else if (block.body) {
+      rendered.push(
+        <div key={block.orderNo}>
+          {block.body.split('\n').map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </div>,
+      )
+    }
+  }
+  flushList('list-end')
+
+  return <>{rendered}</>
 }
 
 function JourneyCard({ record }) {
   return (
     <span className={styles.journeyCardContent}>
-      <span>{record.floor}</span>
-      <strong>{record.title}</strong>
+      <span>
+        {`${record.floorNo}F ${record.code} | ${record.title}`}
+        {record.isRecommended ? (
+          <span className={styles.aiPick} aria-label="AI 추천 층">
+            ✦ AI
+          </span>
+        ) : null}
+      </span>
+      <strong>{record.tagline}</strong>
     </span>
   )
 }

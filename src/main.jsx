@@ -6,26 +6,8 @@ import { router } from '@/app/router.jsx'
 import '@/styles/tailwind.css'
 import '@/styles/globals.scss'
 
-async function enableMocking() {
-  // 백엔드 미완성 구간: 로컬 개발은 mock API를 기본 사용한다.
-  // 실서버를 치려면 .env.local 에 VITE_ENABLE_MSW=false
-  if (!import.meta.env.DEV || import.meta.env.VITE_ENABLE_MSW === 'false') {
-    return
-  }
-
-  // onUnhandledRequest: bypass — 보딩패스 외 요청은 그대로 통과
-  const { worker } = await import('@/mocks/browser.js')
-  await worker.start({ onUnhandledRequest: 'bypass' })
-}
-
-function renderApp() {
-  createRoot(document.getElementById('root')).render(
-    <StrictMode>
-      <RouterProvider router={router} />
-    </StrictMode>,
-  )
-}
-
-enableMocking()
-  .catch((error) => console.warn('MSW 시작 실패, 실제 API를 사용합니다.', error))
-  .then(renderApp)
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <RouterProvider router={router} />
+  </StrictMode>,
+)

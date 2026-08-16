@@ -99,42 +99,13 @@
   background: var(--mcm-color-product-surface);
 }
 
-.productCrop {
+/* 백엔드 사진은 1000×1083 카탈로그 컷이라 손크롭 없이 칸만 채운다. */
+.artworkImage {
   position: absolute;
-  overflow: hidden;
-}
-
-.productCrop img {
-  position: absolute;
-  max-width: none;
-}
-
-.pinaCrop {
-  top: 40px;
-  left: 24px;
-  width: 41px;
-  height: 38px;
-}
-
-.pinaCrop img {
-  top: -154.08%;
-  left: -76.27%;
-  width: 248.45%;
-  height: 289.69%;
-}
-
-.slidesCrop {
-  top: 55px;
-  left: 14px;
-  width: 60px;
-  height: 23px;
-}
-
-.slidesCrop img {
-  top: -264.82%;
-  left: -23.46%;
-  width: 148.48%;
-  height: 413.77%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .productDetails {

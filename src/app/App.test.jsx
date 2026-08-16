@@ -1,6 +1,32 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { clearAccessToken, setAccessToken } from '@/shared/api/authToken.js'
+
+// 상품 상세는 서버에서 받아 온다. 통합 테스트는 라우팅을 보는 자리라
+// 네트워크까지 실어 나르지 않는다.
+vi.mock('@/shared/api/productApi.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  getProduct: async (productId) => ({
+    id: Number(productId),
+    name: 'New Liz 비세토스 쇼퍼',
+    price: 1050000,
+    priceLabel: '₩1,050,000',
+    description: '',
+    colors: [
+      {
+        productColorId: 3,
+        label: 'Beige + Black',
+        hex: '#E0CEBB',
+        isDefault: true,
+        images: ['https://cdn/beige.jpg'],
+        sizes: [{ productSizeId: 3, label: 'S', note: null, sku: 'A', stock: null }],
+        isWished: false,
+      },
+    ],
+  }),
+}))
 
 import { createAppRoutes } from './router.jsx'
 
@@ -38,7 +64,14 @@ function renderRoute(pathname) {
 }
 
 describe('App', () => {
+  beforeEach(() => {
+    // 백엔드 데이터를 그리는 라우트는 보호 구간에 있다. 라우팅 검사가
+    // 로그인 화면으로 튕기지 않도록 토큰을 쥐여 준다.
+    setAccessToken('app-test-token')
+  })
+
   afterEach(() => {
+    clearAccessToken()
     activeRouters.splice(0).forEach((router) => router.dispose())
     document.documentElement.classList.remove('store-menu-open')
     document.body.classList.remove('store-menu-open')
@@ -138,25 +171,25 @@ describe('App', () => {
   })
 
   it('동적 상품 경로에서 착용 화면을 열고 같은 상품 상세로 돌아간다', async () => {
-    const router = renderRoute('/products/mcm-002')
+    const router = renderRoute('/products/2')
 
     expect(
       await screen.findByRole('heading', { name: 'New Liz 비세토스 쇼퍼' }),
     ).toBeInTheDocument()
 
     const tryOnLink = screen.getByRole('link', { name: 'Fitting with Ai' })
-    expect(tryOnLink).toHaveAttribute('href', '/products/mcm-002/try-on')
+    expect(tryOnLink).toHaveAttribute('href', '/products/2/try-on?color=3')
     fireEvent.click(tryOnLink)
 
     expect(await screen.findByRole('heading', { name: '상품 착용' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/products/mcm-002/try-on')
+    expect(router.state.location.pathname).toBe('/products/2/try-on')
 
     fireEvent.click(screen.getByRole('button', { name: '상품 상세로 돌아가기' }))
 
     expect(
       await screen.findByRole('heading', { name: 'New Liz 비세토스 쇼퍼' }),
     ).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/products/mcm-002')
+    expect(router.state.location.pathname).toBe('/products/2')
   })
 
   it('찾을 수 없는 경로에서 메인으로 돌아간다', async () => {
@@ -348,7 +381,20 @@ describe('App', () => {
     expect(router.state.location.pathname).toBe('/boarding-pass/survey')
   })
 
-  it('보딩패스 랜딩에서 로그인 없이 Passport에 진입한다', async () => {
+  it('로그인 없이 Passport를 누르면 로그인으로 보내고 돌아올 곳을 남긴다', async () => {
+    clearAccessToken()
+    const router = renderRoute('/boarding-pass')
+
+    fireEvent.click(await screen.findByRole('button', { name: 'PASSPORT 확인' }))
+
+    expect(
+      await screen.findByRole('heading', { name: '로그인' }, { timeout: 10_000 }),
+    ).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/login')
+    expect(router.state.location.state?.from).toBe('/boarding-pass/passport')
+  })
+
+  it('로그인한 사용자는 랜딩에서 Passport에 진입한다', async () => {
     const router = renderRoute('/boarding-pass')
 
     fireEvent.click(await screen.findByRole('button', { name: 'PASSPORT 확인' }))

@@ -9,6 +9,7 @@ import { getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
 import stageBack from '@/shared/assets/boarding-pass/complete/stage-back.png'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import StateNotice from '@/shared/ui/state-notice/StateNotice.jsx'
 import { useToast } from '@/shared/ui/toastContext.js'
 
 import styles from './CompletePage.module.scss'
@@ -102,8 +103,17 @@ export function Component() {
           <div className={styles.ticketWrap}>
             {pass ? (
               <BoardingTicketCard pass={pass} size="md" className={styles.ticketCard} />
+            ) : error ? (
+              <StateNotice
+                role="alert"
+                variant="dark"
+                eyebrow="Notice"
+                message={error}
+                hint="비행을 새로 시작하면 다시 발급됩니다"
+                action={{ label: '보딩패스 홈으로', to: '/boarding-pass' }}
+              />
             ) : (
-              <p className={styles.status}>{error ?? '보딩패스를 불러오는 중…'}</p>
+              <p className={styles.status}>보딩패스를 불러오는 중…</p>
             )}
           </div>
         </section>

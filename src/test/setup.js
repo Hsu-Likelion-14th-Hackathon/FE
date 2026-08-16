@@ -3,19 +3,33 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, vi } from 'vitest'
 
+import { clearAccessToken } from '@/shared/api/authToken.js'
+
 afterEach(cleanup)
 
 /**
  * 테스트는 네트워크를 타면 안 된다.
  *
- * .env에 VITE_API_BASE_URL과 VITE_BEARER_TOKEN이 있으면 화면이 부르는 조회가
- * 실제 서버까지 나간다. 그러면 같은 코드인데도 .env를 둔 로컬과 없는 CI의 결과가
- * 갈리고, 남의 계정 상태나 회선에 따라 통과 여부가 바뀐다.
+ * .env에 VITE_API_BASE_URL이 있으면 화면이 부르는 조회가 실제 서버까지 나간다.
+ * 그러면 같은 코드인데도 .env를 둔 로컬과 없는 CI의 결과가 갈리고, 남의 계정
+ * 상태나 회선에 따라 통과 여부가 바뀐다.
  *
  * 거부는 .env가 없는 환경에서 이미 일어나던 일이라 CI 결과는 그대로 두면서,
  * 로컬을 CI와 같은 조건으로 맞춘다. 특정 응답이 필요한 테스트는 자기 파일에서
  * vi.stubGlobal('fetch', ...)로 덮어쓰면 된다.
  */
+/**
+ * 테스트는 로그인하지 않은 상태에서 시작한다.
+ *
+ * 앞선 테스트가 남긴 sessionStorage 토큰이 다음 테스트의 초기 세션이 되면
+ * 화면마다 세션 복원(/users/me)이 돌아 타이밍에 민감한 테스트가 흔들린다.
+ * 로그인 상태가 필요한 테스트는 자기 파일에서 setAccessToken으로 만들면 된다.
+ */
+beforeEach(() => {
+  clearAccessToken()
+  sessionStorage.clear()
+})
+
 beforeEach(() => {
   vi.stubGlobal(
     'fetch',

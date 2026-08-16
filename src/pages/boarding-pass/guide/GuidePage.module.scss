@@ -150,8 +150,17 @@
   right: 1.25rem;
   display: flex;
   width: 12.5rem;
+  /* 4칸(칩 3.125 × 4 + 간격 1.875 × 3) 기준 높이. 추천 층이 2~3개로 줄면
+     같은 높이 안에서 고르게 벌어져 건물 위 자리를 그대로 채운다. */
+  min-height: 18.125rem;
   flex-direction: column;
-  gap: 1.875rem;
+  justify-content: space-between;
+}
+
+/* 추천 층이 하나뿐일 때 — 계단 모양 없이 알약 하나로 둔다. */
+.floorChipSingle {
+  z-index: 1;
+  border-radius: 1.5625rem;
 }
 
 .floorChip {
@@ -494,4 +503,41 @@
   font-size: 0.625rem;
   line-height: 0.875rem;
   color: var(--mcm-color-muted);
+}
+
+/* 백엔드 콘텐츠 렌더용 — API 연동 후 추가 */
+
+/* AI 추천 층 마크. 배지 오른쪽에 작게 붙는다. */
+.aiPick {
+  margin-left: 0.375rem;
+  padding: 0.0625rem 0.375rem;
+  border-radius: 6.25rem;
+  background: rgb(192 115 70 / 35%);
+  color: #fff7d5;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* 층 목록·상세 로딩 한 줄 */
+.floorStatus {
+  margin: 2rem 0;
+  color: #fff7d5;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* LIST 블록 묶음 */
+.panelList {
+  display: flex;
+  margin: 0;
+  padding-left: 1.1em;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* IMAGE 블록 */
+.contentImage {
+  width: 100%;
+  border-radius: 0.5rem;
 }
