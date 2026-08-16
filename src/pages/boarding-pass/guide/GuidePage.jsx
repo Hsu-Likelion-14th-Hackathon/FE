@@ -12,12 +12,7 @@ import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import BoardingPassStageBackdrop from '@/shared/layout/BoardingPassStageBackdrop.jsx'
 import BoardingPassStageHeader from '@/shared/layout/BoardingPassStageHeader.jsx'
 import BoardingPassStepNav from '@/shared/layout/BoardingPassStepNav.jsx'
-import {
-  FLIGHT_STEP,
-  GUIDE_FLOOR_ORDER,
-  guideFloorFromStep,
-  guideFloorStep,
-} from '@/shared/layout/boardingPassSteps.js'
+import { FLIGHT_STEP, GUIDE_FLOOR_ORDER } from '@/shared/layout/boardingPassSteps.js'
 import scrollDocumentToTop from '@/shared/layout/scrollDocumentToTop.js'
 import StateNotice from '@/shared/ui/state-notice/StateNotice.jsx'
 
@@ -55,9 +50,26 @@ export function Component() {
   const [details, setDetails] = useState({})
   // 요청 중인 층. state로 두면 effect 안에서 동기 setState가 필요해진다.
   const inFlightRef = useRef(new Set())
-  const floorIndex = GUIDE_FLOOR_ORDER.indexOf(floor)
+
+  // AI가 추천한 층만 가이드에 세운다 — 순서는 추천 동선(sequence)을 따른다.
+  // 동선을 아직 못 받았거나 추천이 하나도 없으면 전 층을 보여 준다.
+  // 빈 가이드는 아무것도 안내하지 못한다.
+  const recommendedIds = (route ?? [])
+    .filter((step) => step.isRecommended)
+    .sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0))
+    .map((step) => step.id)
+  const visibleFloorIds = recommendedIds.length
+    ? recommendedIds
+    : floors
+      ? [...floors].sort((a, b) => a.floorNo - b.floorNo).map((item) => item.id)
+      : GUIDE_FLOOR_ORDER.slice(1)
+  const order = ['overview', ...visibleFloorIds]
+  const floorIndex = order.indexOf(floor)
   const atStart = floorIndex <= 0
-  const atEnd = floorIndex >= GUIDE_FLOOR_ORDER.length - 1
+  const atEnd = floorIndex >= order.length - 1
+  // 하단 슬라이더도 보이는 층만큼만 눈금을 만든다.
+  const step = FLIGHT_STEP + 1 + Math.max(floorIndex, 0)
+  const stepLabels = ['MAPS', '가이드 개요', ...visibleFloorIds.map((id) => id.toUpperCase())]
 
   useLayoutEffect(() => {
     scrollDocumentToTop()
@@ -130,7 +142,7 @@ export function Component() {
 
   function goRelative(delta) {
     if (delta > 0) {
-      const next = GUIDE_FLOOR_ORDER[floorIndex + 1]
+      const next = order[floorIndex + 1]
       if (next) setFloor(next)
       return
     }
@@ -140,16 +152,16 @@ export function Component() {
       return
     }
 
-    const prev = GUIDE_FLOOR_ORDER[floorIndex - 1]
+    const prev = order[floorIndex - 1]
     if (prev) setFloor(prev)
   }
 
-  function goToStep(step) {
-    if (step <= FLIGHT_STEP) {
+  function goToStep(nextStep) {
+    if (nextStep <= FLIGHT_STEP) {
       navigate('/boarding-pass/flight')
       return
     }
-    const nextFloor = guideFloorFromStep(step)
+    const nextFloor = order[nextStep - FLIGHT_STEP - 1]
     if (nextFloor) setFloor(nextFloor)
   }
 
@@ -187,7 +199,8 @@ export function Component() {
         </main>
 
         <BoardingPassStepNav
-          step={guideFloorStep(floor)}
+          step={step}
+          labels={stepLabels}
           onPrev={() => goRelative(-1)}
           onNext={() => goRelative(1)}
           onSelectStep={goToStep}
@@ -206,6 +219,8 @@ function OverviewView({ floors, error, route, onRetry, onSelectFloor }) {
   const recommended = new Set(
     (route ?? []).filter((step) => step.isRecommended).map((step) => step.id),
   )
+  // 추천 동선이 있으면 그 층만 세운다. 없으면(동선 실패·패스 없음) 전 층이다.
+  const shown = recommended.size ? ordered.filter((item) => recommended.has(item.id)) : ordered
 
   return (
     <div>
@@ -242,17 +257,19 @@ function OverviewView({ floors, error, route, onRetry, onSelectFloor }) {
           </p>
         ) : (
           <div className={styles.floorChips}>
-            {ordered.map((item, index) => (
+            {shown.map((item, index) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => onSelectFloor(item.id)}
                 className={`${styles.floorChip} ${
-                  index === 0
-                    ? styles.floorChipTop
-                    : index === ordered.length - 1
-                      ? styles.floorChipBottom
-                      : styles.floorChipMid
+                  shown.length === 1
+                    ? styles.floorChipSingle
+                    : index === 0
+                      ? styles.floorChipTop
+                      : index === shown.length - 1
+                        ? styles.floorChipBottom
+                        : styles.floorChipMid
                 }`}
               >
                 <p className={styles.floorChipBadge}>

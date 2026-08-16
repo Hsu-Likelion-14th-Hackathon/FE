@@ -758,7 +758,11 @@ function PassportSpread({
  * 캐시한다 — 시트를 닫으면 상태가 사라지므로 오래 들고 있지 않는다.
  */
 function HistoryList({ visit }) {
-  const records = visit?.travelHistory ?? []
+  const all = visit?.travelHistory ?? []
+  // 가이드와 같은 규칙 — AI 추천 층만 세운다. 추천 표시가 하나도 없으면
+  // (동선 조회 실패 등) 기록 전체를 보여 준다.
+  const recommendedOnly = all.filter((record) => record.isRecommended)
+  const records = recommendedOnly.length ? recommendedOnly : all
   const [expandedId, setExpandedId] = useState(null)
   const [floorStories, setFloorStories] = useState({})
 

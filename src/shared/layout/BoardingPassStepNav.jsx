@@ -1,12 +1,13 @@
 import navNextImg from '@/shared/assets/boarding-pass/guide/nav-next.svg'
 import navPrevImg from '@/shared/assets/boarding-pass/guide/nav-prev.svg'
 
-import { BOARDING_PASS_STEP_LABELS, boardingPassStepProgress } from './boardingPassSteps.js'
+import { BOARDING_PASS_STEP_LABELS } from './boardingPassSteps.js'
 import styles from './BoardingPassStepNav.module.scss'
 
 /**
  * 비행 MAPS / 여행 가이드 공통 하단 가로 슬라이더.
- * 이전·다음·진행 바 클릭으로 1~6단계 이동.
+ * 이전·다음·진행 바 클릭으로 단계 이동. 눈금은 labels 수만큼 생긴다 —
+ * 가이드가 AI 추천 층만 보여 줄 때는 그만큼만 넘긴다.
  */
 export default function BoardingPassStepNav({
   step,
@@ -17,8 +18,9 @@ export default function BoardingPassStepNav({
   nextDisabled = false,
   groupLabel,
   note,
+  labels = BOARDING_PASS_STEP_LABELS,
 }) {
-  const progress = boardingPassStepProgress(step)
+  const progress = (step / labels.length) * 100
 
   return (
     <div className={styles.nav}>
@@ -37,7 +39,7 @@ export default function BoardingPassStepNav({
             <div className={styles.progressFill} style={{ width: `${progress}%` }} />
           </div>
           <div className={styles.progressHits} role="group" aria-label="여행 단계">
-            {BOARDING_PASS_STEP_LABELS.map((label, index) => {
+            {labels.map((label, index) => {
               const targetStep = index + 1
               return (
                 <button

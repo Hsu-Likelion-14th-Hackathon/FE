@@ -111,6 +111,16 @@ beforeEach(() => {
     },
     {
       sequence: 2,
+      id: '2f',
+      floorId: 2,
+      floorNo: 2,
+      code: 'EMBLEM',
+      title: '상징',
+      isRecommended: true,
+      reason: '취향 반영',
+    },
+    {
+      sequence: 3,
       id: '5f',
       floorId: 5,
       floorNo: 5,
@@ -127,16 +137,44 @@ describe('GuidePage', { timeout: 15_000 }, () => {
     activeRouters.splice(0).forEach((router) => router.dispose())
   })
 
-  it('개요 칩을 백엔드 층으로 위층부터 세우고 추천 층에 AI 마크를 단다', async () => {
+  it('개요에 AI 추천 층만 위층부터 세운다', async () => {
     renderGuide()
 
     const chips = await screen.findAllByRole('button', { name: /F .* \|/ })
-    // floorNo 내림차순 — 건물처럼 5F가 맨 위다.
+    // 추천 층(1F·2F)만 남고, 비추천 5F는 사라진다. 위층이 먼저다.
+    expect(chips).toHaveLength(2)
+    expect(chips[0]).toHaveTextContent('2F EMBLEM')
+    expect(chips[1]).toHaveTextContent('1F ORIGIN')
+    expect(chips[0]).toHaveTextContent('✦ AI')
+    expect(screen.queryByRole('button', { name: /5F HORIZON/ })).not.toBeInTheDocument()
+
+    // 하단 슬라이더 눈금도 추천 층만큼만 생긴다.
+    expect(screen.getByRole('button', { name: '1F로 이동' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '2F로 이동' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '5F로 이동' })).not.toBeInTheDocument()
+  })
+
+  it('추천 동선이 없으면 전 층을 보여 준다', async () => {
+    // 보딩패스가 없는 사용자 — 가이드는 그대로 열린다.
+    getLatestBoardingPass.mockResolvedValue(null)
+    renderGuide()
+
+    const chips = await screen.findAllByRole('button', { name: /F .* \|/ })
+    expect(chips).toHaveLength(FLOORS.length)
     expect(chips[0]).toHaveTextContent('5F HORIZON')
-    expect(chips[chips.length - 1]).toHaveTextContent('1F ORIGIN')
-    // 추천 동선(route)의 isRecommended 층만 표시된다.
-    expect(chips[chips.length - 1]).toHaveTextContent('✦ AI')
-    expect(chips[0]).not.toHaveTextContent('✦ AI')
+  })
+
+  it('다음 버튼이 추천 동선 순서(1F → 2F)로만 넘긴다', async () => {
+    renderGuide()
+    await screen.findAllByRole('button', { name: /F .* \|/ })
+
+    fireEvent.click(screen.getByRole('button', { name: '다음' }))
+    expect(await screen.findByText('1976년 뮌헨의 밤에서 시작된 이야기.')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '다음' }))
+    await waitFor(() => expect(getFloor).toHaveBeenCalledWith(2))
+    // 2F가 마지막 추천 층 — 더 넘어갈 곳이 없다.
+    expect(screen.getByRole('button', { name: '다음' })).toBeDisabled()
   })
 
   it('칩을 누르면 그 층의 콘텐츠 블록을 받아 그린다', async () => {
@@ -169,7 +207,7 @@ describe('GuidePage', { timeout: 15_000 }, () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('층 안내를 불러오지 못했습니다.')
 
     fireEvent.click(screen.getByRole('button', { name: '다시 시도' }))
-    expect(await screen.findByRole('button', { name: /5F HORIZON/ })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /1F ORIGIN/ })).toBeInTheDocument()
   })
 
   it('shows the AI note only on the travel guide overview', async () => {

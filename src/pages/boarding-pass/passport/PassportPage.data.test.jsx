@@ -184,11 +184,13 @@ describe('여권 DOM 데이터', () => {
     expect(sheet).toHaveTextContent('뮌헨의 밤이 낳은 대담함')
     expect(sheet).not.toHaveTextContent('삶은 여행이다')
 
-    // 동선의 AI 추천이 층 카드에 얹힌다 — 추천 층에만.
+    // 동선의 AI 추천이 층 카드에 얹히고, 추천 층만 남는다.
     expect(getBoardingPassRoute).toHaveBeenCalledWith(77)
     const badges = await screen.findAllByLabelText('AI 추천 층')
     expect(badges).toHaveLength(1)
     expect(badges[0].closest('button')).toHaveAccessibleName('1F JOURNEY 상세 보기')
+    // 비추천 2F는 기록 목록에서 빠진다.
+    expect(sheet).not.toHaveTextContent('2F EMBLEM')
   })
 
   it('동선 조회가 실패해도 여행 기록은 추천 표시 없이 열린다', async () => {
@@ -205,7 +207,9 @@ describe('여권 DOM 데이터', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'TRAVEL HISTORY' }))
     const sheet = await screen.findByRole('dialog', { name: '여행 기록' })
+    // 추천 표시가 없으니 걸러낼 근거도 없다 — 기록 전체를 보여 준다.
     expect(sheet).toHaveTextContent('1F JOURNEY | 여정')
+    expect(sheet).toHaveTextContent('2F EMBLEM | 상징')
     expect(screen.queryByLabelText('AI 추천 층')).not.toBeInTheDocument()
   })
 

@@ -150,8 +150,17 @@
   right: 1.25rem;
   display: flex;
   width: 12.5rem;
+  /* 4칸(칩 3.125 × 4 + 간격 1.875 × 3) 기준 높이. 추천 층이 2~3개로 줄면
+     같은 높이 안에서 고르게 벌어져 건물 위 자리를 그대로 채운다. */
+  min-height: 18.125rem;
   flex-direction: column;
-  gap: 1.875rem;
+  justify-content: space-between;
+}
+
+/* 추천 층이 하나뿐일 때 — 계단 모양 없이 알약 하나로 둔다. */
+.floorChipSingle {
+  z-index: 1;
+  border-radius: 1.5625rem;
 }
 
 .floorChip {
