@@ -166,7 +166,7 @@ function UploadStage({
 }
 
 /** Figma (17-1) — 피팅이 끝난 뒤 결과와 상품 정보를 보여준다. */
-function ResultStage({ session, onClose, onDetail, onBag }) {
+function ResultStage({ session, onClose, onDetail, onBag, onSave }) {
   return (
     <section className={`${styles.stage} ${styles.resultStage}`} aria-label="AI Fitting 결과">
       <span className={styles.monogram} aria-hidden="true" />
@@ -206,7 +206,7 @@ function ResultStage({ session, onClose, onDetail, onBag }) {
         </div>
       </div>
 
-      <button className={styles.saveButton} type="button">
+      <button className={styles.saveButton} type="button" onClick={onSave}>
         이미지 저장
       </button>
     </section>
@@ -443,6 +443,52 @@ export function Component() {
     setPhase('upload')
   }
 
+  /**
+   * 결과 이미지를 기기에 저장한다. 세 단계로 내려간다.
+   *
+   * 1. 모바일 — 공유 시트(navigator.share)에 파일로 넘기면 사진 앱에 바로
+   *    저장할 수 있다. 모바일 브라우저의 <a download>는 뷰어만 여는 경우가
+   *    많다.
+   * 2. 데스크톱 — Blob을 받아 <a download>로 내려받는다.
+   * 3. fetch가 스토리지 CORS에 막히면 바이트를 읽을 수 없다(<img>는 되지만
+   *    fetch는 CORS 검사를 받는다). 새 탭으로 열어 길게 눌러 저장하게 한다.
+   */
+  const saveResultImage = async () => {
+    const url = session?.resultImageUrl
+    if (!url) return
+
+    try {
+      const response = await fetch(url)
+      if (!response.ok) throw new Error(`이미지를 받지 못했습니다 (${response.status})`)
+      const blob = await response.blob()
+      const extension = blob.type.includes('png') ? 'png' : 'jpg'
+      const fileName = `mcm-fitting-${session?.fittingSessionId ?? 'result'}.${extension}`
+
+      const shareFile = new File([blob], fileName, { type: blob.type || 'image/jpeg' })
+      if (navigator.canShare?.({ files: [shareFile] })) {
+        try {
+          await navigator.share({ files: [shareFile] })
+          return
+        } catch (cause) {
+          // 시트를 닫은 것은 실패가 아니다. 그 외에는 다운로드로 이어 간다.
+          if (cause?.name === 'AbortError') return
+        }
+      }
+
+      const objectUrl = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = objectUrl
+      anchor.download = fileName
+      document.body.append(anchor)
+      anchor.click()
+      anchor.remove()
+      URL.revokeObjectURL(objectUrl)
+    } catch {
+      window.open(url, '_blank', 'noopener')
+      showToast(<p className="text-sm leading-5">새 탭에서 이미지를 길게 눌러 저장해 주세요.</p>)
+    }
+  }
+
   const closeUpload = () => {
     navigate(productId ? `/products/${encodeURIComponent(productId)}` : '/products')
   }
@@ -499,6 +545,7 @@ export function Component() {
       {showResult ? (
         <ResultStage
           session={session}
+          onSave={saveResultImage}
           onClose={resetFitting}
           onDetail={() =>
             navigate(productId ? `/products/${encodeURIComponent(productId)}` : '/products')

@@ -58,7 +58,7 @@
 
 ### 피팅 후속
 
-- [ ] 결과 화면 "이미지 저장" 버튼 동작 구현 (현재 자리만 있음)
+- [x] 결과 화면 "이미지 저장" 구현 (2026-08-16) — 모바일은 공유 시트(사진 앱 저장), 데스크톱은 Blob 다운로드, fetch가 CORS에 막히면 새 탭 + 안내 토스트. CORS의 GET이 풀리면 자동으로 정식 경로로 동작
 - [ ] 결과 화면 "쇼핑백 추가" — 현재는 /cart 이동만. 사이즈 선택이 필요해 UX 결정 필요
 
 ### 계약 확정 대기
@@ -74,7 +74,10 @@
 
 프리플라이트 403 `CorsPreflightFailure`. curl로는 201이므로 SAS는 정상, 스토리지 계정 CORS 설정만 없다. 해결 전까지 브라우저에서는 "파일 없이 기본 전신 이미지" 경로만 동작.
 
-요청할 규칙: Origins `http://localhost:5173` + 배포 URL / Methods `PUT, OPTIONS` / Headers `content-type, x-ms-blob-type`
+요청한 규칙(2026-08-16 백엔드 전달 완료): Origins `http://localhost:5173` + 배포 URL / Methods `GET, PUT, OPTIONS` / Headers `content-type, x-ms-blob-type`
+
+- `PUT` — 업로드(피팅 사진·기본 전신 이미지)
+- `GET` — 결과 "이미지 저장"의 fetch 다운로드. 풀리기 전까지는 새 탭 폴백으로 동작
 
 ### 2. 상품 누끼 컷(투명 PNG) 없음
 

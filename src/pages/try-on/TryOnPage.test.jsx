@@ -216,6 +216,84 @@ describe('TryOnPage', () => {
     expect(registerBodyImage).not.toHaveBeenCalled()
   })
 
+  /** 결과 화면까지 간다 — 세션이 곧바로 DONE으로 끝나는 경로. */
+  async function reachResultStage() {
+    createFittingSession.mockResolvedValue(doneSession)
+    renderTryOn()
+    await screen.findByText('Credit | 150')
+    fireEvent.click(screen.getByRole('button', { name: 'Fitting' }))
+    return await screen.findByRole('button', { name: '이미지 저장' })
+  }
+
+  it('이미지 저장 — 공유 시트를 지원하면 파일로 넘긴다 (모바일)', async () => {
+    const share = vi.fn().mockResolvedValue(undefined)
+    navigator.canShare = vi.fn(() => true)
+    navigator.share = share
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        blob: async () => new Blob(['img-bytes'], { type: 'image/png' }),
+      }),
+    )
+
+    try {
+      fireEvent.click(await reachResultStage())
+
+      await waitFor(() => expect(share).toHaveBeenCalled())
+      const shared = share.mock.calls[0][0].files[0]
+      expect(shared.name).toBe('mcm-fitting-11.png')
+    } finally {
+      vi.unstubAllGlobals()
+      delete navigator.canShare
+      delete navigator.share
+    }
+  })
+
+  it('이미지 저장 — 공유가 없으면 Blob 다운로드로 내려받는다 (데스크톱)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        blob: async () => new Blob(['img-bytes'], { type: 'image/jpeg' }),
+      }),
+    )
+    const createObjectURL = vi.fn(() => 'blob:mock')
+    const revokeObjectURL = vi.fn()
+    URL.createObjectURL = createObjectURL
+    URL.revokeObjectURL = revokeObjectURL
+
+    try {
+      fireEvent.click(await reachResultStage())
+
+      await waitFor(() => expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock'))
+      expect(createObjectURL).toHaveBeenCalled()
+    } finally {
+      vi.unstubAllGlobals()
+      delete URL.createObjectURL
+      delete URL.revokeObjectURL
+    }
+  })
+
+  it('이미지 저장 — fetch가 막히면(CORS) 새 탭으로 열고 안내한다', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
+    const open = vi.fn()
+    vi.stubGlobal('open', open)
+
+    try {
+      fireEvent.click(await reachResultStage())
+
+      await waitFor(() =>
+        expect(open).toHaveBeenCalledWith('https://cdn/fitting-result.jpg', '_blank', 'noopener'),
+      )
+      expect(
+        await screen.findByText('새 탭에서 이미지를 길게 눌러 저장해 주세요.'),
+      ).toBeInTheDocument()
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
   it('PENDING 동안 로딩을 보여주고, 폴링이 DONE을 받으면 결과 화면으로 넘어간다', async () => {
     vi.useFakeTimers()
     renderTryOn()
