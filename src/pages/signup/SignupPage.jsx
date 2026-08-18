@@ -248,7 +248,7 @@ export function Component() {
             <p className={styles.description}>
               {step === 'account'
                 ? '이미 계정이 있으신가요?'
-                : '여권에 표기할 정보만 더 받으면 끝납니다.'}
+                : '여권에 표기할 정보를 기입해 주세요.'}
             </p>
             {step === 'account' ? (
               <Link className={styles.textLink} to="/login">
