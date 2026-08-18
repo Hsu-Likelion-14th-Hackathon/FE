@@ -3,14 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router'
 
 import backIcon from '@/assets/icons/auth/back.svg'
 import userIcon from '@/assets/icons/auth/user.svg'
-import {
-  EMAIL_ALREADY_REGISTERED,
-  PROFILE_ALREADY_REGISTERED,
-  createProfile,
-  signup,
-} from '@/shared/api/authApi.js'
+import { EMAIL_ALREADY_REGISTERED, createProfile, signup } from '@/shared/api/authApi.js'
 import { isProfilePending } from '@/shared/api/profilePending.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import SpaceGuardNotice from '@/shared/ui/space-guard/SpaceGuardNotice.jsx'
+import { useSpaceGuard } from '@/shared/ui/space-guard/useSpaceGuard.js'
 
 import BirthDateField from '@/shared/ui/profile-fields/BirthDateField.jsx'
 import NationalitySelect from '@/shared/ui/profile-fields/NationalitySelect.jsx'
@@ -122,11 +119,10 @@ export function Component() {
   const [error, setError] = useState(null)
   const [openPicker, setOpenPicker] = useState(null)
   const [email, setEmail] = useState('')
-  // 공백을 걷어냈을 때만 안내를 띄운다. 조용히 지우면 지운 적 없는 글자가
-  // 사라진 것처럼 보인다.
-  const [emailSpaceRejected, setEmailSpaceRejected] = useState(false)
   const [password, setPassword] = useState('')
-  const [passwordSpaceRejected, setPasswordSpaceRejected] = useState(false)
+  // 이메일·비밀번호에 공백은 유효하지 않다. 들어오는 순간 막고 이유를 알린다.
+  const emailGuard = useSpaceGuard()
+  const passwordGuard = useSpaceGuard()
   // 이미 쓰인 이메일이면 그 조합으로는 더 갈 곳이 없다. 다음 동작이 오면
   // 칸을 비워 새 이메일부터 치게 한다. 지우는 시점을 미루는 이유는, 실패하자마자
   // 비우면 사용자가 방금 무엇을 넣었는지 확인할 새가 없기 때문이다.
@@ -204,9 +200,9 @@ export function Component() {
     if (!resetArmed) return
     setResetArmed(false)
     setEmail('')
-    setEmailSpaceRejected(false)
+    emailGuard.reset()
     setPassword('')
-    setPasswordSpaceRejected(false)
+    passwordGuard.reset()
     setPasswordTouched(false)
     setError(null)
   }
@@ -226,14 +222,9 @@ export function Component() {
         nationality: getCountryOption(countryCode)?.code ?? '',
       })
       // 보호 라우트나 카카오 콜백이 남긴 원래 자리로 돌아간다. 없으면 홈이다.
+      // "이미 등록됨"(409)도 여기로 온다 — createProfile이 멱등 성공으로 삼킨다.
       navigate(location.state?.from ?? '/', { replace: true })
     } catch (profileError) {
-      // "이미 등록됨"은 가입이 끝나 있다는 뜻이다. 오류로 세워 두면 이 화면에
-      // 갇힌다 — 성공과 같은 길로 보낸다. 표시는 createProfile이 이미 껐다.
-      if (profileError.code === PROFILE_ALREADY_REGISTERED) {
-        navigate(location.state?.from ?? '/', { replace: true })
-        return
-      }
       setError(profileError)
     } finally {
       setSubmitting(false)
@@ -303,32 +294,14 @@ export function Component() {
                     aria-invalid={error ? true : undefined}
                     aria-describedby={error ? 'signup-email-error' : undefined}
                     value={email}
-                    // 이메일에 공백은 어차피 유효하지 않다. 들어오는 순간 막는다 —
-                    // change에서 지우는 방식은 크롬이 email 값의 꼬리 공백을 걸러
-                    // 돌려줘서, 끝에 친 공백이 다음 글자를 칠 때까지 화면에 남는다.
-                    onBeforeInput={(event) => {
-                      if (/\s/.test(event.data ?? '')) {
-                        event.preventDefault()
-                        setEmailSpaceRejected(true)
-                      }
-                    }}
-                    // 붙여넣기·자동완성처럼 beforeinput을 지나치는 경로의 뒷그물.
-                    // 막힌 공백은 change를 만들지 않으므로 안내는 다음 깨끗한
-                    // 입력 때 내려간다.
-                    onChange={(event) => {
-                      const raw = event.target.value
-                      const stripped = raw.replace(/\s/g, '')
-                      setEmailSpaceRejected(stripped !== raw)
-                      setEmail(stripped)
-                    }}
+                    onBeforeInput={emailGuard.onBeforeInput}
+                    onChange={(event) => setEmail(emailGuard.sanitize(event.target.value))}
                     required
                   />
                 </div>
-                {emailSpaceRejected ? (
-                  <p className={styles.inputNotice} role="status">
-                    이메일에는 공백을 입력할 수 없습니다
-                  </p>
-                ) : null}
+                <SpaceGuardNotice show={emailGuard.rejected}>
+                  이메일에는 공백을 입력할 수 없습니다
+                </SpaceGuardNotice>
               </div>
 
               <div className={styles.fieldGroup}>
@@ -350,24 +323,19 @@ export function Component() {
                     aria-describedby="signup-password-rules"
                     value={password}
                     // 공백은 가려진 채 입력되면 별표만 늘어 오타와 구분되지
-                    // 않는다. 이메일과 같은 결로 즉시 걷어내고 이유를 알린다.
-                    // 규칙표의 "공백 없이"는 붙여넣기 등 이 필터를 지나치는
-                    // 경로의 뒷그물로 남는다.
+                    // 않는다. 규칙표의 "공백 없이"는 붙여넣기 등 이 가드를
+                    // 지나치는 경로의 뒷그물로 남는다.
+                    onBeforeInput={passwordGuard.onBeforeInput}
                     onChange={(event) => {
-                      const raw = event.target.value
-                      const stripped = raw.replace(/\s/g, '')
-                      setPasswordSpaceRejected(stripped !== raw)
-                      setPassword(stripped)
+                      setPassword(passwordGuard.sanitize(event.target.value))
                       setPasswordTouched(true)
                     }}
                     required
                   />
                 </div>
-                {passwordSpaceRejected ? (
-                  <p className={styles.inputNotice} role="status">
-                    비밀번호에는 공백을 입력할 수 없습니다
-                  </p>
-                ) : null}
+                <SpaceGuardNotice show={passwordGuard.rejected}>
+                  비밀번호에는 공백을 입력할 수 없습니다
+                </SpaceGuardNotice>
                 <PasswordRules password={password} touched={passwordTouched} />
               </div>
             </div>

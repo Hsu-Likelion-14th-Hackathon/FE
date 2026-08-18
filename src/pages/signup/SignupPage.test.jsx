@@ -253,13 +253,10 @@ describe('SignupPage', { timeout: 15_000 }, () => {
   })
 
   it('이미 추가 정보가 등록된 회원이면 오류 대신 성공과 같은 길로 보낸다', async () => {
-    // 409(PROFILE_ALREADY_REGISTERED)는 가입이 끝나 있다는 뜻이다. 오류로
-    // 세워 두면 이 화면에 갇힌다 — 여권 404 안내를 타고 온 계정이 특히 그렇다.
-    createProfile.mockRejectedValue(
-      Object.assign(new Error('이미 추가 정보가 등록된 회원입니다.'), {
-        code: 'PROFILE_ALREADY_REGISTERED',
-      }),
-    )
+    // 409(PROFILE_ALREADY_REGISTERED)는 가입이 끝나 있다는 뜻이라 createProfile이
+    // 멱등 성공(null)으로 삼킨다. 화면은 회원 정보 없이도 제자리로 보내야 한다 —
+    // 여권 404 안내를 타고 온 계정이 특히 그렇다.
+    createProfile.mockResolvedValue(null)
     const router = createMemoryRouter(
       [
         { path: '/signup', Component: SignupPage },

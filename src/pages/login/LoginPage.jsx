@@ -6,16 +6,17 @@ import kakaoIcon from '@/assets/icons/auth/kakao.svg'
 import { login } from '@/shared/api/authApi.js'
 import { startKakaoLogin } from '@/shared/api/kakaoAuth.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import SpaceGuardNotice from '@/shared/ui/space-guard/SpaceGuardNotice.jsx'
+import { useSpaceGuard } from '@/shared/ui/space-guard/useSpaceGuard.js'
 
 import styles from './LoginPage.module.scss'
 
 export function Component() {
   // 입력한 비밀번호를 눈으로 확인할 수 있게 한다. 오타로 막히는 일이 잦다.
   const [passwordVisible, setPasswordVisible] = useState(false)
-  // 공백을 걷어냈을 때만 안내를 띄운다. 조용히 지우면 지운 적 없는 글자가
-  // 사라진 것처럼 보인다.
-  const [emailSpaceRejected, setEmailSpaceRejected] = useState(false)
-  const [passwordSpaceRejected, setPasswordSpaceRejected] = useState(false)
+  // 이메일·비밀번호에 공백은 유효하지 않다. 들어오는 순간 막고 이유를 알린다.
+  const emailGuard = useSpaceGuard()
+  const passwordGuard = useSpaceGuard()
   const [submitting, setSubmitting] = useState(false)
   // 백엔드가 준 message를 그대로 보여 준다. 우리가 지어내면 실제 이유와
   // 어긋난다(잘못된 비밀번호인지, 없는 계정인지).
@@ -89,30 +90,13 @@ export function Component() {
               name="email"
               type="email"
               autoComplete="email"
-              // 이메일에 공백은 어차피 유효하지 않다. 들어오는 순간 막는다 —
-              // change에서 지우는 방식은 크롬이 email 값의 꼬리 공백을 걸러
-              // 돌려줘서, 끝에 친 공백이 다음 글자를 칠 때까지 화면에 남는다.
-              onBeforeInput={(event) => {
-                if (/\s/.test(event.data ?? '')) {
-                  event.preventDefault()
-                  setEmailSpaceRejected(true)
-                }
-              }}
-              // 붙여넣기·자동완성처럼 beforeinput을 지나치는 경로의 뒷그물.
-              // 비제어 입력이라 값을 자리에서 고친다. 막힌 공백은 change를
-              // 만들지 않으므로 안내는 다음 깨끗한 입력 때 내려간다.
-              onChange={(event) => {
-                const stripped = event.target.value.replace(/\s/g, '')
-                setEmailSpaceRejected(stripped !== event.target.value)
-                if (stripped !== event.target.value) event.target.value = stripped
-              }}
+              onBeforeInput={emailGuard.onBeforeInput}
+              onChange={emailGuard.sanitizeInPlace}
               required
             />
-            {emailSpaceRejected ? (
-              <p className={styles.inputNotice} role="status">
-                이메일에는 공백을 입력할 수 없습니다
-              </p>
-            ) : null}
+            <SpaceGuardNotice show={emailGuard.rejected}>
+              이메일에는 공백을 입력할 수 없습니다
+            </SpaceGuardNotice>
           </div>
 
           <div className={styles.field}>
@@ -139,20 +123,14 @@ export function Component() {
               type={passwordVisible ? 'text' : 'password'}
               autoComplete="current-password"
               // 가입이 비밀번호에 공백을 막으므로 공백이 든 비밀번호는 있을 수
-              // 없다. 가려진 칸에서 별표만 늘어 오타와 구분되지 않으니 이메일과
-              // 같은 결로 걷어내고 알린다.
-              onChange={(event) => {
-                const stripped = event.target.value.replace(/\s/g, '')
-                setPasswordSpaceRejected(stripped !== event.target.value)
-                if (stripped !== event.target.value) event.target.value = stripped
-              }}
+              // 없다. 가려진 칸에서 별표만 늘어 오타와 구분되지 않는다.
+              onBeforeInput={passwordGuard.onBeforeInput}
+              onChange={passwordGuard.sanitizeInPlace}
               required
             />
-            {passwordSpaceRejected ? (
-              <p className={styles.inputNotice} role="status">
-                비밀번호에는 공백을 입력할 수 없습니다
-              </p>
-            ) : null}
+            <SpaceGuardNotice show={passwordGuard.rejected}>
+              비밀번호에는 공백을 입력할 수 없습니다
+            </SpaceGuardNotice>
           </div>
 
           {error ? (
