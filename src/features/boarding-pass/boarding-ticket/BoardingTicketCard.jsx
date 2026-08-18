@@ -8,6 +8,15 @@ import TicketStamp from './TicketStamp.jsx'
 import styles from './BoardingTicketCard.module.scss'
 
 /**
+ * 티켓 QR의 착지 — 히든 탑승객 이벤트 페이지.
+ *
+ * QR을 찍는 사람은 앱 사용자가 아니라 티켓을 받아 든 손님이다. 패스 코드
+ * 문자열 대신 숨은 이벤트로 잇고, 코드는 쿼리로 실어 어느 티켓인지의
+ * 식별자 역할을 유지한다. (저장소: khy1121/HACKATHON_FE_EVENT)
+ */
+const HIDDEN_EVENT_URL = 'https://khy1121.github.io/HACKATHON_FE_EVENT/'
+
+/**
  * 보딩패스 티켓 — Figma 532:6224.
  * 절취선 노치: 본문·스텁 모서리가 각각 호로 만나 첨점(V) — 단일 C 반원 아님.
  * API: 승객/클래스/항공편/게이트/탑승일/시각 + QR. 바코드만 정적.
@@ -16,7 +25,8 @@ function BoardingTicketCard({ pass, className = '', size = 'md' }) {
   if (!pass) return null
 
   const compact = size === 'sm'
-  const qrValue = String(pass.passCode || pass.qrData || pass.id || pass.boardingPassId || '')
+  const passIdentity = String(pass.passCode || pass.qrData || pass.id || pass.boardingPassId || '')
+  const qrValue = passIdentity ? `${HIDDEN_EVENT_URL}?pass=${encodeURIComponent(passIdentity)}` : ''
   const fromCity = formatCity(pass.from?.city) || 'Seoul'
   const toCity = formatCity(pass.to?.city) || 'Munich'
   const fromLocal = pass.from?.localName || pass.from?.label || '서울'
