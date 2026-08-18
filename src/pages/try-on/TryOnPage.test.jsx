@@ -192,15 +192,12 @@ describe('TryOnPage', () => {
     getMe.mockResolvedValue({ defaultBodyImageUrl: 'https://cdn/default-body.jpg' })
     renderTryOn()
 
-    expect(
-      await screen.findByText('사진을 고르지 않으면 등록된 기본 전신 이미지를 사용해요'),
-    ).toBeInTheDocument()
+    // 문구는 "전신 이미지"부터 줄바꿈(<br>)이라 문자열 하나로는 못 찾는다.
+    expect(await screen.findByText(/사진을 고르지 않으면 등록된 기본/)).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: '삭제' }))
     await waitFor(() => expect(deleteBodyImage).toHaveBeenCalled())
-    expect(
-      screen.queryByText('사진을 고르지 않으면 등록된 기본 전신 이미지를 사용해요'),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByText(/사진을 고르지 않으면 등록된 기본/)).not.toBeInTheDocument()
   })
 
   it('저장을 체크하고 Fitting하면 업로드한 fileKey로 기본 이미지도 등록한다', async () => {

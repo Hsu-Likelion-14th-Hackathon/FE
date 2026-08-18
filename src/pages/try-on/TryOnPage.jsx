@@ -124,7 +124,11 @@ function UploadStage({
         {bodyImage && !fileName ? (
           <div className={styles.bodyImageRow}>
             <img className={styles.bodyThumb} src={bodyImage} alt="" />
-            <span>사진을 고르지 않으면 등록된 기본 전신 이미지를 사용해요</span>
+            <span>
+              사진을 고르지 않으면 등록된 기본
+              <br />
+              전신 이미지를 사용해요
+            </span>
             <button
               className={styles.bodyRemove}
               type="button"
