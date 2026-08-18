@@ -303,8 +303,18 @@ export function Component() {
                     aria-invalid={error ? true : undefined}
                     aria-describedby={error ? 'signup-email-error' : undefined}
                     value={email}
-                    // 이메일에 공백은 어차피 유효하지 않다. 치는 즉시 걷어내면
-                    // 붙여넣기의 꼬리 공백도 제출 전에 사라진다.
+                    // 이메일에 공백은 어차피 유효하지 않다. 들어오는 순간 막는다 —
+                    // change에서 지우는 방식은 크롬이 email 값의 꼬리 공백을 걸러
+                    // 돌려줘서, 끝에 친 공백이 다음 글자를 칠 때까지 화면에 남는다.
+                    onBeforeInput={(event) => {
+                      if (/\s/.test(event.data ?? '')) {
+                        event.preventDefault()
+                        setEmailSpaceRejected(true)
+                      }
+                    }}
+                    // 붙여넣기·자동완성처럼 beforeinput을 지나치는 경로의 뒷그물.
+                    // 막힌 공백은 change를 만들지 않으므로 안내는 다음 깨끗한
+                    // 입력 때 내려간다.
                     onChange={(event) => {
                       const raw = event.target.value
                       const stripped = raw.replace(/\s/g, '')
