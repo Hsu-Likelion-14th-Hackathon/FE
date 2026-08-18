@@ -20,6 +20,18 @@ vi.mock('@/shared/api/floorApi.js', () => ({
   getFloor: (...args) => getFloor(...args),
 }))
 
+// 이 파일은 지면·시트의 동작을 본다. 조회가 실패하면 이제 여권 대신 안내가
+// 뜨므로(usePassport의 missing/error), 채움 데이터와 같은 값으로 성공시켜
+// 화면을 연다. 데이터가 어디서 왔는지는 PassportPage.data.test.jsx가 본다.
+vi.mock('@/shared/api/passportApi.js', () => ({
+  getPassport: async () => (await import('./passportData.js')).passportProfile,
+  getPassportStamps: async () => {
+    const { passportProfile, passportStamps } = await import('./passportData.js')
+    return { visits: passportProfile.visits, stamps: passportStamps }
+  },
+  getVisitDetail: vi.fn(),
+}))
+
 vi.mock('three/addons/renderers/CSS3DRenderer.js', async (importOriginal) => {
   const actual = await importOriginal()
 

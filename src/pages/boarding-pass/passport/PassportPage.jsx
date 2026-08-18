@@ -26,6 +26,7 @@ import { getFloor } from '@/shared/api/floorApi.js'
 import { getBoardingPassRoute } from '@/shared/api/boardingPassApi.js'
 import { getVisitDetail } from '@/shared/api/passportApi.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import StateNotice from '@/shared/ui/state-notice/StateNotice.jsx'
 import {
   findCountryByStoredValue,
   getCountryOption,
@@ -346,44 +347,74 @@ export function Component() {
           <div className={styles.introCopy}>
             <p>MCM BOARDING PASS</p>
           </div>
-          <PassportPageTurn
-            step={step}
-            disabled={Boolean(sheet)}
-            passport={{ ...passport, visit }}
-            lastStep={visit ? 3 : 2}
-            profileOverride={profileOverride}
-            onCommit={(direction) =>
-              setStep((current) => Math.min(3, Math.max(0, current + direction)))
-            }
-            renderStep={(visibleStep, visibleProfile, visibleStamps, helpers) => (
-              <PassportSpread
-                step={visibleStep}
-                sheetOpen={Boolean(sheet)}
-                isRestoringFocus={() => restoringFocus.current}
-                profile={visibleProfile}
-                stamps={visibleStamps}
-                visit={visit}
-                onNameHover={helpers?.onNameHover}
-                profileReady={helpers?.profileReady ?? true}
-                // 세 칸이 한 시트를 함께 쓴다. 백엔드도 셋을 한 번에 받으므로
-                // (UserUpdateRequest는 셋 다 필수) 어느 칸을 눌러도 같은 화면이다.
-                onSelectStamp={openVisit}
-                onEditProfile={(event) => {
-                  setNameDraft(toDisplayName(visibleProfile))
-                  setBirthDraft(toIsoBirthDate(visibleProfile?.birthDate))
-                  setCountryDraft(findCountryByStoredValue(visibleProfile?.nationality)?.code ?? '')
-                  setNameRejected(false)
-                  setNameBlocked(false)
-                  setOpenPicker(null)
-                  composingName.current = false
-                  openSheet('profile', event.currentTarget)
-                }}
-                onHistory={(event) => openSheet('history', event.currentTarget)}
-                onTicket={(event) => openSheet('ticket', event.currentTarget)}
-                onProducts={() => navigate('/products')}
-              />
-            )}
-          />
+          {/* 실패는 여권을 그리지 않는다. 채움 데이터로 덮으면 여권 없는
+              사용자가 남의 기록이 찍힌 여권을 보게 된다. 여권이 없는 것은
+              만들러 갈 일이고(가입 2단계), 그 밖의 실패는 다시 시도할 일이다. */}
+          {passport.status === 'missing' ? (
+            <StateNotice
+              variant="dark"
+              eyebrow="Check-in"
+              message="아직 여권이 없습니다"
+              hint="여권에 표기할 정보를 입력하면 여정이 시작됩니다"
+              action={{
+                label: '여권 만들기',
+                onClick: () =>
+                  navigate('/signup', {
+                    state: { step: 'profile', from: '/boarding-pass/passport' },
+                  }),
+              }}
+            />
+          ) : passport.status === 'error' ? (
+            <StateNotice
+              variant="dark"
+              role="alert"
+              eyebrow="Notice"
+              message="여권을 불러오지 못했습니다"
+              hint="잠시 후 다시 시도해 주세요"
+              action={{ label: '다시 시도', onClick: passport.retry }}
+            />
+          ) : (
+            <PassportPageTurn
+              step={step}
+              disabled={Boolean(sheet)}
+              passport={{ ...passport, visit }}
+              lastStep={visit ? 3 : 2}
+              profileOverride={profileOverride}
+              onCommit={(direction) =>
+                setStep((current) => Math.min(3, Math.max(0, current + direction)))
+              }
+              renderStep={(visibleStep, visibleProfile, visibleStamps, helpers) => (
+                <PassportSpread
+                  step={visibleStep}
+                  sheetOpen={Boolean(sheet)}
+                  isRestoringFocus={() => restoringFocus.current}
+                  profile={visibleProfile}
+                  stamps={visibleStamps}
+                  visit={visit}
+                  onNameHover={helpers?.onNameHover}
+                  profileReady={helpers?.profileReady ?? true}
+                  // 세 칸이 한 시트를 함께 쓴다. 백엔드도 셋을 한 번에 받으므로
+                  // (UserUpdateRequest는 셋 다 필수) 어느 칸을 눌러도 같은 화면이다.
+                  onSelectStamp={openVisit}
+                  onEditProfile={(event) => {
+                    setNameDraft(toDisplayName(visibleProfile))
+                    setBirthDraft(toIsoBirthDate(visibleProfile?.birthDate))
+                    setCountryDraft(
+                      findCountryByStoredValue(visibleProfile?.nationality)?.code ?? '',
+                    )
+                    setNameRejected(false)
+                    setNameBlocked(false)
+                    setOpenPicker(null)
+                    composingName.current = false
+                    openSheet('profile', event.currentTarget)
+                  }}
+                  onHistory={(event) => openSheet('history', event.currentTarget)}
+                  onTicket={(event) => openSheet('ticket', event.currentTarget)}
+                  onProducts={() => navigate('/products')}
+                />
+              )}
+            />
+          )}
         </div>
         {sheet ? (
           <div className={styles.sheetRoot}>
