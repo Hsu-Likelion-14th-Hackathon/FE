@@ -143,7 +143,6 @@ function UploadStage({
             <span>이 사진을 기본 전신 이미지로 저장</span>
           </label>
         ) : null}
-
       </div>
 
       {/* 오류는 Fitting 버튼 위에 앵커한다. 콘텐츠 흐름(uploadContent) 안에
