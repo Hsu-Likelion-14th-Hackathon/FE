@@ -32,7 +32,7 @@ import {
   getCountryOption,
 } from '@/shared/ui/profile-fields/country-options.js'
 
-import { passportTicket, passportVisit } from './passportData.js'
+import { passportTicket } from './passportData.js'
 import styles from './PassportPage.module.scss'
 import PassportPageTurn from './PassportPageTurn.jsx'
 
@@ -195,17 +195,18 @@ export function Component() {
   const [sheet, setSheet] = useState(null)
   // 여권 데이터는 페이지가 한 번 불러와 지면(PageTurn)과 시트가 나눠 쓴다.
   const passport = usePassport()
+  // 실패하면 여권 대신 안내(StateNotice)가 선다. 시트도 함께 접어야 한다 —
+  // 남겨 두면 채움 데이터를 보여 주는 시트가 안내를 덮고, 안내의 버튼은
+  // inert 뒤에 있어 누를 수 없다.
+  const passportFailed = passport.status === 'missing' || passport.status === 'error'
   // 여행 기록 면(마지막 면)은 스탬프를 눌러야 열린다. 어느 방문을 보는지가
   // 이 상태다. 고르기 전에는 그 면으로 넘길 수 없다(lastStep).
   const [visit, setVisit] = useState(null)
 
   const openVisit = (stamp) => {
-    // 채움 스탬프(조회 실패 시)는 방문 번호가 없다. 채움 방문 상세로 연다.
-    if (!stamp.visitLogId) {
-      setVisit(passportVisit)
-      setStep(3)
-      return
-    }
+    // 방문 번호가 없으면 열 상세도 없다. 채움 방문으로 메우면 진짜 여권에
+    // 가짜 매장·입장 번호가 찍힌다 — 조회 중에는 버튼도 잠겨 있다(disabled).
+    if (!stamp.visitLogId) return
     getVisitDetail(stamp.visitLogId)
       .then(withRouteBadges)
       .then((detail) => {
@@ -312,6 +313,15 @@ export function Component() {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [openPicker, sheet])
 
+  // 실패 전에 열려 있던 시트를 접고 다시 조회한다. 시트 상태를 남긴 채
+  // 재시도가 성공하면, 닫은 적 없는 시트가 새 지면 위에 되살아난다.
+  const retryPassport = () => {
+    setSheet(null)
+    setOpenPicker(null)
+    setSaveError(null)
+    passport.retry()
+  }
+
   return (
     <div className={styles.page}>
       <div inert={sheet || undefined} className={sheet ? styles.dimmed : undefined}>
@@ -371,7 +381,7 @@ export function Component() {
               eyebrow="Notice"
               message="여권을 불러오지 못했습니다"
               hint="잠시 후 다시 시도해 주세요"
-              action={{ label: '다시 시도', onClick: passport.retry }}
+              action={{ label: '다시 시도', onClick: retryPassport }}
             />
           ) : (
             <PassportPageTurn
@@ -416,7 +426,7 @@ export function Component() {
             />
           )}
         </div>
-        {sheet ? (
+        {sheet && !passportFailed ? (
           <div className={styles.sheetRoot}>
             <button
               type="button"
@@ -710,10 +720,13 @@ function PassportSpread({
             {/* 캔버스도 여섯 칸(3열 2행)만 그린다. 더 읽어 주면 화면과 어긋난다. */}
             {stamps.slice(0, 6).map((stamp) => (
               <li key={stamp.id ?? stamp.date}>
-                {/* 스탬프를 눌러야 그 방문의 여행 기록 면이 열린다. */}
+                {/* 스탬프를 눌러야 그 방문의 여행 기록 면이 열린다. 조회 중에는
+                    화면의 스탬프가 채움 데이터라 잠근다 — 열면 가짜 방문이
+                    상태에 박혀 진짜 데이터가 온 뒤에도 남는다. */}
                 <button
                   type="button"
                   aria-label={`${stamp.date} 방문 기록 보기`}
+                  disabled={!profileReady}
                   onClick={() => onSelectStamp?.(stamp)}
                 >
                   {/* 캔버스와 같은 그림을 가리켜야 한다. 백엔드가 방문마다 다른

@@ -230,6 +230,21 @@ describe('여권 DOM 데이터', () => {
     expect(stamps).not.toHaveTextContent('2026 07 21')
   })
 
+  it('조회가 끝나기 전에는 채움 스탬프를 열 수 없다', async () => {
+    // 채움 스탬프에는 방문 번호가 없다. 열면 가짜 방문이 상태에 박혀 진짜
+    // 데이터가 온 뒤에도 남는다.
+    getPassport.mockReturnValue(new Promise(() => {}))
+    getPassportStamps.mockReturnValue(new Promise(() => {}))
+    renderPassport()
+    const next = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(next)
+    fireEvent.click(next)
+
+    const stamps = await screen.findAllByRole('button', { name: /방문 기록 보기/ })
+    expect(stamps).not.toHaveLength(0)
+    for (const stamp of stamps) expect(stamp).toBeDisabled()
+  })
+
   it('여권이 없으면 채움 여권 대신 만들기 안내를 열고 가입 2단계로 보낸다', async () => {
     // 채움 데이터로 덮으면 여권 없는 사용자가 남의 기록이 찍힌 여권을 보게 된다.
     getPassport.mockRejectedValue(
