@@ -126,6 +126,7 @@ export function Component() {
   // 사라진 것처럼 보인다.
   const [emailSpaceRejected, setEmailSpaceRejected] = useState(false)
   const [password, setPassword] = useState('')
+  const [passwordSpaceRejected, setPasswordSpaceRejected] = useState(false)
   // 이미 쓰인 이메일이면 그 조합으로는 더 갈 곳이 없다. 다음 동작이 오면
   // 칸을 비워 새 이메일부터 치게 한다. 지우는 시점을 미루는 이유는, 실패하자마자
   // 비우면 사용자가 방금 무엇을 넣었는지 확인할 새가 없기 때문이다.
@@ -203,7 +204,9 @@ export function Component() {
     if (!resetArmed) return
     setResetArmed(false)
     setEmail('')
+    setEmailSpaceRejected(false)
     setPassword('')
+    setPasswordSpaceRejected(false)
     setPasswordTouched(false)
     setError(null)
   }
@@ -336,13 +339,25 @@ export function Component() {
                     placeholder="비밀번호를 입력해 주세요"
                     aria-describedby="signup-password-rules"
                     value={password}
+                    // 공백은 가려진 채 입력되면 별표만 늘어 오타와 구분되지
+                    // 않는다. 이메일과 같은 결로 즉시 걷어내고 이유를 알린다.
+                    // 규칙표의 "공백 없이"는 붙여넣기 등 이 필터를 지나치는
+                    // 경로의 뒷그물로 남는다.
                     onChange={(event) => {
-                      setPassword(event.target.value)
+                      const raw = event.target.value
+                      const stripped = raw.replace(/\s/g, '')
+                      setPasswordSpaceRejected(stripped !== raw)
+                      setPassword(stripped)
                       setPasswordTouched(true)
                     }}
                     required
                   />
                 </div>
+                {passwordSpaceRejected ? (
+                  <p className={styles.inputNotice} role="status">
+                    비밀번호에는 공백을 입력할 수 없습니다
+                  </p>
+                ) : null}
                 <PasswordRules password={password} touched={passwordTouched} />
               </div>
             </div>

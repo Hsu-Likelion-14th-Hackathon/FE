@@ -316,6 +316,26 @@ describe('SignupPage', { timeout: 15_000 }, () => {
     expect(screen.queryByText('이메일에는 공백을 입력할 수 없습니다')).not.toBeInTheDocument()
   })
 
+  it('비밀번호에 친 공백도 걷어내고 이유를 알린다', () => {
+    // 가려진 채 입력되는 칸이라 공백은 별표만 늘어 오타와 구분되지 않는다.
+    render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>,
+    )
+
+    const password = screen.getByLabelText(/비밀번호/)
+    fireEvent.change(password, { target: { value: 'Pass w0rd! ' } })
+
+    expect(password.value).toBe('Passw0rd!')
+    expect(screen.getByText('비밀번호에는 공백을 입력할 수 없습니다')).toBeInTheDocument()
+
+    // 공백 없이 다시 치면 안내도 사라진다. 같은 값이면 React가 change를
+    // 생략하므로 다른 값으로 잇는다.
+    fireEvent.change(password, { target: { value: 'Passw0rd!!' } })
+    expect(screen.queryByText('비밀번호에는 공백을 입력할 수 없습니다')).not.toBeInTheDocument()
+  })
+
   it('규칙에 못 미치는 비밀번호는 서버까지 보내지 않고 무엇이 모자란지 보여 준다', async () => {
     render(
       <MemoryRouter>
