@@ -11,15 +11,20 @@ import {
   updateMe,
 } from './authApi.js'
 import { clearAccessToken, getAccessToken } from './authToken.js'
+import { isProfilePending, setProfilePending } from './profilePending.js'
 
 function respond(result, { ok = true, status = 200 } = {}) {
   const body = JSON.stringify({ isSuccess: ok, code: 'COMMON200', message: '실패 사유', result })
   return vi.fn().mockResolvedValue({ ok, status, text: () => Promise.resolve(body) })
 }
 
-beforeEach(() => clearAccessToken())
+beforeEach(() => {
+  clearAccessToken()
+  setProfilePending(false)
+})
 afterEach(() => {
   clearAccessToken()
+  setProfilePending(false)
   vi.restoreAllMocks()
 })
 
@@ -27,11 +32,14 @@ describe('authApi', () => {
   it('로그인에 성공하면 토큰을 보관소에 넣는다', async () => {
     // 화면마다 따로 저장하면 한 곳만 빠뜨려도 다음 요청이 익명으로 나간다.
     globalThis.fetch = respond({ accessToken: 'issued-token', userId: 7 })
+    // 지난 계정이 가입을 끝내지 않고 떠났어도, 이 계정은 가입이 끝난 계정이다.
+    setProfilePending(true)
 
     const session = await login({ email: 'a@b.c', password: 'pw' })
 
     expect(session.userId).toBe(7)
     expect(getAccessToken()).toBe('issued-token')
+    expect(isProfilePending()).toBe(false)
   })
 
   it('로그인 요청에는 토큰을 붙이지 않는다', async () => {
@@ -62,11 +70,15 @@ describe('authApi', () => {
     expect(session.userId).toBe(8)
     expect(getAccessToken()).toBe('signup-token')
     expect(globalThis.fetch.mock.calls[0][1].headers.Authorization).toBeUndefined()
+    // 토큰만 있고 여권 정보는 아직이다 — 보호 구간이 가입 2단계로 돌려보내는 근거.
+    expect(isProfilePending()).toBe(true)
   })
 
   it('카카오 교환은 code와 redirectUri를 싣고, 신규 여부는 true일 때만 믿는다', async () => {
     // isNewUser가 빠진 응답을 신규로 보면 기존 회원이 추가 정보 화면으로 밀린다.
     globalThis.fetch = respond({ accessToken: 'kakao-token', userId: 9 })
+    // 기존 회원 로그인은 지난 계정이 남긴 미완성 표시도 걷어낸다.
+    setProfilePending(true)
 
     const session = await loginWithKakao({ code: 'auth-code', redirectUri: 'https://app/cb' })
 
@@ -75,6 +87,16 @@ describe('authApi', () => {
     expect(init.headers.Authorization).toBeUndefined()
     expect(session.isNewUser).toBe(false)
     expect(getAccessToken()).toBe('kakao-token')
+    expect(isProfilePending()).toBe(false)
+  })
+
+  it('카카오 신규 가입은 미완성 표시를 켠다 — 프로필을 안 쓰고 떠나도 잡을 수 있게', async () => {
+    globalThis.fetch = respond({ accessToken: 'kakao-token', userId: 9, isNewUser: true })
+
+    const session = await loginWithKakao({ code: 'auth-code', redirectUri: 'https://app/cb' })
+
+    expect(session.isNewUser).toBe(true)
+    expect(isProfilePending()).toBe(true)
   })
 
   it('회원 정보의 국적은 대문자, 생년월일은 지면 표기로 옮긴다', async () => {
@@ -108,8 +130,11 @@ describe('authApi', () => {
     })
 
     globalThis.fetch = respond({ userId: 7, name: 'A', nationality: 'KR', birthDate: '2000-01-01' })
+    // 가입 1단계가 켠 표시를 여기서 끈다 — 여권 정보까지 들어가야 가입 완료다.
+    setProfilePending(true)
     await createProfile({ name: 'A', birthDate: '2000-01-01', nationality: 'KR' })
     expect(globalThis.fetch.mock.calls[0][1].method).toBe('POST')
+    expect(isProfilePending()).toBe(false)
   })
 
   it('기본 전신 이미지는 피팅 업로드의 fileKey를 그대로 등록한다', async () => {

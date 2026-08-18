@@ -1,6 +1,7 @@
 import { setAccessToken } from './authToken.js'
 import { apiFetch } from './client.js'
 import { API } from './endpoints.js'
+import { setProfilePending } from './profilePending.js'
 
 /**
  * 인증·회원 API.
@@ -63,6 +64,9 @@ export async function login({ email, password }) {
     auth: false,
     unwrap: true,
   })
+  // 일반 로그인이 된다는 건 가입이 끝났다는 뜻이다. 지난 계정이 남긴
+  // 미완성 표시가 있으면 여기서 걷어낸다.
+  setProfilePending(false)
   return keepToken({ accessToken: result.accessToken, userId: result.userId ?? null })
 }
 
@@ -80,6 +84,9 @@ export async function signup({ email, password }) {
     auth: false,
     unwrap: true,
   })
+  // 토큰은 나왔지만 여권 정보(이름·생년월일·국적)는 아직이다. 이 표시가
+  // 켜진 동안 보호 구간은 가입 2단계로 돌려보낸다(ProtectedRoute).
+  setProfilePending(true)
   return keepToken({ accessToken: result.accessToken, userId: result.userId ?? null })
 }
 
@@ -97,6 +104,9 @@ export async function loginWithKakao({ code, redirectUri }) {
     auth: false,
     unwrap: true,
   })
+  // 신규면 signup과 같은 "토큰만 있는" 상태다. 기존 회원이면 반대로, 지난
+  // 계정이 남긴 미완성 표시를 걷어낸다.
+  setProfilePending(result.isNewUser === true)
   return keepToken({
     accessToken: result.accessToken,
     userId: result.userId ?? null,
@@ -116,6 +126,8 @@ export async function createProfile({ name, birthDate, nationality }) {
     body: { name, birthDate, nationality },
     unwrap: true,
   })
+  // 여권 정보까지 들어갔으니 가입이 끝났다. 보호 구간이 다시 열린다.
+  setProfilePending(false)
   return toMember(result)
 }
 

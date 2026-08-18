@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import backIcon from '@/assets/icons/auth/back.svg'
 import userIcon from '@/assets/icons/auth/user.svg'
 import { EMAIL_ALREADY_REGISTERED, createProfile, signup } from '@/shared/api/authApi.js'
+import { isProfilePending } from '@/shared/api/profilePending.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
 import BirthDateField from '@/shared/ui/profile-fields/BirthDateField.jsx'
@@ -105,8 +106,10 @@ export function Component() {
   // 'account' → 'profile'
   // 카카오로 새로 가입한 사람은 계정이 이미 있으므로 두 번째 단계로 들어온다.
   // 카카오는 인증만 맡아 이름·생년월일·국적을 주지 않는다.
+  // state 없이 다시 들어와도(프로필을 안 쓰고 이탈했다 돌아온 경우) 미완성
+  // 표시가 켜져 있으면 계정 단계를 건너뛴다 — 계정은 이미 있다.
   const [step, setStep] = useState(() =>
-    location.state?.step === 'profile' ? 'profile' : 'account',
+    location.state?.step === 'profile' || isProfilePending() ? 'profile' : 'account',
   )
   const [submitting, setSubmitting] = useState(false)
   // 백엔드 message를 그대로 싣는다. 이미 가입된 이메일이면 어느 방식으로

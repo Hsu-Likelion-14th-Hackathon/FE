@@ -11,6 +11,8 @@ vi.mock('@/shared/api/authApi.js', async (importOriginal) => ({
   createProfile: (...args) => createProfile(...args),
 }))
 
+import { setProfilePending } from '@/shared/api/profilePending.js'
+
 import { Component as SignupPage } from './SignupPage.jsx'
 
 /**
@@ -45,6 +47,7 @@ beforeEach(() => {
   signup.mockResolvedValue({ accessToken: 'issued', userId: 1 })
   createProfile.mockReset()
   createProfile.mockResolvedValue({ userId: 1 })
+  setProfilePending(false)
 })
 
 // 국가 목록 249개를 그리고 단계까지 넘어간다. 다른 파일과 함께 돌면 기본
@@ -247,6 +250,21 @@ describe('SignupPage', { timeout: 15_000 }, () => {
     fireEvent.submit(screen.getByRole('button', { name: '가입하기' }).closest('form'))
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/wishlist'))
+  })
+
+  it('프로필이 미완성이면 state 없이 들어와도 여권 정보 단계부터 연다', async () => {
+    // 프로필 화면에서 이탈했다 돌아온 사용자다. 계정은 이미 있으므로 계정
+    // 단계를 다시 보여 주면 있는 계정으로 또 가입하라는 화면이 된다.
+    setProfilePending(true)
+
+    render(
+      <MemoryRouter initialEntries={['/signup']}>
+        <SignupPage />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('button', { name: '가입하기' })).toBeInTheDocument()
+    expect(screen.queryByLabelText(/이메일 주소/)).not.toBeInTheDocument()
   })
 
   it('규칙에 못 미치는 비밀번호는 서버까지 보내지 않고 무엇이 모자란지 보여 준다', async () => {
