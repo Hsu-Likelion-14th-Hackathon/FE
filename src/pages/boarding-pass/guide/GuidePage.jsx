@@ -343,7 +343,7 @@ function FloorView({ meta, entry, onRetry }) {
       )}
 
       {entry?.status === 'ready' ? (
-        <FloorContents contents={entry.data.contents} floorNo={entry.data.floorNo} />
+        <FloorContents contents={entry.data.contents} floorCode={entry.data.code} />
       ) : entry?.status === 'error' ? (
         <StateNotice
           role="alert"
@@ -371,14 +371,14 @@ function FloorHeadline({ meta }) {
   )
 }
 
-function FloorContents({ contents, floorNo }) {
-  // 2층(Figma 46)은 마지막 콘텐츠가 좁은 노트가 되어 상품 카드와 한 행에
+function FloorContents({ contents, floorCode }) {
+  // 상징(Figma 46)은 마지막 콘텐츠가 좁은 노트가 되어 상품 카드와 한 행에
   // 나란히 선다. 상품이 있을 때 끝의 블록(연이은 LIST면 그 묶음)을 노트로
   // 떼어 두고, 나머지는 평소처럼 그린다.
   let bodyBlocks = contents
   let noteBlocks = []
   const hasProduct = contents.some((block) => block.blockType === 'PRODUCT' && block.product)
-  if (floorNo === 2 && hasProduct) {
+  if (floorCode === 'EMBLEM' && hasProduct) {
     const nonProduct = contents.filter((block) => block.blockType !== 'PRODUCT')
     let cut = nonProduct.length
     if (cut && nonProduct[cut - 1].blockType === 'LIST') {
@@ -409,12 +409,12 @@ function FloorContents({ contents, floorNo }) {
     listBuffer = []
   }
 
-  // 연이은 PRODUCT 블록은 층 배치대로 묶는다. 1층(Figma 45)은 두 카드가
-  // 나란히 서고, 2층(46)은 노트와 카드가 한 행이며, 3층(47)은 와이드
+  // 연이은 PRODUCT 블록은 층 배치대로 묶는다. 여정(Figma 45)은 두 카드가
+  // 나란히 서고, 상징(46)은 노트와 카드가 한 행이며, 시도(47)는 와이드
   // 카드가 세로로 쌓인다.
   const flushProducts = (key) => {
     if (!productBuffer.length) return
-    if (floorNo === 1 && productBuffer.length > 1) {
+    if (floorCode === 'JOURNEY' && productBuffer.length > 1) {
       rendered.push(
         <div className={styles.productPair} key={key}>
           {productBuffer.map((block) => (

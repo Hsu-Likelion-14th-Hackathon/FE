@@ -34,17 +34,21 @@ export async function getFloors() {
 }
 
 /**
- * 층별 가이드 상품.
+ * 층 테마별 가이드 상품.
  *
  * 백엔드가 층 콘텐츠에 PRODUCT 블록을 연결할 여유가 없어(2026-08-18 합의),
- * 프론트가 층에 맞는 상품을 직접 조회해 콘텐츠 끝에 잇는다. 열쇠는 floorNo다
- * — 피그마 층 화면(1층=45, 2층=46, 3층=47)이 층 번호로 매겨져 있다. 서버가
- * 나중에 PRODUCT 블록을 주기 시작하면 그 블록을 그대로 쓰고 덧붙이지 않는다.
+ * 프론트가 층에 맞는 상품을 직접 조회해 콘텐츠 끝에 잇는다. 열쇠는 층
+ * 번호가 아니라 code다 — 피그마 화면 번호(1F 여정, 3F 시도)와 서버
+ * floorNo(3층 여정, 5층 시도)가 서로 달라, 번호로 매기면 상품이 엉뚱한
+ * 테마 층에 붙는다. 서버가 나중에 PRODUCT 블록을 주기 시작하면 그 블록을
+ * 그대로 쓰고 덧붙이지 않는다.
  */
 const GUIDE_PRODUCT_IDS = {
-  1: [7, 8], // (45) 캐빈 트롤리 · 그라데이션 위켄더
-  2: [9], // (46) 뮌헨 비세토스 토트
-  3: [10, 11], // (47) HIMMEL 쇼퍼 · ECONYL 위켄더 백팩
+  JOURNEY: [7, 8], // 피그마 45 여정 — 캐빈 트롤리 · 그라데이션 위켄더
+  EMBLEM: [9], // 피그마 46 상징 — 뮌헨 비세토스 토트
+  // 시도 층은 백엔드에서 5층이라, 5층이 동선에 포함될 때만 보인다. 층
+  // 번호가 피그마(시도=3층)대로 재정렬되면 자연히 동선에 들어온다.
+  HORIZON: [10, 11], // 피그마 47 시도 — HIMMEL 쇼퍼 · ECONYL 위켄더 백팩
 }
 
 /** 상세 응답을 층 콘텐츠의 PRODUCT 블록과 같은 모양으로 접는다. */
@@ -64,8 +68,8 @@ function toGuideProductBlock(product, orderNo) {
   }
 }
 
-async function fetchGuideProductBlocks(floorNo, startOrderNo) {
-  const ids = GUIDE_PRODUCT_IDS[floorNo] ?? []
+async function fetchGuideProductBlocks(code, startOrderNo) {
+  const ids = GUIDE_PRODUCT_IDS[code] ?? []
   if (!ids.length) return []
   // 상품 하나를 못 불러와도 나머지 카드와 층 이야기는 그대로 보여야 한다.
   const settled = await Promise.allSettled(ids.map((id) => getProduct(id)))
@@ -102,7 +106,7 @@ export async function getFloor(floorId) {
   // 서버 콘텐츠에 상품이 없으면 가이드 상품을 이어 붙인다(맨 끝, 연번).
   if (!contents.some((block) => block.blockType === 'PRODUCT')) {
     const lastOrderNo = contents.reduce((max, block) => Math.max(max, block.orderNo ?? 0), 0)
-    contents.push(...(await fetchGuideProductBlocks(result.floorNo, lastOrderNo + 1)))
+    contents.push(...(await fetchGuideProductBlocks(result.code, lastOrderNo + 1)))
   }
 
   return { ...toFloor(result), contents }
