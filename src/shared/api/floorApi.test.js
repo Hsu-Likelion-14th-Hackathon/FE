@@ -74,9 +74,9 @@ describe('층 상세', () => {
   })
 
   it('가이드 상품이 없는 층은 콘텐츠가 비어도 빈 배열로 그릴 수 있게 한다', async () => {
-    globalThis.fetch = respondWith({ floorId: 1, floorNo: 1, code: 'ORIGIN', title: '기원' })
+    globalThis.fetch = respondWith({ floorId: 5, floorNo: 5, code: 'ARRIVE', title: '도착' })
 
-    const floor = await getFloor(1)
+    const floor = await getFloor(5)
 
     expect(floor.contents).toEqual([])
   })
