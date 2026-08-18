@@ -1,3 +1,6 @@
+import { subscribeAccessToken } from './authToken.js'
+import { createStoredValue } from './storedValue.js'
+
 /**
  * "프로필(여권 정보) 미완성" 표시.
  *
@@ -6,53 +9,32 @@
  * 보호 구간의 화면마다 API가 제각각 실패한다. 이 표시가 켜져 있는 동안
  * ProtectedRoute가 가입 2단계로 돌려보낸다.
  *
- * 토큰과 같은 이유로 sessionStorage다 — 새로고침은 견디고, 탭을 닫으면
- * 함께 사라진다. 모든 로그인 경로(login/signup/kakao)가 이 값을 덮어쓰므로
- * 다른 계정으로 갈아타도 지난 계정의 표시가 남지 않는다.
+ * 토큰과 같은 저장소(storedValue)를 쓴다 — 새로고침은 견디고, 탭을 닫으면
+ * 함께 사라진다. 카카오 로그인이 이 값을 덮어쓰고, 세션 복원(useSession)이
+ * 서버 프로필로 다시 맞춘다.
  */
 
-const STORAGE_KEY = 'mcm-profile-pending'
-
-function readStored() {
-  try {
-    return sessionStorage.getItem(STORAGE_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-
-function writeStored(next) {
-  try {
-    if (next) sessionStorage.setItem(STORAGE_KEY, '1')
-    else sessionStorage.removeItem(STORAGE_KEY)
-  } catch {
-    // 저장이 막힌 환경이면 이번 세션 동안 메모리 값으로 동작한다.
-  }
-}
-
-let pending = readStored()
-
-/** 표시가 바뀐 것을 알아야 하는 쪽(ProtectedRoute)이 구독한다. */
-const listeners = new Set()
-
-function notify() {
-  for (const listener of listeners) listener(pending)
-}
+const store = createStoredValue('mcm-profile-pending', {
+  decode: (raw) => raw === '1',
+  encode: (value) => (value ? '1' : null),
+})
 
 export function isProfilePending() {
-  return pending
+  return store.get()
 }
 
 export function setProfilePending(next) {
-  const value = Boolean(next)
-  if (value === pending) return
-  pending = value
-  writeStored(value)
-  notify()
+  store.set(Boolean(next))
 }
 
 /** @returns 구독을 끊는 함수 */
 export function subscribeProfilePending(listener) {
-  listeners.add(listener)
-  return () => listeners.delete(listener)
+  return store.subscribe(listener)
 }
+
+// 토큰이 죽으면(로그아웃·401) 표시도 함께 걷는다. 남겨 두면 그 탭의
+// /signup이 프로필 단계에 고정되어 — 계정 단계에 도달할 수 없어 — 새 계정을
+// 만들 수 없게 된다. 다음 로그인은 어떤 경로든 이 값을 다시 정한다.
+subscribeAccessToken((token) => {
+  if (!token) setProfilePending(false)
+})

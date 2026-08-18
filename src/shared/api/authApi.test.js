@@ -10,7 +10,7 @@ import {
   signup,
   updateMe,
 } from './authApi.js'
-import { clearAccessToken, getAccessToken } from './authToken.js'
+import { clearAccessToken, getAccessToken, setAccessToken } from './authToken.js'
 import { isProfilePending, setProfilePending } from './profilePending.js'
 
 function respond(result, { ok = true, status = 200 } = {}) {
@@ -29,16 +29,28 @@ afterEach(() => {
 })
 
 describe('authApi', () => {
-  it('로그인에 성공하면 토큰을 보관소에 넣는다', async () => {
+  it('로그인에 성공하면 토큰을 보관소에 넣고, 미완성 표시는 건드리지 않는다', async () => {
     // 화면마다 따로 저장하면 한 곳만 빠뜨려도 다음 요청이 익명으로 나간다.
     globalThis.fetch = respond({ accessToken: 'issued-token', userId: 7 })
-    // 지난 계정이 가입을 끝내지 않고 떠났어도, 이 계정은 가입이 끝난 계정이다.
+    // 가입 1단계만 한 계정도 로그인은 된다 — 여기서 표시를 걷으면 그 계정이
+    // 프로필 가드를 지나친다. 진짜 상태는 세션 복원(useSession)이 맞춘다.
     setProfilePending(true)
 
     const session = await login({ email: 'a@b.c', password: 'pw' })
 
     expect(session.userId).toBe(7)
     expect(getAccessToken()).toBe('issued-token')
+    expect(isProfilePending()).toBe(true)
+  })
+
+  it('토큰이 죽으면(로그아웃·401) 미완성 표시도 함께 걷는다', () => {
+    // 남겨 두면 그 탭의 /signup이 프로필 단계에 고정되어 새 계정을 만들 수 없다.
+    globalThis.fetch = respond({})
+    setAccessToken('live-token')
+    setProfilePending(true)
+
+    clearAccessToken()
+
     expect(isProfilePending()).toBe(false)
   })
 
@@ -137,10 +149,9 @@ describe('authApi', () => {
     expect(isProfilePending()).toBe(false)
   })
 
-  it('이미 등록된 회원의 추가 정보 409도 미완성 표시를 끄고 실패는 그대로 올린다', async () => {
-    // 뜻은 "가입이 끝나 있다"이다. 표시를 켠 채 두면 보호 구간이 계속 가입
-    // 화면으로 돌려보내는 루프가 된다. 어디로 갈지는 화면이 정하므로 실패
-    // 자체는 삼키지 않는다.
+  it('이미 등록된 회원의 추가 정보 409는 멱등 성공으로 삼키고 표시를 끈다', async () => {
+    // 실패 코드지만 뜻은 "가입이 끝나 있다"이다. 오류로 올리면 호출부마다
+    // 코드를 대조해야 하고, 하나만 빠져도 성공 상태가 오류 화면으로 남는다.
     const body = JSON.stringify({
       isSuccess: false,
       code: 'PROFILE_ALREADY_REGISTERED',
@@ -153,7 +164,7 @@ describe('authApi', () => {
 
     await expect(
       createProfile({ name: 'A', birthDate: '2000-01-01', nationality: 'KR' }),
-    ).rejects.toMatchObject({ code: 'PROFILE_ALREADY_REGISTERED' })
+    ).resolves.toBeNull()
     expect(isProfilePending()).toBe(false)
   })
 

@@ -72,9 +72,10 @@ export async function login({ email, password }) {
     auth: false,
     unwrap: true,
   })
-  // 일반 로그인이 된다는 건 가입이 끝났다는 뜻이다. 지난 계정이 남긴
-  // 미완성 표시가 있으면 여기서 걷어낸다.
-  setProfilePending(false)
+  // 미완성 표시는 건드리지 않는다. 계정 자격만으로는 프로필이 있는지 알 수
+  // 없다 — 가입 1단계만 한 계정도 로그인은 된다. 지난 계정이 남긴 표시는
+  // 로그아웃·401이 토큰과 함께 걷고(profilePending), 진짜 상태는 세션
+  // 복원(useSession)이 서버 프로필로 맞춘다.
   return keepToken({ accessToken: result.accessToken, userId: result.userId ?? null })
 }
 
@@ -137,10 +138,12 @@ export async function createProfile({ name, birthDate, nationality }) {
       unwrap: true,
     })
   } catch (cause) {
-    // "이미 등록됨"도 가입이 끝나 있다는 뜻이다. 표시를 끄지 않으면 보호
-    // 구간이 계속 가입 화면으로 돌려보낸다. 어디로 갈지는 화면이 정한다.
-    if (cause?.code === PROFILE_ALREADY_REGISTERED) setProfilePending(false)
-    throw cause
+    // "이미 등록됨"(409)은 실패 코드지만 뜻은 "가입이 끝나 있다"이다. 여기서
+    // 멱등 성공으로 삼킨다 — 호출부마다 코드를 대조하게 두면 하나만 빠져도
+    // 성공 상태가 오류 화면으로 남는다. 회원 정보가 필요하면 getMe로 받는다.
+    if (cause?.code !== PROFILE_ALREADY_REGISTERED) throw cause
+    setProfilePending(false)
+    return null
   }
   // 여권 정보까지 들어갔으니 가입이 끝났다. 보호 구간이 다시 열린다.
   setProfilePending(false)
