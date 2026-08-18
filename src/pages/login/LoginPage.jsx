@@ -12,6 +12,9 @@ import styles from './LoginPage.module.scss'
 export function Component() {
   // 입력한 비밀번호를 눈으로 확인할 수 있게 한다. 오타로 막히는 일이 잦다.
   const [passwordVisible, setPasswordVisible] = useState(false)
+  // 공백을 걷어냈을 때만 안내를 띄운다. 조용히 지우면 지운 적 없는 글자가
+  // 사라진 것처럼 보인다.
+  const [emailSpaceRejected, setEmailSpaceRejected] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   // 백엔드가 준 message를 그대로 보여 준다. 우리가 지어내면 실제 이유와
   // 어긋난다(잘못된 비밀번호인지, 없는 계정인지).
@@ -85,8 +88,21 @@ export function Component() {
               name="email"
               type="email"
               autoComplete="email"
+              // 이메일에 공백은 어차피 유효하지 않다. 치는 즉시 걷어내면
+              // 붙여넣기의 꼬리 공백도 제출 전에 사라진다. 비제어 입력이라
+              // 값을 자리에서 고친다.
+              onChange={(event) => {
+                const stripped = event.target.value.replace(/\s/g, '')
+                setEmailSpaceRejected(stripped !== event.target.value)
+                if (stripped !== event.target.value) event.target.value = stripped
+              }}
               required
             />
+            {emailSpaceRejected ? (
+              <p className={styles.inputNotice} role="status">
+                이메일에는 공백을 입력할 수 없습니다
+              </p>
+            ) : null}
           </div>
 
           <div className={styles.field}>

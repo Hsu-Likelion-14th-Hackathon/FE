@@ -122,6 +122,9 @@ export function Component() {
   const [error, setError] = useState(null)
   const [openPicker, setOpenPicker] = useState(null)
   const [email, setEmail] = useState('')
+  // 공백을 걷어냈을 때만 안내를 띄운다. 조용히 지우면 지운 적 없는 글자가
+  // 사라진 것처럼 보인다.
+  const [emailSpaceRejected, setEmailSpaceRejected] = useState(false)
   const [password, setPassword] = useState('')
   // 이미 쓰인 이메일이면 그 조합으로는 더 갈 곳이 없다. 다음 동작이 오면
   // 칸을 비워 새 이메일부터 치게 한다. 지우는 시점을 미루는 이유는, 실패하자마자
@@ -297,10 +300,22 @@ export function Component() {
                     aria-invalid={error ? true : undefined}
                     aria-describedby={error ? 'signup-email-error' : undefined}
                     value={email}
-                    onChange={(event) => setEmail(event.target.value)}
+                    // 이메일에 공백은 어차피 유효하지 않다. 치는 즉시 걷어내면
+                    // 붙여넣기의 꼬리 공백도 제출 전에 사라진다.
+                    onChange={(event) => {
+                      const raw = event.target.value
+                      const stripped = raw.replace(/\s/g, '')
+                      setEmailSpaceRejected(stripped !== raw)
+                      setEmail(stripped)
+                    }}
                     required
                   />
                 </div>
+                {emailSpaceRejected ? (
+                  <p className={styles.inputNotice} role="status">
+                    이메일에는 공백을 입력할 수 없습니다
+                  </p>
+                ) : null}
               </div>
 
               <div className={styles.fieldGroup}>

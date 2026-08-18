@@ -294,6 +294,28 @@ describe('SignupPage', { timeout: 15_000 }, () => {
     expect(screen.queryByLabelText(/이메일 주소/)).not.toBeInTheDocument()
   })
 
+  it('이메일에 친 공백은 걷어내고 이유를 알린다', () => {
+    // 이메일에 공백은 어차피 유효하지 않다. 특히 모바일 자동완성의 꼬리
+    // 공백은 눈에 안 보여, 조용히 지우면 지운 적 없는 글자가 사라진 것처럼
+    // 보인다.
+    render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>,
+    )
+
+    const email = screen.getByLabelText(/이메일 주소/)
+    fireEvent.change(email, { target: { value: ' a@b .c ' } })
+
+    expect(email.value).toBe('a@b.c')
+    expect(screen.getByText('이메일에는 공백을 입력할 수 없습니다')).toBeInTheDocument()
+
+    // 공백 없이 다시 치면 안내도 사라진다. 같은 값이면 React가 change를
+    // 생략하므로 다른 값으로 잇는다.
+    fireEvent.change(email, { target: { value: 'a@b.cd' } })
+    expect(screen.queryByText('이메일에는 공백을 입력할 수 없습니다')).not.toBeInTheDocument()
+  })
+
   it('규칙에 못 미치는 비밀번호는 서버까지 보내지 않고 무엇이 모자란지 보여 준다', async () => {
     render(
       <MemoryRouter>
