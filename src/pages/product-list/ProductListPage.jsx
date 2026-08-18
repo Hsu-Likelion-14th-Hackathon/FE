@@ -94,7 +94,11 @@ export function Component() {
           </div>
         </section>
 
-        <section className={styles.productGrid} aria-label="인기상품" aria-busy={!products && !error}>
+        <section
+          className={styles.productGrid}
+          aria-label="인기상품"
+          aria-busy={!products && !error}
+        >
           {(products ?? []).map((product, index) => (
             <ProductCard
               key={product.productColorId}
