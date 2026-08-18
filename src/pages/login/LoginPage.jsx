@@ -15,6 +15,7 @@ export function Component() {
   // 공백을 걷어냈을 때만 안내를 띄운다. 조용히 지우면 지운 적 없는 글자가
   // 사라진 것처럼 보인다.
   const [emailSpaceRejected, setEmailSpaceRejected] = useState(false)
+  const [passwordSpaceRejected, setPasswordSpaceRejected] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   // 백엔드가 준 message를 그대로 보여 준다. 우리가 지어내면 실제 이유와
   // 어긋난다(잘못된 비밀번호인지, 없는 계정인지).
@@ -128,8 +129,21 @@ export function Component() {
               name="password"
               type={passwordVisible ? 'text' : 'password'}
               autoComplete="current-password"
+              // 가입이 비밀번호에 공백을 막으므로 공백이 든 비밀번호는 있을 수
+              // 없다. 가려진 칸에서 별표만 늘어 오타와 구분되지 않으니 이메일과
+              // 같은 결로 걷어내고 알린다.
+              onChange={(event) => {
+                const stripped = event.target.value.replace(/\s/g, '')
+                setPasswordSpaceRejected(stripped !== event.target.value)
+                if (stripped !== event.target.value) event.target.value = stripped
+              }}
               required
             />
+            {passwordSpaceRejected ? (
+              <p className={styles.inputNotice} role="status">
+                비밀번호에는 공백을 입력할 수 없습니다
+              </p>
+            ) : null}
           </div>
 
           {error ? (
