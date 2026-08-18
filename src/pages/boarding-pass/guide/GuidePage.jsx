@@ -343,7 +343,7 @@ function FloorView({ meta, entry, onRetry }) {
       )}
 
       {entry?.status === 'ready' ? (
-        <FloorContents contents={entry.data.contents} />
+        <FloorContents contents={entry.data.contents} floorCode={entry.data.code} />
       ) : entry?.status === 'error' ? (
         <StateNotice
           role="alert"
@@ -371,9 +371,29 @@ function FloorHeadline({ meta }) {
   )
 }
 
-function FloorContents({ contents }) {
+function FloorContents({ contents, floorCode }) {
+  // 상징(Figma 46)은 마지막 콘텐츠가 좁은 노트가 되어 상품 카드와 한 행에
+  // 나란히 선다. 상품이 있을 때 끝의 블록(연이은 LIST면 그 묶음)을 노트로
+  // 떼어 두고, 나머지는 평소처럼 그린다.
+  let bodyBlocks = contents
+  let noteBlocks = []
+  const hasProduct = contents.some((block) => block.blockType === 'PRODUCT' && block.product)
+  if (floorCode === 'EMBLEM' && hasProduct) {
+    const nonProduct = contents.filter((block) => block.blockType !== 'PRODUCT')
+    let cut = nonProduct.length
+    if (cut && nonProduct[cut - 1].blockType === 'LIST') {
+      while (cut > 0 && nonProduct[cut - 1].blockType === 'LIST') cut -= 1
+    } else if (cut) {
+      cut -= 1
+    }
+    noteBlocks = nonProduct.slice(cut)
+    const noteOrderNos = new Set(noteBlocks.map((block) => block.orderNo))
+    bodyBlocks = contents.filter((block) => !noteOrderNos.has(block.orderNo))
+  }
+
   const rendered = []
   let listBuffer = []
+  let productBuffer = []
 
   const flushList = (key) => {
     if (!listBuffer.length) return
@@ -389,13 +409,59 @@ function FloorContents({ contents }) {
     listBuffer = []
   }
 
-  for (const block of contents) {
+  // 연이은 PRODUCT 블록은 층 배치대로 묶는다. 여정(Figma 45)은 두 카드가
+  // 나란히 서고, 상징(46)은 노트와 카드가 한 행이며, 시도(47)는 와이드
+  // 카드가 세로로 쌓인다.
+  const flushProducts = (key) => {
+    if (!productBuffer.length) return
+    if (floorCode === 'JOURNEY' && productBuffer.length > 1) {
+      rendered.push(
+        <div className={styles.productPair} key={key}>
+          {productBuffer.map((block) => (
+            <FloorProductCard compact product={block.product} key={block.orderNo} />
+          ))}
+        </div>,
+      )
+    } else if (noteBlocks.length) {
+      rendered.push(
+        <div className={styles.productCognacRow} key={key}>
+          <div className={styles.cognacNote}>
+            {noteBlocks.map((block) =>
+              block.blockType === 'LIST' ? (
+                <p key={block.orderNo}>{block.body}</p>
+              ) : (
+                block.body.split('\n').map((line) => <p key={line}>{line}</p>)
+              ),
+            )}
+          </div>
+          {productBuffer.map((block) => (
+            <FloorProductCard compact product={block.product} key={block.orderNo} />
+          ))}
+        </div>,
+      )
+      noteBlocks = []
+    } else {
+      for (const block of productBuffer) {
+        rendered.push(<FloorProductCard product={block.product} key={block.orderNo} />)
+      }
+    }
+    productBuffer = []
+  }
+
+  for (const block of bodyBlocks) {
     if (block.blockType === 'LIST') {
       // 연이은 LIST 블록은 한 목록으로 묶는다.
+      flushProducts(`products-${block.orderNo}`)
       listBuffer.push(block)
       continue
     }
+    if (block.blockType === 'PRODUCT' && block.product) {
+      flushList(`list-${block.orderNo}`)
+      productBuffer.push(block)
+      continue
+    }
     flushList(`list-${block.orderNo}`)
+    flushProducts(`products-${block.orderNo}`)
 
     if (block.blockType === 'TEXT') {
       rendered.push(
@@ -417,25 +483,26 @@ function FloorContents({ contents }) {
       rendered.push(
         <img className={styles.contentImage} src={block.imageUrl} alt="" key={block.orderNo} />,
       )
-    } else if (block.blockType === 'PRODUCT' && block.product) {
-      rendered.push(<FloorProductCard product={block.product} key={block.orderNo} />)
     }
   }
   flushList('list-end')
+  flushProducts('products-end')
 
   return <>{rendered}</>
 }
 
-function FloorProductCard({ product }) {
+function FloorProductCard({ product, compact = false }) {
   return (
-    <div className={`${styles.productCard} ${styles.productCardWide}`}>
+    <div
+      className={`${styles.productCard} ${compact ? styles.productCardCompact : styles.productCardWide}`}
+    >
       <div className={styles.productThumb}>
         {product.imageUrl ? (
           <img src={product.imageUrl} alt="" className={styles.productThumbImg} />
         ) : null}
       </div>
       <div className={styles.productMeta}>
-        <p className={`${styles.productName} ${styles.productNameWide}`}>
+        <p className={`${styles.productName} ${compact ? '' : styles.productNameWide}`}>
           <FitLine className={styles.productNameLine}>{product.name}</FitLine>
         </p>
         {product.priceLabel ? <p className={styles.productPrice}>{product.priceLabel}</p> : null}

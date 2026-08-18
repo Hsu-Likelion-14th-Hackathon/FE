@@ -61,6 +61,19 @@ beforeEach(() => {
 })
 
 describe('CartPage', () => {
+  it('상품 영역은 그 상품의 상세로 가는 링크다', async () => {
+    // 선택·삭제 버튼은 링크 밖이라 그대로 제 일을 해야 한다.
+    await renderLoadedCart()
+
+    expect(screen.getByRole('link', { name: 'Pina 비세토스 탬버린 백 상세 보기' })).toHaveAttribute(
+      'href',
+      '/products/1',
+    )
+    expect(
+      screen.getByRole('link', { name: '모노그램 프린트 러버 슬라이드 상세 보기' }),
+    ).toHaveAttribute('href', '/products/4')
+  })
+
   it('서버 항목을 이름·₩ 가격·색·사이즈·SKU로 그린다', async () => {
     await renderLoadedCart()
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 
 import removeIcon from '@/assets/icons/state/remove.svg'
 import selectionEmptyIcon from '@/assets/icons/state/selection-empty.svg'
@@ -34,7 +35,13 @@ function CartItem({ item, selected, onRemove, onToggle }) {
         </button>
       </div>
 
-      <div className={styles.productRow}>
+      {/* 상품 영역을 누르면 상세로 간다. 선택·삭제 버튼은 링크 밖이라
+          그대로 제 일을 한다. */}
+      <Link
+        className={styles.productRow}
+        to={`/products/${encodeURIComponent(item.productId)}`}
+        aria-label={`${item.name} 상세 보기`}
+      >
         <div className={styles.imagePanel}>
           {item.thumbnailImageUrl ? (
             <img
@@ -59,7 +66,7 @@ function CartItem({ item, selected, onRemove, onToggle }) {
             </div>
           </div>
         </div>
-      </div>
+      </Link>
 
       <div className={styles.sku}>{item.sku ? `#${item.sku}` : ''}</div>
     </li>

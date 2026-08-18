@@ -1,9 +1,14 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
+import EmptyBagToast from '@/features/boarding-pass/empty-bag-toast/EmptyBagToast.jsx'
+import noticeStyles from '@/features/boarding-pass/notice-toast/PassNoticeToast.module.scss'
+import { getWishlist } from '@/shared/api/wishlistApi.js'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import passCard from '@/shared/assets/boarding-pass/intro/pass-card.png'
 import nextArrow from '@/shared/assets/boarding-pass/intro/next-arrow.svg'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import { useToast } from '@/shared/ui/toastContext.js'
 
 import styles from './IntroPage.module.scss'
 
@@ -14,6 +19,40 @@ import styles from './IntroPage.module.scss'
  */
 export function Component() {
   const navigate = useNavigate()
+  const { showToast, hideToast } = useToast()
+
+  // 인트로에서도 위시리스트가 비어 있으면 초대를 건넨다(랜딩과 같은 토스트).
+  // 랜딩을 거치지 않고 들어온 사람(보호 라우트 복귀 등)도 발급 전에
+  // 알아야 한다 — 빈 가방으로 발급하면 티켓에 담길 상품이 없다.
+  useEffect(() => {
+    const controller = new AbortController()
+
+    getWishlist({ signal: controller.signal })
+      .then((items) => {
+        if (controller.signal.aborted || items?.length) return
+        showToast(
+          <EmptyBagToast
+            bag="wishlist"
+            // 빈 화면은 초대다 — 토스트를 누르면 상품 목록으로 간다.
+            onGoProducts={() => {
+              hideToast()
+              navigate('/products')
+            }}
+          />,
+          {
+            position: 'bottom',
+            duration: 4000,
+            closeOnOutsideClick: false,
+            className: noticeStyles.shell,
+          },
+        )
+      })
+      .catch(() => {
+        // 네트워크 실패에는 초대를 건네지 않는다.
+      })
+
+    return () => controller.abort()
+  }, [showToast, hideToast, navigate])
 
   function handleClose() {
     navigate('/boarding-pass', { replace: true })
