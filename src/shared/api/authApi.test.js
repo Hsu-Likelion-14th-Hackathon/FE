@@ -137,6 +137,26 @@ describe('authApi', () => {
     expect(isProfilePending()).toBe(false)
   })
 
+  it('이미 등록된 회원의 추가 정보 409도 미완성 표시를 끄고 실패는 그대로 올린다', async () => {
+    // 뜻은 "가입이 끝나 있다"이다. 표시를 켠 채 두면 보호 구간이 계속 가입
+    // 화면으로 돌려보내는 루프가 된다. 어디로 갈지는 화면이 정하므로 실패
+    // 자체는 삼키지 않는다.
+    const body = JSON.stringify({
+      isSuccess: false,
+      code: 'PROFILE_ALREADY_REGISTERED',
+      message: '이미 추가 정보가 등록된 회원입니다.',
+    })
+    globalThis.fetch = vi
+      .fn()
+      .mockResolvedValue({ ok: false, status: 409, text: () => Promise.resolve(body) })
+    setProfilePending(true)
+
+    await expect(
+      createProfile({ name: 'A', birthDate: '2000-01-01', nationality: 'KR' }),
+    ).rejects.toMatchObject({ code: 'PROFILE_ALREADY_REGISTERED' })
+    expect(isProfilePending()).toBe(false)
+  })
+
   it('기본 전신 이미지는 피팅 업로드의 fileKey를 그대로 등록한다', async () => {
     // 전용 업로드 경로가 없다. 업로드는 한 번, fileKey를 두 곳(피팅·등록)이 나눠 쓴다.
     globalThis.fetch = respond({ bodyImageUrl: 'https://blob/body.jpg' })

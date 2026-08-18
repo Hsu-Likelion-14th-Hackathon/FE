@@ -252,6 +252,33 @@ describe('SignupPage', { timeout: 15_000 }, () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/wishlist'))
   })
 
+  it('이미 추가 정보가 등록된 회원이면 오류 대신 성공과 같은 길로 보낸다', async () => {
+    // 409(PROFILE_ALREADY_REGISTERED)는 가입이 끝나 있다는 뜻이다. 오류로
+    // 세워 두면 이 화면에 갇힌다 — 여권 404 안내를 타고 온 계정이 특히 그렇다.
+    createProfile.mockRejectedValue(
+      Object.assign(new Error('이미 추가 정보가 등록된 회원입니다.'), {
+        code: 'PROFILE_ALREADY_REGISTERED',
+      }),
+    )
+    const router = createMemoryRouter(
+      [
+        { path: '/signup', Component: SignupPage },
+        { path: '/boarding-pass/passport', element: <h1>여권</h1> },
+      ],
+      {
+        initialEntries: [
+          { pathname: '/signup', state: { step: 'profile', from: '/boarding-pass/passport' } },
+        ],
+      },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.change(screen.getByLabelText(/이름/), { target: { value: 'yeonju lim' } })
+    fireEvent.submit(screen.getByRole('button', { name: '가입하기' }).closest('form'))
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/passport'))
+  })
+
   it('프로필이 미완성이면 state 없이 들어와도 여권 정보 단계부터 연다', async () => {
     // 프로필 화면에서 이탈했다 돌아온 사용자다. 계정은 이미 있으므로 계정
     // 단계를 다시 보여 주면 있는 계정으로 또 가입하라는 화면이 된다.

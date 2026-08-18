@@ -3,7 +3,12 @@ import { Link, useLocation, useNavigate } from 'react-router'
 
 import backIcon from '@/assets/icons/auth/back.svg'
 import userIcon from '@/assets/icons/auth/user.svg'
-import { EMAIL_ALREADY_REGISTERED, createProfile, signup } from '@/shared/api/authApi.js'
+import {
+  EMAIL_ALREADY_REGISTERED,
+  PROFILE_ALREADY_REGISTERED,
+  createProfile,
+  signup,
+} from '@/shared/api/authApi.js'
 import { isProfilePending } from '@/shared/api/profilePending.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 
@@ -217,6 +222,12 @@ export function Component() {
       // 보호 라우트나 카카오 콜백이 남긴 원래 자리로 돌아간다. 없으면 홈이다.
       navigate(location.state?.from ?? '/', { replace: true })
     } catch (profileError) {
+      // "이미 등록됨"은 가입이 끝나 있다는 뜻이다. 오류로 세워 두면 이 화면에
+      // 갇힌다 — 성공과 같은 길로 보낸다. 표시는 createProfile이 이미 껐다.
+      if (profileError.code === PROFILE_ALREADY_REGISTERED) {
+        navigate(location.state?.from ?? '/', { replace: true })
+        return
+      }
       setError(profileError)
     } finally {
       setSubmitting(false)

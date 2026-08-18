@@ -28,6 +28,14 @@ import { setProfilePending } from './profilePending.js'
  */
 export const EMAIL_ALREADY_REGISTERED = 'EMAIL_ALREADY_REGISTERED'
 
+/**
+ * 이미 추가 정보가 등록된 회원 (POST /auth/profile 409).
+ *
+ * 실패지만 뜻은 "가입이 끝나 있다"이다. 미완성 표시를 켠 채 두면 보호 구간이
+ * 계속 가입 화면으로 돌려보내는 루프가 된다.
+ */
+export const PROFILE_ALREADY_REGISTERED = 'PROFILE_ALREADY_REGISTERED'
+
 /** `2026-08-25` → `2026 08 25` (여권 지면 표기) */
 function toDisplayDate(value) {
   if (!value) return ''
@@ -121,11 +129,19 @@ export async function loginWithKakao({ code, redirectUri }) {
  * 세 필드가 모두 필수다. 부분 입력을 허용하지 않는다.
  */
 export async function createProfile({ name, birthDate, nationality }) {
-  const result = await apiFetch(API.auth.profile, {
-    method: 'POST',
-    body: { name, birthDate, nationality },
-    unwrap: true,
-  })
+  let result
+  try {
+    result = await apiFetch(API.auth.profile, {
+      method: 'POST',
+      body: { name, birthDate, nationality },
+      unwrap: true,
+    })
+  } catch (cause) {
+    // "이미 등록됨"도 가입이 끝나 있다는 뜻이다. 표시를 끄지 않으면 보호
+    // 구간이 계속 가입 화면으로 돌려보낸다. 어디로 갈지는 화면이 정한다.
+    if (cause?.code === PROFILE_ALREADY_REGISTERED) setProfilePending(false)
+    throw cause
+  }
   // 여권 정보까지 들어갔으니 가입이 끝났다. 보호 구간이 다시 열린다.
   setProfilePending(false)
   return toMember(result)
