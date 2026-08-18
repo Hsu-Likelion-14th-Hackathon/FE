@@ -69,7 +69,7 @@ describe('ProductListPage', () => {
 
     for (const heading of [
       screen.getByRole('heading', { level: 1, name: '상품 목록' }),
-      screen.getByRole('heading', { level: 2, name: 'Autumn Winter 2026' }),
+      screen.getByRole('heading', { level: 2, name: '인기상품' }),
     ]) {
       const style = window.getComputedStyle(heading)
       expect(style.position).toBe('absolute')

@@ -12,7 +12,7 @@ import StateNotice from '@/shared/ui/state-notice/StateNotice.jsx'
 import styles from './ProductDetailPage.module.scss'
 
 /** 컬렉션 표기는 디자인 문구다. 백엔드가 주는 값이 아니다. */
-const COLLECTION_LABEL = 'NEW COLLECTION'
+const COLLECTION_LABEL = 'MOST COVETED'
 
 /** 이보다 짧게 쓸면 넘기지 않는다. 탭하다 손이 미끄러진 것과 구분해야 한다. */
 const SWIPE_THRESHOLD = 40

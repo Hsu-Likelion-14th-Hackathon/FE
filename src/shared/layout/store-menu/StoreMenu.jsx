@@ -107,10 +107,10 @@ function CollectionCard({ onClose }) {
   return (
     <Link className={styles.contentGroup} to="/products" onClick={onClose}>
       <div className={styles.collectionCard}>
-        <img src={collectionImage} alt="2026 가을-겨울 컬렉션 모델" />
-        <span>Autumn Winter 2026</span>
+        <img src={collectionImage} alt="인기상품 컬렉션 모델" />
+        <span>인기상품</span>
       </div>
-      <ContentLink>2026 가을-겨울 컬렉션 둘러보기</ContentLink>
+      <ContentLink>인기상품 둘러보기</ContentLink>
     </Link>
   )
 }

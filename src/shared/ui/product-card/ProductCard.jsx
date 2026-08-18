@@ -6,7 +6,7 @@ import ProductArtwork from './ProductArtwork.jsx'
 import styles from './ProductCard.module.scss'
 
 /** 컬렉션 표기는 디자인 문구다. 백엔드가 주는 값이 아니다. */
-const COLLECTION_LABEL = 'NEW COLLECTION'
+const COLLECTION_LABEL = 'MOST COVETED'
 
 function GalleryArrow({ direction }) {
   return (
