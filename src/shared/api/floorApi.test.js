@@ -74,16 +74,16 @@ describe('층 상세', () => {
   })
 
   it('가이드 상품이 없는 층은 콘텐츠가 비어도 빈 배열로 그릴 수 있게 한다', async () => {
-    globalThis.fetch = respondWith({ floorId: 1, floorNo: 1, code: 'ORIGIN', title: '기원' })
+    globalThis.fetch = respondWith({ floorId: 5, floorNo: 5, code: 'HORIZON', title: '지평' })
 
-    const floor = await getFloor(1)
+    const floor = await getFloor(5)
 
     expect(floor.contents).toEqual([])
   })
 
-  it('서버 콘텐츠에 상품이 없으면 층 코드의 가이드 상품을 끝에 잇는다', async () => {
+  it('서버 콘텐츠에 상품이 없으면 층 번호의 가이드 상품을 끝에 잇는다', async () => {
     // 백엔드가 PRODUCT 블록을 연결할 여유가 없어(2026-08-18) 프론트가 층
-    // 코드별 상품을 직접 불러 붙인다. 서버가 블록을 주기 시작하면 위
+    // 번호별 상품을 직접 불러 붙인다. 서버가 블록을 주기 시작하면 위
     // 테스트처럼 그쪽을 그대로 쓴다.
     const floorBody = JSON.stringify({
       isSuccess: true,

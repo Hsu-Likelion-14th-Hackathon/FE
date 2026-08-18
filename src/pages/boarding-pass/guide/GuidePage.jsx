@@ -343,7 +343,7 @@ function FloorView({ meta, entry, onRetry }) {
       )}
 
       {entry?.status === 'ready' ? (
-        <FloorContents contents={entry.data.contents} floorCode={entry.data.code} />
+        <FloorContents contents={entry.data.contents} floorNo={entry.data.floorNo} />
       ) : entry?.status === 'error' ? (
         <StateNotice
           role="alert"
@@ -371,7 +371,26 @@ function FloorHeadline({ meta }) {
   )
 }
 
-function FloorContents({ contents, floorCode }) {
+function FloorContents({ contents, floorNo }) {
+  // 2층(Figma 46)은 마지막 콘텐츠가 좁은 노트가 되어 상품 카드와 한 행에
+  // 나란히 선다. 상품이 있을 때 끝의 블록(연이은 LIST면 그 묶음)을 노트로
+  // 떼어 두고, 나머지는 평소처럼 그린다.
+  let bodyBlocks = contents
+  let noteBlocks = []
+  const hasProduct = contents.some((block) => block.blockType === 'PRODUCT' && block.product)
+  if (floorNo === 2 && hasProduct) {
+    const nonProduct = contents.filter((block) => block.blockType !== 'PRODUCT')
+    let cut = nonProduct.length
+    if (cut && nonProduct[cut - 1].blockType === 'LIST') {
+      while (cut > 0 && nonProduct[cut - 1].blockType === 'LIST') cut -= 1
+    } else if (cut) {
+      cut -= 1
+    }
+    noteBlocks = nonProduct.slice(cut)
+    const noteOrderNos = new Set(noteBlocks.map((block) => block.orderNo))
+    bodyBlocks = contents.filter((block) => !noteOrderNos.has(block.orderNo))
+  }
+
   const rendered = []
   let listBuffer = []
   let productBuffer = []
@@ -390,11 +409,12 @@ function FloorContents({ contents, floorCode }) {
     listBuffer = []
   }
 
-  // 연이은 PRODUCT 블록은 층 배치대로 묶는다. 여정(Figma 45)은 두 카드가
-  // 나란히 서고, 나머지 층(46·47)은 와이드 카드가 세로로 쌓인다.
+  // 연이은 PRODUCT 블록은 층 배치대로 묶는다. 1층(Figma 45)은 두 카드가
+  // 나란히 서고, 2층(46)은 노트와 카드가 한 행이며, 3층(47)은 와이드
+  // 카드가 세로로 쌓인다.
   const flushProducts = (key) => {
     if (!productBuffer.length) return
-    if (floorCode === 'JOURNEY' && productBuffer.length > 1) {
+    if (floorNo === 1 && productBuffer.length > 1) {
       rendered.push(
         <div className={styles.productPair} key={key}>
           {productBuffer.map((block) => (
@@ -402,6 +422,24 @@ function FloorContents({ contents, floorCode }) {
           ))}
         </div>,
       )
+    } else if (noteBlocks.length) {
+      rendered.push(
+        <div className={styles.productCognacRow} key={key}>
+          <div className={styles.cognacNote}>
+            {noteBlocks.map((block) =>
+              block.blockType === 'LIST' ? (
+                <p key={block.orderNo}>{block.body}</p>
+              ) : (
+                block.body.split('\n').map((line) => <p key={line}>{line}</p>)
+              ),
+            )}
+          </div>
+          {productBuffer.map((block) => (
+            <FloorProductCard compact product={block.product} key={block.orderNo} />
+          ))}
+        </div>,
+      )
+      noteBlocks = []
     } else {
       for (const block of productBuffer) {
         rendered.push(<FloorProductCard product={block.product} key={block.orderNo} />)
@@ -410,7 +448,7 @@ function FloorContents({ contents, floorCode }) {
     productBuffer = []
   }
 
-  for (const block of contents) {
+  for (const block of bodyBlocks) {
     if (block.blockType === 'LIST') {
       // 연이은 LIST 블록은 한 목록으로 묶는다.
       flushProducts(`products-${block.orderNo}`)
