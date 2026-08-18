@@ -343,7 +343,7 @@ function FloorView({ meta, entry, onRetry }) {
       )}
 
       {entry?.status === 'ready' ? (
-        <FloorContents contents={entry.data.contents} />
+        <FloorContents contents={entry.data.contents} floorCode={entry.data.code} />
       ) : entry?.status === 'error' ? (
         <StateNotice
           role="alert"
@@ -371,9 +371,10 @@ function FloorHeadline({ meta }) {
   )
 }
 
-function FloorContents({ contents }) {
+function FloorContents({ contents, floorCode }) {
   const rendered = []
   let listBuffer = []
+  let productBuffer = []
 
   const flushList = (key) => {
     if (!listBuffer.length) return
@@ -389,13 +390,40 @@ function FloorContents({ contents }) {
     listBuffer = []
   }
 
+  // 연이은 PRODUCT 블록은 층 배치대로 묶는다. 여정(Figma 45)은 두 카드가
+  // 나란히 서고, 나머지 층(46·47)은 와이드 카드가 세로로 쌓인다.
+  const flushProducts = (key) => {
+    if (!productBuffer.length) return
+    if (floorCode === 'JOURNEY' && productBuffer.length > 1) {
+      rendered.push(
+        <div className={styles.productPair} key={key}>
+          {productBuffer.map((block) => (
+            <FloorProductCard compact product={block.product} key={block.orderNo} />
+          ))}
+        </div>,
+      )
+    } else {
+      for (const block of productBuffer) {
+        rendered.push(<FloorProductCard product={block.product} key={block.orderNo} />)
+      }
+    }
+    productBuffer = []
+  }
+
   for (const block of contents) {
     if (block.blockType === 'LIST') {
       // 연이은 LIST 블록은 한 목록으로 묶는다.
+      flushProducts(`products-${block.orderNo}`)
       listBuffer.push(block)
       continue
     }
+    if (block.blockType === 'PRODUCT' && block.product) {
+      flushList(`list-${block.orderNo}`)
+      productBuffer.push(block)
+      continue
+    }
     flushList(`list-${block.orderNo}`)
+    flushProducts(`products-${block.orderNo}`)
 
     if (block.blockType === 'TEXT') {
       rendered.push(
@@ -417,25 +445,26 @@ function FloorContents({ contents }) {
       rendered.push(
         <img className={styles.contentImage} src={block.imageUrl} alt="" key={block.orderNo} />,
       )
-    } else if (block.blockType === 'PRODUCT' && block.product) {
-      rendered.push(<FloorProductCard product={block.product} key={block.orderNo} />)
     }
   }
   flushList('list-end')
+  flushProducts('products-end')
 
   return <>{rendered}</>
 }
 
-function FloorProductCard({ product }) {
+function FloorProductCard({ product, compact = false }) {
   return (
-    <div className={`${styles.productCard} ${styles.productCardWide}`}>
+    <div
+      className={`${styles.productCard} ${compact ? styles.productCardCompact : styles.productCardWide}`}
+    >
       <div className={styles.productThumb}>
         {product.imageUrl ? (
           <img src={product.imageUrl} alt="" className={styles.productThumbImg} />
         ) : null}
       </div>
       <div className={styles.productMeta}>
-        <p className={`${styles.productName} ${styles.productNameWide}`}>
+        <p className={`${styles.productName} ${compact ? '' : styles.productNameWide}`}>
           <FitLine className={styles.productNameLine}>{product.name}</FitLine>
         </p>
         {product.priceLabel ? <p className={styles.productPrice}>{product.priceLabel}</p> : null}
