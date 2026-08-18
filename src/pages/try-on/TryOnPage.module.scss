@@ -238,12 +238,21 @@
 }
 
 /* 요청 실패 사유. 어두운 무대 위라 밝은 경고색을 쓴다. */
+/* Fitting 버튼(bottom 74px, 높이 50px) 위 8px에 앵커한다. 콘텐츠 흐름에 두면
+   내용이 늘어날 때 아래로 밀려 버튼에 가려진다. */
 .errorMessage {
-  margin: 16px 0 0;
+  position: absolute;
+  z-index: 2;
+  bottom: 132px;
+  left: 50%;
+  width: calc(100% - 40px);
+  max-width: 350px;
+  margin: 0;
   color: #ffb4a9;
   font-size: 12px;
   line-height: 18px;
   text-align: center;
+  transform: translateX(-50%);
 }
 
 .errorMessage a {
@@ -680,5 +689,10 @@
   .fittingButton,
   .progressGroup {
     bottom: calc(50% - 277.5px);
+  }
+
+  /* 버튼이 바닥 기준을 버리므로 오류도 같은 기준으로 따라간다(버튼 위 8px). */
+  .errorMessage {
+    bottom: calc(50% - 219.5px);
   }
 }
