@@ -179,7 +179,7 @@ export function Component() {
           eyebrow="Next flight"
           message="담긴 아이템이 없습니다"
           hint="다음 비행을 위한 아이템을 담아 보세요"
-          action={{ label: '신상품 보러가기', to: '/products' }}
+          action={{ label: '인기상품 보러가기', to: '/products' }}
         />
       ) : null}
 

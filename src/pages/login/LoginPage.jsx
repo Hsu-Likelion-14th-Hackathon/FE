@@ -6,12 +6,17 @@ import kakaoIcon from '@/assets/icons/auth/kakao.svg'
 import { login } from '@/shared/api/authApi.js'
 import { startKakaoLogin } from '@/shared/api/kakaoAuth.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import SpaceGuardNotice from '@/shared/ui/space-guard/SpaceGuardNotice.jsx'
+import { useSpaceGuard } from '@/shared/ui/space-guard/useSpaceGuard.js'
 
 import styles from './LoginPage.module.scss'
 
 export function Component() {
   // 입력한 비밀번호를 눈으로 확인할 수 있게 한다. 오타로 막히는 일이 잦다.
   const [passwordVisible, setPasswordVisible] = useState(false)
+  // 이메일·비밀번호에 공백은 유효하지 않다. 들어오는 순간 막고 이유를 알린다.
+  const emailGuard = useSpaceGuard()
+  const passwordGuard = useSpaceGuard()
   const [submitting, setSubmitting] = useState(false)
   // 백엔드가 준 message를 그대로 보여 준다. 우리가 지어내면 실제 이유와
   // 어긋난다(잘못된 비밀번호인지, 없는 계정인지).
@@ -85,8 +90,13 @@ export function Component() {
               name="email"
               type="email"
               autoComplete="email"
+              onBeforeInput={emailGuard.onBeforeInput}
+              onChange={emailGuard.sanitizeInPlace}
               required
             />
+            <SpaceGuardNotice show={emailGuard.rejected}>
+              이메일에는 공백을 입력할 수 없습니다
+            </SpaceGuardNotice>
           </div>
 
           <div className={styles.field}>
@@ -112,8 +122,15 @@ export function Component() {
               name="password"
               type={passwordVisible ? 'text' : 'password'}
               autoComplete="current-password"
+              // 가입이 비밀번호에 공백을 막으므로 공백이 든 비밀번호는 있을 수
+              // 없다. 가려진 칸에서 별표만 늘어 오타와 구분되지 않는다.
+              onBeforeInput={passwordGuard.onBeforeInput}
+              onChange={passwordGuard.sanitizeInPlace}
               required
             />
+            <SpaceGuardNotice show={passwordGuard.rejected}>
+              비밀번호에는 공백을 입력할 수 없습니다
+            </SpaceGuardNotice>
           </div>
 
           {error ? (

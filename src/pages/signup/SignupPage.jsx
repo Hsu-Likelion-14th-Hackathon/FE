@@ -4,7 +4,10 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import backIcon from '@/assets/icons/auth/back.svg'
 import userIcon from '@/assets/icons/auth/user.svg'
 import { EMAIL_ALREADY_REGISTERED, createProfile, signup } from '@/shared/api/authApi.js'
+import { isProfilePending } from '@/shared/api/profilePending.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
+import SpaceGuardNotice from '@/shared/ui/space-guard/SpaceGuardNotice.jsx'
+import { useSpaceGuard } from '@/shared/ui/space-guard/useSpaceGuard.js'
 
 import BirthDateField from '@/shared/ui/profile-fields/BirthDateField.jsx'
 import NationalitySelect from '@/shared/ui/profile-fields/NationalitySelect.jsx'
@@ -105,8 +108,10 @@ export function Component() {
   // 'account' → 'profile'
   // 카카오로 새로 가입한 사람은 계정이 이미 있으므로 두 번째 단계로 들어온다.
   // 카카오는 인증만 맡아 이름·생년월일·국적을 주지 않는다.
+  // state 없이 다시 들어와도(프로필을 안 쓰고 이탈했다 돌아온 경우) 미완성
+  // 표시가 켜져 있으면 계정 단계를 건너뛴다 — 계정은 이미 있다.
   const [step, setStep] = useState(() =>
-    location.state?.step === 'profile' ? 'profile' : 'account',
+    location.state?.step === 'profile' || isProfilePending() ? 'profile' : 'account',
   )
   const [submitting, setSubmitting] = useState(false)
   // 백엔드 message를 그대로 싣는다. 이미 가입된 이메일이면 어느 방식으로
@@ -115,6 +120,9 @@ export function Component() {
   const [openPicker, setOpenPicker] = useState(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  // 이메일·비밀번호에 공백은 유효하지 않다. 들어오는 순간 막고 이유를 알린다.
+  const emailGuard = useSpaceGuard()
+  const passwordGuard = useSpaceGuard()
   // 이미 쓰인 이메일이면 그 조합으로는 더 갈 곳이 없다. 다음 동작이 오면
   // 칸을 비워 새 이메일부터 치게 한다. 지우는 시점을 미루는 이유는, 실패하자마자
   // 비우면 사용자가 방금 무엇을 넣었는지 확인할 새가 없기 때문이다.
@@ -192,7 +200,9 @@ export function Component() {
     if (!resetArmed) return
     setResetArmed(false)
     setEmail('')
+    emailGuard.reset()
     setPassword('')
+    passwordGuard.reset()
     setPasswordTouched(false)
     setError(null)
   }
@@ -212,6 +222,7 @@ export function Component() {
         nationality: getCountryOption(countryCode)?.code ?? '',
       })
       // 보호 라우트나 카카오 콜백이 남긴 원래 자리로 돌아간다. 없으면 홈이다.
+      // "이미 등록됨"(409)도 여기로 온다 — createProfile이 멱등 성공으로 삼킨다.
       navigate(location.state?.from ?? '/', { replace: true })
     } catch (profileError) {
       setError(profileError)
@@ -283,10 +294,14 @@ export function Component() {
                     aria-invalid={error ? true : undefined}
                     aria-describedby={error ? 'signup-email-error' : undefined}
                     value={email}
-                    onChange={(event) => setEmail(event.target.value)}
+                    onBeforeInput={emailGuard.onBeforeInput}
+                    onChange={(event) => setEmail(emailGuard.sanitize(event.target.value))}
                     required
                   />
                 </div>
+                <SpaceGuardNotice show={emailGuard.rejected}>
+                  이메일에는 공백을 입력할 수 없습니다
+                </SpaceGuardNotice>
               </div>
 
               <div className={styles.fieldGroup}>
@@ -307,13 +322,20 @@ export function Component() {
                     placeholder="비밀번호를 입력해 주세요"
                     aria-describedby="signup-password-rules"
                     value={password}
+                    // 공백은 가려진 채 입력되면 별표만 늘어 오타와 구분되지
+                    // 않는다. 규칙표의 "공백 없이"는 붙여넣기 등 이 가드를
+                    // 지나치는 경로의 뒷그물로 남는다.
+                    onBeforeInput={passwordGuard.onBeforeInput}
                     onChange={(event) => {
-                      setPassword(event.target.value)
+                      setPassword(passwordGuard.sanitize(event.target.value))
                       setPasswordTouched(true)
                     }}
                     required
                   />
                 </div>
+                <SpaceGuardNotice show={passwordGuard.rejected}>
+                  비밀번호에는 공백을 입력할 수 없습니다
+                </SpaceGuardNotice>
                 <PasswordRules password={password} touched={passwordTouched} />
               </div>
             </div>

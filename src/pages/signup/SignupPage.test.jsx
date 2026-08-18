@@ -11,6 +11,8 @@ vi.mock('@/shared/api/authApi.js', async (importOriginal) => ({
   createProfile: (...args) => createProfile(...args),
 }))
 
+import { setProfilePending } from '@/shared/api/profilePending.js'
+
 import { Component as SignupPage } from './SignupPage.jsx'
 
 /**
@@ -45,6 +47,7 @@ beforeEach(() => {
   signup.mockResolvedValue({ accessToken: 'issued', userId: 1 })
   createProfile.mockReset()
   createProfile.mockResolvedValue({ userId: 1 })
+  setProfilePending(false)
 })
 
 // 국가 목록 249개를 그리고 단계까지 넘어간다. 다른 파일과 함께 돌면 기본
@@ -247,6 +250,87 @@ describe('SignupPage', { timeout: 15_000 }, () => {
     fireEvent.submit(screen.getByRole('button', { name: '가입하기' }).closest('form'))
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/wishlist'))
+  })
+
+  it('이미 추가 정보가 등록된 회원이면 오류 대신 성공과 같은 길로 보낸다', async () => {
+    // 409(PROFILE_ALREADY_REGISTERED)는 가입이 끝나 있다는 뜻이라 createProfile이
+    // 멱등 성공(null)으로 삼킨다. 화면은 회원 정보 없이도 제자리로 보내야 한다 —
+    // 여권 404 안내를 타고 온 계정이 특히 그렇다.
+    createProfile.mockResolvedValue(null)
+    const router = createMemoryRouter(
+      [
+        { path: '/signup', Component: SignupPage },
+        { path: '/boarding-pass/passport', element: <h1>여권</h1> },
+      ],
+      {
+        initialEntries: [
+          { pathname: '/signup', state: { step: 'profile', from: '/boarding-pass/passport' } },
+        ],
+      },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.change(screen.getByLabelText(/이름/), { target: { value: 'yeonju lim' } })
+    fireEvent.submit(screen.getByRole('button', { name: '가입하기' }).closest('form'))
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/boarding-pass/passport'))
+  })
+
+  it('프로필이 미완성이면 state 없이 들어와도 여권 정보 단계부터 연다', async () => {
+    // 프로필 화면에서 이탈했다 돌아온 사용자다. 계정은 이미 있으므로 계정
+    // 단계를 다시 보여 주면 있는 계정으로 또 가입하라는 화면이 된다.
+    setProfilePending(true)
+
+    render(
+      <MemoryRouter initialEntries={['/signup']}>
+        <SignupPage />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('button', { name: '가입하기' })).toBeInTheDocument()
+    expect(screen.queryByLabelText(/이메일 주소/)).not.toBeInTheDocument()
+  })
+
+  it('이메일에 친 공백은 걷어내고 이유를 알린다', () => {
+    // 이메일에 공백은 어차피 유효하지 않다. 특히 모바일 자동완성의 꼬리
+    // 공백은 눈에 안 보여, 조용히 지우면 지운 적 없는 글자가 사라진 것처럼
+    // 보인다.
+    render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>,
+    )
+
+    const email = screen.getByLabelText(/이메일 주소/)
+    fireEvent.change(email, { target: { value: ' a@b .c ' } })
+
+    expect(email.value).toBe('a@b.c')
+    expect(screen.getByText('이메일에는 공백을 입력할 수 없습니다')).toBeInTheDocument()
+
+    // 공백 없이 다시 치면 안내도 사라진다. 같은 값이면 React가 change를
+    // 생략하므로 다른 값으로 잇는다.
+    fireEvent.change(email, { target: { value: 'a@b.cd' } })
+    expect(screen.queryByText('이메일에는 공백을 입력할 수 없습니다')).not.toBeInTheDocument()
+  })
+
+  it('비밀번호에 친 공백도 걷어내고 이유를 알린다', () => {
+    // 가려진 채 입력되는 칸이라 공백은 별표만 늘어 오타와 구분되지 않는다.
+    render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>,
+    )
+
+    const password = screen.getByLabelText(/비밀번호/)
+    fireEvent.change(password, { target: { value: 'Pass w0rd! ' } })
+
+    expect(password.value).toBe('Passw0rd!')
+    expect(screen.getByText('비밀번호에는 공백을 입력할 수 없습니다')).toBeInTheDocument()
+
+    // 공백 없이 다시 치면 안내도 사라진다. 같은 값이면 React가 change를
+    // 생략하므로 다른 값으로 잇는다.
+    fireEvent.change(password, { target: { value: 'Passw0rd!!' } })
+    expect(screen.queryByText('비밀번호에는 공백을 입력할 수 없습니다')).not.toBeInTheDocument()
   })
 
   it('규칙에 못 미치는 비밀번호는 서버까지 보내지 않고 무엇이 모자란지 보여 준다', async () => {

@@ -3,6 +3,7 @@ import { createMemoryRouter, RouterProvider, useLocation } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { clearAccessToken, setAccessToken } from '@/shared/api/authToken.js'
+import { setProfilePending } from '@/shared/api/profilePending.js'
 
 import { ProtectedRoute } from './ProtectedRoute.jsx'
 import { createAppRoutes } from './router.jsx'
@@ -13,10 +14,21 @@ function LoginProbe() {
   return <p>로그인 화면 (from: {location.state?.from ?? '없음'})</p>
 }
 
+/** 가입 화면 대역 — 어느 단계로, 어디서 왔는지 보여 준다. */
+function SignupProbe() {
+  const location = useLocation()
+  return (
+    <p>
+      가입 화면 (step: {location.state?.step ?? '없음'}, from: {location.state?.from ?? '없음'})
+    </p>
+  )
+}
+
 function renderGuarded(initialEntry) {
   const router = createMemoryRouter(
     [
       { path: '/login', Component: LoginProbe },
+      { path: '/signup', Component: SignupProbe },
       {
         Component: ProtectedRoute,
         children: [{ path: '/secret', element: <p>비밀 화면</p> }],
@@ -30,7 +42,10 @@ function renderGuarded(initialEntry) {
 }
 
 describe('ProtectedRoute', () => {
-  afterEach(() => clearAccessToken())
+  afterEach(() => {
+    clearAccessToken()
+    setProfilePending(false)
+  })
 
   it('토큰이 없으면 로그인으로 보내고 돌아올 곳을 남긴다', async () => {
     renderGuarded('/secret?tab=1')
@@ -42,6 +57,32 @@ describe('ProtectedRoute', () => {
   it('토큰이 있으면 화면을 그대로 연다', async () => {
     setAccessToken('live-token')
     renderGuarded('/secret')
+
+    expect(await screen.findByText('비밀 화면')).toBeInTheDocument()
+  })
+
+  it('프로필이 미완성이면 가입 2단계로 보내고 돌아올 곳을 남긴다', async () => {
+    // 가입 1단계·카카오 신규는 토큰부터 준다. 프로필 화면에서 이탈한 사용자를
+    // 여기서 잡지 않으면 보호 구간의 화면마다 API가 제각각 실패한다.
+    setAccessToken('signup-token')
+    setProfilePending(true)
+    renderGuarded('/secret?tab=1')
+
+    expect(
+      await screen.findByText('가입 화면 (step: profile, from: /secret?tab=1)'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('비밀 화면')).not.toBeInTheDocument()
+  })
+
+  it('프로필을 완성하고 돌아오면 같은 주소가 열린다', async () => {
+    setAccessToken('signup-token')
+    setProfilePending(true)
+    const router = renderGuarded('/secret')
+    expect(await screen.findByText(/가입 화면/)).toBeInTheDocument()
+
+    // createProfile 성공 → SignupPage가 state.from으로 돌려보내는 흐름과 같다.
+    setProfilePending(false)
+    await act(() => router.navigate('/secret'))
 
     expect(await screen.findByText('비밀 화면')).toBeInTheDocument()
   })

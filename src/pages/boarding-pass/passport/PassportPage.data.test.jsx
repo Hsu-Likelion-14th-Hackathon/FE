@@ -83,12 +83,13 @@ const FETCHED_ROUTE = [
   },
 ]
 
+const getPassport = vi.hoisted(() => vi.fn())
 const getVisitDetail = vi.hoisted(() => vi.fn())
 const getPassportStamps = vi.hoisted(() => vi.fn())
 const getBoardingPassRoute = vi.hoisted(() => vi.fn())
 
 vi.mock('@/shared/api/passportApi.js', () => ({
-  getPassport: vi.fn(async () => FETCHED_PROFILE),
+  getPassport: (...args) => getPassport(...args),
   getPassportStamps: (...args) => getPassportStamps(...args),
   getVisitDetail: (...args) => getVisitDetail(...args),
 }))
@@ -99,6 +100,7 @@ vi.mock('@/shared/api/boardingPassApi.js', () => ({
 
 beforeEach(() => {
   vi.spyOn(console, 'warn').mockImplementation(() => {})
+  getPassport.mockReset().mockResolvedValue(FETCHED_PROFILE)
   getPassportStamps
     .mockReset()
     .mockResolvedValue({ visits: FETCHED_PROFILE.visits, stamps: FETCHED_STAMPS })
@@ -113,6 +115,7 @@ function renderPassport() {
       { path: '/boarding-pass/passport', Component: PassportPage },
       { path: '/boarding-pass', element: <p>Boarding</p> },
       { path: '/products', element: <p>Products</p> },
+      { path: '/signup', element: <p>Signup</p> },
     ],
     { initialEntries: ['/boarding-pass/passport'] },
   )
@@ -225,5 +228,54 @@ describe('여권 DOM 데이터', () => {
     await waitFor(() => expect(stamps).toHaveTextContent('총 방문 횟수 | 0회'))
     expect(stamps.querySelectorAll('li')).toHaveLength(0)
     expect(stamps).not.toHaveTextContent('2026 07 21')
+  })
+
+  it('조회가 끝나기 전에는 채움 스탬프를 열 수 없다', async () => {
+    // 채움 스탬프에는 방문 번호가 없다. 열면 가짜 방문이 상태에 박혀 진짜
+    // 데이터가 온 뒤에도 남는다.
+    getPassport.mockReturnValue(new Promise(() => {}))
+    getPassportStamps.mockReturnValue(new Promise(() => {}))
+    renderPassport()
+    const next = screen.getByRole('button', { name: '다음 단계' })
+    fireEvent.click(next)
+    fireEvent.click(next)
+
+    const stamps = await screen.findAllByRole('button', { name: /방문 기록 보기/ })
+    expect(stamps).not.toHaveLength(0)
+    for (const stamp of stamps) expect(stamp).toBeDisabled()
+  })
+
+  it('여권이 없으면 채움 여권 대신 만들기 안내를 열고 가입 2단계로 보낸다', async () => {
+    // 채움 데이터로 덮으면 여권 없는 사용자가 남의 기록이 찍힌 여권을 보게 된다.
+    getPassport.mockRejectedValue(
+      Object.assign(new Error('발급 없습니다.'), { code: 'PASSPORT_NOT_FOUND' }),
+    )
+    const router = renderPassport()
+
+    expect(await screen.findByText('아직 여권이 없습니다')).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '여권 표지' })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '여권 만들기' }))
+    await screen.findByText('Signup')
+    // 프로필을 완성하면 여권으로 되돌아온다.
+    expect(router.state.location.state).toEqual({
+      step: 'profile',
+      from: '/boarding-pass/passport',
+    })
+  })
+
+  it('여권 조회가 실패하면 다시 시도할 수 있다', async () => {
+    // 여권이 있는 사용자의 일시적 실패다. 만들기 안내를 띄우면 멀쩡한 여권을
+    // 다시 만들라는 소리가 된다.
+    getPassport.mockRejectedValueOnce(new Error('network down'))
+    renderPassport()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('여권을 불러오지 못했습니다')
+    expect(screen.queryByText('아직 여권이 없습니다')).not.toBeInTheDocument()
+
+    // 두 번째 호출은 성공한다(mockRejectedValueOnce) — 여권이 다시 열린다.
+    fireEvent.click(screen.getByRole('button', { name: '다시 시도' }))
+    expect(await screen.findByRole('region', { name: '여권 표지' })).toBeInTheDocument()
+    expect(getPassport).toHaveBeenCalledTimes(2)
   })
 })

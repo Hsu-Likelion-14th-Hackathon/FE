@@ -25,6 +25,41 @@ describe('LoginPage', () => {
     expect(submitted).toBe(false)
   })
 
+  it('이메일에 친 공백은 걷어내고 이유를 알린다', () => {
+    // 이메일에 공백은 어차피 유효하지 않다. 특히 모바일 자동완성의 꼬리
+    // 공백은 눈에 안 보여, 조용히 지우면 지운 적 없는 글자가 사라진 것처럼
+    // 보인다.
+    renderLogin()
+
+    const email = screen.getByLabelText(/이메일 주소/)
+    fireEvent.change(email, { target: { value: ' a@b .c ' } })
+
+    expect(email.value).toBe('a@b.c')
+    expect(screen.getByText('이메일에는 공백을 입력할 수 없습니다')).toBeInTheDocument()
+
+    // 공백 없이 다시 치면 안내도 사라진다. 같은 값이면 React가 change를
+    // 생략하므로 다른 값으로 잇는다.
+    fireEvent.change(email, { target: { value: 'a@b.cd' } })
+    expect(screen.queryByText('이메일에는 공백을 입력할 수 없습니다')).not.toBeInTheDocument()
+  })
+
+  it('비밀번호에 친 공백도 걷어내고 이유를 알린다', () => {
+    // 가입이 공백을 막으므로 공백이 든 비밀번호는 있을 수 없다. 가려진
+    // 칸에서 별표만 늘면 오타와 구분되지 않는다.
+    renderLogin()
+
+    const password = screen.getByLabelText(/^비밀번호/)
+    fireEvent.change(password, { target: { value: 'Pass w0rd! ' } })
+
+    expect(password.value).toBe('Passw0rd!')
+    expect(screen.getByText('비밀번호에는 공백을 입력할 수 없습니다')).toBeInTheDocument()
+
+    // 공백 없이 다시 치면 안내도 사라진다. 같은 값이면 React가 change를
+    // 생략하므로 다른 값으로 잇는다.
+    fireEvent.change(password, { target: { value: 'Passw0rd!!' } })
+    expect(screen.queryByText('비밀번호에는 공백을 입력할 수 없습니다')).not.toBeInTheDocument()
+  })
+
   it('비밀번호를 가렸다 보였다 할 수 있다', () => {
     renderLogin()
 

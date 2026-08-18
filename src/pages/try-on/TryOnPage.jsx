@@ -143,19 +143,22 @@ function UploadStage({
             <span>이 사진을 기본 전신 이미지로 저장</span>
           </label>
         ) : null}
-
-        {error ? (
-          <p className={styles.errorMessage} role="alert">
-            {error.status === 401 ? (
-              <>
-                로그인이 필요합니다. <Link to="/login">로그인하기</Link>
-              </>
-            ) : (
-              (error.message ?? 'AI Fitting 요청에 실패했습니다.')
-            )}
-          </p>
-        ) : null}
       </div>
+
+      {/* 오류는 Fitting 버튼 위에 앵커한다. 콘텐츠 흐름(uploadContent) 안에
+          두면 기본 이미지 안내 등으로 내용이 늘어날 때 아래로 밀려 버튼에
+          가려진다. */}
+      {error ? (
+        <p className={styles.errorMessage} role="alert">
+          {error.status === 401 ? (
+            <>
+              로그인이 필요합니다. <Link to="/login">로그인하기</Link>
+            </>
+          ) : (
+            (error.message ?? 'AI Fitting 요청에 실패했습니다.')
+          )}
+        </p>
+      ) : null}
 
       <button className={styles.fittingButton} type="button" onClick={onStartFitting}>
         <span>Fitting</span>

@@ -1,6 +1,7 @@
 import { setAccessToken } from './authToken.js'
 import { apiFetch } from './client.js'
 import { API } from './endpoints.js'
+import { setProfilePending } from './profilePending.js'
 
 /**
  * 인증·회원 API.
@@ -26,6 +27,14 @@ import { API } from './endpoints.js'
  * 실제 응답에서만 온다.
  */
 export const EMAIL_ALREADY_REGISTERED = 'EMAIL_ALREADY_REGISTERED'
+
+/**
+ * 이미 추가 정보가 등록된 회원 (POST /auth/profile 409).
+ *
+ * 실패지만 뜻은 "가입이 끝나 있다"이다. 미완성 표시를 켠 채 두면 보호 구간이
+ * 계속 가입 화면으로 돌려보내는 루프가 된다.
+ */
+export const PROFILE_ALREADY_REGISTERED = 'PROFILE_ALREADY_REGISTERED'
 
 /** `2026-08-25` → `2026 08 25` (여권 지면 표기) */
 function toDisplayDate(value) {
@@ -63,6 +72,10 @@ export async function login({ email, password }) {
     auth: false,
     unwrap: true,
   })
+  // 미완성 표시는 건드리지 않는다. 계정 자격만으로는 프로필이 있는지 알 수
+  // 없다 — 가입 1단계만 한 계정도 로그인은 된다. 지난 계정이 남긴 표시는
+  // 로그아웃·401이 토큰과 함께 걷고(profilePending), 진짜 상태는 세션
+  // 복원(useSession)이 서버 프로필로 맞춘다.
   return keepToken({ accessToken: result.accessToken, userId: result.userId ?? null })
 }
 
@@ -80,6 +93,9 @@ export async function signup({ email, password }) {
     auth: false,
     unwrap: true,
   })
+  // 토큰은 나왔지만 여권 정보(이름·생년월일·국적)는 아직이다. 이 표시가
+  // 켜진 동안 보호 구간은 가입 2단계로 돌려보낸다(ProtectedRoute).
+  setProfilePending(true)
   return keepToken({ accessToken: result.accessToken, userId: result.userId ?? null })
 }
 
@@ -97,6 +113,9 @@ export async function loginWithKakao({ code, redirectUri }) {
     auth: false,
     unwrap: true,
   })
+  // 신규면 signup과 같은 "토큰만 있는" 상태다. 기존 회원이면 반대로, 지난
+  // 계정이 남긴 미완성 표시를 걷어낸다.
+  setProfilePending(result.isNewUser === true)
   return keepToken({
     accessToken: result.accessToken,
     userId: result.userId ?? null,
@@ -111,11 +130,23 @@ export async function loginWithKakao({ code, redirectUri }) {
  * 세 필드가 모두 필수다. 부분 입력을 허용하지 않는다.
  */
 export async function createProfile({ name, birthDate, nationality }) {
-  const result = await apiFetch(API.auth.profile, {
-    method: 'POST',
-    body: { name, birthDate, nationality },
-    unwrap: true,
-  })
+  let result
+  try {
+    result = await apiFetch(API.auth.profile, {
+      method: 'POST',
+      body: { name, birthDate, nationality },
+      unwrap: true,
+    })
+  } catch (cause) {
+    // "이미 등록됨"(409)은 실패 코드지만 뜻은 "가입이 끝나 있다"이다. 여기서
+    // 멱등 성공으로 삼킨다 — 호출부마다 코드를 대조하게 두면 하나만 빠져도
+    // 성공 상태가 오류 화면으로 남는다. 회원 정보가 필요하면 getMe로 받는다.
+    if (cause?.code !== PROFILE_ALREADY_REGISTERED) throw cause
+    setProfilePending(false)
+    return null
+  }
+  // 여권 정보까지 들어갔으니 가입이 끝났다. 보호 구간이 다시 열린다.
+  setProfilePending(false)
   return toMember(result)
 }
 
