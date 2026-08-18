@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 
 import { getMe } from '@/shared/api/authApi.js'
 import { clearAccessToken, getAccessToken, subscribeAccessToken } from '@/shared/api/authToken.js'
+import { setProfilePending } from '@/shared/api/profilePending.js'
 
 /**
  * 로그인 상태와 회원 정보.
@@ -27,7 +28,14 @@ export function useSession() {
     const controller = new AbortController()
 
     getMe({ signal: controller.signal })
-      .then((member) => setResolved({ token, member }))
+      .then((member) => {
+        // 미완성 표시는 sessionStorage라 탭을 닫으면 사라지고, 카카오 재로그인의
+        // isNewUser는 유저 행 기준이라 프로필 미입력 이탈자를 못 잡을 수 있다.
+        // 서버가 준 실제 프로필로 표시를 맞춘다 — 이름이 비어 있으면 가입
+        // 2단계가 끝나지 않은 사람이다.
+        setProfilePending(!member.name)
+        setResolved({ token, member })
+      })
       .catch((error) => {
         if (error?.name === 'AbortError') return
         // 401이면 apiFetch가 이미 토큰을 지웠다. 그 밖의 실패(네트워크·5xx)로
