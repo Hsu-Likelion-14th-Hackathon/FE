@@ -39,35 +39,41 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('BoardingPassDocent', () => {
-  it('재생을 누르면 층 해설 음성을 튼다', async () => {
+  it('재생을 누르면 틀고, 한 번 더 누르면 그 지점에서 멈췄다 이어 튼다', () => {
     render(<BoardingPassDocent audioUrl="https://cdn/floor-journey.mp3" />)
 
     fireEvent.click(screen.getByRole('button', { name: '도슨트 재생' }))
-
     const [audio] = FakeAudio.instances
     expect(audio.src).toBe('https://cdn/floor-journey.mp3')
     expect(audio.paused).toBe(false)
-    expect(screen.getByRole('button', { name: '도슨트 재생' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
+
+    // 일시정지 — 지점(currentTime)은 그대로 남는다.
+    audio.currentTime = 12
+    fireEvent.click(screen.getByRole('button', { name: '도슨트 일시정지' }))
+    expect(audio.paused).toBe(true)
+    expect(audio.currentTime).toBe(12)
+
+    // 다시 누르면 그 지점부터 이어 튼다.
+    fireEvent.click(screen.getByRole('button', { name: '도슨트 재생' }))
+    expect(audio.paused).toBe(false)
+    expect(audio.currentTime).toBe(12)
   })
 
-  it('정지는 처음으로 되감고, 음성이 끝나면 스스로 정지 상태가 된다', async () => {
+  it('네모 버튼은 처음부터 다시 틀고, 음성이 끝나면 스스로 정지 상태가 된다', () => {
     render(<BoardingPassDocent audioUrl="https://cdn/floor-journey.mp3" />)
-    const playButton = screen.getByRole('button', { name: '도슨트 재생' })
-
-    fireEvent.click(playButton)
+    fireEvent.click(screen.getByRole('button', { name: '도슨트 재생' }))
     const [audio] = FakeAudio.instances
-    audio.currentTime = 12
+    audio.currentTime = 30
 
-    fireEvent.click(screen.getByRole('button', { name: '도슨트 정지' }))
-    expect(audio.paused).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: '도슨트 처음부터 재생' }))
     expect(audio.currentTime).toBe(0)
+    expect(audio.paused).toBe(false)
 
-    fireEvent.click(playButton)
     act(() => audio.listeners.ended?.())
-    expect(playButton).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: '도슨트 재생' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
   })
 
   it('층이 바뀌면 이전 층 해설을 멈추고 갈아끼운다', () => {
@@ -126,7 +132,7 @@ describe('BoardingPassDocent', () => {
     fireEvent.click(screen.getByRole('button', { name: '도슨트 재생' }))
 
     expect(FakeAudio.instances).toHaveLength(0)
-    expect(screen.getByRole('button', { name: '도슨트 재생' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: '도슨트 일시정지' })).toHaveAttribute(
       'aria-pressed',
       'true',
     )
