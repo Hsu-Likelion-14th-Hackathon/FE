@@ -8,6 +8,30 @@ import styles from './BoardingPassDocent.module.scss'
 /** 해설 재생 속도. 눌러서 순환한다 — 목록 끝이면 처음으로. */
 const PLAYBACK_RATES = [1, 1.25, 1.5, 2]
 
+const DOCENT_HINT = '음성 AI 도슨트가 고객님의 여정을 안내합니다'
+
+/**
+ * 안내 문구 파도타기 — 화면에 들어설 때 글자가 한 자씩 살짝 떠올랐다
+ * 내려온다. 한 번만 돈다(반복하면 읽는 내내 흔들리는 문장이 된다).
+ * 글자를 쪼개므로 읽어 주는 문장은 aria-label로 온전히 남긴다.
+ */
+function DocentHintWave() {
+  return (
+    <p className={styles.docentHint} aria-label={DOCENT_HINT}>
+      {[...DOCENT_HINT].map((ch, index) => (
+        <span
+          key={index}
+          aria-hidden="true"
+          className={styles.hintChar}
+          style={{ animationDelay: `${index * 0.04}s` }}
+        >
+          {ch === ' ' ? ' ' : ch}
+        </span>
+      ))}
+    </p>
+  )
+}
+
 /**
  * 음성 AI 도슨트 (M-01).
  *
@@ -80,7 +104,9 @@ export default function BoardingPassDocent({ audioUrl = null }) {
 
   return (
     <div className={styles.docentBlock}>
-      <p className={styles.docentHint}>음성 AI 도슨트가 고객님의 여정을 안내합니다</p>
+      {/* 층을 옮기면(audioUrl 변경) 리마운트되어 파도가 다시 지나간다.
+          같은 화면 안에서는 한 번만 돈다. */}
+      <DocentHintWave key={audioUrl ?? 'static'} />
       <div className={styles.docentControls} data-deferred-id="M-01">
         <button
           type="button"
