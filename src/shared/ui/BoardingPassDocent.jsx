@@ -104,7 +104,9 @@ export default function BoardingPassDocent({ audioUrl = null }) {
 
   return (
     <div className={styles.docentBlock}>
-      <DocentHintWave />
+      {/* 층을 옮기면(audioUrl 변경) 리마운트되어 파도가 다시 지나간다.
+          같은 화면 안에서는 한 번만 돈다. */}
+      <DocentHintWave key={audioUrl ?? 'static'} />
       <div className={styles.docentControls} data-deferred-id="M-01">
         <button
           type="button"
