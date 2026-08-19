@@ -21,6 +21,19 @@
   gap: 0.75rem;
 }
 
+/* 배속 — 재생·정지와 같은 줄의 작은 순환 버튼 */
+.rateBtn {
+  padding: 0.125rem 0.375rem;
+  border: 1px solid #ab9e97;
+  border-radius: 999px;
+  color: #ab9e97;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 0.875rem;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
 .playBtn {
   position: relative;
   display: grid;
