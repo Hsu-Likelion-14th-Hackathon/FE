@@ -29,6 +29,9 @@ export async function getFloors() {
   const result = await apiFetch(API.floor.list, { unwrap: true })
   return {
     storeName: result.storeName ?? '',
+    // 무대 해설 음성(2026-08-19 추가) — 비행 MAPS와 가이드 개요의 도슨트.
+    introAudioUrl: result.introAudioUrl ?? null,
+    guideAudioUrl: result.guideAudioUrl ?? null,
     floors: (result.floors ?? []).map(toFloor),
   }
 }

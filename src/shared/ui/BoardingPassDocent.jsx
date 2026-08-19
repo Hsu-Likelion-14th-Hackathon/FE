@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
+import docentPauseImg from '@/shared/assets/boarding-pass/flight/docent-pause.svg'
 import docentPlayImg from '@/shared/assets/boarding-pass/flight/docent-play.svg'
 import docentStopImg from '@/shared/assets/boarding-pass/flight/docent-stop.svg'
 
@@ -39,6 +40,10 @@ function DocentHintWave() {
  * 해설을 멈추고 갈아끼운다 — 남겨 두면 두 층의 음성이 겹친다. 배속은 층을
  * 옮겨도 유지한다 — 듣는 속도는 층이 아니라 사람의 취향이다.
  *
+ * 조작은 실제 플레이어처럼:
+ *   - 재생 버튼: 재생 ⇄ 일시정지 토글. 멈춘 지점을 기억했다 이어 튼다.
+ *   - 네모 버튼: 처음부터 다시 튼다.
+ *
  * audioUrl이 없으면(아직 음성이 등록되지 않은 화면) 재생/정지 상태만
  * 표현하는 기존 목 동작으로 남는다. 디자인에 있는 버튼이라 감추지 않는다.
  */
@@ -76,23 +81,38 @@ export default function BoardingPassDocent({ audioUrl = null }) {
     }
   }, [audioUrl])
 
-  const play = () => {
-    setPlaying(true)
-    const audio = audioRef.current
-    if (!audio) return
+  const startPlayback = (audio) => {
     audio.playbackRate = rate
+    setPlaying(true)
     // 재생 실패(네트워크·정책)는 조용히 정지 상태로 되돌린다 — 여기서
     // 막혀도 가이드 본문은 그대로 읽을 수 있다.
     audio.play().catch(() => setPlaying(false))
   }
 
-  const stop = () => {
-    setPlaying(false)
+  /** 재생 ⇄ 일시정지. pause는 currentTime을 건드리지 않아 지점이 남는다. */
+  const togglePlay = () => {
     const audio = audioRef.current
-    if (audio) {
-      audio.pause()
-      audio.currentTime = 0
+    if (!audio) {
+      setPlaying((current) => !current)
+      return
     }
+    if (playing) {
+      audio.pause()
+      setPlaying(false)
+      return
+    }
+    startPlayback(audio)
+  }
+
+  /** 처음부터 다시 튼다. */
+  const restart = () => {
+    const audio = audioRef.current
+    if (!audio) {
+      setPlaying(false)
+      return
+    }
+    audio.currentTime = 0
+    startPlayback(audio)
   }
 
   const cycleRate = () => {
@@ -118,20 +138,27 @@ export default function BoardingPassDocent({ audioUrl = null }) {
         </button>
         <button
           type="button"
-          aria-label="도슨트 재생"
+          aria-label={playing ? '도슨트 일시정지' : '도슨트 재생'}
           aria-pressed={playing}
           className={styles.playBtn}
-          onClick={play}
+          onClick={togglePlay}
         >
-          <span aria-hidden="true" className={styles.playFill} />
-          <img src={docentPlayImg} alt="" className={styles.playIcon} />
+          {/* 일시정지 아이콘은 정지 아이콘과 같은 문법(흰 원판 + 브라운 구멍)
+              이라 채움이 제 안에 있다. 재생 삼각형만 뒤판(playFill)이 필요하다. */}
+          {playing ? (
+            <img src={docentPauseImg} alt="" className={styles.playIcon} />
+          ) : (
+            <>
+              <span aria-hidden="true" className={styles.playFill} />
+              <img src={docentPlayImg} alt="" className={styles.playIcon} />
+            </>
+          )}
         </button>
         <button
           type="button"
-          aria-label="도슨트 정지"
-          aria-pressed={!playing}
+          aria-label="도슨트 처음부터 재생"
           className={styles.stopBtn}
-          onClick={stop}
+          onClick={restart}
         >
           <img src={docentStopImg} alt="" className={styles.stopIcon} />
         </button>

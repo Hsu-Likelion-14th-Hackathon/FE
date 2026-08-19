@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 
 import BoardingTicketCard from '@/features/boarding-pass/boarding-ticket/BoardingTicketCard.jsx'
 import { completeBoardingPass, getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
+import { getFloors } from '@/shared/api/floorApi.js'
 import cameraDotImg from '@/shared/assets/boarding-pass/flight/camera-dot.svg'
 import controlArrowImg from '@/shared/assets/boarding-pass/flight/control-arrow.svg'
 import controlBrightnessImg from '@/shared/assets/boarding-pass/flight/control-brightness.svg'
@@ -27,7 +28,7 @@ import styles from './FlightPage.module.scss'
 /**
  * 비행 MAPS 페이지 (41)(43) + 티켓 시트 (42).
  * 여행 가이드 → /boarding-pass/guide.
- * 음성 도슨트 = M-01 mock (재생/정지 토글만).
+ * 음성 도슨트 = 비행 인트로 해설(GET /floors의 introAudioUrl).
  */
 export function Component() {
   const navigate = useNavigate()
@@ -115,6 +116,20 @@ export function Component() {
     if (shouldClose) setTicketOpen(false)
   }
 
+  // 비행 무대의 도슨트 음성. 실패해도 화면은 그대로다 — 도슨트만 목으로 남는다.
+  const [introAudioUrl, setIntroAudioUrl] = useState(null)
+  useEffect(() => {
+    let alive = true
+    getFloors()
+      .then(({ introAudioUrl: url }) => {
+        if (alive) setIntroAudioUrl(url ?? null)
+      })
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [])
+
   useEffect(() => {
     let cancelled = false
     getLatestBoardingPass()
@@ -153,6 +168,7 @@ export function Component() {
             title="MAPS"
             closeLabel="닫기"
             onClose={() => navigate('/boarding-pass/scan')}
+            audioUrl={introAudioUrl}
           />
 
           <div className={styles.monitorWrap}>

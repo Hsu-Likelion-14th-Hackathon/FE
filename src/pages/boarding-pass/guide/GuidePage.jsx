@@ -44,6 +44,8 @@ export function Component() {
   const [floor, setFloor] = useState(() => initialGuideFloor(location))
   // 층 목록·추천 동선. 상세는 층에 처음 들어갈 때 받아 캐시한다.
   const [floors, setFloors] = useState(null)
+  // 가이드 개요의 도슨트 음성 — 층 해설과 달리 목록 응답에 실려 온다.
+  const [overviewAudioUrl, setOverviewAudioUrl] = useState(null)
   const [floorsError, setFloorsError] = useState(null)
   const [retryCount, setRetryCount] = useState(0)
   const [route, setRoute] = useState(null)
@@ -88,9 +90,10 @@ export function Component() {
     let alive = true
 
     getFloors()
-      .then(({ floors: loaded }) => {
+      .then(({ floors: loaded, guideAudioUrl }) => {
         if (!alive) return
         setFloors(loaded)
+        setOverviewAudioUrl(guideAudioUrl ?? null)
         setFloorsError(null)
       })
       .catch((cause) => {
@@ -202,11 +205,11 @@ export function Component() {
             title="TRAVEL GUIDE"
             closeLabel="비행으로 돌아가기"
             onClose={() => navigate('/boarding-pass/flight')}
-            // 지금 보는 층의 해설(GET /floors의 audioUrl). 개요에는 층 해설이
-            // 없고, 층을 옮기면 도슨트가 음성을 갈아끼운다.
+            // 지금 보는 화면의 해설 — 개요는 목록 응답의 guideAudioUrl,
+            // 층은 그 층의 audioUrl. 옮기면 도슨트가 음성을 갈아끼운다.
             audioUrl={
               floor === 'overview'
-                ? null
+                ? overviewAudioUrl
                 : (floors?.find((item) => item.id === floor)?.audioUrl ?? null)
             }
           />
