@@ -87,6 +87,39 @@ describe('BoardingPassDocent', () => {
     )
   })
 
+  it('배속 버튼은 1 → 1.25 → 1.5 → 2를 돌고 재생 중에도 바로 반영된다', () => {
+    render(<BoardingPassDocent audioUrl="https://cdn/floor-journey.mp3" />)
+    const rateButton = screen.getByRole('button', { name: /재생 속도/ })
+
+    fireEvent.click(screen.getByRole('button', { name: '도슨트 재생' }))
+    const [audio] = FakeAudio.instances
+    expect(audio.playbackRate ?? 1).toBe(1)
+
+    fireEvent.click(rateButton)
+    expect(audio.playbackRate).toBe(1.25)
+    expect(rateButton).toHaveTextContent('1.25x')
+
+    fireEvent.click(rateButton)
+    fireEvent.click(rateButton)
+    expect(audio.playbackRate).toBe(2)
+
+    // 한 바퀴 돌면 처음으로.
+    fireEvent.click(rateButton)
+    expect(audio.playbackRate).toBe(1)
+  })
+
+  it('층이 바뀌어도 배속은 유지된다', () => {
+    // 듣는 속도는 층이 아니라 사람의 취향이다.
+    const { rerender } = render(<BoardingPassDocent audioUrl="https://cdn/floor-journey.mp3" />)
+    fireEvent.click(screen.getByRole('button', { name: /재생 속도/ }))
+
+    rerender(<BoardingPassDocent audioUrl="https://cdn/floor-emblem.mp3" />)
+    fireEvent.click(screen.getByRole('button', { name: '도슨트 재생' }))
+
+    const second = FakeAudio.instances[1]
+    expect(second.playbackRate).toBe(1.25)
+  })
+
   it('audioUrl이 없으면 눌러도 소리 없이 상태 표시만 한다', () => {
     render(<BoardingPassDocent />)
 
