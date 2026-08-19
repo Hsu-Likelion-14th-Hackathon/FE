@@ -202,6 +202,13 @@ export function Component() {
             title="TRAVEL GUIDE"
             closeLabel="비행으로 돌아가기"
             onClose={() => navigate('/boarding-pass/flight')}
+            // 지금 보는 층의 해설(GET /floors의 audioUrl). 개요에는 층 해설이
+            // 없고, 층을 옮기면 도슨트가 음성을 갈아끼운다.
+            audioUrl={
+              floor === 'overview'
+                ? null
+                : (floors?.find((item) => item.id === floor)?.audioUrl ?? null)
+            }
           />
 
           <div key={floor} className={styles.scroll}>
