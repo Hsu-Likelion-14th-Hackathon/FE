@@ -329,11 +329,7 @@
   z-index: 2;
   top: 212px;
   left: 50%;
-  width: 80px;
-  height: 80px;
-  animation: fitting-spin 900ms linear infinite;
   transform: translateX(-50%);
-  transform-origin: center;
 }
 
 .loadingMessage {
@@ -394,16 +390,6 @@
   outline-offset: 3px;
 }
 
-@keyframes fitting-spin {
-  from {
-    transform: translateX(-50%) rotate(0deg);
-  }
-
-  to {
-    transform: translateX(-50%) rotate(360deg);
-  }
-}
-
 @media (hover: hover) and (pointer: fine) {
   .closeButton:hover,
   .uploadButton:hover {
@@ -437,10 +423,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .spinner {
-    animation: none;
-  }
-
   .progressValue {
     transition: none;
   }

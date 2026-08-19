@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 
 import fittingSparkleIcon from '@/assets/icons/state/fitting-sparkle.svg'
-import fittingSpinner from '@/assets/icons/state/fitting-spinner.png'
 import closeIcon from '@/assets/icons/state/close.svg'
 import creditDiamondIcon from '@/assets/icons/state/credit-diamond.svg'
 import uploadArrowIcon from '@/assets/icons/state/upload-arrow.svg'
+import LoadingRingSpinner from '@/features/boarding-pass/loading-ring/LoadingRingSpinner.jsx'
 import { deleteBodyImage, getMe, registerBodyImage } from '@/shared/api/authApi.js'
 import {
   createFittingSession,
@@ -237,7 +237,9 @@ function LoadingStage({ progress, onClose }) {
         Loading<span aria-hidden="true"> ...</span>
       </p>
 
-      <img className={styles.spinner} src={fittingSpinner} alt="" />
+      <div className={styles.spinner}>
+        <LoadingRingSpinner />
+      </div>
 
       <p className={styles.loadingMessage}>
         <span>고객님을 위한</span>
