@@ -1,5 +1,11 @@
 # Vercel Personal Mirror Implementation Plan
 
+> **폐기됨 (2026-08-20).** 조직 저장소가 공개로 바뀌면서 Vercel Hobby가
+> 조직 저장소에 직접 연결할 수 있게 됐다. Vercel 프로젝트를
+> `Hsu-Likelion-14th-Hackathon/FE`의 `main`에 다시 연결했고, 동기화
+> 워크플로(`.github/workflows/sync-main.yml`)는 삭제했다. 아래 내용은
+> 그때의 기록으로만 남긴다.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Verify `Hsu-Likelion-14th-Hackathon/FE:develop`, synchronize its tracked source into `khy1121/HACKATHON_FE:develop`, and let Vercel deploy the personal repository.
