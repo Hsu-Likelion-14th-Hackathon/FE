@@ -1,16 +1,16 @@
-name: Sync develop to personal repository
+name: Sync main to personal repository
 
 on:
   push:
     branches:
-      - develop
+      - main
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: sync-develop-to-personal
+  group: sync-main-to-personal
   cancel-in-progress: true
 
 jobs:
@@ -22,10 +22,10 @@ jobs:
       source_sha: ${{ steps.source.outputs.sha }}
 
     steps:
-      - name: Checkout organization develop
+      - name: Checkout organization main
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: develop
+          ref: main
           path: source
           persist-credentials: false
 
@@ -93,6 +93,9 @@ jobs:
           git clone --quiet "https://github.com/khy1121/HACKATHON_FE.git" target
           cd target
 
+          # 조직 저장소는 main을 기본으로 쓰지만, 개인 저장소의 기본 브랜치는
+          # 여전히 develop이다. 여기까지 main으로 바꾸면 개인 저장소에 기본이
+          # 아닌 브랜치가 생기고 develop은 그대로 멈췄다.
           if git show-ref --verify --quiet refs/heads/develop; then
             git switch develop
           elif git show-ref --verify --quiet refs/remotes/origin/develop; then
@@ -114,5 +117,5 @@ jobs:
           source_sha="$(git -C ../source rev-parse HEAD)"
           git config user.name "khy1121"
           git config user.email "$PERSONAL_GIT_EMAIL"
-          git commit --allow-empty --message "chore: sync organization develop (${source_sha:0:7})"
+          git commit --allow-empty --message "chore: sync organization main (${source_sha:0:7})"
           git push origin develop
