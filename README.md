@@ -330,12 +330,6 @@ rewrite가 없으면 `/boarding-pass/passport`를 새로고침할 때 404가 납
 - [와이어프레임](https://www.figma.com/design/nPoHrwxi0e0738SWNzN7rN/%EB%A9%8B%EC%82%AC-14%EA%B8%B0-%EC%A4%91%EC%95%99%ED%86%A4--%EB%B3%B5%EC%82%AC-?node-id=0-1)
 - [디자인](https://www.figma.com/design/nPoHrwxi0e0738SWNzN7rN/%EB%A9%8B%EC%82%AC-14%EA%B8%B0-%EC%A4%91%EC%95%99%ED%86%A4--%EB%B3%B5%EC%82%AC-?node-id=1-2)
 
-## 문서
-
-- [프론트엔드 개발 계획](./docs/frontend-development-plan.md)
-- [API 연동 계획](./docs/api-integration-plan.md) · [연동 백로그](./docs/api-integration-backlog.md)
-- [API 명세 모음](./docs/api/) — 노션에서 내보낸 엔드포인트별 문서
-- [서드파티 고지](./docs/third-party-notices.md)
 
 **백엔드 저장소** — [Hsu-Likelion-14th-Hackathon/BE](https://github.com/Hsu-Likelion-14th-Hackathon/BE)
 
