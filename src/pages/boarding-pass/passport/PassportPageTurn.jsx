@@ -7,12 +7,12 @@ import coverWordSrc from '@/shared/assets/boarding-pass/passport/cover-passport.
 import coverStarSrc from '@/shared/assets/boarding-pass/passport/cover-star.png'
 import journeyDecorationSrc from '@/shared/assets/boarding-pass/passport/journey-decoration.png'
 import journeyTicketSrc from '@/shared/assets/boarding-pass/passport/journey-ticket.png'
-import hausSrc from '@/shared/assets/boarding-pass/passport/mcm-haus.png'
+import hausSrc from '@/shared/assets/boarding-pass/passport/mcm-haus.webp'
 import wordSrc from '@/shared/assets/boarding-pass/passport/passport-word.webp'
 import bowLeftSrc from '@/shared/assets/boarding-pass/passport/passport-bow-left.png'
 import bowRightSrc from '@/shared/assets/boarding-pass/passport/passport-bow-right.png'
-import coverSrc from '@/shared/assets/boarding-pass/passport/passport-cover.png'
-import emblemSrc from '@/shared/assets/boarding-pass/passport/passport-emblem.png'
+import coverSrc from '@/shared/assets/boarding-pass/passport/passport-cover.webp'
+import emblemSrc from '@/shared/assets/boarding-pass/passport/passport-emblem.webp'
 import stampBowSrc from '@/shared/assets/boarding-pass/passport/passport-stamp-bow.png'
 // 내지는 알파가 필요해 새로 잘라 받았고, 설계(253.5x394)의 2배로 굽는 텍스처에
 // 맞춰 507x788로 넣었다. 같은 크기의 PNG는 한 장에 620KB라 WebP로 둔다.

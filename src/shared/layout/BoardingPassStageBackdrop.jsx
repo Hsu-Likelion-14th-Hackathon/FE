@@ -1,4 +1,4 @@
-import stageBg from '@/shared/assets/boarding-pass/stage-bg.png'
+import stageBg from '@/shared/assets/boarding-pass/stage-bg.webp'
 
 import styles from './BoardingPassStageBackdrop.module.scss'
 

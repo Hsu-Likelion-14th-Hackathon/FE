@@ -14,11 +14,11 @@ import diamantSoftPinkImage from '@/assets/images/products/diamant-soft-pink.web
 import duffelBlackImage from '@/assets/images/products/duffel-black.webp'
 import newLizBeigeImage from '@/assets/images/products/new-liz-beige.webp'
 import pinaCinnamonImage from '@/assets/images/products/pina-cinnamon.webp'
-import econylImage from '@/shared/assets/boarding-pass/guide/product-econyl.png'
-import himmelImage from '@/shared/assets/boarding-pass/guide/product-himmel.png'
-import toteCognacImage from '@/shared/assets/boarding-pass/guide/product-tote-cognac.png'
-import trolleyImage from '@/shared/assets/boarding-pass/guide/product-trolley.png'
-import weekenderImage from '@/shared/assets/boarding-pass/guide/product-weekender.png'
+import econylImage from '@/shared/assets/boarding-pass/guide/product-econyl.webp'
+import himmelImage from '@/shared/assets/boarding-pass/guide/product-himmel.webp'
+import toteCognacImage from '@/shared/assets/boarding-pass/guide/product-tote-cognac.webp'
+import trolleyImage from '@/shared/assets/boarding-pass/guide/product-trolley.webp'
+import weekenderImage from '@/shared/assets/boarding-pass/guide/product-weekender.webp'
 
 /* ------------------------------------------------------------------ 상품 */
 

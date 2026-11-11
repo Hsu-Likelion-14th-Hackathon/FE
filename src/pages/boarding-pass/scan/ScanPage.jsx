@@ -11,7 +11,7 @@ import checkCircleIcon from '@/shared/assets/boarding-pass/scan/check-circle.svg
 import pointScanIcon from '@/shared/assets/boarding-pass/scan/point-scan.svg'
 import scanButtonIcon from '@/shared/assets/boarding-pass/scan/scan-button-icon.svg'
 import scanFrameIcon from '@/shared/assets/boarding-pass/scan/scan-frame.svg'
-import stageBack from '@/shared/assets/boarding-pass/scan/stage-back.png'
+import stageBack from '@/shared/assets/boarding-pass/scan/stage-back.webp'
 import scrollDocumentToTop from '@/shared/layout/scrollDocumentToTop.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import { useToast } from '@/shared/ui/toastContext.js'
