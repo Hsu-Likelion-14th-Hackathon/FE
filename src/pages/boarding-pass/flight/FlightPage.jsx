@@ -9,7 +9,7 @@ import controlArrowImg from '@/shared/assets/boarding-pass/flight/control-arrow.
 import controlBrightnessImg from '@/shared/assets/boarding-pass/flight/control-brightness.svg'
 import controlPowerImg from '@/shared/assets/boarding-pass/flight/control-power.svg'
 import controlSoundImg from '@/shared/assets/boarding-pass/flight/control-sound.svg'
-import decoRightImg from '@/shared/assets/boarding-pass/flight/deco-right.png'
+import decoRightImg from '@/shared/assets/boarding-pass/flight/deco-right.webp'
 import hingeImg from '@/shared/assets/boarding-pass/flight/hinge.svg'
 import mapImg from '@/shared/assets/boarding-pass/flight/map.webp'
 import planeMarkerImg from '@/shared/assets/boarding-pass/flight/plane-marker.svg'
