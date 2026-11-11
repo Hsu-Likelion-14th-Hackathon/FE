@@ -82,6 +82,14 @@
   }
 }
 
+/* 인앱 브라우저는 위아래 바가 늘 떠 있어 lvh(바가 숨은 높이)를 쓰면 하단이
+   바 밑에 깔린다. browserViewport.js가 잰 실제 높이를 쓴다. 값이 들어오기
+   전에는 바가 떠 있는 높이(svh)로 둔다. */
+html[data-inapp] {
+  --mcm-viewport-stable: var(--mcm-app-height, 100svh);
+  --mcm-viewport-dynamic: var(--mcm-app-height, 100svh);
+}
+
 @media (min-width: 744px) and (max-width: 1199px) {
   :root {
     --mcm-shell-inline-size: 100vw;

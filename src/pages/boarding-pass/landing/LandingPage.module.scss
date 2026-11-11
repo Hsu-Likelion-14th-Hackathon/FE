@@ -1,6 +1,11 @@
 /* (23) 랜딩 — Figma 492:4896 · rem (hairline만 px) */
 
 .stage {
+  /* Figma 기준 높이(844)보다 짧은 만큼. 인앱 브라우저(약 655px)처럼 바가
+     늘 떠 있는 화면에서 하단 버튼이 바 밑에 깔리지 않게, 위 여백·비행기
+     여백·비행기 크기를 이 값에 비례해 줄인다. 844 이상이면 0이라 Figma 그대로다. */
+  --landing-deficit: max(0px, calc(var(--mcm-design-height) - var(--mcm-viewport-stable)));
+
   position: relative;
   display: flex;
   flex: 1 0 auto;
@@ -62,7 +67,8 @@
   align-items: center;
   width: 100%;
   /* Figma 492:4954 copy top 206(상태바 포함) → 스테이지 기준 ≈71 */
-  padding: 4.4375rem 1.25rem max(2.125rem, var(--mcm-safe-bottom));
+  padding: max(3.25rem, calc(4.4375rem - var(--landing-deficit) * 0.2)) 1.25rem
+    max(2.125rem, var(--mcm-safe-bottom));
   /* 남는 하단 여백은 Figma처럼 페이드만 — CTA를 바닥으로 밀지 않음 */
 }
 
@@ -119,9 +125,9 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 13.0625rem; /* 209 */
-  margin-top: 2.25rem; /* ~36 */
-  margin-bottom: 2.25rem; /* ~36 */
+  height: max(10rem, calc(13.0625rem - var(--landing-deficit) * 0.15)); /* 209 */
+  margin-top: max(1rem, calc(2.25rem - var(--landing-deficit) * 0.08)); /* ~36 */
+  margin-bottom: max(1rem, calc(2.25rem - var(--landing-deficit) * 0.08)); /* ~36 */
   animation: planeFloat 3.2s ease-in-out infinite;
 }
 
@@ -139,7 +145,12 @@
 .planeFrame {
   position: relative;
   z-index: 1;
-  width: min(15.375rem, 100%); /* 246 */
+  /* 높이가 줄면 비행기도 비율을 지켜 함께 준다 */
+  width: min(
+    15.375rem,
+    100%,
+    calc(max(10rem, 13.0625rem - var(--landing-deficit) * 0.15) * 246 / 209)
+  ); /* 246 */
   height: auto;
   aspect-ratio: 246 / 209;
 }

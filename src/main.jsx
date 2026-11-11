@@ -5,6 +5,9 @@ import { RouterProvider } from 'react-router'
 import { router } from '@/app/router.jsx'
 import '@/styles/tailwind.css'
 import '@/styles/globals.scss'
+import { installBrowserViewport } from '@/shared/layout/browserViewport.js'
+
+installBrowserViewport()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

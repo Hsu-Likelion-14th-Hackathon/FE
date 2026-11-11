@@ -56,11 +56,22 @@
   transform: translateY(1.25rem);
 }
 
-/* 시각 박스 310×412 → 20% 확대 = 372×494.4 */
+/* 시각 박스 310×412 → 20% 확대 = 372×494.4
+   높이가 짧은 화면(인앱 브라우저 약 655px)에서는 카드가 스테이지를 넘쳐
+   Next가 바 밑에 깔리고 아래에 흰 띠가 생겼다. 스테이지 높이에서 Next·여백
+   몫(9rem)을 뺀 만큼으로 카드 높이를 묶는다. 844 기준에서는 폭 상한(372)이
+   먼저 걸려 Figma 크기 그대로다. */
 .cardWrap {
   position: relative;
   z-index: 1;
-  width: min(23.25rem, 100%);
+  width: min(
+    23.25rem,
+    100%,
+    calc(
+      (var(--mcm-viewport-stable) - var(--mcm-header-height) - var(--mcm-safe-top) - 9rem) * 310 /
+        412
+    )
+  );
   flex: 0 0 auto;
   aspect-ratio: 310 / 412;
   background: transparent;
