@@ -46,13 +46,13 @@
 
 .flag,
 .optionFlag {
-  --CountryFlagIcon-height: 18px;
-
   flex: none;
+  width: 27px;
+  height: 18px;
   overflow: hidden;
   border: 1px solid rgb(25 25 25 / 10%);
   border-radius: 2px;
-  background-position: center;
+  object-fit: cover;
 }
 
 .placeholder,
