@@ -23,14 +23,14 @@
 
 | 키                | 경로                                                  | 원본 nodeId      | 타입 | 사용처                                                                                  |
 | ----------------- | ----------------------------------------------------- | ---------------- | ---- | --------------------------------------------------------------------------------------- |
-| intro-pass-card   | src/shared/assets/boarding-pass/intro/pass-card.png   | 3012:414+426+427 | png  | (22) 인트로 패스 카드 그래픽만(보우·리본, 카피 제외). Figma `EcjMcxEJlMBy1c4A1aCKD8` 4x |
+| intro-pass-card   | src/shared/assets/boarding-pass/intro/pass-card.webp  | 3012:414+426+427 | webp | (22) 인트로 패스 카드 그래픽만(보우·리본, 카피 제외). Figma `EcjMcxEJlMBy1c4A1aCKD8` 4x |
 | intro-ticket-logo | src/shared/assets/boarding-pass/intro/ticket-logo.png | 472:4805         | png  | 티켓/완료 등에서 쓰는 MCM 로렐 엠블럼                                                   |
 
 ## landing/
 
 | 키                     | 경로                                                   | 원본 nodeId | 타입 | 사용처                                               |
 | ---------------------- | ------------------------------------------------------ | ----------- | ---- | ---------------------------------------------------- |
-| landing-plane          | src/shared/assets/boarding-pass/landing/plane.png      | 502:4974    | png  | (23) 랜딩 중앙 MCM 비행기 히어로 이미지              |
+| landing-plane          | src/shared/assets/boarding-pass/landing/plane.webp     | 502:4974    | webp | (23) 랜딩 중앙 MCM 비행기 히어로 이미지              |
 | landing-cta-plane      | src/shared/assets/boarding-pass/landing/cta-plane.svg  | 492:4963    | svg  | (23) 「비행 시작하기」 CTA 우측 비행기 아이콘        |
 | landing-stage-back     | src/shared/assets/boarding-pass/landing/stage-back.png | 492:4942    | png  | (23) 랜딩 스테이지 배경 글로우                       |
 | landing-stage-back-svg | src/shared/assets/boarding-pass/landing/stage-back.svg | 492:4942    | svg  | (23) 랜딩 스테이지 배경 글로우(Figma SVG · PNG 대체) |
@@ -46,7 +46,7 @@
 | 키                      | 경로                                                     | 원본 nodeId       | 타입 | 사용처                                                                           |
 | ----------------------- | -------------------------------------------------------- | ----------------- | ---- | -------------------------------------------------------------------------------- |
 | complete-stage-back     | src/shared/assets/boarding-pass/complete/stage-back.svg  | 532:6148          | svg  | (33)(34) 완료 스테이지 스포트라이트 배경                                         |
-| complete-stage-back-png | src/shared/assets/boarding-pass/complete/stage-back.png  | 3002:379          | png  | (33)(34) 완료 본문 단색 그라데이션+비세토스 배경. Figma `EcjMcxEJlMBy1c4A1aCKD8` |
+| complete-stage-back-png | src/shared/assets/boarding-pass/complete/stage-back.webp | 3002:379          | webp | (33)(34) 완료 본문 단색 그라데이션+비세토스 배경. Figma `EcjMcxEJlMBy1c4A1aCKD8` |
 | complete-ticket-card    | src/shared/assets/boarding-pass/complete/ticket-card.png | 532:6224+573:6226 | png  | (33)(34) 예전 정적 합성 보관용 — 런타임은 BoardingTicketCard                     |
 
 ## issue/
@@ -67,7 +67,7 @@
 
 | 키                | 경로                                                      | 원본 nodeId | 타입 | 사용처                                                                |
 | ----------------- | --------------------------------------------------------- | ----------- | ---- | --------------------------------------------------------------------- |
-| scan-stage-back   | src/shared/assets/boarding-pass/scan/stage-back.png       | 1369:685    | png  | (35)~(40) 스캔 페이지 배경. Figma `EcjMcxEJlMBy1c4A1aCKD8` 프레임 PNG |
+| scan-stage-back   | src/shared/assets/boarding-pass/scan/stage-back.webp      | 1369:685    | webp | (35)~(40) 스캔 페이지 배경. Figma `EcjMcxEJlMBy1c4A1aCKD8` 프레임 PNG |
 | scan-point-scan   | src/shared/assets/boarding-pass/scan/point-scan.svg       | 576:6470    | svg  | (35) 스캔 대기 상태 중앙 point-scan 아이콘                            |
 | scan-button-icon  | src/shared/assets/boarding-pass/scan/scan-button-icon.svg | 576:6454    | svg  | (35) "평가용 탑승권 스캔 시뮬레이션" 버튼 좌측 스캔 프레임 아이콘     |
 | scan-check-circle | src/shared/assets/boarding-pass/scan/check-circle.svg     | 576:6699    | svg  | (36)(37) SUCCESS SCAN 체크 서클 아이콘                                |
@@ -77,7 +77,7 @@
 
 | 키                        | 경로                                                          | 원본 nodeId | 타입 | 사용처                                                                              |
 | ------------------------- | ------------------------------------------------------------- | ----------- | ---- | ----------------------------------------------------------------------------------- |
-| flight-map                | src/shared/assets/boarding-pass/flight/map.png                | 635:8155    | png  | (41)(43) MAPS 태블릿 프레임 안 서울→뮌헨 지도 이미지 ((42) 재사용)                  |
+| flight-map                | src/shared/assets/boarding-pass/flight/map.webp               | 635:8155    | webp | (41)(43) MAPS 태블릿 프레임 안 서울→뮌헨 지도 이미지 ((42) 재사용)                  |
 | flight-cloud-large        | src/shared/assets/boarding-pass/flight/cloud-large.png        | 635:8116    | png  | (41)~(45) 공통 배경 기체 노즈 데코 (상단 202×151·하단 354×254 동일 이미지 2회 배치) |
 | flight-plane-deco         | src/shared/assets/boarding-pass/flight/plane-deco.png         | 635:8118    | png  | (41)~(45) 공통 배경 좌하단 비행기 데코 (캔버스 좌측에서 클리핑되는 형태)            |
 | flight-deco-right         | src/shared/assets/boarding-pass/flight/deco-right.png         | 671:8484    | png  | (41)(43) 우측 MCM 트렁크(보석함) 데코 이미지                                        |
@@ -95,45 +95,45 @@
 | flight-docent-stop        | src/shared/assets/boarding-pass/flight/docent-stop.svg        | 635:8141    | svg  | (41)(43)(42) 음성 도슨트 정지 아이콘                                                |
 | flight-nav-prev           | src/shared/assets/boarding-pass/flight/nav-prev.svg           | 635:8194    | svg  | (41)(43) 하단 재생바 이전 버튼                                                      |
 | flight-nav-next           | src/shared/assets/boarding-pass/flight/nav-next.svg           | 635:8206    | svg  | (41)(43) 하단 재생바 다음 버튼                                                      |
-| flight-ticket-sheet-back  | src/shared/assets/boarding-pass/flight/ticket-sheet-back.png  | 3002:368    | png  | (42) 티켓 바텀시트 단색+비세토스 배경. Figma `EcjMcxEJlMBy1c4A1aCKD8` 프레임 PNG    |
+| flight-ticket-sheet-back  | src/shared/assets/boarding-pass/flight/ticket-sheet-back.webp | 3002:368    | webp | (42) 티켓 바텀시트 단색+비세토스 배경. Figma `EcjMcxEJlMBy1c4A1aCKD8` 프레임 PNG    |
 
 ## stage/
 
-| 키       | 경로                                         | 원본 nodeId | 타입 | 사용처                                                                 |
-| -------- | -------------------------------------------- | ----------- | ---- | ---------------------------------------------------------------------- |
-| stage-bg | src/shared/assets/boarding-pass/stage-bg.png | 1025:293    | png  | (43)~(47) 상단 바 아래 배경. Figma `GHEgor3gw7V9BMj2KLVZqf` 프레임 PNG |
+| 키       | 경로                                          | 원본 nodeId | 타입 | 사용처                                                                 |
+| -------- | --------------------------------------------- | ----------- | ---- | ---------------------------------------------------------------------- |
+| stage-bg | src/shared/assets/boarding-pass/stage-bg.webp | 1025:293    | webp | (43)~(47) 상단 바 아래 배경. Figma `GHEgor3gw7V9BMj2KLVZqf` 프레임 PNG |
 
 ## guide/
 
-| 키                        | 경로                                                          | 원본 nodeId | 타입 | 사용처                                             |
-| ------------------------- | ------------------------------------------------------------- | ----------- | ---- | -------------------------------------------------- |
-| guide-deco-top            | src/shared/assets/boarding-pass/guide/deco-top.png            | 683:8781    | png  | (44) 가이드 개요 우상단 MCM 비행기 데코 이미지     |
-| guide-overview-main       | src/shared/assets/boarding-pass/guide/overview-main.png       | 683:8782    | png  | (44) 가이드 개요 좌측 메인 MCM HAUS 건물 이미지    |
-| guide-overview-figure     | src/shared/assets/boarding-pass/guide/overview-figure.png     | 683:8794    | png  | (44) 가이드 개요 우측 화살표 참(charm) 장식 이미지 |
-| guide-nav-prev            | src/shared/assets/boarding-pass/guide/nav-prev.svg            | 702:9738    | svg  | (44)~(47) 하단 이전 원형 화살표                    |
-| guide-nav-next            | src/shared/assets/boarding-pass/guide/nav-next.svg            | 702:9750    | svg  | (44)~(47) 하단 다음 원형 화살표                    |
-| guide-product-trolley     | src/shared/assets/boarding-pass/guide/product-trolley.png     | 702:9780    | png  | (45) 1F Ottomar 비세토스 트롤리                    |
-| guide-product-weekender   | src/shared/assets/boarding-pass/guide/product-weekender.png   | 702:9789    | png  | (45) 1F Ottomar 그라데이션 위켄더                  |
-| guide-emblem-laurel       | src/shared/assets/boarding-pass/guide/emblem-laurel.png       | 722:10071   | png  | (46) 2F 로렐 엠블럼 글로우                         |
-| guide-emblem-crest        | src/shared/assets/boarding-pass/guide/emblem-crest.png        | 722:10073   | png  | (46) 2F MCM 크레스트 로고                          |
-| guide-product-tote-cognac | src/shared/assets/boarding-pass/guide/product-tote-cognac.png | 722:10064   | png  | (46) 2F 뮌헨 비세토스 토트 Cognac                  |
-| guide-product-himmel      | src/shared/assets/boarding-pass/guide/product-himmel.png      | 736:10195   | png  | (47) 3F Himmel Shopper in MIRUM®                   |
-| guide-product-econyl      | src/shared/assets/boarding-pass/guide/product-econyl.png      | 736:10202   | png  | (47) 3F Ottomar ECONYL® 위켄더 백팩                |
+| 키                        | 경로                                                           | 원본 nodeId | 타입 | 사용처                                             |
+| ------------------------- | -------------------------------------------------------------- | ----------- | ---- | -------------------------------------------------- |
+| guide-deco-top            | src/shared/assets/boarding-pass/guide/deco-top.png             | 683:8781    | png  | (44) 가이드 개요 우상단 MCM 비행기 데코 이미지     |
+| guide-overview-main       | src/shared/assets/boarding-pass/guide/overview-main.webp       | 683:8782    | webp | (44) 가이드 개요 좌측 메인 MCM HAUS 건물 이미지    |
+| guide-overview-figure     | src/shared/assets/boarding-pass/guide/overview-figure.png      | 683:8794    | png  | (44) 가이드 개요 우측 화살표 참(charm) 장식 이미지 |
+| guide-nav-prev            | src/shared/assets/boarding-pass/guide/nav-prev.svg             | 702:9738    | svg  | (44)~(47) 하단 이전 원형 화살표                    |
+| guide-nav-next            | src/shared/assets/boarding-pass/guide/nav-next.svg             | 702:9750    | svg  | (44)~(47) 하단 다음 원형 화살표                    |
+| guide-product-trolley     | src/shared/assets/boarding-pass/guide/product-trolley.webp     | 702:9780    | webp | (45) 1F Ottomar 비세토스 트롤리                    |
+| guide-product-weekender   | src/shared/assets/boarding-pass/guide/product-weekender.webp   | 702:9789    | webp | (45) 1F Ottomar 그라데이션 위켄더                  |
+| guide-emblem-laurel       | src/shared/assets/boarding-pass/guide/emblem-laurel.webp       | 722:10071   | webp | (46) 2F 로렐 엠블럼 글로우                         |
+| guide-emblem-crest        | src/shared/assets/boarding-pass/guide/emblem-crest.png         | 722:10073   | png  | (46) 2F MCM 크레스트 로고                          |
+| guide-product-tote-cognac | src/shared/assets/boarding-pass/guide/product-tote-cognac.webp | 722:10064   | webp | (46) 2F 뮌헨 비세토스 토트 Cognac                  |
+| guide-product-himmel      | src/shared/assets/boarding-pass/guide/product-himmel.webp      | 736:10195   | webp | (47) 3F Himmel Shopper in MIRUM®                   |
+| guide-product-econyl      | src/shared/assets/boarding-pass/guide/product-econyl.webp      | 736:10202   | webp | (47) 3F Ottomar ECONYL® 위켄더 백팩                |
 
 ## passport/
 
 | id                 | path                                                            | Figma node | type | use                        |
 | ------------------ | --------------------------------------------------------------- | ---------- | ---- | -------------------------- |
-| passport-cover     | src/shared/assets/boarding-pass/passport/passport-cover.png     | 52:18570   | png  | Isolated Visetos cover     |
-| passport-spread    | src/shared/assets/boarding-pass/passport/passport-spread.png    | 52:18663   | png  | Isolated open passport     |
-| passport-mcm-haus  | src/shared/assets/boarding-pass/passport/mcm-haus.png           | 52:18723   | png  | MCM HAUS storefront        |
+| passport-cover     | src/shared/assets/boarding-pass/passport/passport-cover.webp    | 52:18570   | webp | Isolated Visetos cover     |
+| passport-spread    | src/shared/assets/boarding-pass/passport/passport-spread.webp   | 52:18663   | webp | Isolated open passport     |
+| passport-mcm-haus  | src/shared/assets/boarding-pass/passport/mcm-haus.webp          | 52:18723   | webp | MCM HAUS storefront        |
 | journey-decoration | src/shared/assets/boarding-pass/passport/journey-decoration.png | 52:19131   | png  | Isolated airplane ornament |
 
 2026-08-12 검증: `passport-spread.png`는 최신 Figma 파일 `aklj7UjNcG6PDFJVRU9JXv`의 exact child `52:18665` raw source를 Figma 배치 크기 507×394로 저장했다. 스탬프 단계는 흰 배경 raster 대신 이 spread와 DOM 스탬프를 사용한다.
 
 | id                  | path                                                             | Figma node | type | use                                               |
 | ------------------- | ---------------------------------------------------------------- | ---------- | ---- | ------------------------------------------------- |
-| passport-emblem     | src/shared/assets/boarding-pass/passport/passport-emblem.png     | 52:18581   | png  | Cover emblem composite                            |
+| passport-emblem     | src/shared/assets/boarding-pass/passport/passport-emblem.webp    | 52:18581   | webp | Cover emblem composite                            |
 | cover-mcm           | src/shared/assets/boarding-pass/passport/cover-mcm.png           | 52:18583   | png  | Cover MCM word                                    |
 | cover-star          | src/shared/assets/boarding-pass/passport/cover-star.png          | 52:18585   | png  | Cover center star                                 |
 | cover-passport      | src/shared/assets/boarding-pass/passport/cover-passport.png      | 52:18584   | png  | Cover PASSPORT word                               |
