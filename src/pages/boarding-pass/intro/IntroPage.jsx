@@ -5,7 +5,7 @@ import EmptyBagToast from '@/features/boarding-pass/empty-bag-toast/EmptyBagToas
 import noticeStyles from '@/features/boarding-pass/notice-toast/PassNoticeToast.module.scss'
 import { getWishlist } from '@/shared/api/wishlistApi.js'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
-import passCard from '@/shared/assets/boarding-pass/intro/pass-card.png'
+import passCard from '@/shared/assets/boarding-pass/intro/pass-card.webp'
 import nextArrow from '@/shared/assets/boarding-pass/intro/next-arrow.svg'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import { useToast } from '@/shared/ui/toastContext.js'
