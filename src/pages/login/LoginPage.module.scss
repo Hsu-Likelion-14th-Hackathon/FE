@@ -117,6 +117,53 @@
 }
 
 /* 테두리를 두른 상자 입력 — 라벨이 상자 위에 앉는 형태다. */
+/* 체험용 데모 모드 안내 — 백엔드가 꺼져 목으로 동작할 때만 보인다.
+   브랜드 브라운을 테두리·배지에, 크림빛 hover 면을 바탕에 써 경고가 아닌
+   안내로 읽히게 한다. */
+.demoNotice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 24px;
+  padding: 14px 16px;
+  border: 1px solid rgb(192 115 70 / 35%);
+  border-left: 3px solid var(--mcm-color-brand-brown);
+  border-radius: 8px;
+  background: var(--mcm-color-hover-surface);
+}
+
+.demoTitle,
+.demoText {
+  margin: 0;
+}
+
+.demoTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mcm-color-brand-brown);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.demoBadge {
+  padding: 1px 6px;
+  border-radius: 999px;
+  color: var(--mcm-color-surface);
+  background: var(--mcm-color-brand-brown);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 18px;
+}
+
+.demoText {
+  color: var(--mcm-color-ink);
+  font-size: 13px;
+  line-height: 20px;
+}
+
 .form {
   display: flex;
   flex-direction: column;
