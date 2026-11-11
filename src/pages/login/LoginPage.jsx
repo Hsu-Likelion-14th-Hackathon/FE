@@ -5,11 +5,19 @@ import backIcon from '@/assets/icons/auth/back.svg'
 import kakaoIcon from '@/assets/icons/auth/kakao.svg'
 import { login } from '@/shared/api/authApi.js'
 import { startKakaoLogin } from '@/shared/api/kakaoAuth.js'
+import useBackendOffline from '@/shared/api/useBackendOffline.js'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import SpaceGuardNotice from '@/shared/ui/space-guard/SpaceGuardNotice.jsx'
 import { useSpaceGuard } from '@/shared/ui/space-guard/useSpaceGuard.js'
 
 import styles from './LoginPage.module.scss'
+
+/**
+ * 데모 모드에서 들어가는 계정. 백엔드에 닿지 못하면 목 서버가 로그인을
+ * 받으므로(mock/mockServer.js) 어떤 값이든 통과하지만, 목 데이터의 기본
+ * 회원과 같은 이메일을 써 화면 곳곳의 표기와 맞춘다.
+ */
+const DEMO_CREDENTIALS = { email: 'guest@mcm.demo', password: 'demo' }
 
 export function Component() {
   // 입력한 비밀번호를 눈으로 확인할 수 있게 한다. 오타로 막히는 일이 잦다.
@@ -23,6 +31,9 @@ export function Component() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
+  // 백엔드가 꺼져 목으로 동작하면 체험용 데모 모드다. 입력 없이 로그인
+  // 버튼만으로 들어가게 한다 — 심사·시연 중에 없는 계정을 만들 수는 없다.
+  const demoMode = useBackendOffline()
 
   async function handleSubmit(event) {
     // 막지 않으면 브라우저가 기본 GET 제출을 해서 비밀번호가 주소창과 방문
@@ -35,7 +46,9 @@ export function Component() {
     setError('')
 
     try {
-      await login({ email: form.get('email'), password: form.get('password') })
+      await login(
+        demoMode ? DEMO_CREDENTIALS : { email: form.get('email'), password: form.get('password') },
+      )
       // 보호 화면에서 밀려왔다면 원래 가려던 곳으로 돌려보낸다.
       navigate(location.state?.from ?? '/', { replace: true })
     } catch (loginError) {
@@ -74,8 +87,23 @@ export function Component() {
           </div>
         </header>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <p className={styles.requiredNotice}>* 표시가 있는 모든 입력 항목은 필수입니다.</p>
+        {demoMode ? (
+          <aside className={styles.demoNotice} role="status">
+            <p className={styles.demoTitle}>
+              <span className={styles.demoBadge} aria-hidden="true">
+                DEMO
+              </span>
+              체험용 데모 모드
+            </p>
+            <p className={styles.demoText}>로그인 버튼만 누르면 데모 계정으로 바로 들어가요</p>
+          </aside>
+        ) : null}
+
+        {/* 데모 모드에서는 입력을 쓰지 않으므로 브라우저 필수 검사도 끈다. */}
+        <form className={styles.form} onSubmit={handleSubmit} noValidate={demoMode}>
+          {demoMode ? null : (
+            <p className={styles.requiredNotice}>* 표시가 있는 모든 입력 항목은 필수입니다.</p>
+          )}
 
           <div className={styles.field}>
             <label className={styles.fieldLabel} htmlFor="login-email">
@@ -92,7 +120,7 @@ export function Component() {
               autoComplete="email"
               onBeforeInput={emailGuard.onBeforeInput}
               onChange={emailGuard.sanitizeInPlace}
-              required
+              required={!demoMode}
             />
             <SpaceGuardNotice show={emailGuard.rejected}>
               이메일에는 공백을 입력할 수 없습니다
@@ -126,7 +154,7 @@ export function Component() {
               // 없다. 가려진 칸에서 별표만 늘어 오타와 구분되지 않는다.
               onBeforeInput={passwordGuard.onBeforeInput}
               onChange={passwordGuard.sanitizeInPlace}
-              required
+              required={!demoMode}
             />
             <SpaceGuardNotice show={passwordGuard.rejected}>
               비밀번호에는 공백을 입력할 수 없습니다

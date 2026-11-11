@@ -45,6 +45,22 @@ export function shouldProbe() {
   return MOCK_MODE === 'fallback' && status !== 'online'
 }
 
+/**
+ * 상태가 바뀌면 알린다. 로그인 화면이 데모 모드 안내를 켜고 끄는 데 쓴다.
+ *
+ * @returns 구독을 끊는 함수
+ */
+const listeners = new Set()
+
+export function subscribeBackendStatus(listener) {
+  listeners.add(listener)
+  return () => listeners.delete(listener)
+}
+
+function notify() {
+  listeners.forEach((listener) => listener())
+}
+
 export function markBackendOnline() {
   status = 'online'
   try {
@@ -52,6 +68,7 @@ export function markBackendOnline() {
   } catch {
     // 무시
   }
+  notify()
 }
 
 let warned = false
@@ -67,6 +84,7 @@ export function markBackendOffline(reason) {
     warned = true
     console.warn(`[mock] 백엔드에 연결할 수 없어 목 데이터로 표시합니다. (${reason})`)
   }
+  notify()
 }
 
 /**
