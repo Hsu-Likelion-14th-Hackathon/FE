@@ -1,5 +1,6 @@
 import { apiFetch } from './client.js'
 import { API } from './endpoints.js'
+import { MOCK_UPLOAD_URL } from './mock/mockServer.js'
 
 /**
  * AI 가상 피팅 API.
@@ -48,6 +49,8 @@ export async function createUploadUrl({ fileName, contentType }) {
  * 본문은 FormData가 아니라 파일 바이트 그대로다.
  */
 export async function uploadToAzure(uploadUrl, file) {
+  // 목 서버가 준 업로드 자리다. 올릴 곳이 없으니 건너뛴다.
+  if (uploadUrl === MOCK_UPLOAD_URL) return
   let response
   try {
     response = await fetch(uploadUrl, {
