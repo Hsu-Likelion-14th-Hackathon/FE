@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { clearAccessToken, setAccessToken } from '@/shared/api/authToken.js'
 
@@ -28,7 +28,17 @@ vi.mock('@/shared/api/productApi.js', async (importOriginal) => ({
   }),
 }))
 
+import * as routeModules from './routeModules.js'
 import { createAppRoutes } from './router.jsx'
+
+// 화면은 전부 lazy route라 테스트마다 첫 렌더 전에 모듈을 변환·평가한다.
+// 병렬 실행에서는 이 import가 findBy 기다림(3초)을 넘겨, 실행할 때마다
+// 다른 화면 테스트가 하나씩 떨어졌다. 모듈을 한 번 미리 불러 두면 각
+// 테스트는 라우팅과 렌더만 기다린다. 라우터는 같은 로더를 쓰므로 lazy가
+// 캐시된 모듈로 바로 풀린다.
+beforeAll(async () => {
+  await Promise.all(Object.values(routeModules).map((load) => load()))
+}, 60_000)
 
 const routeCases = [
   ['/', '메인'],
