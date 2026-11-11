@@ -165,6 +165,38 @@ async function fetchWithProbe(path, init) {
 }
 
 /**
+ * 백엔드에 닿는지 한 번 확인한다. 로그인 화면이 들어서자마자 데모 모드
+ * 안내를 띄울지 정하려고 부른다 — 요청이 실패한 뒤에야 알면 사용자는 이미
+ * 이메일·비밀번호를 치고 있다.
+ *
+ * mode: 'no-cors'로 보낸다. 응답 내용은 필요 없고 연결이 되는지만 보면
+ * 된다. CORS 헤더가 없는 경로라도 연결되면 opaque 응답으로 끝나고, 서버가
+ * 꺼져 있으면 네트워크 오류나 타임아웃으로 떨어진다. 같은 출처 프록시
+ * (/backend)는 백엔드가 죽으면 502·503·504를 준다.
+ *
+ * @returns {Promise<boolean>} 목으로 동작 중이면 true
+ */
+export async function probeBackend() {
+  if (MOCK_MODE !== 'fallback' || isBackendOffline()) return isBackendOffline()
+  try {
+    const response = await fetchWithProbe(`${API_BASE_URL}/`, {
+      method: 'HEAD',
+      mode: 'no-cors',
+      cache: 'no-store',
+    })
+    if (response.type !== 'opaque' && [502, 503, 504].includes(response.status)) {
+      markBackendOffline(`HTTP ${response.status}`)
+      return true
+    }
+    markBackendOnline()
+    return false
+  } catch (cause) {
+    markBackendOffline(cause?.message ?? 'network error')
+    return true
+  }
+}
+
+/**
  * @param {string} path 완성된 URL
  * @param {object} [options]
  * @param {boolean} [options.auth] 토큰을 붙일지. login/signup/kakao만 false다.
