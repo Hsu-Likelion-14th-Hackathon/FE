@@ -14,11 +14,13 @@ import diamantSoftPinkImage from '@/assets/images/products/diamant-soft-pink.web
 import duffelBlackImage from '@/assets/images/products/duffel-black.webp'
 import newLizBeigeImage from '@/assets/images/products/new-liz-beige.webp'
 import pinaCinnamonImage from '@/assets/images/products/pina-cinnamon.webp'
-import econylImage from '@/shared/assets/boarding-pass/guide/product-econyl.webp'
-import himmelImage from '@/shared/assets/boarding-pass/guide/product-himmel.webp'
-import toteCognacImage from '@/shared/assets/boarding-pass/guide/product-tote-cognac.webp'
-import trolleyImage from '@/shared/assets/boarding-pass/guide/product-trolley.webp'
-import weekenderImage from '@/shared/assets/boarding-pass/guide/product-weekender.webp'
+// mock-*.webp는 가이드 Figma 크롭(guide/product-*)을 카탈로그 컷 구도(800×866, 여백 포함)로
+// 다시 앉힌 사본이다. 카드가 object-fit: cover라 여백 없는 크롭을 쓰면 상품이 칸을 꽉 채워 커 보인다.
+import econylImage from '@/assets/images/products/mock-econyl.webp'
+import himmelImage from '@/assets/images/products/mock-himmel.webp'
+import toteCognacImage from '@/assets/images/products/mock-tote-cognac.webp'
+import trolleyImage from '@/assets/images/products/mock-trolley.webp'
+import weekenderImage from '@/assets/images/products/mock-weekender.webp'
 
 /* ------------------------------------------------------------------ 상품 */
 
