@@ -14,7 +14,7 @@
   flex-direction: column;
   gap: 4px;
   border-top: 0.5px solid #c8c8c8;
-  font-size: 10px;
+  font-size: max(var(--mcm-font-min), 10px);
   font-weight: 600;
   line-height: 16px;
   text-decoration: none;

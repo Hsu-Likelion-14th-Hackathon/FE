@@ -109,7 +109,7 @@
   justify-content: space-between;
   width: 100%;
   color: #fafafa;
-  font-size: 0.625rem; /* 10 */
+  font-size: max(var(--mcm-font-min), 0.625rem); /* 10 */
   font-weight: 400;
   line-height: 1rem;
   text-align: center;

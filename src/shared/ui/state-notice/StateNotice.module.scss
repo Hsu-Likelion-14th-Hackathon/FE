@@ -24,7 +24,7 @@
 .eyebrow {
   margin: 0;
   color: var(--mcm-color-brand-brown);
-  font-size: 0.625rem;
+  font-size: max(var(--mcm-font-min), 0.625rem);
   font-weight: 600;
   letter-spacing: 0.18em;
   line-height: 1;
