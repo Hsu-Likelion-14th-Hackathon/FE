@@ -1,4 +1,15 @@
 import { clearAccessToken, getAccessToken } from './authToken.js'
+import { API_BASE_URL } from './endpoints.js'
+import {
+  isBackendOffline,
+  isUnreachableResponse,
+  markBackendOffline,
+  markBackendOnline,
+  MOCK_MODE,
+  PROBE_TIMEOUT_MS,
+  shouldProbe,
+} from './mock/backendStatus.js'
+import { mockRespond } from './mock/mockServer.js'
 
 /**
  * 백엔드가 돌려준 실패를 그대로 들고 다니는 오류.
@@ -64,6 +75,94 @@ function unwrapEnvelope(body, { status, path }) {
 }
 
 /**
+ * 백엔드로 보내되, 닿지 않으면 목 서버(mock/mockServer.js)의 응답으로 대신한다.
+ *
+ * 백엔드 코드를 건드리지 않고 배포본에서도 화면을 끝까지 볼 수 있게 하려는
+ * 장치다. 언제 목을 쓰는지는 mock/backendStatus.js가 정한다.
+ *
+ * @returns {Promise<{ status: number, ok: boolean, parsed?: any, raw?: Response }>}
+ *   parsed가 있으면 이미 읽은 본문, 없으면 raw에서 읽는다.
+ */
+async function send(path, { method, headers, body, signal }) {
+  const fallback = async () => {
+    const mocked = await mockRespond({ url: path, method, body, baseUrl: API_BASE_URL, signal })
+    if (!mocked) return null
+    return {
+      status: mocked.status,
+      ok: mocked.status >= 200 && mocked.status < 300,
+      parsed: mocked.body,
+    }
+  }
+
+  if (isBackendOffline()) {
+    const mocked = await fallback()
+    if (mocked) return mocked
+  }
+
+  let raw
+  try {
+    raw = await fetchWithProbe(path, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+      signal,
+    })
+  } catch (cause) {
+    // 화면 이탈로 끊은 요청은 목으로 바꾸지 않는다 — 호출부의 AbortError 가드가 받아야 한다.
+    if (signal?.aborted || MOCK_MODE === 'off') throw cause
+    markBackendOffline(cause?.message ?? 'network error')
+    const mocked = await fallback()
+    if (mocked) return mocked
+    throw cause
+  }
+
+  if (MOCK_MODE !== 'off' && raw.status >= 500) {
+    const parsed = await readBody(raw)
+    if (isUnreachableResponse(raw, parsed)) {
+      markBackendOffline(`HTTP ${raw.status}`)
+      const mocked = await fallback()
+      if (mocked) return mocked
+    }
+    return { status: raw.status, ok: raw.ok, parsed }
+  }
+
+  markBackendOnline()
+  return { status: raw.status, ok: raw.ok, raw }
+}
+
+/**
+ * 백엔드가 살아 있는지 아직 모를 때는 PROBE_TIMEOUT_MS 안에 응답이 없으면
+ * 끊는다. 서버가 꺼져 있으면 연결이 수십 초씩 매달려 화면이 멈춘 것처럼
+ * 보이기 때문이다. 한 번이라도 응답을 받으면 타임아웃 없이 보낸다.
+ */
+async function fetchWithProbe(path, init) {
+  if (!shouldProbe()) return fetch(path, init)
+
+  const controller = new AbortController()
+  const outer = init.signal
+  const onAbort = () => controller.abort(outer.reason)
+  if (outer) {
+    if (outer.aborted) controller.abort(outer.reason)
+    else outer.addEventListener('abort', onAbort, { once: true })
+  }
+  let timedOut = false
+  const timer = setTimeout(() => {
+    timedOut = true
+    controller.abort()
+  }, PROBE_TIMEOUT_MS)
+
+  try {
+    return await fetch(path, { ...init, signal: controller.signal })
+  } catch (cause) {
+    if (timedOut) throw new Error(`백엔드 응답 없음 (${PROBE_TIMEOUT_MS}ms)`)
+    throw cause
+  } finally {
+    clearTimeout(timer)
+    outer?.removeEventListener('abort', onAbort)
+  }
+}
+
+/**
  * @param {string} path 완성된 URL
  * @param {object} [options]
  * @param {boolean} [options.auth] 토큰을 붙일지. login/signup/kakao만 false다.
@@ -83,16 +182,16 @@ export async function apiFetch(
   const token = auth ? getAccessToken() : null
   if (token) headers.Authorization = `Bearer ${token}`
 
-  const response = await fetch(path, {
+  const response = await send(path, {
     method,
     headers: Object.keys(headers).length ? headers : undefined,
-    body: body ? JSON.stringify(body) : undefined,
+    body,
     signal,
   })
 
   if (notFoundAsNull && response.status === 404) return null
 
-  const parsed = await readBody(response)
+  const parsed = 'parsed' in response ? response.parsed : await readBody(response.raw)
 
   if (!response.ok) {
     // 401은 붙여 보낸 토큰이 죽었다는 뜻이다. 지워야 다음 요청이 죽은 토큰을 또
