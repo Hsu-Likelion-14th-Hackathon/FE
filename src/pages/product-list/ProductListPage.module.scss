@@ -80,7 +80,7 @@
   }
 
   .collectionDescription p {
-    font-size: 11px;
+    font-size: max(var(--mcm-font-min), 11px);
     line-height: 17px;
   }
 }

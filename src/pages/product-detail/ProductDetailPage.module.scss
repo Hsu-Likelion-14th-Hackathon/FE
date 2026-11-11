@@ -21,7 +21,7 @@
   top: 10px;
   left: 20px;
   color: var(--mcm-color-muted);
-  font-size: 10px;
+  font-size: max(var(--mcm-font-min), 10px);
   font-weight: 400;
   line-height: 18px;
 }
@@ -145,7 +145,7 @@
   bottom: 6px;
   left: 20px;
   color: var(--mcm-color-muted);
-  font-size: 10px;
+  font-size: max(var(--mcm-font-min), 10px);
   font-weight: 400;
 }
 
@@ -191,7 +191,7 @@
   align-items: center;
   gap: 10px;
   color: var(--mcm-color-ink);
-  font-size: 10px;
+  font-size: max(var(--mcm-font-min), 10px);
   font-weight: 400;
   line-height: 18px;
   white-space: nowrap;
@@ -328,7 +328,7 @@
 
   .variantSummary {
     gap: 8px;
-    font-size: 9px;
+    font-size: max(var(--mcm-font-min), 9px);
   }
 }
 

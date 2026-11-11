@@ -744,7 +744,7 @@ button.historyCard {
 }
 .detailCopy {
   color: #fafafa;
-  font-size: 0.6875rem;
+  font-size: max(var(--mcm-font-min), 0.6875rem);
   line-height: 1.5;
 }
 
@@ -755,7 +755,7 @@ button.historyCard {
   border-radius: 6.25rem;
   background: rgba(255, 247, 213, 0.22);
   color: #fff7d5;
-  font-size: 0.5625rem;
+  font-size: max(var(--mcm-font-min), 0.5625rem);
   font-weight: 600;
   letter-spacing: 0.06em;
 }

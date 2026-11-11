@@ -193,7 +193,7 @@
   align-items: center;
   gap: 8px;
   color: #fff7d5;
-  font-size: 11px;
+  font-size: max(var(--mcm-font-min), 11px);
   line-height: 14px;
 }
 
@@ -212,7 +212,7 @@
   border-radius: 100px;
   background: none;
   color: inherit;
-  font-size: 11px;
+  font-size: max(var(--mcm-font-min), 11px);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -378,7 +378,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: max(var(--mcm-font-min), 10px);
   font-weight: 400;
   line-height: 16px;
 }
@@ -579,7 +579,7 @@
   border-radius: 4px;
   background: #e6e6e6;
   color: var(--mcm-color-ink);
-  font-size: 10px;
+  font-size: max(var(--mcm-font-min), 10px);
   line-height: 18px;
 }
 

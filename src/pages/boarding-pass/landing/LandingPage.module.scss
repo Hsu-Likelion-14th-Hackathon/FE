@@ -224,7 +224,7 @@
   border: none;
   border-radius: 6.25rem; /* 100 */
   background: transparent;
-  font-size: 0.625rem; /* 10 */
+  font-size: max(var(--mcm-font-min), 0.625rem); /* 10 */
   font-weight: 600;
   line-height: 1;
   color: #fafafa;

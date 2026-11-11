@@ -67,7 +67,7 @@
   top: 4px;
   left: 10px;
   color: var(--mcm-color-muted);
-  font-size: 8px;
+  font-size: max(var(--mcm-font-min), 8px);
   font-weight: 400;
   line-height: 18px;
   white-space: nowrap;
@@ -115,7 +115,7 @@
   flex-direction: column;
   color: var(--mcm-color-ink);
   background: var(--mcm-color-canvas);
-  font-size: 10px;
+  font-size: max(var(--mcm-font-min), 10px);
   font-weight: 400;
   line-height: 18px;
   text-decoration: none;

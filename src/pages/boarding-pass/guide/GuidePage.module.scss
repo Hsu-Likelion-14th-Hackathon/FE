@@ -250,7 +250,7 @@
   z-index: 1;
   margin: 0;
   font-family: var(--mcm-font-sans);
-  font-size: 0.625rem;
+  font-size: max(var(--mcm-font-min), 0.625rem);
   font-weight: 400;
   line-height: 0.875rem;
   color: #fafafa;
@@ -378,7 +378,7 @@
   border: 1px solid #fafafa;
   border-radius: 0.5rem;
   color: #fafafa;
-  font-size: 0.625rem;
+  font-size: max(var(--mcm-font-min), 0.625rem);
   line-height: 0.875rem;
 }
 
@@ -409,7 +409,7 @@
   border: 1px solid #fafafa;
   border-radius: 0.5rem;
   color: #fafafa;
-  font-size: 0.625rem;
+  font-size: max(var(--mcm-font-min), 0.625rem);
   line-height: 0.875rem;
 }
 
@@ -476,7 +476,7 @@
 
 .productName {
   margin: 0;
-  font-size: 0.625rem;
+  font-size: max(var(--mcm-font-min), 0.625rem);
   line-height: 0.875rem;
   color: var(--mcm-color-ink);
 }
@@ -493,14 +493,14 @@
 
 .productPrice {
   margin: 0;
-  font-size: 0.625rem;
+  font-size: max(var(--mcm-font-min), 0.625rem);
   line-height: 1.125rem;
   color: var(--mcm-color-muted);
 }
 
 .productDetail {
   margin: 0;
-  font-size: 0.625rem;
+  font-size: max(var(--mcm-font-min), 0.625rem);
   line-height: 0.875rem;
   color: var(--mcm-color-muted);
 }
@@ -514,7 +514,7 @@
   border-radius: 6.25rem;
   background: rgb(192 115 70 / 35%);
   color: #fff7d5;
-  font-size: 0.5625rem;
+  font-size: max(var(--mcm-font-min), 0.5625rem);
   font-weight: 600;
   letter-spacing: 0.06em;
 }

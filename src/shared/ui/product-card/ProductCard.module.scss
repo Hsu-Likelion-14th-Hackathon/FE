@@ -32,7 +32,7 @@
   top: 4px;
   left: 10px;
   color: var(--mcm-color-muted);
-  font-size: 8px;
+  font-size: max(var(--mcm-font-min), 8px);
   font-weight: 400;
   line-height: 18px;
 }
@@ -123,7 +123,7 @@
   overflow: hidden;
   padding: 4px 10px 0;
   background: var(--mcm-color-canvas);
-  font-size: 10px;
+  font-size: max(var(--mcm-font-min), 10px);
   font-weight: 400;
   line-height: 18px;
 }

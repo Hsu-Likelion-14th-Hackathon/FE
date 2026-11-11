@@ -47,6 +47,14 @@
     'Malgun Gothic', 'Segoe UI', sans-serif;
   --mcm-font-brand: 'neurimbo_Gothic', var(--mcm-font-sans);
 
+  /* 글자 크기 하한. Figma에는 8~11px 글자가 있지만 휴대폰에서 읽기 어렵다.
+     Apple HIG는 iOS 최소 11pt, Material 3의 가장 작은 라벨은 11sp다. 한글은
+     획이 많아 같은 크기에서 라틴 문자보다 뭉개지므로 12px을 하한으로 둔다.
+     쓰는 곳: font-size: max(var(--mcm-font-min), <Figma 값>) — 원래 값을 남겨
+     둬 하한을 바꾸면 한 번에 따라간다. 여권 지면은 캔버스 글자와 크기를 맞춰야
+     해서 쓰지 않는다. */
+  --mcm-font-min: 0.75rem;
+
   --mcm-safe-top: env(safe-area-inset-top, 0px);
   --mcm-safe-right: env(safe-area-inset-right, 0px);
   --mcm-safe-bottom: env(safe-area-inset-bottom, 0px);
