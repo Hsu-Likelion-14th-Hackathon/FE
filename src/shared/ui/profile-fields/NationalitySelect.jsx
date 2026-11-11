@@ -1,7 +1,5 @@
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
-import 'country-flag-icons/3x2/flags.css'
-
 import chevronMutedIcon from '@/assets/icons/auth/chevron-muted.svg'
 import chevronOpenIcon from '@/assets/icons/auth/chevron-open.svg'
 import chevronSelectedIcon from '@/assets/icons/auth/chevron-selected.svg'
@@ -9,6 +7,7 @@ import mapPinActiveIcon from '@/assets/icons/auth/map-pin-active.svg'
 import mapPinMutedIcon from '@/assets/icons/auth/map-pin-muted.svg'
 
 import { countryOptions, getCountryOption } from './country-options.js'
+import { getFlagUrl } from './countryFlags.js'
 import styles from './NationalitySelect.module.scss'
 
 /**
@@ -265,10 +264,10 @@ export default function NationalitySelect({ value, onChange, isOpen, onOpenChang
         onKeyDown={handleTriggerKeyDown}
       >
         {displayedCountry ? (
-          <span
-            className={`${styles.flag} flag:${displayedCountry.code}`}
-            role="img"
-            aria-label={`${displayedCountry.englishName} 국기`}
+          <img
+            className={styles.flag}
+            src={getFlagUrl(displayedCountry.code)}
+            alt={`${displayedCountry.englishName} 국기`}
           />
         ) : (
           <img
@@ -344,9 +343,13 @@ export default function NationalitySelect({ value, onChange, isOpen, onOpenChang
                       onKeyDown={(event) => handleOptionKeyDown(event, index)}
                       onPointerMove={() => setActiveIndex(index)}
                     >
-                      <span
-                        className={`${styles.optionFlag} flag:${country.code}`}
+                      <img
+                        className={styles.optionFlag}
+                        src={getFlagUrl(country.code)}
+                        alt=""
                         aria-hidden="true"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <CountryName country={country} className={styles.optionName} />
                     </button>
