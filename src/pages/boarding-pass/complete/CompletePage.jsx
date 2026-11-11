@@ -6,7 +6,7 @@ import { PASS_STORAGE_KEY } from '@/features/boarding-pass/boarding-ticket/passS
 import noticeStyles from '@/features/boarding-pass/notice-toast/PassNoticeToast.module.scss'
 import SavePassToast from '@/features/boarding-pass/save-pass-toast/SavePassToast.jsx'
 import { getLatestBoardingPass } from '@/shared/api/boardingPassApi.js'
-import stageBack from '@/shared/assets/boarding-pass/complete/stage-back.png'
+import stageBack from '@/shared/assets/boarding-pass/complete/stage-back.webp'
 import closeIcon from '@/shared/assets/boarding-pass/icons/close.svg'
 import StoreHeader from '@/shared/layout/store-header/StoreHeader.jsx'
 import StateNotice from '@/shared/ui/state-notice/StateNotice.jsx'
