@@ -1,11 +1,21 @@
 import '@/styles/globals.scss'
 import '@testing-library/jest-dom/vitest'
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { afterEach, beforeEach, vi } from 'vitest'
 
 import { clearAccessToken } from '@/shared/api/authToken.js'
 
 afterEach(cleanup)
+
+/**
+ * findBy·waitFor의 기다림을 1초에서 3초로 늘린다.
+ *
+ * 화면은 전부 lazy route라 첫 렌더 전에 모듈을 불러온다. 전체 테스트를
+ * 병렬로 돌리면 이 import가 1초를 넘기는 때가 있어, 실행할 때마다 다른
+ * 화면 테스트가 하나씩 떨어졌다(따로 돌리면 통과). 기다림 상한만 늘리는
+ * 것이라 통과하는 테스트의 속도는 그대로다.
+ */
+configure({ asyncUtilTimeout: 3000 })
 
 /**
  * 테스트는 네트워크를 타면 안 된다.
