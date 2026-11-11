@@ -4,7 +4,9 @@ Figma에서 확인된 실제 사용 범위에 맞춰 배포에 필요한 파일�
 
 ## Pretendard 1.3.9
 
-- 사용 파일: Regular 400, SemiBold 600 WOFF2 subset
+- 사용 파일: Regular 400, SemiBold 600 WOFF2 **동적 서브셋**(`pretendard-dynamic/`, 굵기마다 92개 묶음)
+- `src/styles/_pretendard-dynamic.scss`가 묶음마다 unicode-range를 달아, 화면에 나온 글자가 든 묶음만 받는다
+- 출처: `pretendard@1.3.9` 패키지의 `dist/web/static/woff2-dynamic-subset`, `pretendard-dynamic-subset.css`
 - 라이선스: SIL Open Font License 1.1
 - 전문: `public/licenses/PRETENDARD-LICENSE.txt`
 - 원본: https://github.com/orioncactus/pretendard

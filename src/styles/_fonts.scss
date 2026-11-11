@@ -1,18 +1,5 @@
-@font-face {
-  font-family: 'Pretendard';
-  src: url('../assets/fonts/Pretendard-Regular.subset.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  src: url('../assets/fonts/Pretendard-SemiBold.subset.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
+// Pretendard는 unicode-range로 쪼갠 동적 서브셋을 쓴다(_pretendard-dynamic.scss).
+@use 'pretendard-dynamic';
 
 @font-face {
   font-family: 'neurimbo_Gothic';
