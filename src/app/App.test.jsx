@@ -86,7 +86,7 @@ describe('App', () => {
     expect(screen.getAllByRole('main')).toHaveLength(1)
   })
 
-  it('renders the home scene with the original Figma raster assets', async () => {
+  it('renders the home scene with the Figma raster assets (WebP)', async () => {
     renderRoute('/')
 
     await screen.findByRole('link', { name: 'Boarding' })
@@ -96,9 +96,9 @@ describe('App', () => {
 
     expect(imageSources).toEqual(
       expect.arrayContaining([
-        expect.stringMatching(/\/hero-plane\.png$/),
-        expect.stringMatching(/\/hero-suitcase\.png$/),
-        expect.stringMatching(/\/hero-watch\.png$/),
+        expect.stringMatching(/\/hero-plane\.webp$/),
+        expect.stringMatching(/\/hero-suitcase\.webp$/),
+        expect.stringMatching(/\/hero-watch\.webp$/),
       ]),
     )
   })
