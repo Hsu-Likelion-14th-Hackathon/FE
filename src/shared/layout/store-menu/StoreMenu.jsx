@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 
 import { useSession } from '@/entities/session/useSession.js'
@@ -74,7 +74,7 @@ function ContentLink({ children }) {
   )
 }
 
-function BoardingCard({ onClose }) {
+function BoardingCard({ onClose, loadImages }) {
   return (
     <Link
       className={styles.contentGroup}
@@ -84,7 +84,7 @@ function BoardingCard({ onClose }) {
     >
       <div className={styles.boardingCard}>
         <div className={styles.cardPlaneFrame} aria-hidden="true">
-          <img src={cardPlaneImage} alt="" />
+          {loadImages ? <img src={cardPlaneImage} alt="" decoding="async" /> : null}
         </div>
         <img className={styles.cardPlaneIcon} src={planeIcon} alt="" />
         <p className={styles.cardTitle} aria-hidden="true">
@@ -103,11 +103,13 @@ function BoardingCard({ onClose }) {
   )
 }
 
-function CollectionCard({ onClose }) {
+function CollectionCard({ onClose, loadImages }) {
   return (
     <Link className={styles.contentGroup} to="/products" onClick={onClose}>
       <div className={styles.collectionCard}>
-        <img src={collectionImage} alt="인기상품 컬렉션 모델" />
+        {loadImages ? (
+          <img src={collectionImage} alt="인기상품 컬렉션 모델" decoding="async" />
+        ) : null}
         <span>인기상품</span>
       </div>
       <ContentLink>인기상품 둘러보기</ContentLink>
@@ -115,8 +117,48 @@ function CollectionCard({ onClose }) {
   )
 }
 
+/**
+ * 메뉴 카드 사진(약 130KB)을 언제 받을지.
+ *
+ * 메뉴는 여닫는 애니메이션 때문에 닫혀 있어도 늘 그려져 있어, 사진이 모든
+ * 화면의 첫 로딩에 끼어 LCP 이미지·폰트와 대역폭을 다퉜다. 메뉴를 처음 열
+ * 때, 또는 화면이 다 뜨고 브라우저가 한가해졌을 때 받는다.
+ */
+function useDeferredMenuImages(isOpen) {
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    if (ready) return undefined
+    if (isOpen) {
+      // 열려 있는 동안은 아래 반환값이 이미 true다. 닫힌 뒤에도 사진이
+      // 사라지지 않게 다음 프레임에 기억해 둔다.
+      const id = window.requestAnimationFrame(() => setReady(true))
+      return () => window.cancelAnimationFrame(id)
+    }
+    let cancel = () => {}
+    const schedule = () => {
+      if (typeof window.requestIdleCallback === 'function') {
+        const id = window.requestIdleCallback(() => setReady(true), { timeout: 4000 })
+        cancel = () => window.cancelIdleCallback(id)
+      } else {
+        const id = window.setTimeout(() => setReady(true), 2000)
+        cancel = () => window.clearTimeout(id)
+      }
+    }
+    if (document.readyState === 'complete') schedule()
+    else window.addEventListener('load', schedule, { once: true })
+    return () => {
+      window.removeEventListener('load', schedule)
+      cancel()
+    }
+  }, [isOpen, ready])
+
+  return ready || isOpen
+}
+
 function StoreMenu({ isOpen, onClose }) {
   const dialogRef = useRef(null)
+  const loadImages = useDeferredMenuImages(isOpen)
 
   useEffect(() => {
     if (!isOpen) {
@@ -189,8 +231,8 @@ function StoreMenu({ isOpen, onClose }) {
         <div className={styles.menuPanel}>
           <nav aria-label="전체 메뉴 탐색">
             <div className={styles.menuContent}>
-              <BoardingCard onClose={onClose} />
-              <CollectionCard onClose={onClose} />
+              <BoardingCard onClose={onClose} loadImages={loadImages} />
+              <CollectionCard onClose={onClose} loadImages={loadImages} />
               <SessionAction onClose={onClose} />
             </div>
           </nav>
