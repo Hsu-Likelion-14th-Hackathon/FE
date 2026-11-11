@@ -2,7 +2,7 @@
 <!--                     PROJECT HEADER                    -->
 <!-- ===================================================== -->
 
-<h1 align="center">✈️ MCM Boarding Pass</h1>
+<h1 align="center">MCM Boarding Pass</h1>
 
 <p align="center">
   <b>온라인의 취향이 오프라인의 여정이 되는, MCM HAUS 브랜드 경험 플랫폼</b><br/>
@@ -76,15 +76,24 @@
 
 > 사이트에 들어가 로그인 버튼만 누르면 체험용 계정으로 바로 둘러볼 수 있습니다.
 
-1. 휴대폰이나 컴퓨터에서 **https://boardingpass-seven.vercel.app** 에 접속합니다.
-2. **Boarding** 버튼을 눌러 보딩패스 소개 화면으로 들어갑니다.
-3. **비행 시작하기**를 누르면 로그인 화면이 나옵니다. 화면에 **체험용 데모 모드** 안내가 보이면,
-   아무것도 입력하지 않고 **로그인** 버튼만 눌러 데모 계정으로 들어갑니다.
+<p align="center">
+  <a href="https://boardingpass-seven.vercel.app">
+    <img src="https://img.shields.io/badge/MCM%20Boarding%20Pass-%EB%B0%94%EB%A1%9C%20%EC%8D%A8%EB%B3%B4%EA%B8%B0-C07346?style=for-the-badge&logo=vercel&logoColor=white"/>
+  </a>
+</p>
+
+<p align="center">
+  <sub>휴대폰으로 여는 것을 권장합니다 · 컴퓨터에서는 휴대폰 모양 틀 안에 표시됩니다</sub>
+</p>
+
+| 순서 | 할 일                                                                           |
+| :--: | ------------------------------------------------------------------------------- |
+|  1   | 홈에서 **Boarding** 버튼을 누릅니다                                             |
+|  2   | **비행 시작하기**를 누르면 로그인 화면이 나옵니다                               |
+|  3   | **체험용 데모 모드** 안내가 보이면 아무것도 입력하지 않고 **로그인**만 누릅니다 |
 
 > 서버에 연결되지 않을 때는 사이트가 자동으로 **체험용 데모 모드**로 바뀝니다. 미리 준비된 예시 데이터로
 > 모든 화면이 동작하고, 담은 상품이나 발급한 탑승권은 내 브라우저에만 남아 탭을 닫으면 처음으로 돌아갑니다.
-
-컴퓨터로 접속하면 화면이 휴대폰 모양 틀 안에 표시됩니다.
 
 ---
 
@@ -109,20 +118,20 @@
 
 > 실제처럼 넘겨 보는 3D 여권, 매장에서 스캔하는 탑승권, 층마다 들려주는 음성 해설, 사진으로 입어 보는 AI 피팅이 핵심입니다.
 
-| 기능                    | 할 수 있는 일                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------ |
-| **🎫 보딩패스(탑승권)** | 취향 설문을 마치면 발급되고, 매장에서 QR로 스캔해 여행을 시작                  |
-| **🗺️ 층별 여행 가이드** | 층마다 볼거리와 추천 상품을 안내. AI가 추천한 층을 먼저 보여 줌                |
-| **🔊 음성 도슨트**      | 층을 옮기면 그 층의 해설로 바뀌고, 재생 속도를 1 → 1.25 → 1.5 → 2배로 조절     |
-| **🛂 3D 디지털 여권**   | 종이가 휘며 넘어가는 여권에 방문 스탬프와 여행 기록이 쌓임                     |
-| **👗 AI 가상 피팅**     | 전신 사진을 올리면 상품을 입힌 모습을 만들어 줌. 실패하면 쓴 크레딧을 돌려받음 |
-| **🛍️ 쇼핑**             | 상품 목록·상세, 위시리스트, 쇼핑백                                             |
-| **🔐 로그인**           | 이메일 또는 카카오 계정으로 로그인. 서버가 멈추면 체험용 데모 모드             |
+| 기능                 | 할 수 있는 일                                                                  |
+| -------------------- | ------------------------------------------------------------------------------ |
+| **보딩패스(탑승권)** | 취향 설문을 마치면 발급되고, 매장에서 QR로 스캔해 여행을 시작                  |
+| **층별 여행 가이드** | 층마다 볼거리와 추천 상품을 안내. AI가 추천한 층을 먼저 보여 줌                |
+| **음성 도슨트**      | 층을 옮기면 그 층의 해설로 바뀌고, 재생 속도를 1 → 1.25 → 1.5 → 2배로 조절     |
+| **3D 디지털 여권**   | 종이가 휘며 넘어가는 여권에 방문 스탬프와 여행 기록이 쌓임                     |
+| **AI 가상 피팅**     | 전신 사진을 올리면 상품을 입힌 모습을 만들어 줌. 실패하면 쓴 크레딧을 돌려받음 |
+| **쇼핑**             | 상품 목록·상세, 위시리스트, 쇼핑백                                             |
+| **로그인**           | 이메일 또는 카카오 계정으로 로그인. 서버가 멈추면 체험용 데모 모드             |
 
 <details>
 <summary>기능별로 어떻게 만들었는지 보기</summary>
 
-### 🛂 3D 여권
+### 3D 여권
 
 여권을 실제로 넘기는 화면입니다. three.js로 책과 지면을 세우고,
 지면 내용은 **캔버스에 구워 `CanvasTexture`로 입힙니다.**
@@ -142,12 +151,12 @@ WebGL 컨텍스트를 만들지 못하는 환경과 `prefers-reduced-motion` 설
 방문 스탬프는 3열 2행 여섯 칸이 설계된 전부입니다. 서버가 최신순으로 주는 목록에서
 앞의 여섯 개를 그리므로, 방문이 쌓이면 오래된 스탬프가 지면에서 밀려납니다.
 
-### 🎫 보딩패스 티켓
+### 보딩패스 티켓
 
 발급된 패스 코드를 QR로 실어 매장에서 스캔합니다.
 티켓 카드는 발급 시점 데이터를 그대로 받아 그리므로, 이후 찜을 취소해도 내용이 변하지 않습니다.
 
-### 🔊 음성 도슨트
+### 음성 도슨트
 
 `GET /floors`가 주는 `audioUrl`을 받아 층 해설을 재생합니다.
 층이 바뀌면 이전 층의 음성을 멈추고 새 음원으로 교체합니다.
@@ -156,7 +165,7 @@ WebGL 컨텍스트를 만들지 못하는 환경과 `prefers-reduced-motion` 설
 아직 음원이 등록되지 않은 화면에서는 재생·정지 상태만 표현합니다.
 디자인에 있는 버튼이라 감추지 않습니다.
 
-### 👗 AI 가상 피팅
+### AI 가상 피팅
 
 ```
 업로드 URL 발급 → Azure Blob 직접 PUT → 세션 생성(PENDING · 크레딧 차감)
@@ -168,7 +177,7 @@ WebGL 컨텍스트를 만들지 못하는 환경과 `prefers-reduced-motion` 설
 생성 응답이 곧장 `FAILED`로 오면 폴링이 걸리지 않아 로딩 화면에 갇히므로,
 그 자리에서 바로 접습니다.
 
-### 🌏 국적 선택
+### 국적 선택
 
 249개국을 현지 이름과 영문 이름으로 검색합니다.
 한국·일본·미국·중국·프랑스·독일 여섯 나라는 목록 맨 위에 고정했습니다 —
@@ -234,45 +243,72 @@ WebGL 컨텍스트를 만들지 못하는 환경과 `prefers-reduced-motion` 설
 
 > 화면은 React로 만들고, 3D 여권은 three.js로 그리며, Vercel로 인터넷에 올립니다.
 
-### 화면 만들기 (Frontend)
+### Frontend
 
 <p>
-  <img src="https://skillicons.dev/icons?i=react,vite,js,sass,tailwind,threejs"/>
+  <img src="https://skillicons.dev/icons?i=react,vite,js,html,css,sass,tailwind"/>
 </p>
 
-| 기술                  | 설명                                                                |
-| --------------------- | ------------------------------------------------------------------- |
-| React 19              | 화면을 부품(컴포넌트)처럼 나눠 만드는 도구                          |
-| React Router 7        | 주소(`/boarding-pass`, `/products` 등)에 맞는 화면을 보여 주는 도구 |
-| Vite 8                | 만든 코드를 웹사이트용 파일로 묶어 주는 도구                        |
-| Tailwind CSS 4 · Sass | 화면 디자인(색, 크기, 배치)을 작성하는 도구                         |
-| three.js              | 3D 여권의 종이 넘김을 그리는 3D 그래픽 도구                         |
-| react-qr-code         | 탑승권의 QR 코드를 그리는 도구                                      |
+<p>
+  <img src="https://img.shields.io/badge/React%20Router-7-CA4245?style=flat-square&logo=reactrouter&logoColor=white"/>
+  <img src="https://img.shields.io/badge/react--qr--code-2-191919?style=flat-square"/>
+</p>
 
-### 배포 · 측정 (Deploy / Monitoring)
+### 3D · Graphics
+
+<p>
+  <img src="https://skillicons.dev/icons?i=threejs"/>
+</p>
+
+### Deploy · Monitoring
 
 <p>
   <img src="https://skillicons.dev/icons?i=vercel"/>
 </p>
 
-| 기술                  | 설명                                                          |
-| --------------------- | ------------------------------------------------------------- |
-| Vercel                | 웹사이트를 인터넷에 올려 누구나 접속할 수 있게 해 주는 서비스 |
-| Vercel Speed Insights | 실제 방문자 기기에서 체감 속도를 모아 보여 주는 도구          |
-| Lighthouse            | 구글이 만든 웹사이트 속도 측정 도구                           |
-
-### 품질 관리 · 도구 (Tools)
-
 <p>
-  <img src="https://skillicons.dev/icons?i=vitest,git,github,figma"/>
+  <img src="https://img.shields.io/badge/Vercel-Speed%20Insights-000000?style=flat-square&logo=vercel&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Lighthouse-%EC%84%B1%EB%8A%A5%20%EC%B8%A1%EC%A0%95-F44B21?style=flat-square&logo=lighthouse&logoColor=white"/>
 </p>
 
-| 기술                     | 설명                                                            |
-| ------------------------ | --------------------------------------------------------------- |
-| Vitest · Testing Library | 화면과 기능이 의도대로 동작하는지 자동으로 확인하는 테스트 도구 |
-| ESLint · Prettier        | 코드 실수를 잡고 모양을 일정하게 맞추는 도구                    |
-| Git · GitHub             | 코드 변경 기록을 남기고 팀원과 함께 관리하는 도구               |
-| Figma                    | 화면 디자인 시안을 만드는 도구                                  |
+### Testing · Code Quality
+
+<p>
+  <img src="https://skillicons.dev/icons?i=vitest"/>
+</p>
+
+<p>
+  <img src="https://img.shields.io/badge/Testing%20Library-16-E33332?style=flat-square&logo=testinglibrary&logoColor=white"/>
+  <img src="https://img.shields.io/badge/ESLint-9-4B32C3?style=flat-square&logo=eslint&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Prettier-3-F7B93E?style=flat-square&logo=prettier&logoColor=black"/>
+</p>
+
+### Tools
+
+<p>
+  <img src="https://skillicons.dev/icons?i=git,github,figma,notion"/>
+</p>
+
+<details>
+<summary>각 기술이 하는 일 보기</summary>
+
+| 기술                     | 하는 일                                                             |
+| ------------------------ | ------------------------------------------------------------------- |
+| React 19                 | 화면을 부품(컴포넌트)처럼 나눠 만드는 도구                          |
+| React Router 7           | 주소(`/boarding-pass`, `/products` 등)에 맞는 화면을 보여 주는 도구 |
+| Vite 8                   | 만든 코드를 웹사이트용 파일로 묶어 주는 도구                        |
+| Tailwind CSS 4 · Sass    | 화면 디자인(색, 크기, 배치)을 작성하는 도구                         |
+| three.js                 | 3D 여권의 종이 넘김을 그리는 3D 그래픽 도구                         |
+| react-qr-code            | 탑승권의 QR 코드를 그리는 도구                                      |
+| Vercel                   | 웹사이트를 인터넷에 올려 누구나 접속할 수 있게 해 주는 서비스       |
+| Vercel Speed Insights    | 실제 방문자 기기에서 체감 속도를 모아 보여 주는 도구                |
+| Lighthouse               | 구글이 만든 웹사이트 속도 측정 도구                                 |
+| Vitest · Testing Library | 화면과 기능이 의도대로 동작하는지 자동으로 확인하는 테스트 도구     |
+| ESLint · Prettier        | 코드 실수를 잡고 모양을 일정하게 맞추는 도구                        |
+| Git · GitHub             | 코드 변경 기록을 남기고 팀원과 함께 관리하는 도구                   |
+| Figma · Notion           | 화면 디자인 시안과 API 명세·회의 기록을 함께 보는 도구              |
+
+</details>
 
 <details>
 <summary>버전과 라이브러리 자세히 보기</summary>
@@ -658,7 +694,7 @@ rewrite가 없으면 `/boarding-pass/passport`를 새로고침할 때 404가 납
 <details>
 <summary>자세히 보기</summary>
 
-### 🖼️ 이미지 용량 — 21.9MB → 1.8MB
+### 이미지 용량 — 21.9MB → 1.8MB
 
 화면은 390px 폭인데 원본 PNG를 그대로 쓰고 있었습니다. 2048×2048(2.3MB) 비행기,
 3.0MB 상품 사진 같은 파일이 화면을 넘길 때마다 위에서부터 늦게 그려졌습니다.
@@ -670,7 +706,7 @@ rewrite가 없으면 `/boarding-pass/passport`를 새로고침할 때 404가 납
 - 이어서 장식·티켓·여권 소품 PNG 14장도 WebP로 바꿔 **449KB → 115KB**로 줄였습니다.
   바코드는 막대 가장자리가 무르면 안 되어 무손실로 저장했습니다.
 
-### ⏭️ 다음 화면 미리 받기
+### 다음 화면 미리 받기
 
 화면은 넘어가야 그 화면의 JS를 받고, 렌더된 뒤에야 이미지를 요청했습니다.
 넘길 때마다 청크 → 렌더 → 이미지가 순서대로 이어져 이미지가 늦게 떴습니다.
@@ -682,7 +718,7 @@ rewrite가 없으면 `/boarding-pass/passport`를 새로고침할 때 404가 납
 - 여권의 three.js는 여정 끝(비행·가이드)에서만 받습니다. 랜딩에서 모두에게 받게 하지 않습니다.
 - 데이터 절약 모드와 2G에서는 미리 받지 않습니다.
 
-### 📦 필요한 코드만 받기
+### 필요한 코드만 받기
 
 - **전 화면을 lazy route로 나눴습니다.** three.js를 쓰는 여권 화면(약 560KB)은 별도 청크라,
   여권에 들어가지 않는 사용자는 내려받지 않습니다.
@@ -696,7 +732,7 @@ rewrite가 없으면 `/boarding-pass/passport`를 새로고침할 때 404가 납
 - 목록 이미지는 `decoding="async"`, 위시리스트·쇼핑백은 `loading="lazy"`를 붙여
   화면 밖 이미지가 첫 렌더를 막지 않게 했습니다.
 
-### 🔤 폰트
+### 폰트
 
 - Pretendard는 저작자가 배포하는 **동적 서브셋**(굵기마다 92개 묶음 + `unicode-range`)을 씁니다.
   화면에 실제로 나온 글자가 든 묶음만 받아, 굵기마다 260KB 파일을 통째로 받던 때보다 첫 로딩이 가볍습니다.
@@ -705,19 +741,19 @@ rewrite가 없으면 `/boarding-pass/passport`를 새로고침할 때 404가 납
 - 브랜드 글꼴(느림보고딕)은 라이선스상 변환·서브셋이 금지라 원본 OTF를 그대로 `preload`합니다.
 - `font-display: swap`으로 폰트를 기다리느라 글자가 비어 보이지 않게 했습니다.
 
-### 🗄️ 캐시
+### 캐시
 
 - 이름에 내용 해시가 붙은 `/assets/*`는 `Cache-Control: public, max-age=31536000, immutable`(`vercel.json`).
   이전에는 `max-age=0`이라 다시 방문할 때마다 파일 수십 개를 서버에 확인했습니다.
 - 메뉴 카드 사진(약 130KB)은 메뉴를 처음 열 때, 또는 화면이 다 뜬 뒤 한가할 때 받습니다.
 
-### 📈 측정
+### 측정
 
 - **실험실** — Lighthouse 13 모바일(느린 4G · CPU 4배), 실서버 영향을 빼려고 목을 켠 운영 빌드에서 화면마다 3회 중앙값.
 - **실사용자** — `@vercel/speed-insights`. 라우트는 주소가 아니라 패턴(`/products/:productId`)으로 보내 화면 단위로 모읍니다.
   배포 빌드에서만 켜며, Vercel 대시보드에서 Speed Insights를 켜야 수집됩니다(Hobby 무료 등급).
 
-### 🛂 3D 여권 렌더링
+### 3D 여권 렌더링
 
 - **이미지를 한 번만 받습니다.** 에셋 로딩이 단계(step)에 묶여 있어 장을 넘길 때마다
   이미지 14장을 다시 받고 디코딩했습니다. 최초 1회만 받고, 지면을 굽는 일과 각도만 바꿔
@@ -732,7 +768,7 @@ rewrite가 없으면 `/boarding-pass/passport`를 새로고침할 때 404가 납
   않아 폰트 도착 전에 구우면 대체 글꼴로 굳습니다. 1.5초까지만 기다리고, 그 뒤에 도착한
   경우에만 한 번 다시 굽습니다.
 
-### 🌐 백엔드가 응답하지 않을 때
+### 백엔드가 응답하지 않을 때
 
 서버가 꺼져 있으면 요청이 수십 초씩 매달려 화면이 멈춘 것처럼 보였습니다.
 
