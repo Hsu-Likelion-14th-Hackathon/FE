@@ -33,5 +33,9 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['src/**/*.test.{js,jsx}'],
     setupFiles: './src/test/setup.js',
+    // 화면 테스트는 lazy route 모듈을 불러온 뒤 findBy로 최대 3초(setup.js의
+    // asyncUtilTimeout) 기다린다. 가입 화면처럼 무거운 화면은 혼자 돌려도 3초
+    // 가까이 걸려, 병렬 실행에서 기본 한도(5초)를 넘겨 떨어졌다.
+    testTimeout: 10000,
   },
 })
