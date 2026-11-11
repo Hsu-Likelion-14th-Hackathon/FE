@@ -9,7 +9,6 @@ import {
   PROBE_TIMEOUT_MS,
   shouldProbe,
 } from './mock/backendStatus.js'
-import { mockRespond } from './mock/mockServer.js'
 
 /**
  * 백엔드가 돌려준 실패를 그대로 들고 다니는 오류.
@@ -85,6 +84,9 @@ function unwrapEnvelope(body, { status, path }) {
  */
 async function send(path, { method, headers, body, signal }) {
   const fallback = async () => {
+    // 목 서버는 백엔드에 닿지 못할 때만 받는다. 정상일 때 모든 사용자가
+    // 메인 번들로 목 데이터까지 내려받을 이유가 없다.
+    const { mockRespond } = await import('./mock/mockServer.js')
     const mocked = await mockRespond({ url: path, method, body, baseUrl: API_BASE_URL, signal })
     if (!mocked) return null
     return {

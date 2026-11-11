@@ -1,6 +1,6 @@
 import { apiFetch } from './client.js'
 import { API } from './endpoints.js'
-import { MOCK_UPLOAD_URL } from './mock/mockServer.js'
+import { MOCK_UPLOAD_URL } from './mock/mockUploadUrl.js'
 
 /**
  * AI 가상 피팅 API.
