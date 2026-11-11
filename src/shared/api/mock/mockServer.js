@@ -21,6 +21,7 @@ import {
   STORE,
   SURVEY_QUESTIONS,
 } from './mockData.js'
+import { MOCK_UPLOAD_URL } from './mockUploadUrl.js'
 
 const STATE_KEY = 'mcm-mock-state'
 
@@ -540,9 +541,6 @@ const ROUTES = [
     },
   ],
 ]
-
-/** 업로드 URL 자리. fittingApi.uploadToAzure가 이 값이면 PUT을 건너뛴다. */
-export const MOCK_UPLOAD_URL = 'mock://upload'
 
 function fittingResult(session) {
   const { product, color } = findColor(session.productColorId)
