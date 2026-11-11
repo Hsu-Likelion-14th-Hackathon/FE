@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router'
 
 import AppProviders from '@/app/providers.jsx'
+import SpeedInsightsTracker from '@/app/SpeedInsightsTracker.jsx'
 import useRoutePrefetch from '@/app/useRoutePrefetch.js'
 import MobileShell from '@/shared/layout/mobile-shell/MobileShell.jsx'
 import StoreMenuProvider from '@/shared/layout/store-menu/StoreMenuProvider.jsx'
@@ -15,6 +16,8 @@ function App() {
           <Outlet />
         </StoreMenuProvider>
       </AppProviders>
+      {/* 개발 서버에서는 Vercel CDN의 디버그 스크립트를 불러오므로 배포 빌드에서만 켠다. */}
+      {import.meta.env.PROD ? <SpeedInsightsTracker /> : null}
     </MobileShell>
   )
 }
