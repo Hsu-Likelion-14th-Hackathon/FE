@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 
 import docentPauseImg from '@/shared/assets/boarding-pass/flight/docent-pause.svg'
 import docentPlayImg from '@/shared/assets/boarding-pass/flight/docent-play.svg'
@@ -17,18 +17,36 @@ const DOCENT_HINT = '음성 AI 도슨트가 고객님의 여정을 안내합니�
  * 글자를 쪼개므로 읽어 주는 문장은 aria-label로 온전히 남긴다.
  */
 function DocentHintWave() {
+  // 글자 span이 inline-block이라 글자마다 줄이 바뀔 수 있다('안 / 내합니다').
+  // 낱말 단위로 묶어 띄어쓰기에서만 줄을 바꾼다. 지연은 문장 전체에서 이어진다.
+  let charIndex = 0
+  const words = DOCENT_HINT.split(' ')
+
   return (
     <p className={styles.docentHint} aria-label={DOCENT_HINT}>
-      {[...DOCENT_HINT].map((ch, index) => (
-        <span
-          key={index}
-          aria-hidden="true"
-          className={styles.hintChar}
-          style={{ animationDelay: `${index * 0.04}s` }}
-        >
-          {ch === ' ' ? ' ' : ch}
-        </span>
-      ))}
+      {words.map((word, wordIndex) => {
+        const chars = [...word].map((ch) => {
+          const index = charIndex++
+          return (
+            <span
+              key={index}
+              aria-hidden="true"
+              className={styles.hintChar}
+              style={{ animationDelay: `${index * 0.04}s` }}
+            >
+              {ch}
+            </span>
+          )
+        })
+        charIndex++ // 띄어쓰기 몫
+        // 띄어쓰기는 묶음 밖에 둬야 그 자리에서 줄을 바꿀 수 있다.
+        return (
+          <Fragment key={wordIndex}>
+            <span className={styles.hintWord}>{chars}</span>
+            {wordIndex < words.length - 1 ? ' ' : null}
+          </Fragment>
+        )
+      })}
     </p>
   )
 }

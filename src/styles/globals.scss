@@ -49,6 +49,11 @@ body {
   background: var(--mcm-color-canvas);
   font-size: 1rem;
   line-height: 1.5;
+  /* 한글은 기본값이면 글자 단위로 줄을 바꿔 '반복되 / 는'처럼 낱말이 쪼개진다.
+     띄어쓰기에서만 바꾸고, 띄어쓰기 없이 긴 문자열(SKU·URL)은 칸을 넘지 않게
+     overflow-wrap으로 끊는다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 @media (min-width: 1200px) {

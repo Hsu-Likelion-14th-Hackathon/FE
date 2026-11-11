@@ -10,7 +10,7 @@
   width: 100%;
   margin: 0;
   text-align: center;
-  font-size: 0.625rem;
+  font-size: max(var(--mcm-font-min), 0.625rem);
   line-height: 1.25rem;
   color: #ab9e97;
 }
@@ -19,6 +19,11 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+/* 낱말 단위 묶음 — 이 안에서는 줄을 바꾸지 않는다 */
+.hintWord {
+  white-space: nowrap;
 }
 
 /* 안내 문구 파도타기 — 글자마다 지연이 계단식이라 물결이 된다. 한 번만. */
@@ -50,7 +55,7 @@
   border: 1px solid #ab9e97;
   border-radius: 999px;
   color: #ab9e97;
-  font-size: 0.625rem;
+  font-size: max(var(--mcm-font-min), 0.625rem);
   font-weight: 600;
   line-height: 0.875rem;
   letter-spacing: 0.02em;
