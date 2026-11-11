@@ -264,7 +264,7 @@ describe('App', () => {
     const router = renderRoute('/')
 
     fireEvent.click(await screen.findByRole('button', { name: '메뉴 열기' }))
-    fireEvent.click(screen.getByRole('link', { name: '로그인' }))
+    fireEvent.click(await screen.findByRole('link', { name: '로그인' }))
 
     expect(await screen.findByRole('heading', { name: '로그인' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/login')
@@ -339,7 +339,7 @@ describe('App', () => {
     fireEvent.click(await screen.findByRole('button', { name: '메뉴 열기' }))
 
     const firstLink = screen.getByRole('link', { name: 'MCM Boarding Pass 둘러보기' })
-    const lastLink = screen.getByRole('link', { name: '로그인' })
+    const lastLink = await screen.findByRole('link', { name: '로그인' })
 
     expect(firstLink).toHaveFocus()
 
