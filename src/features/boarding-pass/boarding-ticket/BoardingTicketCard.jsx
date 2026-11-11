@@ -1,8 +1,8 @@
 import QRCode from 'react-qr-code'
 
-import barcodeImg from '@/shared/assets/boarding-pass/issue/barcode.png'
+import barcodeImg from '@/shared/assets/boarding-pass/issue/barcode.webp'
 import planeRouteImg from '@/shared/assets/boarding-pass/issue/plane-route.svg'
-import ticketLogoImg from '@/shared/assets/boarding-pass/intro/ticket-logo.png'
+import ticketLogoImg from '@/shared/assets/boarding-pass/intro/ticket-logo.webp'
 
 import TicketStamp from './TicketStamp.jsx'
 import styles from './BoardingTicketCard.module.scss'

@@ -1,4 +1,4 @@
-import ticketStampImg from '@/shared/assets/boarding-pass/issue/ticket-stamp.png'
+import ticketStampImg from '@/shared/assets/boarding-pass/issue/ticket-stamp.webp'
 
 import styles from './TicketStamp.module.scss'
 
