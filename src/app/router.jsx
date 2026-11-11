@@ -2,6 +2,26 @@ import { createBrowserRouter } from 'react-router'
 
 import App, { HydrateFallback } from './App.jsx'
 import { ProtectedRoute } from './ProtectedRoute.jsx'
+import {
+  loadCartPage,
+  loadCompletePage,
+  loadFlightPage,
+  loadGuidePage,
+  loadHomePage,
+  loadIntroPage,
+  loadKakaoCallbackPage,
+  loadLandingPage,
+  loadLoginPage,
+  loadNotFoundPage,
+  loadPassportPage,
+  loadProductDetailPage,
+  loadProductListPage,
+  loadScanPage,
+  loadSignupPage,
+  loadSurveyPage,
+  loadTryOnPage,
+  loadWishlistPage,
+} from './routeModules.js'
 
 export function createAppRoutes() {
   return [
@@ -12,24 +32,24 @@ export function createAppRoutes() {
       children: [
         {
           index: true,
-          lazy: () => import('@/pages/home/HomePage.jsx'),
+          lazy: loadHomePage,
         },
         {
           path: 'login',
-          lazy: () => import('@/pages/login/LoginPage.jsx'),
+          lazy: loadLoginPage,
         },
         {
           path: 'signup',
-          lazy: () => import('@/pages/signup/SignupPage.jsx'),
+          lazy: loadSignupPage,
         },
         {
           // 카카오 콘솔에 등록한 Redirect URI와 같아야 한다(KAKAO_CALLBACK_PATH).
           path: 'auth/kakao/callback',
-          lazy: () => import('@/pages/auth/KakaoCallbackPage.jsx'),
+          lazy: loadKakaoCallbackPage,
         },
         {
           path: 'boarding-pass',
-          lazy: () => import('@/pages/boarding-pass/landing/LandingPage.jsx'),
+          lazy: loadLandingPage,
         },
         {
           // 로그인해야 여는 구간. 스웨거상 인증(auth) 계열을 뺀 모든 API가
@@ -42,57 +62,57 @@ export function createAppRoutes() {
           children: [
             {
               path: 'boarding-pass/intro',
-              lazy: () => import('@/pages/boarding-pass/intro/IntroPage.jsx'),
+              lazy: loadIntroPage,
             },
             {
               path: 'products',
-              lazy: () => import('@/pages/product-list/ProductListPage.jsx'),
+              lazy: loadProductListPage,
             },
             {
               path: 'products/:productId',
-              lazy: () => import('@/pages/product-detail/ProductDetailPage.jsx'),
+              lazy: loadProductDetailPage,
             },
             {
               path: 'products/:productId/try-on',
-              lazy: () => import('@/pages/try-on/TryOnPage.jsx'),
+              lazy: loadTryOnPage,
             },
             {
               path: 'wishlist',
-              lazy: () => import('@/pages/wishlist/WishlistPage.jsx'),
+              lazy: loadWishlistPage,
             },
             {
               path: 'cart',
-              lazy: () => import('@/pages/cart/CartPage.jsx'),
+              lazy: loadCartPage,
             },
             {
               path: 'boarding-pass/passport',
-              lazy: () => import('@/pages/boarding-pass/passport/PassportPage.jsx'),
+              lazy: loadPassportPage,
             },
             {
               path: 'boarding-pass/survey',
-              lazy: () => import('@/pages/boarding-pass/survey/SurveyPage.jsx'),
+              lazy: loadSurveyPage,
             },
             {
               path: 'boarding-pass/complete',
-              lazy: () => import('@/pages/boarding-pass/complete/CompletePage.jsx'),
+              lazy: loadCompletePage,
             },
             {
               path: 'boarding-pass/scan',
-              lazy: () => import('@/pages/boarding-pass/scan/ScanPage.jsx'),
+              lazy: loadScanPage,
             },
             {
               path: 'boarding-pass/flight',
-              lazy: () => import('@/pages/boarding-pass/flight/FlightPage.jsx'),
+              lazy: loadFlightPage,
             },
             {
               path: 'boarding-pass/guide',
-              lazy: () => import('@/pages/boarding-pass/guide/GuidePage.jsx'),
+              lazy: loadGuidePage,
             },
           ],
         },
         {
           path: '*',
-          lazy: () => import('@/pages/not-found/NotFoundPage.jsx'),
+          lazy: loadNotFoundPage,
         },
       ],
     },

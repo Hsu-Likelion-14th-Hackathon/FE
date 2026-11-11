@@ -1,10 +1,13 @@
 import { Outlet } from 'react-router'
 
 import AppProviders from '@/app/providers.jsx'
+import useRoutePrefetch from '@/app/useRoutePrefetch.js'
 import MobileShell from '@/shared/layout/mobile-shell/MobileShell.jsx'
 import StoreMenuProvider from '@/shared/layout/store-menu/StoreMenuProvider.jsx'
 
 function App() {
+  useRoutePrefetch()
+
   return (
     <MobileShell>
       <AppProviders>
